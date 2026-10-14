@@ -1,14 +1,12 @@
-
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +17,6 @@ val pagamentos = mutableListOf<Pagamento>()
 
 @Composable
 fun PagamentoFormulario() {
-
     val paciente = remember { mutableStateOf("") }
     val convenio = remember { mutableStateOf("") }
     val valorTotal = remember { mutableStateOf("") }
@@ -30,147 +27,130 @@ fun PagamentoFormulario() {
     val status = remember { mutableStateOf("") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Pagamento",
+        subtitulo = "Lançamento financeiro de sessões, coparticipações e repasses"
     ) {
-        Text("Cadastro de Pagamento")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = paciente.value,
             onValueChange = { paciente.value = it },
-            placeholder = { Text("Nome do paciente") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Nome do Paciente",
+            placeholder = "Ex: Ana Clara Souza"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = convenio.value,
             onValueChange = { convenio.value = it },
-            placeholder = { Text("Convênio") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Convênio / Particular",
+            placeholder = "Ex: Unimed ou Particular"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = valorTotal.value,
             onValueChange = { valorTotal.value = it },
-            placeholder = { Text("Valor total") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Valor Total (R$)",
+            placeholder = "Ex: 200.00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = valorConvenio.value,
             onValueChange = { valorConvenio.value = it },
-            placeholder = { Text("Valor do convênio") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Valor Coberto pelo Convênio (R$)",
+            placeholder = "Ex: 150.00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = valorPaciente.value,
             onValueChange = { valorPaciente.value = it },
-            placeholder = { Text("Valor do paciente") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Coparticipação do Paciente (R$)",
+            placeholder = "Ex: 50.00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = formaPagamento.value,
             onValueChange = { formaPagamento.value = it },
-            placeholder = { Text("Forma de pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Forma de Pagamento",
+            placeholder = "Ex: PIX, Cartão ou Boleto"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = dataPagamento.value,
             onValueChange = { dataPagamento.value = it },
-            placeholder = { Text("Data do pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Data do Pagamento",
+            placeholder = "DD/MM/AAAA"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = status.value,
             onValueChange = { status.value = it },
-            placeholder = { Text("Status do pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Status do Pagamento",
+            placeholder = "Ex: Pago, Pendente ou Faturado"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                val total = valorTotal.value.replace(",", ".").toDoubleOrNull()
-                val valorDoConvenio = valorConvenio.value.replace(",", ".").toDoubleOrNull()
-                val valorDoPaciente = valorPaciente.value.replace(",", ".").toDoubleOrNull()
-
-                if (
-                    paciente.value.isNotBlank() &&
-                    convenio.value.isNotBlank() &&
-                    total != null &&
-                    valorDoConvenio != null &&
-                    valorDoPaciente != null &&
-                    formaPagamento.value.isNotBlank() &&
-                    dataPagamento.value.isNotBlank() &&
-                    status.value.isNotBlank()
-                ) {
-                    val pagamento = Pagamento(
-                        id = pagamentos.size + 1,
-                        paciente = paciente.value,
-                        convenio = convenio.value,
-                        valorTotal = total,
-                        valorConvenio = valorDoConvenio,
-                        valorPaciente = valorDoPaciente,
-                        formaPagamento = formaPagamento.value,
-                        dataPagamento = dataPagamento.value,
-                        status = status.value
-                    )
-
-                    pagamentos.add(pagamento)
-                    mensagem.value = "Pagamento gravado com sucesso!"
-                } else {
-                    mensagem.value = "Preencha todos os campos corretamente."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    paciente.value = ""
+                    convenio.value = ""
+                    valorTotal.value = ""
+                    valorConvenio.value = ""
+                    valorPaciente.value = ""
+                    formaPagamento.value = ""
+                    dataPagamento.value = ""
+                    status.value = ""
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Pagamento",
+                onClick = {
+                    val total = valorTotal.value.replace(",", ".").toDoubleOrNull()
+                    val valorDoConvenio = valorConvenio.value.replace(",", ".").toDoubleOrNull()
+                    val valorDoPaciente = valorPaciente.value.replace(",", ".").toDoubleOrNull()
+
+                    if (
+                        paciente.value.isNotBlank() &&
+                        convenio.value.isNotBlank() &&
+                        total != null &&
+                        valorDoConvenio != null &&
+                        valorDoPaciente != null &&
+                        formaPagamento.value.isNotBlank() &&
+                        dataPagamento.value.isNotBlank() &&
+                        status.value.isNotBlank()
+                    ) {
+                        val pagamento = Pagamento(
+                            id = pagamentos.size + 1,
+                            paciente = paciente.value,
+                            convenio = convenio.value,
+                            valorTotal = total,
+                            valorConvenio = valorDoConvenio,
+                            valorPaciente = valorDoPaciente,
+                            formaPagamento = formaPagamento.value,
+                            dataPagamento = dataPagamento.value,
+                            status = status.value
+                        )
+
+                        pagamentos.add(pagamento)
+                        mensagem.value = "Pagamento do paciente '${pagamento.paciente}' registrado com sucesso!"
+                    } else {
+                        mensagem.value = "Preencha todos os campos corretamente (valores numéricos válidos)."
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                paciente.value = ""
-                convenio.value = ""
-                valorTotal.value = ""
-                valorConvenio.value = ""
-                valorPaciente.value = ""
-                formaPagamento.value = ""
-                dataPagamento.value = ""
-                status.value = ""
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }

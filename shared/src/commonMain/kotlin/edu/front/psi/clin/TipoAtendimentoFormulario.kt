@@ -1,124 +1,112 @@
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import java.time.LocalDateTime
 
 val tiposAtendimento = mutableListOf<TipoAtendimento>()
 
 @Composable
 fun TipoAtendimentoFormulario() {
-
     val nome = remember { mutableStateOf("") }
     val descricao = remember { mutableStateOf("") }
     val duracao = remember { mutableStateOf("") }
     val ativo = remember { mutableStateOf("true") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Tipo de Atendimento",
+        subtitulo = "Defina modalidades de consulta, terapias e durações"
     ) {
-        Text("Cadastro de Tipo de Atendimento")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome do atendimento") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Nome da Modalidade",
+            placeholder = "Ex: Psicoterapia Individual"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = descricao.value,
             onValueChange = { descricao.value = it },
-            placeholder = { Text("Descrição do atendimento") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Descrição Detalhada",
+            placeholder = "Ex: Atendimento focado em acolhimento e desenvolvimento pessoal"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = duracao.value,
             onValueChange = { duracao.value = it },
-            placeholder = { Text("Duração (ex.: 50 minutos)") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Duração Padrão",
+            placeholder = "Ex: 50 minutos"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Status Ativo",
+            placeholder = "true ou false"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (
-                    nome.value.trim().length >= 2 &&
-                    descricao.value.isNotBlank() &&
-                    descricao.value.length <= 500 &&
-                    duracao.value.isNotBlank() &&
-                    duracao.value.length <= 20 &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val tipo = TipoAtendimento(
-                        id = tiposAtendimento.size + 1,
-                        nome = nome.value.trim(),
-                        descricao = descricao.value,
-                        duracao = duracao.value,
-                        ativo = ativo.value == "true",
-                        dataCadastro = LocalDateTime.now().toString()
-                    )
-
-                    tiposAtendimento.add(tipo)
-                    mensagem.value = "Tipo de atendimento gravado com sucesso!"
-                } else {
-                    mensagem.value =
-                        "Confira os campos. O nome deve ter pelo menos 2 caracteres."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    nome.value = ""
+                    descricao.value = ""
+                    duracao.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Tipo",
+                onClick = {
+                    if (
+                        nome.value.trim().length >= 2 &&
+                        descricao.value.isNotBlank() &&
+                        descricao.value.length <= 500 &&
+                        duracao.value.isNotBlank() &&
+                        duracao.value.length <= 20 &&
+                        (ativo.value == "true" || ativo.value == "false")
+                    ) {
+                        val tipo = TipoAtendimento(
+                            id = tiposAtendimento.size + 1,
+                            nome = nome.value.trim(),
+                            descricao = descricao.value,
+                            duracao = duracao.value,
+                            ativo = ativo.value == "true",
+                            dataCadastro = obterDataHoraAtual()
+                        )
+
+                        tiposAtendimento.add(tipo)
+                        mensagem.value = "Tipo de atendimento '${tipo.nome}' gravado com sucesso!"
+                    } else {
+                        mensagem.value =
+                            "Confira os campos. O nome deve ter pelo menos 2 caracteres e todos os campos devem ser preenchidos."
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                nome.value = ""
-                descricao.value = ""
-                duracao.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }

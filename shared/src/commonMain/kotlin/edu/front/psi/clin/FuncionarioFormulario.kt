@@ -1,26 +1,22 @@
-
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import java.time.LocalDateTime
 
 val funcionarios = mutableListOf<Funcionario>()
 
 @Composable
 fun FuncionarioFormulario() {
-
     val nome = remember { mutableStateOf("") }
     val cpf = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
@@ -29,120 +25,107 @@ fun FuncionarioFormulario() {
     val ativo = remember { mutableStateOf("true") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Funcionário",
+        subtitulo = "Cadastre recepcionistas, administradores e equipe de apoio"
     ) {
-        Text("Cadastro de Funcionário")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome completo") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Nome Completo",
+            placeholder = "Ex: Mariana Silva"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = cpf.value,
             onValueChange = { cpf.value = it },
-            placeholder = { Text("CPF") },
-            modifier = Modifier.fillMaxWidth()
+            label = "CPF",
+            placeholder = "000.000.000-00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = email.value,
             onValueChange = { email.value = it },
-            placeholder = { Text("E-mail") },
-            modifier = Modifier.fillMaxWidth()
+            label = "E-mail",
+            placeholder = "mariana@clinica.com"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = telefone.value,
             onValueChange = { telefone.value = it },
-            placeholder = { Text("Telefone") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Telefone",
+            placeholder = "(11) 98765-4321"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = senha.value,
             onValueChange = { senha.value = it },
-            placeholder = { Text("Senha") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Senha de Acesso",
+            placeholder = "Digite uma senha segura"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Status Ativo",
+            placeholder = "true ou false"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (
-                    nome.value.isNotBlank() &&
-                    cpf.value.isNotBlank() &&
-                    email.value.isNotBlank() &&
-                    telefone.value.isNotBlank() &&
-                    senha.value.isNotBlank() &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val funcionario = Funcionario(
-                        id = funcionarios.size + 1,
-                        nome = nome.value,
-                        cpf = cpf.value,
-                        email = email.value,
-                        telefone = telefone.value,
-                        senha = senha.value,
-                        ativo = ativo.value == "true",
-                        dataCadastro = LocalDateTime.now().toString()
-                    )
-
-                    funcionarios.add(funcionario)
-                    mensagem.value = "Funcionário gravado com sucesso!"
-                } else {
-                    mensagem.value = "Preencha todos os campos corretamente."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    nome.value = ""
+                    cpf.value = ""
+                    email.value = ""
+                    telefone.value = ""
+                    senha.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Funcionário",
+                onClick = {
+                    if (
+                        nome.value.isNotBlank() &&
+                        cpf.value.isNotBlank() &&
+                        email.value.isNotBlank() &&
+                        telefone.value.isNotBlank() &&
+                        senha.value.isNotBlank() &&
+                        (ativo.value == "true" || ativo.value == "false")
+                    ) {
+                        val funcionario = Funcionario(
+                            id = funcionarios.size + 1,
+                            nome = nome.value,
+                            cpf = cpf.value,
+                            email = email.value,
+                            telefone = telefone.value,
+                            senha = senha.value,
+                            ativo = ativo.value == "true",
+                            dataCadastro = obterDataHoraAtual()
+                        )
+
+                        funcionarios.add(funcionario)
+                        mensagem.value = "Funcionário '${funcionario.nome}' gravado com sucesso!"
+                    } else {
+                        mensagem.value = "Preencha todos os campos obrigatórios corretamente."
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                nome.value = ""
-                cpf.value = ""
-                email.value = ""
-                telefone.value = ""
-                senha.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }

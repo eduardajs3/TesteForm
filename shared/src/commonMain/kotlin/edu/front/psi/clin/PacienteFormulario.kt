@@ -1,13 +1,12 @@
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,114 +27,125 @@ fun PacienteFormulario() {
     val ativo = remember { mutableStateOf("true") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Paciente",
+        subtitulo = "Informações cadastrais e de contato do paciente"
     ) {
-       Text("Cadastro de Paciente")
+        MeuTextField(
+            value = nome.value,
+            onValueChange = { nome.value = it },
+            label = "Nome Completo",
+            placeholder = "Ex: Ana Clara Souza"
+        )
 
-    TextField(
-        value = nome.value,
-        onValueChange = { nome.value = it },
-        placeholder = { Text("Nome completo") }
-    )
+        MeuTextField(
+            value = cpf.value,
+            onValueChange = { cpf.value = it },
+            label = "CPF",
+            placeholder = "000.000.000-00"
+        )
 
-    TextField(
-        value = cpf.value,
-        onValueChange = { cpf.value = it },
-        placeholder = { Text("CPF") }
-    )
+        MeuTextField(
+            value = nascimento.value,
+            onValueChange = { nascimento.value = it },
+            label = "Data de Nascimento",
+            placeholder = "DD/MM/AAAA"
+        )
 
-    TextField(
-        value = nascimento.value,
-        onValueChange = { nascimento.value = it },
-        placeholder = { Text("Data de nascimento") }
-    )
+        MeuTextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = "E-mail",
+            placeholder = "anaclara@email.com"
+        )
 
-    TextField(
-        value = email.value,
-        onValueChange = { email.value = it },
-        placeholder = { Text("E-mail") }
-    )
+        MeuTextField(
+            value = telefone.value,
+            onValueChange = { telefone.value = it },
+            label = "Telefone",
+            placeholder = "(11) 99999-8888"
+        )
 
-    TextField(
-        value = telefone.value,
-        onValueChange = { telefone.value = it },
-        placeholder = { Text("Telefone") }
-    )
+        MeuTextField(
+            value = endereco.value,
+            onValueChange = { endereco.value = it },
+            label = "Endereço Completo",
+            placeholder = "Rua das Flores, 123 - Apto 4"
+        )
 
-    TextField(
-        value = endereco.value,
-        onValueChange = { endereco.value = it },
-        placeholder = { Text("Endereço") }
-    )
+        MeuTextField(
+            value = observacoes.value,
+            onValueChange = { observacoes.value = it },
+            label = "Observações Clínicas",
+            placeholder = "Histórico, recomendações ou queixas principais"
+        )
 
-    TextField(
-        value = observacoes.value,
-        onValueChange = { observacoes.value = it },
-        placeholder = { Text("Observações") }
-    )
+        MeuTextField(
+            value = ativo.value,
+            onValueChange = { ativo.value = it },
+            label = "Status Ativo",
+            placeholder = "true ou false"
+        )
 
-    TextField(
-        value = ativo.value,
-        onValueChange = { ativo.value = it },
-        placeholder = { Text("Ativo: true ou false") }
-    )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-                if (
-                    nome.value.isNotBlank() &&
-                    cpf.value.isNotBlank() &&
-                    nascimento.value.isNotBlank() &&
-                    email.value.isNotBlank() &&
-                    telefone.value.isNotBlank() &&
-                    endereco.value.isNotBlank() &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val paciente = Paciente(
-                        id = pacientes.size + 1,
-                        nome = nome.value,
-                        cpf = cpf.value,
-                        dataNascimento = nascimento.value,
-                        email = email.value,
-                        telefone = telefone.value,
-                        endereco = endereco.value,
-                        observacoes = observacoes.value,
-                        ativo = ativo.value == "true"
-                    )
-
-                    pacientes.add(paciente)
-                    mensagem.value = "Paciente gravado no protótipo!"
-                } else {
-                    mensagem.value = "Preencha os campos obrigatórios."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    nome.value = ""
+                    cpf.value = ""
+                    nascimento.value = ""
+                    email.value = ""
+                    telefone.value = ""
+                    endereco.value = ""
+                    observacoes.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Paciente",
+                onClick = {
+                    if (
+                        nome.value.isNotBlank() &&
+                        cpf.value.isNotBlank() &&
+                        nascimento.value.isNotBlank() &&
+                        email.value.isNotBlank() &&
+                        telefone.value.isNotBlank() &&
+                        endereco.value.isNotBlank() &&
+                        (ativo.value == "true" || ativo.value == "false")
+                    ) {
+                        val paciente = Paciente(
+                            id = pacientes.size + 1,
+                            nome = nome.value,
+                            cpf = cpf.value,
+                            dataNascimento = nascimento.value,
+                            email = email.value,
+                            telefone = telefone.value,
+                            endereco = endereco.value,
+                            observacoes = observacoes.value,
+                            ativo = ativo.value == "true"
+                        )
+
+                        pacientes.add(paciente)
+                        mensagem.value = "Paciente '${paciente.nome}' gravado com sucesso!"
+                    } else {
+                        mensagem.value = "Preencha todos os campos obrigatórios."
+                    }
+                }
+            )
         }
 
-        Button(
-            onClick = {
-                nome.value = ""
-                cpf.value = ""
-                nascimento.value = ""
-                email.value = ""
-                telefone.value = ""
-                endereco.value = ""
-                observacoes.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Text(mensagem.value)
+        Spacer(modifier = Modifier.height(8.dp))
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }

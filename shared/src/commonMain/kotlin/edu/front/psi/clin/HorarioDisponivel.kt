@@ -1,14 +1,12 @@
-
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +17,6 @@ val horariosDisponiveis = mutableListOf<HorarioDisponivel>()
 
 @Composable
 fun HorarioDisponivelFormulario() {
-
     val psicologo = remember { mutableStateOf("") }
     val diaSemana = remember { mutableStateOf("") }
     val horaInicio = remember { mutableStateOf("") }
@@ -28,119 +25,105 @@ fun HorarioDisponivelFormulario() {
     val ativo = remember { mutableStateOf("true") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Horário Disponível",
+        subtitulo = "Defina a grade de atendimento e disponibilidade dos psicólogos"
     ) {
-        Text("Cadastro de Horário Disponível")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = psicologo.value,
             onValueChange = { psicologo.value = it },
-            placeholder = { Text("Nome do psicólogo") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Nome do Psicólogo",
+            placeholder = "Ex: Dr. Roberto Alencar"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = diaSemana.value,
             onValueChange = { diaSemana.value = it },
-            placeholder = { Text("Dia da semana") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Dia da Semana",
+            placeholder = "Ex: Segunda-feira ou Terça-feira"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = horaInicio.value,
             onValueChange = { horaInicio.value = it },
-            placeholder = { Text("Hora de início (ex.: 08:00)") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Horário de Início",
+            placeholder = "Ex: 08:00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = horaFim.value,
             onValueChange = { horaFim.value = it },
-            placeholder = { Text("Hora de fim (ex.: 09:00)") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Horário de Término",
+            placeholder = "Ex: 09:00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = descricao.value,
             onValueChange = { descricao.value = it },
-            placeholder = { Text("Descrição") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Observação do Turno",
+            placeholder = "Ex: Período matutino / Plantão presencial"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Status Ativo",
+            placeholder = "true ou false"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (
-                    psicologo.value.isNotBlank() &&
-                    diaSemana.value.isNotBlank() &&
-                    horaInicio.value.isNotBlank() &&
-                    horaFim.value.isNotBlank() &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val horario = HorarioDisponivel(
-                        id = horariosDisponiveis.size + 1,
-                        psicologo = psicologo.value,
-                        diaSemana = diaSemana.value,
-                        horaInicio = horaInicio.value,
-                        horaFim = horaFim.value,
-                        descricao = descricao.value,
-                        ativo = ativo.value == "true"
-                    )
-
-                    horariosDisponiveis.add(horario)
-                    mensagem.value = "Horário gravado com sucesso!"
-                } else {
-                    mensagem.value =
-                        "Preencha os campos obrigatórios corretamente."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    psicologo.value = ""
+                    diaSemana.value = ""
+                    horaInicio.value = ""
+                    horaFim.value = ""
+                    descricao.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Horário",
+                onClick = {
+                    if (
+                        psicologo.value.isNotBlank() &&
+                        diaSemana.value.isNotBlank() &&
+                        horaInicio.value.isNotBlank() &&
+                        horaFim.value.isNotBlank() &&
+                        (ativo.value == "true" || ativo.value == "false")
+                    ) {
+                        val horario = HorarioDisponivel(
+                            id = horariosDisponiveis.size + 1,
+                            psicologo = psicologo.value,
+                            diaSemana = diaSemana.value,
+                            horaInicio = horaInicio.value,
+                            horaFim = horaFim.value,
+                            descricao = descricao.value,
+                            ativo = ativo.value == "true"
+                        )
+
+                        horariosDisponiveis.add(horario)
+                        mensagem.value = "Horário do(a) Dr(a). ${horario.psicologo} gravado com sucesso!"
+                    } else {
+                        mensagem.value = "Preencha os campos obrigatórios corretamente."
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                psicologo.value = ""
-                diaSemana.value = ""
-                horaInicio.value = ""
-                horaFim.value = ""
-                descricao.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }

@@ -1,14 +1,12 @@
-
 package edu.front.psi.clin
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +17,6 @@ val psicologos = mutableListOf<Psicologo>()
 
 @Composable
 fun PsicologoFormulario() {
-
     val nome = remember { mutableStateOf("") }
     val cpf = remember { mutableStateOf("") }
     val email = remember { mutableStateOf("") }
@@ -30,143 +27,126 @@ fun PsicologoFormulario() {
     val ativo = remember { mutableStateOf("true") }
     val mensagem = remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+    CardFormulario(
+        titulo = "Cadastro de Psicólogo(a)",
+        subtitulo = "Registro profissional e credenciais do corpo clínico"
     ) {
-        Text("Cadastro de Psicólogo")
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome completo") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Nome Completo",
+            placeholder = "Ex: Dr. Roberto Alencar"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = cpf.value,
             onValueChange = { cpf.value = it },
-            placeholder = { Text("CPF") },
-            modifier = Modifier.fillMaxWidth()
+            label = "CPF",
+            placeholder = "000.000.000-00"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = email.value,
-            onValueChange = { email.value = it },
-            placeholder = { Text("E-mail") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = telefone.value,
-            onValueChange = { telefone.value = it },
-            placeholder = { Text("Telefone") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = senha.value,
-            onValueChange = { senha.value = it },
-            placeholder = { Text("Senha") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = crp.value,
             onValueChange = { crp.value = it },
-            placeholder = { Text("CRP") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Registro CRP",
+            placeholder = "Ex: CRP 06/123456"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
+        MeuTextField(
             value = especialidade.value,
             onValueChange = { especialidade.value = it },
-            placeholder = { Text("Especialidade") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Especialidade / Abordagem",
+            placeholder = "Ex: Terapia Cognitivo-Comportamental (TCC)"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        MeuTextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = "E-mail Profissional",
+            placeholder = "roberto@psyclin.com"
+        )
 
-        TextField(
+        MeuTextField(
+            value = telefone.value,
+            onValueChange = { telefone.value = it },
+            label = "Telefone de Contato",
+            placeholder = "(11) 98765-4321"
+        )
+
+        MeuTextField(
+            value = senha.value,
+            onValueChange = { senha.value = it },
+            label = "Senha de Acesso",
+            placeholder = "Senha para o sistema"
+        )
+
+        MeuTextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = "Status Ativo",
+            placeholder = "true ou false"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (
-                    nome.value.isNotBlank() &&
-                    cpf.value.isNotBlank() &&
-                    email.value.isNotBlank() &&
-                    telefone.value.isNotBlank() &&
-                    senha.value.isNotBlank() &&
-                    crp.value.isNotBlank() &&
-                    especialidade.value.isNotBlank() &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val psicologo = Psicologo(
-                        id = psicologos.size + 1,
-                        nome = nome.value,
-                        cpf = cpf.value,
-                        email = email.value,
-                        telefone = telefone.value,
-                        senha = senha.value,
-                        ativo = ativo.value == "true",
-                        crp = crp.value,
-                        especialidade = especialidade.value
-                    )
-
-                    psicologos.add(psicologo)
-                    mensagem.value = "Psicólogo gravado com sucesso!"
-                } else {
-                    mensagem.value = "Preencha todos os campos corretamente."
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            BotaoSecundario(
+                texto = "Limpar Campos",
+                onClick = {
+                    nome.value = ""
+                    cpf.value = ""
+                    email.value = ""
+                    telefone.value = ""
+                    senha.value = ""
+                    crp.value = ""
+                    especialidade.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            BotaoPrimario(
+                texto = "Gravar Psicólogo",
+                onClick = {
+                    if (
+                        nome.value.isNotBlank() &&
+                        cpf.value.isNotBlank() &&
+                        email.value.isNotBlank() &&
+                        telefone.value.isNotBlank() &&
+                        senha.value.isNotBlank() &&
+                        crp.value.isNotBlank() &&
+                        especialidade.value.isNotBlank() &&
+                        (ativo.value == "true" || ativo.value == "false")
+                    ) {
+                        val psicologo = Psicologo(
+                            id = psicologos.size + 1,
+                            nome = nome.value,
+                            cpf = cpf.value,
+                            email = email.value,
+                            telefone = telefone.value,
+                            senha = senha.value,
+                            ativo = ativo.value == "true",
+                            crp = crp.value,
+                            especialidade = especialidade.value
+                        )
+
+                        psicologos.add(psicologo)
+                        mensagem.value = "Psicólogo '${psicologo.nome}' gravado com sucesso!"
+                    } else {
+                        mensagem.value = "Preencha todos os campos corretamente."
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                nome.value = ""
-                cpf.value = ""
-                email.value = ""
-                telefone.value = ""
-                senha.value = ""
-                crp.value = ""
-                especialidade.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
+        MensagemFeedback(mensagem = mensagem.value)
     }
 }
