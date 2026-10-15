@@ -1,4 +1,3 @@
-
 package edu.front.psi.clin
 
 import androidx.compose.foundation.layout.Column
@@ -15,8 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-val horariosDisponiveis = mutableListOf<HorarioDisponivel>()
-
 @Composable
 fun HorarioDisponivelFormulario() {
 
@@ -26,7 +23,6 @@ fun HorarioDisponivelFormulario() {
     val horaFim = remember { mutableStateOf("") }
     val descricao = remember { mutableStateOf("") }
     val ativo = remember { mutableStateOf("true") }
-    val mensagem = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -92,31 +88,7 @@ fun HorarioDisponivelFormulario() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {
-                if (
-                    psicologo.value.isNotBlank() &&
-                    diaSemana.value.isNotBlank() &&
-                    horaInicio.value.isNotBlank() &&
-                    horaFim.value.isNotBlank() &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val horario = HorarioDisponivel(
-                        id = horariosDisponiveis.size + 1,
-                        psicologo = psicologo.value,
-                        diaSemana = diaSemana.value,
-                        horaInicio = horaInicio.value,
-                        horaFim = horaFim.value,
-                        descricao = descricao.value,
-                        ativo = ativo.value == "true"
-                    )
-
-                    horariosDisponiveis.add(horario)
-                    mensagem.value = "Horário gravado com sucesso!"
-                } else {
-                    mensagem.value =
-                        "Preencha os campos obrigatórios corretamente."
-                }
-            },
+            onClick = {},
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Gravar")
@@ -132,15 +104,10 @@ fun HorarioDisponivelFormulario() {
                 horaFim.value = ""
                 descricao.value = ""
                 ativo.value = "true"
-                mensagem.value = ""
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Limpar Campos")
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(mensagem.value)
     }
 }

@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,49 +33,49 @@ fun PacienteFormulario() {
     ) {
        Text("Cadastro de Paciente")
 
-    TextField(
+    CampoClinica(
         value = nome.value,
         onValueChange = { nome.value = it },
         placeholder = { Text("Nome completo") }
     )
 
-    TextField(
+    CampoClinica(
         value = cpf.value,
         onValueChange = { cpf.value = it },
         placeholder = { Text("CPF") }
     )
 
-    TextField(
+    CampoClinica(
         value = nascimento.value,
         onValueChange = { nascimento.value = it },
         placeholder = { Text("Data de nascimento") }
     )
 
-    TextField(
+    CampoClinica(
         value = email.value,
         onValueChange = { email.value = it },
         placeholder = { Text("E-mail") }
     )
 
-    TextField(
+    CampoClinica(
         value = telefone.value,
         onValueChange = { telefone.value = it },
         placeholder = { Text("Telefone") }
     )
 
-    TextField(
+    CampoClinica(
         value = endereco.value,
         onValueChange = { endereco.value = it },
         placeholder = { Text("Endereço") }
     )
 
-    TextField(
+    CampoClinica(
         value = observacoes.value,
         onValueChange = { observacoes.value = it },
         placeholder = { Text("Observações") }
     )
 
-    TextField(
+    CampoClinica(
         value = ativo.value,
         onValueChange = { ativo.value = it },
         placeholder = { Text("Ativo: true ou false") }
@@ -85,8 +83,8 @@ fun PacienteFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
-            onClick = {
+        AcoesFormulario(
+            onSave = {
                 if (
                     nome.value.isNotBlank() &&
                     cpf.value.isNotBlank() &&
@@ -114,13 +112,7 @@ fun PacienteFormulario() {
                     mensagem.value = "Preencha os campos obrigatórios."
                 }
             },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
-        }
-
-        Button(
-            onClick = {
+            onClear = {
                 nome.value = ""
                 cpf.value = ""
                 nascimento.value = ""
@@ -130,11 +122,8 @@ fun PacienteFormulario() {
                 observacoes.value = ""
                 ativo.value = "true"
                 mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
+            }
+        )
 
         Text(mensagem.value)
     }

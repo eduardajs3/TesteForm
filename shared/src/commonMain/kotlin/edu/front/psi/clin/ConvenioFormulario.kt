@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +34,7 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextField(
+        CampoClinica(
             value = nome.value,
             onValueChange = { nome.value = it },
             placeholder = { Text("Nome do convênio") },
@@ -45,7 +43,7 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextField(
+        CampoClinica(
             value = cnpj.value,
             onValueChange = { cnpj.value = it },
             placeholder = { Text("CNPJ") },
@@ -54,7 +52,7 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextField(
+        CampoClinica(
             value = telefone.value,
             onValueChange = { telefone.value = it },
             placeholder = { Text("Telefone") },
@@ -63,7 +61,7 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextField(
+        CampoClinica(
             value = percentualCobertura.value,
             onValueChange = { percentualCobertura.value = it },
             placeholder = { Text("Percentual de cobertura (ex.: 80)") },
@@ -72,7 +70,7 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextField(
+        CampoClinica(
             value = ativo.value,
             onValueChange = { ativo.value = it },
             placeholder = { Text("Ativo? Digite true ou false") },
@@ -81,8 +79,8 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
+        AcoesFormulario(
+            onSave = {
                 val percentual = percentualCobertura.value
                     .replace(",", ".")
                     .toDoubleOrNull()
@@ -111,26 +109,15 @@ fun ConvenioFormulario() {
                         "Confira os campos e informe um percentual válido."
                 }
             },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Gravar")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
+            onClear = {
                 nome.value = ""
                 cnpj.value = ""
                 telefone.value = ""
                 percentualCobertura.value = ""
                 ativo.value = "true"
                 mensagem.value = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
-        }
+            }
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
