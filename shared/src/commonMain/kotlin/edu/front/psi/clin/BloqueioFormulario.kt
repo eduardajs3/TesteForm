@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 
 @Composable
@@ -30,7 +29,7 @@ fun BloqueioAgendaFormulario() {
     val dataHoraFim = remember { mutableStateOf("") }
     val motivo = remember { mutableStateOf("") }
     val ativo = remember { mutableStateOf("true") }
-    val dataCadastro = remember { mutableStateOf("") }
+
 
     Column(
         modifier = Modifier
@@ -111,18 +110,6 @@ fun BloqueioAgendaFormulario() {
                 )
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TextField(
-                value = dataCadastro.value,
-                onValueChange = { dataCadastro.value = it },
-                label = { Text("Data de cadastro") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
-                )
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,19 +118,11 @@ fun BloqueioAgendaFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {
-                psicologo.value = ""
-                dataHoraInicio.value = ""
-                dataHoraFim.value = ""
-                motivo.value = ""
-                ativo.value = "true"
-                dataCadastro.value = ""
-            },
+                onClick = {},
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE8F1EB),
+                    containerColor = Color(0xFFF6F3EC),
                     contentColor = VerdeClinica
                 ),
-                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")

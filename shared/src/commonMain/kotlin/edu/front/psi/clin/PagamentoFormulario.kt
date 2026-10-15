@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 
 @Composable
@@ -158,21 +157,11 @@ fun PagamentoFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {
-                paciente.value = ""
-                convenio.value = ""
-                valorTotal.value = ""
-                valorConvenio.value = ""
-                valorPaciente.value = ""
-                formaPagamento.value = ""
-                dataPagamento.value = ""
-                status.value = ""
-            },
+                onClick = {},
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE8F1EB),
+                    containerColor = Color(0xFFF6F3EC),
                     contentColor = VerdeClinica
                 ),
-                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
