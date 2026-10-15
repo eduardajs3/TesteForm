@@ -10,12 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 val pacientes = mutableListOf<Paciente>()
 
@@ -36,93 +44,115 @@ fun PacienteFormulario() {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-       Text("Cadastro de Paciente")
+        Text(
+            text = "Cadastro de Paciente",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do paciente.")
 
-    TextField(
-        value = nome.value,
-        onValueChange = { nome.value = it },
-        label = { Text("Nome completo") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = nome.value,
+            onValueChange = { nome.value = it },
+            label = { Text("Nome completo") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = cpf.value,
-        onValueChange = { cpf.value = it },
-        label = { Text("CPF") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = cpf.value,
+            onValueChange = { cpf.value = it },
+            label = { Text("CPF") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = nascimento.value,
-        onValueChange = { nascimento.value = it },
-        label = { Text("Data de nascimento") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = nascimento.value,
+            onValueChange = { nascimento.value = it },
+            label = { Text("Data de nascimento") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = email.value,
-        onValueChange = { email.value = it },
-        label = { Text("E-mail") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text("E-mail") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = telefone.value,
-        onValueChange = { telefone.value = it },
-        label = { Text("Telefone") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = telefone.value,
+            onValueChange = { telefone.value = it },
+            label = { Text("Telefone") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = endereco.value,
-        onValueChange = { endereco.value = it },
-        label = { Text("Endereço") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = endereco.value,
+            onValueChange = { endereco.value = it },
+            label = { Text("Endereço") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = observacoes.value,
-        onValueChange = { observacoes.value = it },
-        label = { Text("Observações") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = observacoes.value,
+            onValueChange = { observacoes.value = it },
+            label = { Text("Observações") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-    TextField(
-        value = ativo.value,
-        onValueChange = { ativo.value = it },
-        label = { Text("Ativo: true ou false") },
-        modifier = Modifier.fillMaxWidth(),
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = ativo.value,
+            onValueChange = { ativo.value = it },
+            placeholder = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -134,40 +164,30 @@ fun PacienteFormulario() {
         ) {
             Button(
                 onClick = {
-                val paciente = Paciente(
-                    id = pacientes.size + 1,
-                    nome = nome.value,
-                    cpf = cpf.value,
-                    dataNascimento = nascimento.value,
-                    email = email.value,
-                    telefone = telefone.value,
-                    endereco = endereco.value,
-                    observacoes = observacoes.value,
-                    ativo = ativo.value
-                )
-
-                pacientes.add(paciente)
-                mensagem.value = "Paciente gravado no protótipo!"
-            },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
-            Button(
-                onClick = {
-                nome.value = ""
-                cpf.value = ""
-                nascimento.value = ""
-                email.value = ""
-                telefone.value = ""
-                endereco.value = ""
-                observacoes.value = ""
-                ativo.value = "true"
-                mensagem.value = ""
-            },
+                    nome.value = ""
+                    cpf.value = ""
+                    nascimento.value = ""
+                    email.value = ""
+                    telefone.value = ""
+                    endereco.value = ""
+                    observacoes.value = ""
+                    ativo.value = "true"
+                    mensagem.value = ""
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
 

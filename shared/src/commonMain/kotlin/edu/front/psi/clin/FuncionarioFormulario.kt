@@ -10,12 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun FuncionarioFormulario() {
@@ -26,13 +31,20 @@ fun FuncionarioFormulario() {
     val telefone = remember { mutableStateOf("") }
     val senha = remember { mutableStateOf("") }
     val ativo = remember { mutableStateOf("true") }
+    val dataCadastro = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Funcionário")
+        Text(
+            text = "Cadastro de Funcionário",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do funcionário.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -42,8 +54,8 @@ fun FuncionarioFormulario() {
             label = { Text("Nome completo") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -55,8 +67,8 @@ fun FuncionarioFormulario() {
             label = { Text("CPF") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -68,8 +80,8 @@ fun FuncionarioFormulario() {
             label = { Text("E-mail") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -81,8 +93,8 @@ fun FuncionarioFormulario() {
             label = { Text("Telefone") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -94,8 +106,8 @@ fun FuncionarioFormulario() {
             label = { Text("Senha") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -107,8 +119,21 @@ fun FuncionarioFormulario() {
             label = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = dataCadastro.value,
+            onValueChange = { dataCadastro.value = it },
+            label = { Text("Data de cadastro") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -119,12 +144,6 @@ fun FuncionarioFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {},
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
-            Button(
                 onClick = {
                 nome.value = ""
                 cpf.value = ""
@@ -132,10 +151,22 @@ fun FuncionarioFormulario() {
                 telefone.value = ""
                 senha.value = ""
                 ativo.value = "true"
+                dataCadastro.value = ""
             },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
     }

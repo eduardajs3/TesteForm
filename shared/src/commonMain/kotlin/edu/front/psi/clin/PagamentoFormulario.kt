@@ -10,12 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun PagamentoFormulario() {
@@ -34,7 +39,13 @@ fun PagamentoFormulario() {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Pagamento")
+        Text(
+            text = "Cadastro de Pagamento",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do pagamento.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -44,8 +55,8 @@ fun PagamentoFormulario() {
             label = { Text("Nome do paciente") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -57,8 +68,8 @@ fun PagamentoFormulario() {
             label = { Text("Convênio") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -70,8 +81,8 @@ fun PagamentoFormulario() {
             label = { Text("Valor total") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -83,8 +94,8 @@ fun PagamentoFormulario() {
             label = { Text("Valor do convênio") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -96,8 +107,8 @@ fun PagamentoFormulario() {
             label = { Text("Valor do paciente") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -109,8 +120,8 @@ fun PagamentoFormulario() {
             label = { Text("Forma de pagamento") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -122,8 +133,8 @@ fun PagamentoFormulario() {
             label = { Text("Data do pagamento") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -135,8 +146,8 @@ fun PagamentoFormulario() {
             label = { Text("Status do pagamento") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -146,12 +157,6 @@ fun PagamentoFormulario() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Button(
-                onClick = {},
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
             Button(
                 onClick = {
                 paciente.value = ""
@@ -163,9 +168,20 @@ fun PagamentoFormulario() {
                 dataPagamento.value = ""
                 status.value = ""
             },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
     }

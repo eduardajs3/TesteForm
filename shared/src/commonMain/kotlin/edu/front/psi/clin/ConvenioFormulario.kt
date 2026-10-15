@@ -1,4 +1,3 @@
-
 package edu.front.psi.clin
 
 import androidx.compose.foundation.layout.Column
@@ -11,12 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 val convenios = mutableListOf<Convenio>()
 
@@ -35,7 +39,13 @@ fun ConvenioFormulario() {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Convênio")
+        Text(
+            text = "Cadastro de Convênio",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do convênio.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -45,8 +55,8 @@ fun ConvenioFormulario() {
             label = { Text("Nome do convênio") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -58,8 +68,8 @@ fun ConvenioFormulario() {
             label = { Text("CNPJ") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -71,8 +81,8 @@ fun ConvenioFormulario() {
             label = { Text("Telefone") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -84,8 +94,8 @@ fun ConvenioFormulario() {
             label = { Text("Percentual de cobertura (ex.: 80)") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -97,8 +107,8 @@ fun ConvenioFormulario() {
             label = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -110,24 +120,6 @@ fun ConvenioFormulario() {
         ) {
             Button(
                 onClick = {
-                val convenio = Convenio(
-                    id = convenios.size + 1,
-                    nome = nome.value,
-                    cnpj = cnpj.value,
-                    telefone = telefone.value,
-                    percentualCobertura = percentualCobertura.value,
-                    ativo = ativo.value
-                )
-
-                convenios.add(convenio)
-                mensagem.value = "Convênio gravado com sucesso!"
-            },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
-            Button(
-                onClick = {
                 nome.value = ""
                 cnpj.value = ""
                 telefone.value = ""
@@ -135,9 +127,20 @@ fun ConvenioFormulario() {
                 ativo.value = "true"
                 mensagem.value = ""
             },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
 

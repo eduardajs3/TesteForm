@@ -10,12 +10,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun ProntuarioFormulario() {
@@ -24,13 +30,20 @@ fun ProntuarioFormulario() {
     val dataAbertura = remember { mutableStateOf("") }
     val queixaPrincipal = remember { mutableStateOf("") }
     val status = remember { mutableStateOf("") }
+    val ativo = remember { mutableStateOf("true") }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Prontuário")
+        Text(
+            text = "Cadastro de Prontuário",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do prontuário.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -40,8 +53,8 @@ fun ProntuarioFormulario() {
             label = { Text("Paciente") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -53,8 +66,8 @@ fun ProntuarioFormulario() {
             label = { Text("Data de abertura") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -68,8 +81,8 @@ fun ProntuarioFormulario() {
             minLines = 3
         ,
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             ))
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -80,33 +93,54 @@ fun ProntuarioFormulario() {
             label = { Text("Status do prontuário") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        
+        TextField(
+            value = ativo.value,
+            onValueChange = { ativo.value = it },
+            label = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Button(
-                onClick = {},
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
+           
             Button(
                 onClick = {
                 paciente.value = ""
                 dataAbertura.value = ""
                 queixaPrincipal.value = ""
                 status.value = ""
+                ativo.value = "true"
             },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+             Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
     }

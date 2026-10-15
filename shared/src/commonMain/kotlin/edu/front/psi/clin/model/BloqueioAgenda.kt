@@ -6,5 +6,6 @@ data class BloqueioAgenda(
     val dataHoraInicio: String,
     val dataHoraFim: String,
     val motivo: String,
-    val ativo: Boolean 
+    val ativo: Boolean,
+    val dataCadastro: String
 )

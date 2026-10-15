@@ -13,11 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,12 +32,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.ChevronRight
 
-private val CremeClaro = Color(0xFFF6F3EC)
+private val Branco = Color.White
+val CremeCampo = Color(0xFFF6F3EC)
 val VerdeClinica = Color(0xFF3B5760)
+
 private data class MenuItem(
     val nome: String,
     val icone: String,
@@ -53,8 +58,15 @@ private fun MenuCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .background(VerdeClinica, RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                CremeCampo,
+                RoundedCornerShape(12.dp)
+            )
             .height(70.dp)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
@@ -67,27 +79,36 @@ private fun MenuCard(
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = item.nome,
-                    tint = Color.White
+                    tint = VerdeClinica
                 )
             } else if (item.icone == "agenda") {
                 Icon(
                     imageVector = Icons.Filled.DateRange,
                     contentDescription = item.nome,
-                    tint = Color.White
+                    tint = VerdeClinica
                 )
             } else {
                 Icon(
                     imageVector = Icons.Filled.Description,
                     contentDescription = item.nome,
-                    tint = Color.White
+                    tint = VerdeClinica
                 )
             }
 
             Text(
-                text = item.nome,
-                color = Color.White,
-                modifier = Modifier.padding(start = 12.dp)
-            )
+            text = item.nome,
+            color = VerdeClinica,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 12.dp)
+        )
+
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = "Abrir formulário",
+            tint = VerdeClinica
+        )
         }
     }
 }
@@ -108,19 +129,21 @@ fun App() {
                 TopAppBar(
                     title = {
                         Text(
-                            "Clínica de Psicologia",
+                            text = "Clínica de Psicologia",
                             color = Color.White
                         )
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { tela.value = "menu" }
+                            onClick = {
+                                tela.value = "menu"
+                            }
                         ) {
                             Icon(
                                 imageVector = if (tela.value == "menu") {
-                                    Icons.Filled.Menu
+                                    Icons.Filled.Psychology
                                 } else {
-                                    Icons.Filled.ArrowBack
+                                    Icons.AutoMirrored.Filled.ArrowBack
                                 },
                                 contentDescription = if (tela.value == "menu") {
                                     "Menu"
@@ -136,7 +159,7 @@ fun App() {
                     )
                 )
             },
-            containerColor = CremeClaro
+            containerColor = Branco
         ) { contentPadding ->
 
             if (tela.value == "menu") {
@@ -147,12 +170,27 @@ fun App() {
                         .verticalScroll(rememberScrollState())
                         .padding(vertical = 8.dp)
                 ) {
-                    Text(
-                        text = "Menu Principal",
-                        color = VerdeClinica,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = 8.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Selecione um formulário",
+                            color = VerdeClinica,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+
+                        Text(
+                            text = "Escolha uma das opções abaixo para cadastrar ou gerenciar as informações da clínica.",
+                            color = VerdeClinica,
+                            fontSize = 14.sp
+                        )
+                    }
 
                     val itensMenu = listOf(
                         MenuItem("Cadastrar Paciente", "pessoa", "paciente"),
@@ -166,13 +204,16 @@ fun App() {
                         MenuItem("Cadastrar Pagamento", "documento", "pagamento"),
                         MenuItem("Cadastrar Prontuário", "documento", "prontuario"),
                         MenuItem("Cadastrar Evolução Clínica", "documento", "evolucao"),
-                        MenuItem("Bloqueio de Agenda", "agenda", "bloqueio")
+                        MenuItem("Bloqueio de Agenda", "agenda", "bloqueio"),
+                        MenuItem("Horário Disponível", "agenda", "horario")
                     )
 
                     for (item in itensMenu) {
                         MenuCard(
                             item = item,
-                            onClick = { tela.value = item.tela }
+                            onClick = {
+                                tela.value = item.tela
+                            }
                         )
                     }
                 }
@@ -208,6 +249,8 @@ fun App() {
                         TipoAtendimentoFormulario()
                     } else if (tela.value == "pagamento") {
                         PagamentoFormulario()
+                    } else if (tela.value == "horario") {
+                        HorarioDisponivelFormulario()
                     }
                 }
             }

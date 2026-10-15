@@ -6,5 +6,5 @@ data class Convenio(
     val cnpj: String,
     val telefone: String,
     val percentualCobertura: String,
-    val ativo: String
+    val ativo: Boolean,
 )

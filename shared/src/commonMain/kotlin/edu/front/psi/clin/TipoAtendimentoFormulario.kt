@@ -10,12 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun TipoAtendimentoFormulario() {
@@ -24,13 +29,20 @@ fun TipoAtendimentoFormulario() {
     val descricao = remember { mutableStateOf("") }
     val duracao = remember { mutableStateOf("") }
     val ativo = remember { mutableStateOf("true") }
+    val dataCadastro = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Tipo de Atendimento")
+        Text(
+            text = "Cadastro de Tipo de Atendimento",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do tipo de atendimento.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -40,8 +52,8 @@ fun TipoAtendimentoFormulario() {
             label = { Text("Nome do atendimento") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -53,8 +65,8 @@ fun TipoAtendimentoFormulario() {
             label = { Text("Descrição do atendimento") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -66,8 +78,8 @@ fun TipoAtendimentoFormulario() {
             label = { Text("Duração (ex.: 50 minutos)") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -79,8 +91,21 @@ fun TipoAtendimentoFormulario() {
             label = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = dataCadastro.value,
+            onValueChange = { dataCadastro.value = it },
+            label = { Text("Data de cadastro") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -91,21 +116,27 @@ fun TipoAtendimentoFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {},
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
-            Button(
                 onClick = {
                 nome.value = ""
                 descricao.value = ""
                 duracao.value = ""
                 ativo.value = "true"
+                dataCadastro.value = ""
             },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Limpar Campos")
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
             }
         }
     }

@@ -1,6 +1,8 @@
 package edu.front.psi.clin
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,8 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.ButtonDefaults
 
 @Composable
 fun HorarioDisponivelFormulario() {
@@ -30,7 +37,13 @@ fun HorarioDisponivelFormulario() {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text("Cadastro de Horário Disponível")
+        Text(
+            text = "Cadastro de Horário Disponível",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica
+        )
+        Text(text = "Preencha os dados do horário disponível.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -40,8 +53,8 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Nome do psicólogo") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -53,8 +66,8 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Dia da semana") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -66,8 +79,8 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Hora de início (ex.: 08:00)") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -79,8 +92,8 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Hora de fim (ex.: 09:00)") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -92,8 +105,8 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Descrição") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
@@ -105,34 +118,42 @@ fun HorarioDisponivelFormulario() {
             placeholder = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = CremeCampo,
-                focusedContainerColor = CremeCampo
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {},
-            modifier = Modifier.fillMaxWidth()
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Gravar")
-        }
+            Button(
+                onClick = {
+                    psicologo.value = ""
+                    diaSemana.value = ""
+                    horaInicio.value = ""
+                    horaFim.value = ""
+                    descricao.value = ""
+                    ativo.value = "true"
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE8F1EB),
+                    contentColor = VerdeClinica
+                ),
+                border = BorderStroke(1.dp, Color(0xFFA8C9B2)),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                psicologo.value = ""
-                diaSemana.value = ""
-                horaInicio.value = ""
-                horaFim.value = ""
-                descricao.value = ""
-                ativo.value = "true"
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Limpar Campos")
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
         }
     }
 }
