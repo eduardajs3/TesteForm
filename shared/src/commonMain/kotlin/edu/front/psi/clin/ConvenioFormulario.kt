@@ -12,6 +12,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 val convenios = mutableListOf<Convenio>()
 
@@ -34,90 +39,107 @@ fun ConvenioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome do convênio") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Nome do convênio") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = cnpj.value,
             onValueChange = { cnpj.value = it },
-            placeholder = { Text("CNPJ") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("CNPJ") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = telefone.value,
             onValueChange = { telefone.value = it },
-            placeholder = { Text("Telefone") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Telefone") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = percentualCobertura.value,
             onValueChange = { percentualCobertura.value = it },
-            placeholder = { Text("Percentual de cobertura (ex.: 80)") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Percentual de cobertura (ex.: 80)") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {
-                val percentual = percentualCobertura.value
-                    .replace(",", ".")
-                    .toDoubleOrNull()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                val convenio = Convenio(
+                    id = convenios.size + 1,
+                    nome = nome.value,
+                    cnpj = cnpj.value,
+                    telefone = telefone.value,
+                    percentualCobertura = percentualCobertura.value,
+                    ativo = ativo.value
+                )
 
-                if (
-                    nome.value.trim().length >= 2 &&
-                    cnpj.value.isNotBlank() &&
-                    telefone.value.isNotBlank() &&
-                    percentual != null &&
-                    percentual >= 0 &&
-                    (ativo.value == "true" || ativo.value == "false")
-                ) {
-                    val convenio = Convenio(
-                        id = convenios.size + 1,
-                        nome = nome.value.trim(),
-                        cnpj = cnpj.value,
-                        telefone = telefone.value,
-                        percentualCobertura = percentual,
-                        ativo = ativo.value == "true"
-                    )
-
-                    convenios.add(convenio)
-                    mensagem.value = "Convênio gravado com sucesso!"
-                } else {
-                    mensagem.value =
-                        "Confira os campos e informe um percentual válido."
-                }
+                convenios.add(convenio)
+                mensagem.value = "Convênio gravado com sucesso!"
             },
-            onClear = {
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 nome.value = ""
                 cnpj.value = ""
                 telefone.value = ""
                 percentualCobertura.value = ""
                 ativo.value = "true"
                 mensagem.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

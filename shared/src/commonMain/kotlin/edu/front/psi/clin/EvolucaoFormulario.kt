@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun EvolucaoClinicaFormulario() {
@@ -30,61 +35,94 @@ fun EvolucaoClinicaFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = prontuario.value,
             onValueChange = { prontuario.value = it },
-            placeholder = { Text("Prontuário") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Prontuário") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = psicologo.value,
             onValueChange = { psicologo.value = it },
-            placeholder = { Text("Psicólogo") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Psicólogo") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = agenda.value,
             onValueChange = { agenda.value = it },
-            placeholder = { Text("Agenda") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Agenda") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataRegistro.value,
             onValueChange = { dataRegistro.value = it },
-            placeholder = { Text("Data e hora do registro") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data e hora do registro") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = descricao.value,
             onValueChange = { descricao.value = it },
-            placeholder = { Text("Descrição da evolução clínica") },
+            label = { Text("Descrição da evolução clínica") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3
-        )
+        ,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            ))
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 prontuario.value = ""
                 psicologo.value = ""
                 agenda.value = ""
                 dataRegistro.value = ""
                 descricao.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }

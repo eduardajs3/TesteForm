@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun TipoAtendimentoFormulario() {
@@ -29,50 +34,79 @@ fun TipoAtendimentoFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome do atendimento") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Nome do atendimento") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = descricao.value,
             onValueChange = { descricao.value = it },
-            placeholder = { Text("Descrição do atendimento") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Descrição do atendimento") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = duracao.value,
             onValueChange = { duracao.value = it },
-            placeholder = { Text("Duração (ex.: 50 minutos)") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Duração (ex.: 50 minutos)") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = ativo.value,
             onValueChange = { ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 nome.value = ""
                 descricao.value = ""
                 duracao.value = ""
                 ativo.value = "true"
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }

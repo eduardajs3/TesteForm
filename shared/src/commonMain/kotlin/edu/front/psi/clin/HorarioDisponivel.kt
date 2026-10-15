@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun HorarioDisponivelFormulario() {
@@ -37,7 +38,11 @@ fun HorarioDisponivelFormulario() {
             value = psicologo.value,
             onValueChange = { psicologo.value = it },
             placeholder = { Text("Nome do psicólogo") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -46,7 +51,11 @@ fun HorarioDisponivelFormulario() {
             value = diaSemana.value,
             onValueChange = { diaSemana.value = it },
             placeholder = { Text("Dia da semana") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -55,7 +64,11 @@ fun HorarioDisponivelFormulario() {
             value = horaInicio.value,
             onValueChange = { horaInicio.value = it },
             placeholder = { Text("Hora de início (ex.: 08:00)") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -64,7 +77,11 @@ fun HorarioDisponivelFormulario() {
             value = horaFim.value,
             onValueChange = { horaFim.value = it },
             placeholder = { Text("Hora de fim (ex.: 09:00)") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -73,7 +90,11 @@ fun HorarioDisponivelFormulario() {
             value = descricao.value,
             onValueChange = { descricao.value = it },
             placeholder = { Text("Descrição") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -82,7 +103,11 @@ fun HorarioDisponivelFormulario() {
             value = ativo.value,
             onValueChange = { ativo.value = it },
             placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))

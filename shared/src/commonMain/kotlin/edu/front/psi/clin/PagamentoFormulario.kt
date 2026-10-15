@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun PagamentoFormulario() {
@@ -33,81 +38,122 @@ fun PagamentoFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = paciente.value,
             onValueChange = { paciente.value = it },
-            placeholder = { Text("Nome do paciente") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Nome do paciente") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = convenio.value,
             onValueChange = { convenio.value = it },
-            placeholder = { Text("Convênio") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Convênio") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = valorTotal.value,
             onValueChange = { valorTotal.value = it },
-            placeholder = { Text("Valor total") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Valor total") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = valorConvenio.value,
             onValueChange = { valorConvenio.value = it },
-            placeholder = { Text("Valor do convênio") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Valor do convênio") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = valorPaciente.value,
             onValueChange = { valorPaciente.value = it },
-            placeholder = { Text("Valor do paciente") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Valor do paciente") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = formaPagamento.value,
             onValueChange = { formaPagamento.value = it },
-            placeholder = { Text("Forma de pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Forma de pagamento") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataPagamento.value,
             onValueChange = { dataPagamento.value = it },
-            placeholder = { Text("Data do pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data do pagamento") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = status.value,
             onValueChange = { status.value = it },
-            placeholder = { Text("Status do pagamento") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Status do pagamento") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 paciente.value = ""
                 convenio.value = ""
                 valorTotal.value = ""
@@ -116,7 +162,11 @@ fun PagamentoFormulario() {
                 formaPagamento.value = ""
                 dataPagamento.value = ""
                 status.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }

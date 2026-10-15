@@ -1,4 +1,3 @@
-
 package edu.front.psi.clin
 
 data class Convenio(
@@ -6,6 +5,6 @@ data class Convenio(
     val nome: String,
     val cnpj: String,
     val telefone: String,
-    val percentualCobertura: Double,
-    val ativo: Boolean
+    val percentualCobertura: String,
+    val ativo: String
 )

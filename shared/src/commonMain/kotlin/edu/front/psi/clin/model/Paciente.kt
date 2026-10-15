@@ -9,5 +9,5 @@ data class Paciente(
     val telefone: String,
     val endereco: String,
     val observacoes: String,
-    val ativo: Boolean
+    val ativo: String
 )

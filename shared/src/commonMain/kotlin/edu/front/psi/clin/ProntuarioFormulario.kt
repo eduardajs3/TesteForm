@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun ProntuarioFormulario() {
@@ -29,51 +34,80 @@ fun ProntuarioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = paciente.value,
             onValueChange = { paciente.value = it },
-            placeholder = { Text("Paciente") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Paciente") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataAbertura.value,
             onValueChange = { dataAbertura.value = it },
-            placeholder = { Text("Data de abertura") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data de abertura") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = queixaPrincipal.value,
             onValueChange = { queixaPrincipal.value = it },
-            placeholder = { Text("Queixa principal") },
+            label = { Text("Queixa principal") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3
-        )
+        ,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            ))
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = status.value,
             onValueChange = { status.value = it },
-            placeholder = { Text("Status do prontuário") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Status do prontuário") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 paciente.value = ""
                 dataAbertura.value = ""
                 queixaPrincipal.value = ""
                 status.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }

@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun BloqueioAgendaFormulario() {
@@ -29,51 +34,80 @@ fun BloqueioAgendaFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = psicologo.value,
             onValueChange = { psicologo.value = it },
-            placeholder = { Text("Nome do psicólogo") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Nome do psicólogo") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataHoraInicio.value,
             onValueChange = { dataHoraInicio.value = it },
-            placeholder = { Text("Data e hora de início") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data e hora de início") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataHoraFim.value,
             onValueChange = { dataHoraFim.value = it },
-            placeholder = { Text("Data e hora de fim") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data e hora de fim") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = motivo.value,
             onValueChange = { motivo.value = it },
-            placeholder = { Text("Motivo do bloqueio") },
+            label = { Text("Motivo do bloqueio") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3
-        )
+        ,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            ))
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 psicologo.value = ""
                 dataHoraInicio.value = ""
                 dataHoraFim.value = ""
                 motivo.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }

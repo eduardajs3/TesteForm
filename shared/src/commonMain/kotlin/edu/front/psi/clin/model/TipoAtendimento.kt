@@ -1,4 +1,3 @@
-
 package edu.front.psi.clin
 
 data class TipoAtendimento(

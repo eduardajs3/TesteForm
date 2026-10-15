@@ -11,6 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun RecepcionistaFormulario() {
@@ -32,72 +37,109 @@ fun RecepcionistaFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = nome.value,
             onValueChange = { nome.value = it },
-            placeholder = { Text("Nome") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = cpf.value,
             onValueChange = { cpf.value = it },
-            placeholder = { Text("CPF") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("CPF") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = email.value,
             onValueChange = { email.value = it },
-            placeholder = { Text("E-mail") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("E-mail") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = telefone.value,
             onValueChange = { telefone.value = it },
-            placeholder = { Text("Telefone") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Telefone") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = senha.value,
             onValueChange = { senha.value = it },
-            placeholder = { Text("Senha") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Senha") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = dataCadastro.value,
             onValueChange = { dataCadastro.value = it },
-            placeholder = { Text("Data de cadastro") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Data de cadastro") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        CampoClinica(
+        TextField(
             value = setor.value,
             onValueChange = { setor.value = it },
-            placeholder = { Text("Setor") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Setor") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = CremeCampo,
+                focusedContainerColor = CremeCampo
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AcoesFormulario(
-            onSave = {},
-            onClear = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gravar")
+            }
+            Button(
+                onClick = {
                 nome.value = ""
                 cpf.value = ""
                 email.value = ""
@@ -105,7 +147,11 @@ fun RecepcionistaFormulario() {
                 senha.value = ""
                 dataCadastro.value = ""
                 setor.value = ""
+            },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Limpar Campos")
             }
-        )
+        }
     }
 }
