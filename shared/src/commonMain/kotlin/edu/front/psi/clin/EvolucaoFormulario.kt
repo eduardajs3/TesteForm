@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
@@ -30,7 +29,7 @@ fun EvolucaoClinicaFormulario() {
     val agenda = remember { mutableStateOf("") }
     val dataRegistro = remember { mutableStateOf("") }
     val descricao = remember { mutableStateOf("") }
-    val ativo = remember { mutableStateOf(true) }
+    val ativo = remember { mutableStateOf("true") }
 
     Column(
         modifier = Modifier
@@ -113,16 +112,16 @@ fun EvolucaoClinicaFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
+        TextField(
+            value = ativo.value,
+            onValueChange = { ativo.value = it },
+            label = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-        ) {
-            Text("Ativo")
-            Switch(
-                checked = ativo.value,
-                onCheckedChange = { ativo.value = it }
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
             )
-        }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
