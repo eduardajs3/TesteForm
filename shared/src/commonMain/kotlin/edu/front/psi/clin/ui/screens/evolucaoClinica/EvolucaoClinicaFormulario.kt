@@ -1,55 +1,51 @@
 package edu.front.psi.clin
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.ButtonDefaults
+import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 
 @Composable
-fun ProntuarioFormulario() {
-
-    val paciente = remember { mutableStateOf("") }
-    val dataAbertura = remember { mutableStateOf("") }
-    val queixaPrincipal = remember { mutableStateOf("") }
-    val status = remember { mutableStateOf("") }
-    val ativo = remember { mutableStateOf("true") }
-
+fun EvolucaoClinicaFormulario(
+    innerPadding: PaddingValues,
+    vm: EvolucaoClinicaViewModel
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .padding(innerPadding)
     ) {
         Text(
-            text = "Cadastro de Prontuário",
+            text = "Cadastro de Evolução Clínica",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = VerdeClinica
         )
-        Text(text = "Preencha os dados do prontuário.")
+        Text(text = "Preencha os dados da evolução clínica.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = paciente.value,
-            onValueChange = { paciente.value = it },
-            label = { Text("Paciente") },
+            value = vm.prontuario.value,
+            onValueChange = { vm.prontuario.value = it },
+            label = { Text("Prontuário") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -60,9 +56,9 @@ fun ProntuarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = dataAbertura.value,
-            onValueChange = { dataAbertura.value = it },
-            label = { Text("Data de abertura") },
+            value = vm.psicologo.value,
+            onValueChange = { vm.psicologo.value = it },
+            label = { Text("Psicólogo") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -73,23 +69,9 @@ fun ProntuarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = queixaPrincipal.value,
-            onValueChange = { queixaPrincipal.value = it },
-            label = { Text("Queixa principal") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3
-        ,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            ))
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = status.value,
-            onValueChange = { status.value = it },
-            label = { Text("Status do prontuário") },
+            value = vm.agenda.value,
+            onValueChange = { vm.agenda.value = it },
+            label = { Text("Agenda") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -99,11 +81,10 @@ fun ProntuarioFormulario() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        
         TextField(
-            value = ativo.value,
-            onValueChange = { ativo.value = it },
-            label = { Text("Ativo? Digite true ou false") },
+            value = vm.dataRegistro.value,
+            onValueChange = { vm.dataRegistro.value = it },
+            label = { Text("Data e hora do registro") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -111,15 +92,41 @@ fun ProntuarioFormulario() {
             )
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = vm.descricao.value,
+            onValueChange = { vm.descricao.value = it },
+            label = { Text("Descrição da evolução clínica") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = vm.ativo.value,
+            onValueChange = { vm.ativo.value = it },
+            placeholder = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-           
             Button(
-                onClick = {},
+                onClick = vm::limparCampos,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF6F3EC),
                     contentColor = VerdeClinica
@@ -128,12 +135,16 @@ fun ProntuarioFormulario() {
             ) {
                 Text("Limpar Campos")
             }
-             Button(
-                onClick = {},
+            Button(
+                onClick = vm::salvar,
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Gravar")
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(vm.mensagem.value)
     }
 }

@@ -53,12 +53,26 @@ import edu.front.psi.clin.ui.screen.PacienteListagem
 import edu.front.psi.clin.ui.screen.PagamentoListagem
 import edu.front.psi.clin.ui.screen.SalaAtendimentoListagem
 import edu.front.psi.clin.ui.screen.TipoAtendimentoListagem
+import edu.front.psi.clin.ui.screen.BloqueioAgendaListagem
+import edu.front.psi.clin.ui.screen.EvolucaoClinicaListagem
+import edu.front.psi.clin.ui.screen.ProntuarioListagem
+import edu.front.psi.clin.ui.screen.RecepcionistaListagem   
+import edu.front.psi.clin.ui.screen.FuncionarioListagem
+import edu.front.psi.clin.ui.screen.PsicologoListagem   
+import edu.front.psi.clin.ui.screen.AgendaListagem
 import edu.front.psi.clin.ui.viewmodel.ConvenioViewModel
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
+import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
+import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
+import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
+import edu.front.psi.clin.ui.viewmodel.FuncionarioViewModel
+import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
+import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 private val Branco = Color.White
 val CremeCampo = Color(0xFFF6F3EC)
@@ -145,14 +159,59 @@ fun App() {
         factory = viewModelFactory {
             initializer { TipoAtendimentoViewModel() }
         }
+
     )
+    val bloqueioVm: BloqueioAgendaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { BloqueioAgendaViewModel() }
+        }
+    )
+    val evolucaoVm: EvolucaoClinicaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { EvolucaoClinicaViewModel() }
+        }
+    )   
+    val prontuarioVm: ProntuarioViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { ProntuarioViewModel() }
+        }
+    )
+    val recepcionistaVm: RecepcionistaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { RecepcionistaViewModel() }
+        }
+    )   
+    val funcionarioVm: FuncionarioViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { FuncionarioViewModel() }
+        }
+    )
+    val psicologoVm: PsicologoViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { PsicologoViewModel() }
+        }
+    )
+    val agendaVm: AgendaViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { AgendaViewModel() }
+        }
+    )
+    
+
     val filtroPaciente = pacienteVm.filtro.collectAsState()
     val filtroPagamento = pagamentoVm.filtro.collectAsState()
     val filtroConvenio = convenioVm.filtro.collectAsState()
     val filtroHorario = horarioVm.filtro.collectAsState()
     val filtroSala = salaVm.filtro.collectAsState()
     val filtroTipo = tipoVm.filtro.collectAsState()
-    val telaComFiltro = tela.value in setOf("paciente", "pagamento", "convenio", "horario", "sala", "tipo")
+    val filtroBloqueio = bloqueioVm.filtro.collectAsState()
+    val filtroEvolucao = evolucaoVm.filtro.collectAsState()
+    val filtroProntuario = prontuarioVm.filtro.collectAsState()
+    val filtroRecepcionista = recepcionistaVm.filtro.collectAsState()
+    val filtroFuncionario = funcionarioVm.filtro.collectAsState()
+    val filtroPsicologo = psicologoVm.filtro.collectAsState()
+    val filtroAgenda = agendaVm.filtro.collectAsState()
+    val telaComFiltro = tela.value in setOf("paciente", "pagamento", "convenio", "horario", "sala", "tipo", "bloqueio", "evolucao", "prontuario", "recepcionista", "funcionario", "psicologo", "agenda")
 
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -176,6 +235,14 @@ fun App() {
                                         "convenio" -> "Convênios"
                                         "horario" -> "Horários disponíveis"
                                         "sala" -> "Salas de atendimento"
+                                        "tipo" -> "Tipos de atendimento"                        
+                                        "bloqueio" -> "Bloqueios"   
+                                        "evolucao" -> "Evoluções"
+                                        "prontuario" -> "Prontuários"
+                                        "recepcionista" -> "Recepcionistas"
+                                        "funcionario" -> "Funcionários"
+                                        "psicologo" -> "Psicólogos"
+                                        "agenda" -> "Agendas"
                                         else -> "Tipos de atendimento"
                                     },
                                     color = Color.White
@@ -189,7 +256,15 @@ fun App() {
                                         "convenio" -> filtroConvenio.value
                                         "horario" -> filtroHorario.value
                                         "sala" -> filtroSala.value
-                                        else -> filtroTipo.value
+                                        "tipo" -> filtroTipo.value
+                                        "bloqueio" -> filtroBloqueio.value
+                                        "evolucao" -> filtroEvolucao.value                  
+                                        "prontuario" -> filtroProntuario.value              
+                                        "recepcionista" -> filtroRecepcionista.value                        
+                                        "funcionario" -> filtroFuncionario.value                            
+                                        "psicologo" -> filtroPsicologo.value                                
+                                        "agenda" -> filtroAgenda.value                                      
+                                        else -> ""
                                     },
                                     onValueChange = {
                                         when (tela.value) {
@@ -199,6 +274,14 @@ fun App() {
                                             "horario" -> horarioVm.atualizarFiltro(it)
                                             "sala" -> salaVm.atualizarFiltro(it)
                                             "tipo" -> tipoVm.atualizarFiltro(it)
+                                            "bloqueio" -> bloqueioVm.atualizarFiltro(it)
+                                            "evolucao" -> evolucaoVm.atualizarFiltro(it)                        
+                                            "prontuario" -> prontuarioVm.atualizarFiltro(it)                                
+                                            "recepcionista" -> recepcionistaVm.atualizarFiltro(it)                          
+                                            "funcionario" -> funcionarioVm.atualizarFiltro(it)                              
+                                            "psicologo" -> psicologoVm.atualizarFiltro(it)                  
+                                            "agenda" -> agendaVm.atualizarFiltro(it)    
+                                            else -> {}    
                                         }
                                     },
                                     placeholder = { Text("Filtro") }
@@ -226,6 +309,20 @@ fun App() {
                                     salaVm.tela.value = "list"
                                 } else if (tela.value == "tipo" && tipoVm.tela.value == "form") {
                                     tipoVm.tela.value = "list"
+                                }else if(tela.value == "bloqueio" && bloqueioVm.tela.value == "form") {
+                                    bloqueioVm.tela.value = "list"  
+                                }else if(tela.value == "evolucao" && evolucaoVm.tela.value == "form") {
+                                    evolucaoVm.tela.value = "list"  
+                                }else if(tela.value == "prontuario" && prontuarioVm.tela.value == "form") {                                     
+                                    prontuarioVm.tela.value = "list"                            
+                                }else if(tela.value == "recepcionista" && recepcionistaVm.tela.value == "form") {                               
+                                    recepcionistaVm.tela.value = "list"                     
+                                }else if(tela.value == "funcionario" && funcionarioVm.tela.value == "form") {                   
+                                    funcionarioVm.tela.value = "list"                                           
+                                }else if(tela.value == "psicologo" && psicologoVm.tela.value == "form") {                                           
+                                    psicologoVm.tela.value = "list"             
+                                }else if(tela.value == "agenda" && agendaVm.tela.value == "form") {                                           
+                                    agendaVm.tela.value = "list"             
                                 } else {
                                     tela.value = "menu"
                                 }
@@ -254,7 +351,15 @@ fun App() {
                     (tela.value == "convenio" && convenioVm.tela.value == "list") ||
                     (tela.value == "horario" && horarioVm.tela.value == "list") ||
                     (tela.value == "sala" && salaVm.tela.value == "list") ||
-                    (tela.value == "tipo" && tipoVm.tela.value == "list")
+                    (tela.value == "tipo" && tipoVm.tela.value == "list") ||
+                    (tela.value == "bloqueio" && bloqueioVm.tela.value == "list") ||
+                    (tela.value == "evolucao" && evolucaoVm.tela.value == "list") ||                                    
+                    (tela.value == "prontuario" && prontuarioVm.tela.value == "list") ||                                        
+                    (tela.value == "recepcionista" && recepcionistaVm.tela.value == "list") ||                                      
+                    (tela.value == "funcionario" && funcionarioVm.tela.value == "list") ||                  
+                    (tela.value == "psicologo" && psicologoVm.tela.value == "list") ||                  
+                    (tela.value == "agenda" && agendaVm.tela.value == "list")                                   
+
                 ) {
                     androidx.compose.material3.Button(
                         onClick = {
@@ -265,6 +370,14 @@ fun App() {
                                 "horario" -> horarioVm.novoHorario()
                                 "sala" -> salaVm.novaSala()
                                 "tipo" -> tipoVm.novoTipo()
+                                "bloqueio" -> bloqueioVm.novoBloqueio()
+                                "evolucao" -> evolucaoVm.novaEvolucao()     
+                                "prontuario" -> prontuarioVm.novoProntuario()               
+                                "recepcionista" -> recepcionistaVm.novaRecepcionista()
+                                "funcionario" -> funcionarioVm.novoFuncionario()                    
+                                "psicologo" -> psicologoVm.novoPsicologo()  
+                                "agenda" -> agendaVm.novoAgendamento()  
+                                else -> {}                          
                             }
                         }
                     ) {
@@ -348,31 +461,51 @@ fun App() {
                 } else if (tela.value == "tipo") {
                     if (tipoVm.tela.value == "form") TipoAtendimentoFormulario(contentPadding, tipoVm)
                     else TipoAtendimentoListagem(contentPadding, tipoVm)
-                } else {
-                    // Demais telas do seu sistema mantidas no layout original
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp)
-                    ) {
-                        if (tela.value == "agenda") {
-                            AgendaFormulario()
-                        } else if (tela.value == "prontuario") {
-                            ProntuarioFormulario()
-                        } else if (tela.value == "recepcionista") {
-                            RecepcionistaFormulario()
-                        } else if (tela.value == "evolucao") {
-                            EvolucaoClinicaFormulario()
-                        } else if (tela.value == "bloqueio") {
-                            BloqueioAgendaFormulario()
-                        } else if (tela.value == "funcionario") {
-                            FuncionarioFormulario()
-                        } else if (tela.value == "psicologo") {
-                            PsicologoFormulario()
-                        }
+                } else if (tela.value == "bloqueio") {
+                    if (bloqueioVm.tela.value == "form") {
+                        BloqueioAgendaFormulario(contentPadding, bloqueioVm)
+                    } else {
+                        BloqueioAgendaListagem(contentPadding, bloqueioVm)
                     }
+                } else if (tela.value == "evolucao") {
+                    if (evolucaoVm.tela.value == "form") {      
+                        EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
+                    } else {
+                        EvolucaoClinicaListagem(contentPadding, evolucaoVm)
+                    }
+                } else if (tela.value == "prontuario") {
+                    if (prontuarioVm.tela.value == "form") {
+                        ProntuarioFormulario(contentPadding, prontuarioVm)
+                    } else {
+                        ProntuarioListagem(contentPadding, prontuarioVm)
+                    }   
+                } else if (tela.value == "recepcionista") {                 
+                    if (recepcionistaVm.tela.value == "form") {
+                        RecepcionistaFormulario(contentPadding, recepcionistaVm)
+                    } else {
+                        RecepcionistaListagem(contentPadding, recepcionistaVm)
+                    }   
+                } else if (tela.value == "funcionario") {                 
+                    if (funcionarioVm.tela.value == "form") {
+                        FuncionarioFormulario(contentPadding, funcionarioVm)
+                    } else {
+                        FuncionarioListagem(contentPadding, funcionarioVm)
+                    }   
+                } else if (tela.value == "psicologo") {                 
+                    if (psicologoVm.tela.value == "form") {
+                        PsicologoFormulario(contentPadding, psicologoVm)
+                    } else {
+                        PsicologoListagem(contentPadding, psicologoVm)
+                    }   
+                } else if (tela.value == "agenda") {                 
+                    if (agendaVm.tela.value == "form") {
+                        AgendaFormulario(contentPadding, agendaVm)
+                    } else {
+                        AgendaListagem(contentPadding, agendaVm)
+                    }                                               
+
+                } else {
+                    
                 }
             }
         }

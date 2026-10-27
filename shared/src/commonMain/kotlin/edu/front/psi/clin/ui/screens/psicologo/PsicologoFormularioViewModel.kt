@@ -1,55 +1,50 @@
 package edu.front.psi.clin
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.ButtonDefaults
+import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
 
 @Composable
-fun FuncionarioFormulario() {
-
-    val nome = remember { mutableStateOf("") }
-    val cpf = remember { mutableStateOf("") }
-    val email = remember { mutableStateOf("") }
-    val telefone = remember { mutableStateOf("") }
-    val senha = remember { mutableStateOf("") }
-    val ativo = remember { mutableStateOf("true") }
-    val dataCadastro = remember { mutableStateOf("") }
-
+fun PsicologoFormulario(
+    innerPadding: PaddingValues,
+    vm: PsicologoViewModel
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .padding(innerPadding)
     ) {
         Text(
-            text = "Cadastro de Funcionário",
+            text = "Cadastro de Psicólogo",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = VerdeClinica
         )
-        Text(text = "Preencha os dados do funcionário.")
+        Text(text = "Preencha os dados do psicólogo.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = nome.value,
-            onValueChange = { nome.value = it },
+            value = vm.nome.value,
+            onValueChange = { vm.nome.value = it },
             label = { Text("Nome completo") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -61,8 +56,8 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = cpf.value,
-            onValueChange = { cpf.value = it },
+            value = vm.cpf.value,
+            onValueChange = { vm.cpf.value = it },
             label = { Text("CPF") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -74,8 +69,8 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = email.value,
-            onValueChange = { email.value = it },
+            value = vm.email.value,
+            onValueChange = { vm.email.value = it },
             label = { Text("E-mail") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -87,8 +82,8 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = telefone.value,
-            onValueChange = { telefone.value = it },
+            value = vm.telefone.value,
+            onValueChange = { vm.telefone.value = it },
             label = { Text("Telefone") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -100,8 +95,8 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = senha.value,
-            onValueChange = { senha.value = it },
+            value = vm.senha.value,
+            onValueChange = { vm.senha.value = it },
             label = { Text("Senha") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -113,9 +108,9 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = ativo.value,
-            onValueChange = { ativo.value = it },
-            label = { Text("Ativo? Digite true ou false") },
+            value = vm.crp.value,
+            onValueChange = { vm.crp.value = it },
+            label = { Text("CRP") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -126,9 +121,22 @@ fun FuncionarioFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = dataCadastro.value,
-            onValueChange = { dataCadastro.value = it },
-            label = { Text("Data de cadastro") },
+            value = vm.especialidade.value,
+            onValueChange = { vm.especialidade.value = it },
+            label = { Text("Especialidade") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = vm.ativo.value,
+            onValueChange = { vm.ativo.value = it },
+            placeholder = { Text("Ativo? Digite true ou false") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -143,7 +151,7 @@ fun FuncionarioFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {},
+                onClick = vm::limparCampos,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF6F3EC),
                     contentColor = VerdeClinica
@@ -153,11 +161,15 @@ fun FuncionarioFormulario() {
                 Text("Limpar Campos")
             }
             Button(
-                onClick = {},
+                onClick = vm::salvar,
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Gravar")
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(vm.mensagem.value)
     }
 }

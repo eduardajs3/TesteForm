@@ -1,55 +1,51 @@
 package edu.front.psi.clin
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.ButtonDefaults
+import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
 
 @Composable
-fun EvolucaoClinicaFormulario() {
-
-    val prontuario = remember { mutableStateOf("") }
-    val psicologo = remember { mutableStateOf("") }
-    val agenda = remember { mutableStateOf("") }
-    val dataRegistro = remember { mutableStateOf("") }
-    val descricao = remember { mutableStateOf("") }
-    val ativo = remember { mutableStateOf("true") }
-
+fun RecepcionistaFormulario(
+    innerPadding: PaddingValues,
+    vm: RecepcionistaViewModel
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .padding(innerPadding)
     ) {
         Text(
-            text = "Cadastro de Evolução Clínica",
+            text = "Cadastro de Recepcionista",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = VerdeClinica
         )
-        Text(text = "Preencha os dados da evolução clínica.")
+        Text(text = "Preencha os dados da recepcionista.")
 
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = prontuario.value,
-            onValueChange = { prontuario.value = it },
-            label = { Text("Prontuário") },
+            value = vm.nome.value,
+            onValueChange = { vm.nome.value = it },
+            label = { Text("Nome") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -60,9 +56,9 @@ fun EvolucaoClinicaFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = psicologo.value,
-            onValueChange = { psicologo.value = it },
-            label = { Text("Psicólogo") },
+            value = vm.cpf.value,
+            onValueChange = { vm.cpf.value = it },
+            label = { Text("CPF") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -73,9 +69,9 @@ fun EvolucaoClinicaFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = agenda.value,
-            onValueChange = { agenda.value = it },
-            label = { Text("Agenda") },
+            value = vm.email.value,
+            onValueChange = { vm.email.value = it },
+            label = { Text("E-mail") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -86,9 +82,9 @@ fun EvolucaoClinicaFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = dataRegistro.value,
-            onValueChange = { dataRegistro.value = it },
-            label = { Text("Data e hora do registro") },
+            value = vm.telefone.value,
+            onValueChange = { vm.telefone.value = it },
+            label = { Text("Telefone") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -99,23 +95,48 @@ fun EvolucaoClinicaFormulario() {
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = descricao.value,
-            onValueChange = { descricao.value = it },
-            label = { Text("Descrição da evolução clínica") },
+            value = vm.senha.value,
+            onValueChange = { vm.senha.value = it },
+            label = { Text("Senha") },
             modifier = Modifier.fillMaxWidth(),
-            minLines = 3
-        ,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
                 focusedContainerColor = Color.White
-            ))
+            )
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         TextField(
-            value = ativo.value,
-            onValueChange = { ativo.value = it },
-            label = { Text("Ativo? Digite true ou false") },
+            value = vm.ativo.value,
+            onValueChange = { vm.ativo.value = it },
+            placeholder = { Text("Ativo? Digite true ou false") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = vm.dataCadastro.value,
+            onValueChange = { vm.dataCadastro.value = it },
+            label = { Text("Data de cadastro") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextField(
+            value = vm.setor.value,
+            onValueChange = { vm.setor.value = it },
+            label = { Text("Setor") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -130,7 +151,7 @@ fun EvolucaoClinicaFormulario() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {},
+                onClick = vm::limparCampos,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF6F3EC),
                     contentColor = VerdeClinica
@@ -140,11 +161,15 @@ fun EvolucaoClinicaFormulario() {
                 Text("Limpar Campos")
             }
             Button(
-                onClick = {},
+                onClick = vm::salvar,
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Gravar")
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(vm.mensagem.value)
     }
 }
