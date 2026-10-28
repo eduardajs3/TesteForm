@@ -1,24 +1,13 @@
-package edu.front.psi.clin
+package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
+import edu.front.psi.clin.ui.components.CampoTextoPadrao
+import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 
 @Composable
@@ -26,125 +15,56 @@ fun EvolucaoClinicaFormulario(
     innerPadding: PaddingValues,
     vm: EvolucaoClinicaViewModel
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .padding(innerPadding)
-    ) {
-        Text(
-            text = "Cadastro de Evolução Clínica",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica
-        )
-        Text(text = "Preencha os dados da evolução clínica.")
+    val isEdicao = vm.id.value.isNotEmpty()
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.prontuario.value,
-            onValueChange = { vm.prontuario.value = it },
-            label = { Text("Prontuário") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.psicologo.value,
-            onValueChange = { vm.psicologo.value = it },
-            label = { Text("Psicólogo") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.agenda.value,
-            onValueChange = { vm.agenda.value = it },
-            label = { Text("Agenda") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.dataRegistro.value,
-            onValueChange = { vm.dataRegistro.value = it },
-            label = { Text("Data e hora do registro") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.descricao.value,
-            onValueChange = { vm.descricao.value = it },
-            label = { Text("Descrição da evolução clínica") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.ativo.value,
-            onValueChange = { vm.ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Box(modifier = Modifier.padding(innerPadding)) {
+        LayoutFormularioBase(
+            titulo = if (isEdicao) "Editar Evolução Clínica" else "Cadastro de Evolução Clínica",
+            subtitulo = if (isEdicao) "Altere os dados do registro de evolução selecionado." else "Preencha os dados da evolução clínica.",
+            mensagemFeedback = vm.mensagem.value
         ) {
-            Button(
-                onClick = vm::limparCampos,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF6F3EC),
-                    contentColor = VerdeClinica
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Limpar Campos")
-            }
-            Button(
-                onClick = vm::salvar,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
+            CampoTextoPadrao(
+                value = vm.prontuario.value,
+                onValueChange = { vm.prontuario.value = it },
+                label = "Prontuário"
+            )
+
+            CampoTextoPadrao(
+                value = vm.psicologo.value,
+                onValueChange = { vm.psicologo.value = it },
+                label = "Psicólogo"
+            )
+
+            CampoTextoPadrao(
+                value = vm.agenda.value,
+                onValueChange = { vm.agenda.value = it },
+                label = "Agenda"
+            )
+
+            CampoTextoPadrao(
+                value = vm.dataRegistro.value,
+                onValueChange = { vm.dataRegistro.value = it },
+                label = "Data e hora do registro"
+            )
+
+            CampoTextoPadrao(
+                value = vm.descricao.value,
+                onValueChange = { vm.descricao.value = it },
+                label = "Descrição da evolução clínica"
+            )
+
+            CampoTextoPadrao(
+                value = vm.ativo.value,
+                onValueChange = { vm.ativo.value = it },
+                label = "Status",
+                placeholder = "Ativo? Digite true ou false"
+            )
+
+            BotoesAcaoFormulario(
+                onLimpar = vm::limparCampos,
+                onSalvar = vm::salvar,
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+            )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(vm.mensagem.value)
     }
 }

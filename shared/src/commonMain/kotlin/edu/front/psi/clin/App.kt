@@ -26,6 +26,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import edu.front.psi.clin.ui.components.MenuLateral
+
+// Imports das telas de Formulário
+import edu.front.psi.clin.ui.screen.AgendaFormulario
+import edu.front.psi.clin.ui.screen.BloqueioAgendaFormulario
+import edu.front.psi.clin.ui.screen.ConvenioFormulario
+import edu.front.psi.clin.ui.screen.EvolucaoClinicaFormulario
+import edu.front.psi.clin.ui.screen.FuncionarioFormulario
+import edu.front.psi.clin.ui.screen.HorarioDisponivelFormulario
+import edu.front.psi.clin.ui.screens.paciente.PacienteFormulario 
+import edu.front.psi.clin.ui.screen.PagamentoFormulario
+import edu.front.psi.clin.ui.screen.ProntuarioFormulario
+import edu.front.psi.clin.ui.screen.PsicologoFormulario
+import edu.front.psi.clin.ui.screen.RecepcionistaFormulario
+import edu.front.psi.clin.ui.screen.SalaAtendimentoFormulario
+import edu.front.psi.clin.ui.screen.TipoAtendimentoFormulario
+
+// Imports das telas de Listagem e Dashboard
 import edu.front.psi.clin.ui.screen.AgendaListagem
 import edu.front.psi.clin.ui.screen.BloqueioAgendaListagem
 import edu.front.psi.clin.ui.screen.ConvenioListagem
@@ -40,6 +57,8 @@ import edu.front.psi.clin.ui.screen.PsicologoListagem
 import edu.front.psi.clin.ui.screen.RecepcionistaListagem
 import edu.front.psi.clin.ui.screen.SalaAtendimentoListagem
 import edu.front.psi.clin.ui.screen.TipoAtendimentoListagem
+
+// Imports das ViewModels
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
 import edu.front.psi.clin.ui.viewmodel.ConvenioViewModel
@@ -62,7 +81,6 @@ val VerdeClinica = Color(0xFF3B5760)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
-    // A tela inicial padrão agora é o Dashboard
     val tela = remember { mutableStateOf("dashboard") }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

@@ -1,24 +1,14 @@
-package edu.front.psi.clin
+package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
+import edu.front.psi.clin.ui.components.CampoTextoPadrao
+import edu.front.psi.clin.ui.components.CampoDataPadrao
+import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 
 @Composable
@@ -26,112 +16,50 @@ fun ProntuarioFormulario(
     innerPadding: PaddingValues,
     vm: ProntuarioViewModel
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .padding(innerPadding)
-    ) {
-        Text(
-            text = "Cadastro de Prontuário",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica
-        )
-        Text(text = "Preencha os dados do prontuário.")
+    val isEdicao = vm.id.value.isNotEmpty()
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.paciente.value,
-            onValueChange = { vm.paciente.value = it },
-            label = { Text("Paciente") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.dataAbertura.value,
-            onValueChange = { vm.dataAbertura.value = it },
-            label = { Text("Data de abertura") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.queixaPrincipal.value,
-            onValueChange = { vm.queixaPrincipal.value = it },
-            label = { Text("Queixa principal") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.status.value,
-            onValueChange = { vm.status.value = it },
-            label = { Text("Status do prontuário") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextField(
-            value = vm.ativo.value,
-            onValueChange = { vm.ativo.value = it },
-            placeholder = { Text("Ativo? Digite true ou false") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Box(modifier = Modifier.padding(innerPadding)) {
+        LayoutFormularioBase(
+            titulo = if (isEdicao) "Editar Prontuário" else "Cadastro de Prontuário",
+            subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
+            mensagemFeedback = vm.mensagem.value
         ) {
-            Button(
-                onClick = vm::limparCampos,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF6F3EC),
-                    contentColor = VerdeClinica
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Limpar Campos")
-            }
-            Button(
-                onClick = vm::salvar,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Gravar")
-            }
+            CampoTextoPadrao(
+                value = vm.paciente.value,
+                onValueChange = { vm.paciente.value = it },
+                label = "Paciente"
+            )
+
+            CampoDataPadrao(
+                value = vm.dataAbertura.value,
+                onValueChange = { vm.dataAbertura.value = it },
+                label = "Data de abertura"
+            )
+
+            CampoTextoPadrao(
+                value = vm.queixaPrincipal.value,
+                onValueChange = { vm.queixaPrincipal.value = it },
+                label = "Queixa principal"
+            )
+
+            CampoTextoPadrao(
+                value = vm.status.value,
+                onValueChange = { vm.status.value = it },
+                label = "Status do prontuário"
+            )
+
+            CampoTextoPadrao(
+                value = vm.ativo.value,
+                onValueChange = { vm.ativo.value = it },
+                label = "Status",
+                placeholder = "Ativo? Digite true ou false"
+            )
+
+            BotoesAcaoFormulario(
+                onLimpar = vm::limparCampos,
+                onSalvar = vm::salvar,
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+            )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(vm.mensagem.value)
     }
 }
