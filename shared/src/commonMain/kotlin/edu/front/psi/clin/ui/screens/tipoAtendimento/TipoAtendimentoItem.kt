@@ -1,70 +1,26 @@
 package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.TipoAtendimento
+import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
 
-@Composable
-fun TipoAtendimentoItem(
-    tipo: TipoAtendimento,
-    apagar: (TipoAtendimento) -> Unit = {},
-    editar: (TipoAtendimento) -> Unit = {}
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(shape = RoundedCornerShape(20.dp), color = Color.LightGray)
-            .height(100.dp)
-            .border(shape = RoundedCornerShape(20.dp), width = 2.dp, color = Color.Black)
-            .padding(vertical = 4.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = tipo.nome,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "Duração: ${tipo.duracao} | ${tipo.descricao}",
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        Column {
-            IconButton(onClick = { editar(tipo) }) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar"
-                )
-            }
-            IconButton(onClick = { apagar(tipo) }) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Remover"
-                )
-            }
-        }
-    }
-}
+private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun TipoAtendimentoListagem(
@@ -72,14 +28,104 @@ fun TipoAtendimentoListagem(
     vm: TipoAtendimentoViewModel
 ) {
     val lista = vm.tiposFiltrados.collectAsState()
-    
-    Column(modifier = Modifier.padding(innerPadding)) {
-        for (tipo in lista.value) {
-            TipoAtendimentoItem(
-                tipo = tipo,
-                apagar = vm::apagar,
-                editar = vm::editar
+    val filtro = vm.filtro.collectAsState()
+    val tipoSelecionado = remember { mutableStateOf<TipoAtendimento?>(null) }
+
+    // Mapeamento das colunas da tabela e suas proporções de largura
+    val colunas = listOf(
+        "Tipo de Atendimento" to 1.6f,
+        "Duração" to 1.1f,
+        "Descrição" to 1.8f
+    )
+
+    Box(modifier = Modifier.padding(innerPadding)) {
+        LayoutListagemBase(
+            titulo = "Tipos de Atendimento",
+            textoBotaoNovo = "Novo Tipo",
+            textoFiltro = filtro.value,
+            onFiltroChange = vm::atualizarFiltro,
+            onNovoClick = vm::novoTipo,
+            colunas = colunas,
+            itens = lista.value,
+            onVisualizar = { tipo -> tipoSelecionado.value = tipo },
+            onEditar = vm::editar,
+            onApagar = vm::apagar,
+            placeholderPesquisa = "Buscar por tipo, duração ou descrição..."
+        ) { tipo ->
+            Text(
+                text = tipo.nome,
+                fontWeight = FontWeight.Bold,
+                color = CorTextoLinha,
+                fontSize = 14.sp,
+                modifier = Modifier.weight(1.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${tipo.duracao} min",
+                color = CorTextoLinha,
+                fontSize = 13.sp,
+                modifier = Modifier.weight(1.1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = tipo.descricao,
+                color = CorTextoLinha,
+                fontSize = 13.sp,
+                modifier = Modifier.weight(1.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
+
+        // Modal de Visualização de Detalhes do Tipo de Atendimento
+        tipoSelecionado.value?.let { tipo ->
+            AlertDialog(
+                onDismissRequest = { tipoSelecionado.value = null },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                title = {
+                    Text(
+                        text = tipo.nome,
+                        fontWeight = FontWeight.Bold,
+                        color = VerdeClinica,
+                        fontSize = 20.sp
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ItemDetalhe("Duração", "${tipo.duracao} minutos")
+                        ItemDetalhe("Descrição", tipo.descricao)
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { tipoSelecionado.value = null }) {
+                        Text(
+                            text = "Fechar",
+                            color = VerdeClinica,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemDetalhe(rotulo: String, valor: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "$rotulo: ",
+            fontWeight = FontWeight.Bold,
+            color = VerdeClinica,
+            fontSize = 14.sp
+        )
+        Text(
+            text = valor.ifEmpty { "-" },
+            color = CorTextoLinha,
+            fontSize = 14.sp
+        )
     }
 }
