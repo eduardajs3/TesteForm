@@ -16,8 +16,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,7 +54,7 @@ import edu.front.psi.clin.ui.screen.FuncionarioListagem
 import edu.front.psi.clin.ui.screen.HorarioDisponivelListagem
 import edu.front.psi.clin.ui.screen.PacienteListagem
 import edu.front.psi.clin.ui.screen.PagamentoListagem
-import edu.front.psi.clin.ui.screen.ProntuarioListagem
+import edu.front.psi.clin.ui.screens.prontuario.ProntuarioListagem
 import edu.front.psi.clin.ui.screen.PsicologoListagem
 import edu.front.psi.clin.ui.screen.RecepcionistaListagem
 import edu.front.psi.clin.ui.screen.SalaAtendimentoListagem
@@ -84,6 +86,9 @@ fun App() {
     val tela = remember { mutableStateOf("dashboard") }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // Estado para guardar o nome do paciente selecionado entre telas
+    var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
     // ViewModels
     val pacienteVm: PacienteViewModel = viewModel(factory = viewModelFactory { initializer { PacienteViewModel() } })
@@ -219,15 +224,52 @@ fun App() {
             ) { contentPadding ->
                 when (tela.value) {
                     "dashboard" -> DashboardTela(contentPadding)
-                    "paciente" -> if (pacienteVm.tela.value == "form") PacienteFormulario(contentPadding, pacienteVm) else PacienteListagem(contentPadding, pacienteVm)
+                    "paciente" -> if (pacienteVm.tela.value == "form") {
+                        PacienteFormulario(contentPadding, pacienteVm)
+                    } else {
+                        PacienteListagem(
+                            innerPadding = contentPadding,
+                            vm = pacienteVm,
+                            onNavegarParaProntuario = { paciente ->
+                                pacienteSelecionadoNome = paciente.nome
+                                prontuarioVm.paciente.value = paciente.nome
+                                prontuarioVm.atualizarFiltro(paciente.nome)
+                                prontuarioVm.tela.value = "list"
+                                tela.value = "prontuario"
+                            },
+                            onNavegarParaEvolucao = { paciente ->
+                                pacienteSelecionadoNome = paciente.nome
+                                evolucaoVm.prontuario.value = paciente.nome
+                                evolucaoVm.atualizarFiltro(paciente.nome)
+                                evolucaoVm.tela.value = "list"
+                                tela.value = "evolucao"
+                            }
+                        )
+                    }
                     "pagamento" -> if (pagamentoVm.tela.value == "form") PagamentoFormulario(contentPadding, pagamentoVm) else PagamentoListagem(contentPadding, pagamentoVm)
                     "convenio" -> if (convenioVm.tela.value == "form") ConvenioFormulario(contentPadding, convenioVm) else ConvenioListagem(contentPadding, convenioVm)
                     "horario" -> if (horarioVm.tela.value == "form") HorarioDisponivelFormulario(contentPadding, horarioVm) else HorarioDisponivelListagem(contentPadding, horarioVm)
                     "sala" -> if (salaVm.tela.value == "form") SalaAtendimentoFormulario(contentPadding, salaVm) else SalaAtendimentoListagem(contentPadding, salaVm)
                     "tipo" -> if (tipoVm.tela.value == "form") TipoAtendimentoFormulario(contentPadding, tipoVm) else TipoAtendimentoListagem(contentPadding, tipoVm)
                     "bloqueio" -> if (bloqueioVm.tela.value == "form") BloqueioAgendaFormulario(contentPadding, bloqueioVm) else BloqueioAgendaListagem(contentPadding, bloqueioVm)
-                    "evolucao" -> if (evolucaoVm.tela.value == "form") EvolucaoClinicaFormulario(contentPadding, evolucaoVm) else EvolucaoClinicaListagem(contentPadding, evolucaoVm)
-                    "prontuario" -> if (prontuarioVm.tela.value == "form") ProntuarioFormulario(contentPadding, prontuarioVm) else ProntuarioListagem(contentPadding, prontuarioVm)
+                    "evolucao" -> if (evolucaoVm.tela.value == "form") {
+                        EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
+                    } else {
+                        EvolucaoClinicaListagem(
+                            innerPadding = contentPadding,
+                            vm = evolucaoVm,
+                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                        )
+                    }
+                    "prontuario" -> if (prontuarioVm.tela.value == "form") {
+                        ProntuarioFormulario(contentPadding, prontuarioVm)
+                    } else {
+                        ProntuarioListagem(
+                            innerPadding = contentPadding,
+                            vm = prontuarioVm,
+                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                        )
+                    }
                     "recepcionista" -> if (recepcionistaVm.tela.value == "form") RecepcionistaFormulario(contentPadding, recepcionistaVm) else RecepcionistaListagem(contentPadding, recepcionistaVm)
                     "funcionario" -> if (funcionarioVm.tela.value == "form") FuncionarioFormulario(contentPadding, funcionarioVm) else FuncionarioListagem(contentPadding, funcionarioVm)
                     "psicologo" -> if (psicologoVm.tela.value == "form") PsicologoFormulario(contentPadding, psicologoVm) else PsicologoListagem(contentPadding, psicologoVm)

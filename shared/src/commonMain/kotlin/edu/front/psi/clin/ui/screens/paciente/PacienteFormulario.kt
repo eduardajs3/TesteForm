@@ -39,25 +39,29 @@ fun PacienteFormulario(
             CampoDataPadrao(
                 value = vm.dataNascimento.value,
                 onValueChange = { vm.dataNascimento.value = it },
-                label = "Data de nascimento"
+                label = "Data de nascimento",
+                obrigatorio = true
             )
 
             CampoTextoPadrao(
                 value = vm.email.value,
                 onValueChange = { vm.email.value = it },
-                label = "E-mail"
+                label = "E-mail",
+                obrigatorio = true
             )
 
             CampoTextoPadrao(
                 value = vm.telefone.value,
                 onValueChange = { vm.telefone.value = it },
-                label = "Telefone"
+                label = "Telefone",
+                obrigatorio = true
             )
 
             CampoTextoPadrao(
                 value = vm.endereco.value,
                 onValueChange = { vm.endereco.value = it },
-                label = "Endereço"
+                label = "Endereço",
+                obrigatorio = true
             )
 
             CampoTextoPadrao(

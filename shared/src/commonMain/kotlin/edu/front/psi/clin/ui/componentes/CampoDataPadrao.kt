@@ -38,6 +38,7 @@ fun CampoDataPadrao(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    obrigatorio: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var mostrarPicker by remember { mutableStateOf(false) }

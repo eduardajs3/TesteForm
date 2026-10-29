@@ -1,14 +1,21 @@
 package edu.front.psi.clin.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -17,114 +24,288 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Agenda
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
-private val CorTextoLinha = Color(0xFF1F2937)
+private val CorTextoPrincipal = Color(0xFF1F2937)
+private val CorBordaCard = Color(0xFFE5E7EB)
+
+data class DiaSemanaAgenda(
+    val nomeDia: String,
+    val dataFormatada: String
+)
 
 @Composable
 fun AgendaListagem(
     innerPadding: PaddingValues,
     vm: AgendaViewModel
 ) {
-    val lista = vm.agendamentosFiltrados.collectAsState()
-    val filtro = vm.filtro.collectAsState()
-    val agendamentoSelecionado = remember { mutableStateOf<Agenda?>(null) }
+    val agendamentos by vm.agendamentosFiltrados.collectAsState()
+    var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
 
-    // Proporções das colunas na tabela
-    val colunas = listOf(
-        "Paciente" to 1.5f,
-        "Psicólogo" to 1.5f,
-        "Início" to 1.2f,
-        "Status" to 1.0f
+    // Dias da semana fictícios para demonstração do calendário
+    val diasDaSemana = listOf(
+        DiaSemanaAgenda("Segunda", "16/03"),
+        DiaSemanaAgenda("Terça", "17/03"),
+        DiaSemanaAgenda("Quarta", "18/03"),
+        DiaSemanaAgenda("Quinta", "19/03"),
+        DiaSemanaAgenda("Sexta", "20/03")
     )
 
-    Box(modifier = Modifier.padding(innerPadding)) {
-        LayoutListagemBase(
-            titulo = "Agenda",
-            textoBotaoNovo = "Novo Agendamento",
-            textoFiltro = filtro.value,
-            onFiltroChange = vm::atualizarFiltro,
-            onNovoClick = vm::novoAgendamento,
-            colunas = colunas,
-            itens = lista.value,
-            onVisualizar = { agendamento -> agendamentoSelecionado.value = agendamento },
-            onEditar = vm::editar,
-            onApagar = vm::apagar,
-            placeholderPesquisa = "Buscar por paciente, psicólogo ou status..."
-        ) { agendamento ->
-            Text(
-                text = agendamento.paciente,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = agendamento.psicologo,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = agendamento.dataHoraInicio,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = agendamento.status,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.0f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+    val horariosSessao = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(24.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Cabeçalho da Agenda
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Agenda de Atendimentos",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = VerdeClinica
+                    )
+                    Text(
+                        text = "Acompanhe e organize as consultas da semana",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Button(
+                    onClick = vm::novoAgendamento,
+                    colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Novo Agendamento",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Novo Agendamento", color = Color.White)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Seletor de Semana
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
+                modifier = Modifier.fillMaxWidth(),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CorBordaCard)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { /* Navegar semana anterior */ }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Semana Anterior",
+                            tint = VerdeClinica
+                        )
+                    }
+
+                    Text(
+                        text = "Semana de 16 a 20 de Março de 2026",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = CorTextoPrincipal
+                    )
+
+                    IconButton(onClick = { /* Navegar próxima semana */ }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Próxima Semana",
+                            tint = VerdeClinica
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Grade de Agendamentos da Semana
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(horariosSessao) { hora ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        // Coluna do Horário
+                        Text(
+                            text = hora,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            modifier = Modifier
+                                .width(60.dp)
+                                .padding(top = 12.dp)
+                        )
+
+                        // Cards dos dias na mesma linha do horário
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            diasDaSemana.forEach { dia ->
+                                val agendamentoNoHorario = agendamentos.firstOrNull {
+                                    it.dataHoraInicio.contains(hora) || it.dataHoraInicio.contains(dia.nomeDia)
+                                }
+
+                                CardAgendamentoGrade(
+                                    dia = dia,
+                                    agendamento = agendamentoNoHorario,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = {
+                                        if (agendamentoNoHorario != null) {
+                                            agendamentoSelecionado = agendamentoNoHorario
+                                        } else {
+                                            vm.novoAgendamento()
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        // Modal de Visualização de Detalhes do Agendamento
-        agendamentoSelecionado.value?.let { agendamento ->
+        // Modal de Visualização e Ações do Agendamento
+        agendamentoSelecionado?.let { agendamento ->
             AlertDialog(
-                onDismissRequest = { agendamentoSelecionado.value = null },
+                onDismissRequest = { agendamentoSelecionado = null },
                 containerColor = Color.White,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
-                        text = "Detalhes do Agendamento",
+                        text = "Consulta Agendada",
                         fontWeight = FontWeight.Bold,
                         color = VerdeClinica,
                         fontSize = 20.sp
                     )
                 },
                 text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ItemDetalhe("Paciente", agendamento.paciente)
                         ItemDetalhe("Psicólogo", agendamento.psicologo)
+                        ItemDetalhe("Horário", agendamento.dataHoraInicio)
                         ItemDetalhe("Sala", agendamento.sala)
-                        ItemDetalhe("Tipo de Atendimento", agendamento.tipoAtendimento)
-                        ItemDetalhe("Convênio", agendamento.convenio)
-                        ItemDetalhe("Início", agendamento.dataHoraInicio)
-                        ItemDetalhe("Fim", agendamento.dataHoraFim)
+                        ItemDetalhe("Tipo", agendamento.tipoAtendimento)
                         ItemDetalhe("Status", agendamento.status)
                         ItemDetalhe("Observações", agendamento.observacoes)
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { agendamentoSelecionado.value = null }) {
-                        Text(
-                            text = "Fechar",
-                            color = VerdeClinica,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        IconButton(onClick = {
+                            val item = agendamento
+                            agendamentoSelecionado = null
+                            vm.editar(item)
+                        }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Editar", tint = VerdeClinica)
+                        }
+                        IconButton(onClick = {
+                            val item = agendamento
+                            agendamentoSelecionado = null
+                            vm.apagar(item)
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Excluir", tint = Color(0xFFEF4444))
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { agendamentoSelecionado = null }) {
+                        Text("Fechar", color = Color.Gray)
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun CardAgendamentoGrade(
+    dia: DiaSemanaAgenda,
+    agendamento: Agenda?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val corStatus = when (agendamento?.status?.lowercase()) {
+        "confirmado", "realizado" -> Color(0xFFDCFCE7)
+        "pendente" -> Color(0xFFFEF3C7)
+        "cancelado" -> Color(0xFFFEE2E2)
+        else -> Color(0xFFF3F4F6)
+    }
+
+    val corTextoStatus = when (agendamento?.status?.lowercase()) {
+        "confirmado", "realizado" -> Color(0xFF166534)
+        "pendente" -> Color(0xFF92400E)
+        "cancelado" -> Color(0xFF991B1B)
+        else -> Color.Gray
+    }
+
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (agendamento != null) corStatus else Color.White
+        ),
+        modifier = modifier
+            .height(72.dp)
+            .border(
+                width = 1.dp,
+                color = if (agendamento != null) corTextoStatus.copy(alpha = 0.3f) else CorBordaCard,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onClick() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (agendamento != null) {
+                Text(
+                    text = agendamento.paciente,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = corTextoStatus,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = agendamento.psicologo,
+                    fontSize = 11.sp,
+                    color = corTextoStatus.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(
+                    text = "+ Livre",
+                    fontSize = 11.sp,
+                    color = Color.LightGray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
         }
     }
 }
@@ -140,7 +321,7 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
+            color = CorTextoPrincipal,
             fontSize = 14.sp
         )
     }

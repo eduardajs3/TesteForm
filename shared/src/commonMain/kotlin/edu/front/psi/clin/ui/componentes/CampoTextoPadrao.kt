@@ -20,6 +20,7 @@ fun CampoTextoPadrao(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String = "",
+    obrigatorio: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {

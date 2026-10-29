@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.*
 
 class ProntuarioViewModel : ViewModel() {
 
-    private var idCounter: Int = 2
+    private var idCounter: Int = 1
 
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(
         listOf(
             Prontuario(
                 id = 1,
-                paciente = "João Silva",
+                paciente = "Maria Clara da Silva",
                 dataAbertura = "10/10/2023",
-                queixaPrincipal = "Ansiedade e insônia",
-                status = "Em Aberto",
+                queixaPrincipal = "Ansiedade social e insônia",
+                status = "Em Acompanhamento",
                 ativo = true
             )
         )
@@ -27,7 +27,7 @@ class ProntuarioViewModel : ViewModel() {
     val filtro = _filtro.asStateFlow()
 
     fun atualizarFiltro(novoFiltro: String) {
-        _filtro.value = novoFiltro
+        _filtro.value = novoFiltro.trim()
     }
 
     val prontuariosFiltrados = combine(_prontuarios, _filtro) { prontuarios, filtro ->
@@ -41,7 +41,8 @@ class ProntuarioViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    // Estado de navegação interno ("list" ou "form")
+    val tela = mutableStateOf("list")
 
     // Campos do formulário
     val id = mutableStateOf("")
@@ -54,48 +55,61 @@ class ProntuarioViewModel : ViewModel() {
 
     fun salvar() {
         try {
-            val prontuario = Prontuario(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                paciente = paciente.value,
-                dataAbertura = dataAbertura.value,
-                queixaPrincipal = queixaPrincipal.value,
-                status = status.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+            if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
+                mensagem.value = "Preencha os campos obrigatórios!"
+                return
+            }
+
+            val ehNovo = id.value.isEmpty()
+            val novoId = if (ehNovo) ++idCounter else id.value.toInt()
+            
+            // Tratamento permissivo para o campo booleano
+            val statusBooleano = when (ativo.value.trim().lowercase()) {
+                "false", "0", "inativo", "não", "nao" -> false
+                else -> true
+            }
+
+            val prontuarioItem = Prontuario(
+                id = novoId,
+                paciente = paciente.value.trim(),
+                dataAbertura = dataAbertura.value.trim(),
+                queixaPrincipal = queixaPrincipal.value.trim(),
+                status = status.value.trim().ifEmpty { "Em Acompanhamento" },
+                ativo = statusBooleano
             )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _prontuarios.update { lista -> lista + prontuario.copy(id = idCounter) }
+            if (ehNovo) {
+                _prontuarios.update { lista -> lista + prontuarioItem }
             } else {
-                val idNumber = id.value.toInt()
                 _prontuarios.update { lista ->
-                    lista.map { item -> if (item.id == idNumber) prontuario.copy(id = idNumber) else item }
+                    lista.map { item -> if (item.id == novoId) prontuarioItem else item }
                 }
             }
+
+            // Limpa o filtro de busca para garantir que o novo prontuário apareça na lista
+            _filtro.value = ""
+            
+            limparCampos()
             mensagem.value = "Prontuário salvo com sucesso!"
-            tela.value = "list"
+            tela.value = "list" // Retorna à listagem
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
         }
     }
 
     fun apagar(prontuario: Prontuario) {
-        _prontuarios.update { lista -> lista - prontuario }
+        _prontuarios.update { lista -> lista.filterNot { it.id == prontuario.id } }
     }
 
-    fun novoProntuario() {
+    fun novoProntuario(nomePaciente: String = "") {
+        limparCampos()
+        if (nomePaciente.isNotEmpty()) {
+            paciente.value = nomePaciente
+        }
         tela.value = "form"
-        id.value = ""
-        paciente.value = ""
-        dataAbertura.value = ""
-        queixaPrincipal.value = ""
-        status.value = ""
-        ativo.value = "true"
-        mensagem.value = ""
     }
 
     fun editar(prontuario: Prontuario) {
-        tela.value = "form"
         id.value = prontuario.id.toString()
         paciente.value = prontuario.paciente
         dataAbertura.value = prontuario.dataAbertura
@@ -103,14 +117,16 @@ class ProntuarioViewModel : ViewModel() {
         status.value = prontuario.status
         ativo.value = prontuario.ativo.toString()
         mensagem.value = ""
+        tela.value = "form"
     }
 
     fun limparCampos() {
+        id.value = ""
         paciente.value = ""
         dataAbertura.value = ""
         queixaPrincipal.value = ""
         status.value = ""
         ativo.value = "true"
-        mensagem.value = "Campos limpos."
+        mensagem.value = ""
     }
 }

@@ -1,171 +1,265 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.prontuario
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Prontuario
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.ui.components.AppDeleteModal
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 
-private val CorTextoLinha = Color(0xFF1F2937)
+private val CorTextoPrincipal = Color(0xFF1F2937)
+private val CorCardFundo = Color(0xFFF9FAFB)
+private val CorBordaCard = Color(0xFFE5E7EB)
 
 @Composable
 fun ProntuarioListagem(
     innerPadding: PaddingValues,
-    vm: ProntuarioViewModel
+    vm: ProntuarioViewModel,
+    nomePaciente: String = vm.paciente.value.ifEmpty { vm.filtro.collectAsState().value.ifEmpty { "Todos os Pacientes" } }
 ) {
-    val lista = vm.prontuariosFiltrados.collectAsState()
-    val filtro = vm.filtro.collectAsState()
-    val prontuarioSelecionado = remember { mutableStateOf<Prontuario?>(null) }
+    val listaProntuarios by vm.prontuariosFiltrados.collectAsState()
+    
+    val listaOrdenada = remember(listaProntuarios) {
+        listaProntuarios.sortedByDescending { it.id }
+    }
 
-    // Mapeamento das colunas da tabela e suas proporções de largura
-    val colunas = listOf(
-        "Paciente" to 1.5f,
-        "Abertura" to 1.1f,
-        "Queixa Principal" to 1.8f,
-        "Status" to 1.1f
-    )
+    var itemExpandidoId by remember { mutableStateOf<Int?>(null) }
+    var itemParaExcluir by remember { mutableStateOf<Prontuario?>(null) }
 
-    Box(modifier = Modifier.padding(innerPadding)) {
-        LayoutListagemBase(
-            titulo = "Prontuários",
-            textoBotaoNovo = "Novo Prontuário",
-            textoFiltro = filtro.value,
-            onFiltroChange = vm::atualizarFiltro,
-            onNovoClick = vm::novoProntuario,
-            colunas = colunas,
-            itens = lista.value,
-            onVisualizar = { prontuario -> prontuarioSelecionado.value = prontuario },
-            onEditar = vm::editar,
-            onApagar = vm::apagar,
-            placeholderPesquisa = "Buscar por paciente, queixa ou status..."
-        ) { prontuario ->
-            Text(
-                text = prontuario.paciente,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = prontuario.dataAbertura,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = prontuario.queixaPrincipal,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.8f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(24.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Cabeçalho
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Prontuário",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CorTextoPrincipal
+                )
 
-            // Badge de Status com cores dinâmicas (Ativo / Em Acompanhamento / Encerrado)
-            Box(modifier = Modifier.weight(1.1f)) {
-                val statusLower = prontuario.status.lowercase()
-                val isAtivo = statusLower.contains("ativo") || statusLower.contains("em andamento") || statusLower.contains("aberto")
-                val isEncerrado = statusLower.contains("encerrado") || statusLower.contains("inativo") || statusLower.contains("concluído")
-
-                val corFundo = when {
-                    isAtivo -> Color(0xFFA2C99B)     // Verde suave
-                    isEncerrado -> Color(0xFFFEF3C7) // Amarelo suave
-                    else -> Color(0xFFE5E7EB)       // Cinza claro neutro
+                Button(
+                    onClick = { vm.novoProntuario(nomePaciente) },
+                    colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Novo Prontuário",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Novo Prontuário", color = Color.White)
                 }
+            }
 
-                val corTexto = when {
-                    isAtivo -> Color(0xFF2E5927)
-                    isEncerrado -> Color(0xFF92400E)
-                    else -> Color(0xFF374151)
-                }
+            Spacer(modifier = Modifier.height(24.dp))
 
-                Box(
+            // Card do Paciente (Mostra dinamicamente o paciente selecionado)
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = CorCardFundo),
+                border = BorderStroke(1.dp, CorBordaCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
                     modifier = Modifier
-                        .background(color = corFundo, shape = RoundedCornerShape(50.dp))
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = prontuario.status,
-                        color = corTexto,
-                        fontSize = 12.sp,
+                        text = "Paciente",
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        fontSize = 16.sp,
+                        color = CorTextoPrincipal
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = nomePaciente,
+                        fontSize = 16.sp,
+                        color = CorTextoPrincipal
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Lista de Cards
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(listaOrdenada) { item ->
+                    val isExpansivel = itemExpandidoId == item.id
+
+                    CardProntuario(
+                        item = item,
+                        isExpandido = isExpansivel,
+                        onClickToggle = {
+                            itemExpandidoId = if (isExpansivel) null else item.id
+                        },
+                        onEditarClick = {
+                            vm.editar(item)
+                        },
+                        onExcluirClick = { itemParaExcluir = item }
                     )
                 }
             }
         }
 
-        // Modal de Detalhes do Prontuário Clínico
-        prontuarioSelecionado.value?.let { prontuario ->
-            AlertDialog(
-                onDismissRequest = { prontuarioSelecionado.value = null },
-                containerColor = Color.White,
-                shape = RoundedCornerShape(20.dp),
-                title = {
-                    Text(
-                        text = "Prontuário - ${prontuario.paciente}",
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
-                        fontSize = 20.sp
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ItemDetalhe("Paciente", prontuario.paciente)
-                        ItemDetalhe("Data de Abertura", prontuario.dataAbertura)
-                        ItemDetalhe("Status", prontuario.status)
-                        ItemDetalhe("Queixa Principal", prontuario.queixaPrincipal)
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { prontuarioSelecionado.value = null }) {
-                        Text(
-                            text = "Fechar",
-                            color = VerdeClinica,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+        // Modal de Exclusão
+        itemParaExcluir?.let { item ->
+            AppDeleteModal(
+                title = "Exclusão de prontuário",
+                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura}?",
+                onDismiss = { itemParaExcluir = null },
+                onConfirm = {
+                    vm.apagar(item)
+                    itemParaExcluir = null
                 }
             )
         }
     }
 }
-
 @Composable
-private fun ItemDetalhe(rotulo: String, valor: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$rotulo: ",
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
-            fontSize = 14.sp
-        )
-        Text(
-            text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
-            fontSize = 14.sp
-        )
+private fun CardProntuario(
+    item: Prontuario,
+    isExpandido: Boolean,
+    onClickToggle: () -> Unit,
+    onEditarClick: () -> Unit,
+    onExcluirClick: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = CorCardFundo),
+        border = BorderStroke(1.dp, CorBordaCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClickToggle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    // Data de Abertura em destaque no topo do card
+                    Text(
+                        text = item.dataAbertura,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = item.queixaPrincipal,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = CorTextoPrincipal
+                    )
+                }
+
+                if (isExpandido) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        IconButton(
+                            onClick = onEditarClick,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar",
+                                tint = Color.Gray
+                            )
+                        }
+                        IconButton(
+                            onClick = onExcluirClick,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Excluir",
+                                tint = Color(0xFFEF4444)
+                            )
+                        }
+                    }
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Expandir",
+                        tint = CorTextoPrincipal
+                    )
+                }
+            }
+
+            if (isExpandido) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Status: ",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = CorTextoPrincipal
+                    )
+                    Text(
+                        text = item.status,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Situação: ",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = CorTextoPrincipal
+                    )
+                    Text(
+                        text = if (item.ativo) "Ativo" else "Inativo",
+                        fontSize = 14.sp,
+                        color = if (item.ativo) Color(0xFF16A34A) else Color(0xFFDC2626)
+                    )
+                }
+            }
+        }
     }
 }

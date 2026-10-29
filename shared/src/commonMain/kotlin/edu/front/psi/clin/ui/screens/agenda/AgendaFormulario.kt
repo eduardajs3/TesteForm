@@ -2,8 +2,10 @@ package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
@@ -17,58 +19,131 @@ fun AgendaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
+    // 1. Lista global de pacientes cadastrados na clínica
+    val listaPacientes = listOf(
+        "Maria Clara da Silva",
+        "João Pedro Santos",
+        "Ana Beatriz Lima",
+        "Lucas Oliveira"
+    )
+
+    // 2. Opções genéricas
+    val listaTiposAtendimento = listOf("Consulta Individual", "Terapia de Casal", "Avaliação Psicológica", "Anamnese")
+    val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
+    val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
+
+    // Estado da data escolhida (Exemplo: "26/03/2026")
+    var dataSelecionada by remember { mutableStateOf("26/03/2026") }
+
+    // 3. Horários, Salas e Psicólogos filtrados dinamicamente com base no dia escolhido
+    val horariosDisponiveisNoDia = remember(dataSelecionada) {
+        if (dataSelecionada.isNotEmpty()) {
+            listOf("08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00")
+        } else {
+            emptyList()
+        }
+    }
+
+    val salasDisponiveisNoDia = remember(dataSelecionada) {
+        if (dataSelecionada.isNotEmpty()) {
+            listOf("Sala 01 - Bloco A", "Sala 02 - Bloco A", "Sala 03 - Bloco B")
+        } else {
+            emptyList()
+        }
+    }
+
+    val psicologosDisponiveisNoDia = remember(dataSelecionada) {
+        if (dataSelecionada.isNotEmpty()) {
+            listOf("Dra. Amanda Silva", "Dr. Roberto Alves", "Dra. Juliana Costa")
+        } else {
+            emptyList()
+        }
+    }
+
+    var horarioSelecionado by remember { mutableStateOf("") }
+
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Agendamento" else "Cadastro de Agenda",
-            subtitulo = if (isEdicao) "Altere os dados do agendamento selecionado." else "Preencha os dados do agendamento.",
+            subtitulo = if (isEdicao) "Altere os dados do agendamento selecionado." else "Escolha a data para carregar os horários e recursos disponíveis.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            CampoTextoPadrao(
-                value = vm.paciente.value,
-                onValueChange = { vm.paciente.value = it },
-                label = "Paciente"
+            // Passo 1: Selecionar o Paciente
+            CampoDropdownPadrao(
+                label = "Paciente",
+                opcoes = listaPacientes,
+                valorSelecionado = vm.paciente.value,
+                onOpcaoSelecionada = { vm.paciente.value = it }
             )
 
+            // Passo 2: Selecionar o Dia do Atendimento (Gera a busca de disponibilidade)
             CampoTextoPadrao(
-                value = vm.psicologo.value,
-                onValueChange = { vm.psicologo.value = it },
-                label = "Psicólogo"
+                value = dataSelecionada,
+                onValueChange = { novaData ->
+                    dataSelecionada = novaData
+                    horarioSelecionado = "" // Reseta o horário ao mudar de dia
+                    vm.dataHoraInicio.value = ""
+                    vm.dataHoraFim.value = ""
+                },
+                label = "Data do Atendimento",
+                placeholder = "Ex: 26/03/2026"
             )
 
-            CampoTextoPadrao(
-                value = vm.sala.value,
-                onValueChange = { vm.sala.value = it },
-                label = "Sala de atendimento"
+            // Passo 3: Seleção do Horário Disponível naquele dia
+            CampoDropdownPadrao(
+                label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data" else "Horário Disponível para $dataSelecionada",
+                opcoes = horariosDisponiveisNoDia,
+                valorSelecionado = horarioSelecionado,
+                habilitado = dataSelecionada.isNotEmpty(),
+                onOpcaoSelecionada = { intervalo ->
+                    horarioSelecionado = intervalo
+                    val partes = intervalo.split(" - ")
+                    if (partes.size == 2) {
+                        vm.dataHoraInicio.value = "$dataSelecionada ${partes[0]}"
+                        vm.dataHoraFim.value = "$dataSelecionada ${partes[1]}"
+                    }
+                }
             )
 
-            CampoTextoPadrao(
-                value = vm.tipoAtendimento.value,
-                onValueChange = { vm.tipoAtendimento.value = it },
-                label = "Tipo de atendimento"
+            // Passo 4: Seleção do Psicólogo disponível no dia
+            CampoDropdownPadrao(
+                label = "Psicólogo Disponível",
+                opcoes = psicologosDisponiveisNoDia,
+                valorSelecionado = vm.psicologo.value,
+                habilitado = dataSelecionada.isNotEmpty(),
+                onOpcaoSelecionada = { vm.psicologo.value = it }
             )
 
-            CampoTextoPadrao(
-                value = vm.convenio.value,
-                onValueChange = { vm.convenio.value = it },
-                label = "Convênio"
+            // Passo 5: Seleção da Sala livre no dia
+            CampoDropdownPadrao(
+                label = "Sala de Atendimento Livre",
+                opcoes = salasDisponiveisNoDia,
+                valorSelecionado = vm.sala.value,
+                habilitado = dataSelecionada.isNotEmpty(),
+                onOpcaoSelecionada = { vm.sala.value = it }
             )
 
-            CampoTextoPadrao(
-                value = vm.dataHoraInicio.value,
-                onValueChange = { vm.dataHoraInicio.value = it },
-                label = "Data e hora de início"
+            // Passo 6: Tipo de Atendimento e Convênio
+            CampoDropdownPadrao(
+                label = "Tipo de Atendimento",
+                opcoes = listaTiposAtendimento,
+                valorSelecionado = vm.tipoAtendimento.value,
+                onOpcaoSelecionada = { vm.tipoAtendimento.value = it }
             )
 
-            CampoTextoPadrao(
-                value = vm.dataHoraFim.value,
-                onValueChange = { vm.dataHoraFim.value = it },
-                label = "Data e hora de fim"
+            CampoDropdownPadrao(
+                label = "Convênio",
+                opcoes = listaConvenios,
+                valorSelecionado = vm.convenio.value,
+                onOpcaoSelecionada = { vm.convenio.value = it }
             )
 
-            CampoTextoPadrao(
-                value = vm.status.value,
-                onValueChange = { vm.status.value = it },
-                label = "Status da agenda"
+            // Passo 7: Status do Agendamento
+            CampoDropdownPadrao(
+                label = "Status da Agenda",
+                opcoes = listaStatusAgenda,
+                valorSelecionado = vm.status.value,
+                onOpcaoSelecionada = { vm.status.value = it }
             )
 
             CampoTextoPadrao(
@@ -77,18 +152,63 @@ fun AgendaFormulario(
                 label = "Observações"
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.value,
-                onValueChange = { vm.ativo.value = it },
-                label = "Status",
-                placeholder = "Ativo? Digite true ou false"
-            )
-
             BotoesAcaoFormulario(
-                onLimpar = vm::limparCampos,
+                onLimpar = {
+                    vm.limparCampos()
+                    dataSelecionada = ""
+                    horarioSelecionado = ""
+                },
                 onSalvar = vm::salvar,
                 textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CampoDropdownPadrao(
+    label: String,
+    opcoes: List<String>,
+    valorSelecionado: String,
+    habilitado: Boolean = true,
+    onOpcaoSelecionada: (String) -> Unit
+) {
+    var expandido by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expandido && habilitado,
+        onExpandedChange = { if (habilitado) expandido = !expandido },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = valorSelecionado,
+            onValueChange = {},
+            readOnly = true,
+            enabled = habilitado,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        if (habilitado) {
+            ExposedDropdownMenu(
+                expanded = expandido,
+                onDismissRequest = { expandido = false }
+            ) {
+                opcoes.forEach { opcao ->
+                    DropdownMenuItem(
+                        text = { Text(opcao) },
+                        onClick = {
+                            onOpcaoSelecionada(opcao)
+                            expandido = false
+                        }
+                    )
+                }
+            }
         }
     }
 }

@@ -68,15 +68,7 @@ fun MenuLateral(
     val itensMenu = listOf(
         MenuItemData("Dashboard", "dashboard", tela = "dashboard"),
         MenuItemData("Pacientes", "pessoa", tela = "paciente"),
-        MenuItemData(
-            nome = "Funcionários",
-            icone = "pessoa",
-            subItens = listOf(
-                SubMenuItemData("Funcionários", "funcionario"),
-                SubMenuItemData("Psicólogos", "psicologo"),
-                SubMenuItemData("Recepcionistas", "recepcionista")
-            )
-        ),
+        
         MenuItemData(
             nome = "Cadastros",
             icone = "cadastros",
@@ -96,8 +88,16 @@ fun MenuLateral(
             )
         ),
         MenuItemData("Pagamentos", "documento", tela = "pagamento"),
-        MenuItemData("Prontuários", "documento", tela = "prontuario"),
-        MenuItemData("Evolução Clínica", "documento", tela = "evolucao")
+        MenuItemData(
+            nome = "Funcionários",
+            icone = "pessoa",
+            subItens = listOf(
+                SubMenuItemData("Funcionários", "funcionario"),
+                SubMenuItemData("Psicólogos", "psicologo"),
+                SubMenuItemData("Recepcionistas", "recepcionista")
+            )
+        ),
+        
     )
 
     ModalNavigationDrawer(

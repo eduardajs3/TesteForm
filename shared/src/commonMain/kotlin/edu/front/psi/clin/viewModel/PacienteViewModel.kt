@@ -3,12 +3,12 @@ package edu.front.psi.clin.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.front.psi.clin.Paciente // Ajuste para o pacote correto da sua Model de Paciente
+import edu.front.psi.clin.Paciente
 import kotlinx.coroutines.flow.*
 
 class PacienteViewModel : ViewModel() {
 
-    private var idCounter: Int = 2 // Começa em 2 se já tiver 2 cadastros de exemplo, ou 0 se preferir
+    private var idCounter: Int = 2
     
     private val _pacientes = MutableStateFlow<List<Paciente>>(listOf(
         Paciente(1, "João Silva", "111.222.333-44", "01/01/1990", "joao@email.com", "(11) 99999-9999", "Rua A, 123", "Paciente estável", true)
@@ -31,7 +31,7 @@ class PacienteViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário correspondentes aos estados da tela
+    // Campos do formulário
     val id = mutableStateOf("")
     val nome = mutableStateOf("")
     val cpf = mutableStateOf("")
@@ -40,10 +40,23 @@ class PacienteViewModel : ViewModel() {
     val telefone = mutableStateOf("")
     val endereco = mutableStateOf("")
     val observacoes = mutableStateOf("")
-    val ativo = mutableStateOf("true") // ou booleano, dependendo de como definiu na Model
+    val ativo = mutableStateOf("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação: apenas observacoes não é obrigatório
+        if (nome.value.isBlank() ||
+            cpf.value.isBlank() ||
+            dataNascimento.value.isBlank() ||
+            email.value.isBlank() ||
+            telefone.value.isBlank() ||
+            endereco.value.isBlank() ||
+            ativo.value.isBlank()
+        ) {
+            mensagem.value = "Por favor, preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val paciente = Paciente(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
