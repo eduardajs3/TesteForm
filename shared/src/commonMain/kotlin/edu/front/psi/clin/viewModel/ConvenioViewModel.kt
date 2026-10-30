@@ -3,7 +3,8 @@ package edu.front.psi.clin.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.front.psi.clin.Convenio // Ajuste para o caminho do seu model
+import edu.front.psi.clin.Convenio
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class ConvenioViewModel : ViewModel() {
@@ -29,22 +30,37 @@ class ConvenioViewModel : ViewModel() {
     val tela = mutableStateOf("list") // "list" ou "form"
 
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val cnpj = mutableStateOf("")
-    val telefone = mutableStateOf("")
-    val percentualCobertura = mutableStateOf("")
-    val ativo = mutableStateOf("true")
+    
+    // Campos geridos pelo validador
+    val nome = CampoValidado()
+    val cnpj = CampoValidado()
+    val telefone = CampoValidado()
+    val percentualCobertura = CampoValidado()
+    val ativo = CampoValidado("true")
+    
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = nome.validar()
+        val v2 = cnpj.validar()
+        val v3 = telefone.validar()
+        val v4 = percentualCobertura.validar()
+        val v5 = ativo.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val convenio = Convenio(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                cnpj = cnpj.value,
-                telefone = telefone.value,
-                percentualCobertura = percentualCobertura.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+                nome = nome.valor.value,
+                cnpj = cnpj.valor.value,
+                telefone = telefone.valor.value,
+                percentualCobertura = percentualCobertura.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
             )
 
             if (id.value.isEmpty()) {
@@ -57,6 +73,7 @@ class ConvenioViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Convênio salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -70,31 +87,27 @@ class ConvenioViewModel : ViewModel() {
     fun novoConvenio() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        cnpj.value = ""
-        telefone.value = ""
-        percentualCobertura.value = ""
-        ativo.value = "true"
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(convenio: Convenio) {
         tela.value = "form"
         id.value = convenio.id.toString()
-        nome.value = convenio.nome
-        cnpj.value = convenio.cnpj
-        telefone.value = convenio.telefone
-        percentualCobertura.value = convenio.percentualCobertura.toString()
-        ativo.value = convenio.ativo.toString()
+        nome.definir(convenio.nome)
+        cnpj.definir(convenio.cnpj)
+        telefone.definir(convenio.telefone)
+        percentualCobertura.definir(convenio.percentualCobertura.toString())
+        ativo.definir(convenio.ativo.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        cnpj.value = ""
-        telefone.value = ""
-        percentualCobertura.value = ""
-        ativo.value = "true"
+        nome.limpar()
+        cnpj.limpar()
+        telefone.limpar()
+        percentualCobertura.limpar()
+        ativo.definir("true")
         mensagem.value = "Campos limpos."
     }
 }

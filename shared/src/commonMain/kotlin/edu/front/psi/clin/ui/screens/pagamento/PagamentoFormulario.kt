@@ -25,51 +25,79 @@ fun PagamentoFormulario(
             mensagemFeedback = vm.mensagem.value
         ) {
             CampoTextoPadrao(
-                value = vm.paciente.value,
-                onValueChange = { vm.paciente.value = it },
-                label = "Nome do paciente"
+                value = vm.paciente.valor.value,
+                onValueChange = { vm.paciente.definir(it) },
+                label = "Nome do paciente",
+                obrigatorio = true,
+                isError = vm.paciente.temErro.value,
+                errorMessage = if (vm.paciente.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.convenio.value,
-                onValueChange = { vm.convenio.value = it },
-                label = "Convênio"
+                value = vm.convenio.valor.value,
+                onValueChange = { vm.convenio.definir(it) },
+                label = "Convênio",
+                obrigatorio = true,
+                isError = vm.convenio.temErro.value,
+                errorMessage = if (vm.convenio.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.valorTotal.value,
-                onValueChange = { vm.valorTotal.value = it },
-                label = "Valor total"
+                value = vm.valorTotal.valor.value,
+                onValueChange = { vm.valorTotal.definir(it) },
+                label = "Valor total",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.valorTotal.temErro.value,
+                errorMessage = if (vm.valorTotal.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.valorConvenio.value,
-                onValueChange = { vm.valorConvenio.value = it },
-                label = "Valor do convênio"
+                value = vm.valorConvenio.valor.value,
+                onValueChange = { vm.valorConvenio.definir(it) },
+                label = "Valor do convênio",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.valorConvenio.temErro.value,
+                errorMessage = if (vm.valorConvenio.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.valorPaciente.value,
-                onValueChange = { vm.valorPaciente.value = it },
-                label = "Valor do paciente"
+                value = vm.valorPaciente.valor.value,
+                onValueChange = { vm.valorPaciente.definir(it) },
+                label = "Valor do paciente",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.valorPaciente.temErro.value,
+                errorMessage = if (vm.valorPaciente.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.formaPagamento.value,
-                onValueChange = { vm.formaPagamento.value = it },
-                label = "Forma de pagamento"
+                value = vm.formaPagamento.valor.value,
+                onValueChange = { vm.formaPagamento.definir(it) },
+                label = "Forma de pagamento",
+                obrigatorio = true,
+                isError = vm.formaPagamento.temErro.value,
+                errorMessage = if (vm.formaPagamento.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(
-                value = vm.dataPagamento.value,
-                onValueChange = { vm.dataPagamento.value = it },
-                label = "Data do pagamento"
+                value = vm.dataPagamento.valor.value,
+                onValueChange = { vm.dataPagamento.definir(it) },
+                label = "Data do pagamento",
+                obrigatorio = true,
+                isError = vm.dataPagamento.temErro.value,
+                errorMessage = if (vm.dataPagamento.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.status.value,
-                onValueChange = { vm.status.value = it },
-                label = "Status do pagamento"
+                value = vm.status.valor.value,
+                onValueChange = { vm.status.definir(it) },
+                label = "Status do pagamento",
+                placeholder = "true ou false",
+                obrigatorio = true,
+                isError = vm.status.temErro.value,
+                errorMessage = if (vm.status.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

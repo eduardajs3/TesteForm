@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import edu.front.psi.clin.ui.components.MenuLateral
+import edu.front.psi.clin.ui.componentes.MenuLateral
 
 // Imports das telas de Formulário
 import edu.front.psi.clin.ui.screen.AgendaFormulario

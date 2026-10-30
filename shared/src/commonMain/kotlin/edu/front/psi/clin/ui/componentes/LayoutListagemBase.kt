@@ -1,24 +1,23 @@
-package edu.front.psi.clin.ui.components
+
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.VerdeClinica
+import org.jetbrains.compose.resources.painterResource
+import frontpsiclinic.shared.generated.resources.*
 
 val CorBordaContainer = Color(0xFFE5E7EB)
 val CorLinhaDivisoria = Color(0xFFF3F4F6)
@@ -66,7 +65,7 @@ fun <T> LayoutListagemBase(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    painter = painterResource(Res.drawable.edit_square_24px),
                     contentDescription = textoBotaoNovo,
                     tint = Color.White,
                     modifier = Modifier.size(18.dp)
@@ -127,63 +126,81 @@ fun <T> LayoutListagemBase(
 
                 HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
 
-                // Linhas de dados
-                itens.forEachIndexed { index, item ->
-                    Row(
+                // Verifica se a lista está vazia para exibir a mensagem informativa
+                if (itens.isEmpty()) {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Renderização das colunas customizadas
-                        linhaContent(item)
-
-                        // Ações (Olho + Editar + Excluir)
+                        Text(
+                            text = "Não há registros cadastrados.",
+                            color = CorTextoCabecalho,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Linhas de dados
+                    itens.forEachIndexed { index, item ->
                         Row(
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.width(larguraAcoes)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (onVisualizar != null) {
+                            // Renderização das colunas customizadas
+                            linhaContent(item)
+
+                            // Ações (Visualizar + Editar + Excluir) com ícones XML
+                            Row(
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.width(larguraAcoes)
+                            ) {
+                                if (onVisualizar != null) {
+                                    IconButton(
+                                        onClick = { onVisualizar(item) },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.badge_24px),
+                                            contentDescription = "Visualizar",
+                                            tint = CorTextoCabecalho,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
                                 IconButton(
-                                    onClick = { onVisualizar(item) },
+                                    onClick = { onEditar(item) },
                                     modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Outlined.Visibility,
-                                        contentDescription = "Visualizar",
+                                        painter = painterResource(Res.drawable.edit_square_24px),
+                                        contentDescription = "Editar",
                                         tint = CorTextoCabecalho,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
-                            }
-                            IconButton(
-                                onClick = { onEditar(item) },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Edit,
-                                    contentDescription = "Editar",
-                                    tint = CorTextoCabecalho,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            IconButton(
-                                onClick = { onApagar(item) },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Delete,
-                                    contentDescription = "Remover",
-                                    tint = Color(0xFFEF4444),
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                IconButton(
+                                    onClick = { onApagar(item) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.delete_24px),
+                                        contentDescription = "Remover",
+                                        tint = Color(0xFFEF4444),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    if (index < itens.size - 1) {
-                        HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                        if (index < itens.size - 1) {
+                            HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                        }
                     }
                 }
             }

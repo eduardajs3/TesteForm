@@ -25,34 +25,50 @@ fun SalaAtendimentoFormulario(
             mensagemFeedback = vm.mensagem.value
         ) {
             CampoTextoPadrao(
-                value = vm.nome.value,
-                onValueChange = { vm.nome.value = it },
-                label = "Nome da sala"
+                value = vm.nome.valor.value,
+                onValueChange = { vm.nome.definir(it) },
+                label = "Nome da sala",
+                obrigatorio = true,
+                isError = vm.nome.temErro.value,
+                errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.descricao.value,
-                onValueChange = { vm.descricao.value = it },
-                label = "Descrição da sala"
+                value = vm.descricao.valor.value,
+                onValueChange = { vm.descricao.definir(it) },
+                label = "Descrição da sala",
+                obrigatorio = true,
+                isError = vm.descricao.temErro.value,
+                errorMessage = if (vm.descricao.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.capacidade.value,
-                onValueChange = { vm.capacidade.value = it },
-                label = "Capacidade de pessoas"
+                value = vm.capacidade.valor.value,
+                onValueChange = { vm.capacidade.definir(it) },
+                label = "Capacidade de pessoas",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.capacidade.temErro.value,
+                errorMessage = if (vm.capacidade.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.ativo.value,
-                onValueChange = { vm.ativo.value = it },
+                value = vm.ativo.valor.value,
+                onValueChange = { vm.ativo.definir(it) },
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false"
+                placeholder = "Ativo? Digite true ou false",
+                obrigatorio = true,
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(
-                value = vm.dataCadastro.value,
-                onValueChange = { vm.dataCadastro.value = it },
-                label = "Data de cadastro"
+                value = vm.dataCadastro.valor.value,
+                onValueChange = { vm.dataCadastro.definir(it) },
+                label = "Data de cadastro",
+                obrigatorio = true,
+                isError = vm.dataCadastro.temErro.value,
+                errorMessage = if (vm.dataCadastro.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

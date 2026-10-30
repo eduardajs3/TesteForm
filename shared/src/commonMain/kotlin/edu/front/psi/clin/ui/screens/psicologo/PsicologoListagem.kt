@@ -1,27 +1,19 @@
 package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Psicologo
-import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
+import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun PsicologoListagem(
@@ -31,6 +23,9 @@ fun PsicologoListagem(
     val lista = vm.psicologosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
     val psicologoSelecionado = remember { mutableStateOf<Psicologo?>(null) }
+    
+    // Estado para controlar qual psicólogo vai abrir o modal de exclusão
+    val psicologoParaExcluir = remember { mutableStateOf<Psicologo?>(null) }
 
     // Mapeamento das colunas da tabela e suas proporções de largura
     val colunas = listOf(
@@ -51,93 +46,54 @@ fun PsicologoListagem(
             itens = lista.value,
             onVisualizar = { psicologo -> psicologoSelecionado.value = psicologo },
             onEditar = vm::editar,
-            onApagar = vm::apagar,
+            onApagar = { psicologo -> psicologoParaExcluir.value = psicologo },
             placeholderPesquisa = "Buscar por nome, CRP ou especialidade..."
         ) { psicologo ->
-            Text(
+            CelulaTabelaTexto(
                 text = psicologo.nome,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f,
+                isBold = true,
+                fontSize = 14
             )
-            Text(
+            CelulaTabelaTexto(
                 text = psicologo.crp,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = psicologo.telefone,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = psicologo.especialidade,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.6f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.6f
             )
         }
 
-        // Modal de Visualização de Detalhes do Psicólogo
+        // Modal Reutilizável de Detalhes do Psicólogo
         psicologoSelecionado.value?.let { psicologo ->
-            AlertDialog(
-                onDismissRequest = { psicologoSelecionado.value = null },
-                containerColor = Color.White,
-                shape = RoundedCornerShape(20.dp),
-                title = {
-                    Text(
-                        text = psicologo.nome,
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
-                        fontSize = 20.sp
-                    )
-                },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ItemDetalhe("CRP", psicologo.crp)
-                        ItemDetalhe("Especialidade", psicologo.especialidade)
-                        ItemDetalhe("Telefone", psicologo.telefone)
-                        ItemDetalhe("E-mail", psicologo.email)
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { psicologoSelecionado.value = null }) {
-                        Text(
-                            text = "Fechar",
-                            color = VerdeClinica,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+            ModalDetalhesBase(
+                titulo = psicologo.nome,
+                onDismiss = { psicologoSelecionado.value = null },
+                conteudo = {
+                    ItemDetalhe("CRP", psicologo.crp)
+                    ItemDetalhe("Especialidade", psicologo.especialidade)
+                    ItemDetalhe("Telefone", psicologo.telefone)
+                    ItemDetalhe("E-mail", psicologo.email)
                 }
             )
         }
-    }
-}
 
-@Composable
-private fun ItemDetalhe(rotulo: String, valor: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$rotulo: ",
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
-            fontSize = 14.sp
-        )
-        Text(
-            text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
-            fontSize = 14.sp
-        )
+        // Modal de Exclusão Reutilizável
+        psicologoParaExcluir.value?.let { psicologo ->
+            AppDeleteModal(
+                title = "Confirmar Exclusão",
+                message = "Tem certeza de que deseja excluir o(a) psicólogo(a) '${psicologo.nome}'? Esta ação não pode ser desfeita.",
+                onDismiss = { psicologoParaExcluir.value = null },
+                onConfirm = {
+                    vm.apagar(psicologo)
+                    psicologoParaExcluir.value = null
+                }
+            )
+        }
     }
 }

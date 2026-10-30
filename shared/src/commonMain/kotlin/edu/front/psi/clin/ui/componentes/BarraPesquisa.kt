@@ -1,13 +1,13 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.painterResource
+import frontpsiclinic.shared.generated.resources.*
 
 @Composable
 fun BarraPesquisa(
@@ -46,9 +48,10 @@ fun BarraPesquisa(
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Default.Search,
+                painter = painterResource(Res.drawable.search_24px), // Certifique-se de que o nome exato do XML corresponde ao ficheiro na pasta drawable
                 contentDescription = "Buscar",
-                tint = cinzaTexto
+                tint = cinzaTexto,
+                modifier = Modifier.size(20.dp)
             )
         },
         trailingIcon = {

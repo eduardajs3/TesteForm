@@ -3,7 +3,8 @@ package edu.front.psi.clin.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.front.psi.clin.TipoAtendimento // Ajuste para o pacote correto do seu Model
+import edu.front.psi.clin.TipoAtendimento
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class TipoAtendimentoViewModel : ViewModel() {
@@ -29,22 +30,36 @@ class TipoAtendimentoViewModel : ViewModel() {
     val tela = mutableStateOf("list") // "list" ou "form"
 
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val descricao = mutableStateOf("")
-    val duracao = mutableStateOf("")
-    val ativo = mutableStateOf("true")
-    val dataCadastro = mutableStateOf("")
+    
+    // Campos do formulário geridos pelo validador
+    val nome = CampoValidado()
+    val descricao = CampoValidado()
+    val duracao = CampoValidado()
+    val ativo = CampoValidado("true")
+    val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = nome.validar()
+        val v2 = descricao.validar()
+        val v3 = duracao.validar()
+        val v4 = ativo.validar()
+        val v5 = dataCadastro.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val tipo = TipoAtendimento(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                descricao = descricao.value,
-                duracao = duracao.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.value
+                nome = nome.valor.value,
+                descricao = descricao.valor.value,
+                duracao = duracao.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                dataCadastro = dataCadastro.valor.value
             )
 
             if (id.value.isEmpty()) {
@@ -57,6 +72,7 @@ class TipoAtendimentoViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Tipo de atendimento salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -70,31 +86,27 @@ class TipoAtendimentoViewModel : ViewModel() {
     fun novoTipo() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        descricao.value = ""
-        duracao.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(tipo: TipoAtendimento) {
         tela.value = "form"
         id.value = tipo.id.toString()
-        nome.value = tipo.nome
-        descricao.value = tipo.descricao
-        duracao.value = tipo.duracao
-        ativo.value = tipo.ativo.toString()
-        dataCadastro.value = tipo.dataCadastro
+        nome.definir(tipo.nome)
+        descricao.definir(tipo.descricao)
+        duracao.definir(tipo.duracao)
+        ativo.definir(tipo.ativo.toString())
+        dataCadastro.definir(tipo.dataCadastro)
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        descricao.value = ""
-        duracao.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
+        nome.limpar()
+        descricao.limpar()
+        duracao.limpar()
+        ativo.definir("true")
+        dataCadastro.limpar()
         mensagem.value = "Campos limpos."
     }
 }

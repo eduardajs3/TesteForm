@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Recepcionista
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class RecepcionistaViewModel : ViewModel() {
@@ -47,30 +48,45 @@ class RecepcionistaViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário
+    // Campos do formulário geridos pelo validador
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val cpf = mutableStateOf("")
-    val email = mutableStateOf("")
-    val telefone = mutableStateOf("")
-    val senha = mutableStateOf("")
-    val ativo = mutableStateOf("true")
-    val dataCadastro = mutableStateOf("")
-    val setor = mutableStateOf("")
+    val nome = CampoValidado()
+    val cpf = CampoValidado()
+    val email = CampoValidado()
+    val telefone = CampoValidado()
+    val senha = CampoValidado()
+    val ativo = CampoValidado("true")
+    val dataCadastro = CampoValidado()
+    val setor = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = nome.validar()
+        val v2 = cpf.validar()
+        val v3 = email.validar()
+        val v4 = telefone.validar()
+        val v5 = senha.validar()
+        val v6 = ativo.validar()
+        val v7 = dataCadastro.validar()
+        val v8 = setor.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val recepcionista = Recepcionista(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                cpf = cpf.value,
-                email = email.value,
-                telefone = telefone.value,
-                senha = senha.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.value,
-                setor = setor.value
+                nome = nome.valor.value,
+                cpf = cpf.valor.value,
+                email = email.valor.value,
+                telefone = telefone.valor.value,
+                senha = senha.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                dataCadastro = dataCadastro.valor.value,
+                setor = setor.valor.value
             )
 
             if (id.value.isEmpty()) {
@@ -83,6 +99,7 @@ class RecepcionistaViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Recepcionista salva com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -96,40 +113,33 @@ class RecepcionistaViewModel : ViewModel() {
     fun novaRecepcionista() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
-        setor.value = ""
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(recepcionista: Recepcionista) {
         tela.value = "form"
         id.value = recepcionista.id.toString()
-        nome.value = recepcionista.nome
-        cpf.value = recepcionista.cpf
-        email.value = recepcionista.email
-        telefone.value = recepcionista.telefone
-        senha.value = recepcionista.senha
-        ativo.value = recepcionista.ativo.toString()
-        dataCadastro.value = recepcionista.dataCadastro
-        setor.value = recepcionista.setor
+        nome.definir(recepcionista.nome)
+        cpf.definir(recepcionista.cpf)
+        email.definir(recepcionista.email)
+        telefone.definir(recepcionista.telefone)
+        senha.definir(recepcionista.senha)
+        ativo.definir(recepcionista.ativo.toString())
+        dataCadastro.definir(recepcionista.dataCadastro)
+        setor.definir(recepcionista.setor)
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
-        setor.value = ""
+        nome.limpar()
+        cpf.limpar()
+        email.limpar()
+        telefone.limpar()
+        senha.limpar()
+        ativo.definir("true")
+        dataCadastro.limpar()
+        setor.limpar()
         mensagem.value = "Campos limpos."
     }
 }

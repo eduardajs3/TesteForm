@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Funcionario
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class FuncionarioViewModel : ViewModel() {
@@ -46,28 +47,42 @@ class FuncionarioViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário
+    // Campos do formulário geridos pelo validador
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val cpf = mutableStateOf("")
-    val email = mutableStateOf("")
-    val telefone = mutableStateOf("")
-    val senha = mutableStateOf("")
-    val ativo = mutableStateOf("true")
-    val dataCadastro = mutableStateOf("")
+    val nome = CampoValidado()
+    val cpf = CampoValidado()
+    val email = CampoValidado()
+    val telefone = CampoValidado()
+    val senha = CampoValidado()
+    val ativo = CampoValidado("true")
+    val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = nome.validar()
+        val v2 = cpf.validar()
+        val v3 = email.validar()
+        val v4 = telefone.validar()
+        val v5 = senha.validar()
+        val v6 = ativo.validar()
+        val v7 = dataCadastro.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val funcionario = Funcionario(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                cpf = cpf.value,
-                email = email.value,
-                telefone = telefone.value,
-                senha = senha.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.value
+                nome = nome.valor.value,
+                cpf = cpf.valor.value,
+                email = email.valor.value,
+                telefone = telefone.valor.value,
+                senha = senha.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                dataCadastro = dataCadastro.valor.value
             )
 
             if (id.value.isEmpty()) {
@@ -80,6 +95,7 @@ class FuncionarioViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Funcionário salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -93,37 +109,31 @@ class FuncionarioViewModel : ViewModel() {
     fun novoFuncionario() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(funcionario: Funcionario) {
         tela.value = "form"
         id.value = funcionario.id.toString()
-        nome.value = funcionario.nome
-        cpf.value = funcionario.cpf
-        email.value = funcionario.email
-        telefone.value = funcionario.telefone
-        senha.value = funcionario.senha
-        ativo.value = funcionario.ativo.toString()
-        dataCadastro.value = funcionario.dataCadastro
+        nome.definir(funcionario.nome)
+        cpf.definir(funcionario.cpf)
+        email.definir(funcionario.email)
+        telefone.definir(funcionario.telefone)
+        senha.definir(funcionario.senha)
+        ativo.definir(funcionario.ativo.toString())
+        dataCadastro.definir(funcionario.dataCadastro)
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        ativo.value = "true"
-        dataCadastro.value = ""
+        nome.limpar()
+        cpf.limpar()
+        email.limpar()
+        telefone.limpar()
+        senha.limpar()
+        ativo.definir("true")
+        dataCadastro.limpar()
         mensagem.value = "Campos limpos."
     }
 }

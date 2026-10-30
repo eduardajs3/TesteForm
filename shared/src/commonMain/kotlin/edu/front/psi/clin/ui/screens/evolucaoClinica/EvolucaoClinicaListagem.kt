@@ -8,8 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,8 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.EvolucaoClinica
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import org.jetbrains.compose.resources.painterResource
+import frontpsiclinic.shared.generated.resources.*
+
 
 private val CorTextoPrincipal = Color(0xFF1F2937)
 private val CorCardFundo = Color(0xFFF9FAFB)
@@ -201,9 +202,10 @@ private fun CardEvolucao(
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Edit,
+                                painter = painterResource(Res.drawable.edit_square_24px),
                                 contentDescription = "Editar",
-                                tint = Color.Gray
+                                tint = Color.Gray,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                         IconButton(
@@ -211,9 +213,10 @@ private fun CardEvolucao(
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Delete,
+                                painter = painterResource(Res.drawable.delete_24px),
                                 contentDescription = "Excluir",
-                                tint = Color(0xFFEF4444)
+                                tint = Color(0xFFEF4444),
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }

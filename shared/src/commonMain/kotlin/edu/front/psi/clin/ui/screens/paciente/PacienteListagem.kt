@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Paciente
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
 
 private val CorTextoLinha = Color(0xFF1F2937)

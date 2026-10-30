@@ -1,22 +1,18 @@
 package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.Pagamento
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.BadgeStatus
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun PagamentoListagem(
@@ -25,6 +21,9 @@ fun PagamentoListagem(
 ) {
     val lista = vm.pagamentosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
+
+    // Estado para controlar qual pagamento vai abrir o modal de exclusão
+    val pagamentoParaExcluir = remember { mutableStateOf<Pagamento?>(null) }
 
     // Configuração das colunas e seus pesos de largura
     val colunas = listOf(
@@ -44,65 +43,47 @@ fun PagamentoListagem(
             colunas = colunas,
             itens = lista.value,
             onEditar = vm::editar,
-            onApagar = vm::apagar,
+            // Guarda o item para abrir o modal de exclusão personalizado
+            onApagar = { pagamento ->
+                pagamentoParaExcluir.value = pagamento
+            },
             placeholderPesquisa = "Buscar por paciente, status ou data..."
         ) { pagamento ->
-            Text(
+            CelulaTabelaTexto(
                 text = pagamento.paciente,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f,
+                isBold = true,
+                fontSize = 14
             )
-            Text(
+            CelulaTabelaTexto(
                 text = "R$ ${pagamento.valorTotal}",
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = pagamento.dataPagamento,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
 
-            // Badge de Status financeiro com cores apropriadas
+            // Utilizando o componente reutilizável BadgeStatus para o estado financeiro
             Box(modifier = Modifier.weight(1.2f)) {
-                val isPago = pagamento.status
-
-                val corFundo = when {
-                    isPago -> Color(0xFFA2C99B)
-                    else -> Color(0xFFFEF3C7)
-                }
-
-                val corTexto = when {
-                    isPago -> Color(0xFF2E5927)
-                    else -> Color(0xFF92400E)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .background(color = corFundo, shape = RoundedCornerShape(50.dp))
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (isPago) "Pago" else "Pendente",
-                        color = corTexto,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                BadgeStatus(
+                    texto = if (pagamento.status) "Pago" else "Pendente",
+                    isAtivo = pagamento.status
+                )
             }
+        }
+
+        // Modal de Exclusão Reutilizável
+        pagamentoParaExcluir.value?.let { pagamento ->
+            AppDeleteModal(
+                title = "Confirmar Exclusão",
+                message = "Tem certeza de que deseja excluir este registo de pagamento? Esta ação não pode ser desfeita.",
+                onDismiss = { pagamentoParaExcluir.value = null },
+                onConfirm = {
+                    vm.apagar(pagamento)
+                    pagamentoParaExcluir.value = null
+                }
+            )
         }
     }
 }

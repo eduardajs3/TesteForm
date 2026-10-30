@@ -24,34 +24,52 @@ fun ConvenioFormulario(
             mensagemFeedback = vm.mensagem.value
         ) {
             CampoTextoPadrao(
-                value = vm.nome.value,
-                onValueChange = { vm.nome.value = it },
-                label = "Nome do convênio"
+                value = vm.nome.valor.value,
+                onValueChange = { vm.nome.definir(it) },
+                label = "Nome do convênio",
+                obrigatorio = true,
+                isError = vm.nome.temErro.value,
+                errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.cnpj.value,
-                onValueChange = { vm.cnpj.value = it },
-                label = "CNPJ"
+                value = vm.cnpj.valor.value,
+                onValueChange = { vm.cnpj.definir(it) },
+                label = "CNPJ",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.cnpj.temErro.value,
+                errorMessage = if (vm.cnpj.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.telefone.value,
-                onValueChange = { vm.telefone.value = it },
-                label = "Telefone"
+                value = vm.telefone.valor.value,
+                onValueChange = { vm.telefone.definir(it) },
+                label = "Telefone",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.telefone.temErro.value,
+                errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.percentualCobertura.value,
-                onValueChange = { vm.percentualCobertura.value = it },
-                label = "Percentual de cobertura (ex.: 80)"
+                value = vm.percentualCobertura.valor.value,
+                onValueChange = { vm.percentualCobertura.definir(it) },
+                label = "Percentual de cobertura (ex.: 80)",
+                obrigatorio = true,
+                apenasNumeros = true,
+                isError = vm.percentualCobertura.temErro.value,
+                errorMessage = if (vm.percentualCobertura.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.ativo.value,
-                onValueChange = { vm.ativo.value = it },
+                value = vm.ativo.valor.value,
+                onValueChange = { vm.ativo.definir(it) },
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false"
+                placeholder = "Ativo? Digite true ou false",
+                obrigatorio = true,
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

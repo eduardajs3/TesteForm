@@ -3,7 +3,8 @@ package edu.front.psi.clin.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.front.psi.clin.Pagamento // Ajuste para o pacote correto do seu Model
+import edu.front.psi.clin.Pagamento
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class PagamentoViewModel : ViewModel() {
@@ -29,28 +30,45 @@ class PagamentoViewModel : ViewModel() {
     val tela = mutableStateOf("list") // "list" ou "form"
 
     val id = mutableStateOf("")
-    val paciente = mutableStateOf("")
-    val convenio = mutableStateOf("")
-    val valorTotal = mutableStateOf("")
-    val valorConvenio = mutableStateOf("")
-    val valorPaciente = mutableStateOf("")
-    val formaPagamento = mutableStateOf("")
-    val dataPagamento = mutableStateOf("")
-    val status = mutableStateOf("")
+    
+    // Campos geridos pelo validador
+    val paciente = CampoValidado()
+    val convenio = CampoValidado()
+    val valorTotal = CampoValidado()
+    val valorConvenio = CampoValidado()
+    val valorPaciente = CampoValidado()
+    val formaPagamento = CampoValidado()
+    val dataPagamento = CampoValidado()
+    val status = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = paciente.validar()
+        val v2 = convenio.validar()
+        val v3 = valorTotal.validar()
+        val v4 = valorConvenio.validar()
+        val v5 = valorPaciente.validar()
+        val v6 = formaPagamento.validar()
+        val v7 = dataPagamento.validar()
+        val v8 = status.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val pagamento = Pagamento(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                paciente = paciente.value,
-                convenio = convenio.value,
-                valorTotal = valorTotal.value.toDoubleOrNull() ?: 0.0,
-                valorConvenio = valorConvenio.value.toDoubleOrNull() ?: 0.0,
-                valorPaciente = valorPaciente.value.toDoubleOrNull() ?: 0.0,
-                formaPagamento = formaPagamento.value,
-                dataPagamento = dataPagamento.value,
-                status = status.value.toBooleanStrictOrNull()
+                paciente = paciente.valor.value,
+                convenio = convenio.valor.value,
+                valorTotal = valorTotal.valor.value.toDoubleOrNull() ?: 0.0,
+                valorConvenio = valorConvenio.valor.value.toDoubleOrNull() ?: 0.0,
+                valorPaciente = valorPaciente.valor.value.toDoubleOrNull() ?: 0.0,
+                formaPagamento = formaPagamento.valor.value,
+                dataPagamento = dataPagamento.valor.value,
+                status = status.valor.value.toBooleanStrictOrNull()
                     ?: throw IllegalArgumentException("Status deve ser true ou false.")
             )
 
@@ -64,6 +82,7 @@ class PagamentoViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Pagamento salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -77,40 +96,33 @@ class PagamentoViewModel : ViewModel() {
     fun novoPagamento() {
         tela.value = "form"
         id.value = ""
-        paciente.value = ""
-        convenio.value = ""
-        valorTotal.value = ""
-        valorConvenio.value = ""
-        valorPaciente.value = ""
-        formaPagamento.value = ""
-        dataPagamento.value = ""
-        status.value = ""
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(pagamento: Pagamento) {
         tela.value = "form"
         id.value = pagamento.id.toString()
-        paciente.value = pagamento.paciente
-        convenio.value = pagamento.convenio
-        valorTotal.value = pagamento.valorTotal.toString()
-        valorConvenio.value = pagamento.valorConvenio.toString()
-        valorPaciente.value = pagamento.valorPaciente.toString()
-        formaPagamento.value = pagamento.formaPagamento
-        dataPagamento.value = pagamento.dataPagamento
-        status.value = pagamento.status.toString()
+        paciente.definir(pagamento.paciente)
+        convenio.definir(pagamento.convenio)
+        valorTotal.definir(pagamento.valorTotal.toString())
+        valorConvenio.definir(pagamento.valorConvenio.toString())
+        valorPaciente.definir(pagamento.valorPaciente.toString())
+        formaPagamento.definir(pagamento.formaPagamento)
+        dataPagamento.definir(pagamento.dataPagamento)
+        status.definir(pagamento.status.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        paciente.value = ""
-        convenio.value = ""
-        valorTotal.value = ""
-        valorConvenio.value = ""
-        valorPaciente.value = ""
-        formaPagamento.value = ""
-        dataPagamento.value = ""
-        status.value = ""
+        paciente.limpar()
+        convenio.limpar()
+        valorTotal.limpar()
+        valorConvenio.limpar()
+        valorPaciente.limpar()
+        formaPagamento.limpar()
+        dataPagamento.limpar()
+        status.limpar()
         mensagem.value = "Campos limpos."
     }
 }

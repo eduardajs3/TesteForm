@@ -1,15 +1,16 @@
 package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.Convenio
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.ConvenioViewModel
 
 private val CorTextoLinha = Color(0xFF1F2937)
@@ -21,6 +22,9 @@ fun ConvenioListagem(
 ) {
     val lista = vm.conveniosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
+
+    // Estado para controlar qual convênio vai abrir o modal de exclusão
+    val convenioParaExcluir = remember { mutableStateOf<Convenio?>(null) }
 
     // Mapeamento das colunas da tabela e suas proporções de largura
     val colunas = listOf(
@@ -39,34 +43,38 @@ fun ConvenioListagem(
             colunas = colunas,
             itens = lista.value,
             onEditar = vm::editar,
-            onApagar = vm::apagar,
+            // Guarda o item para abrir o modal de exclusão personalizado
+            onApagar = { convenio ->
+                convenioParaExcluir.value = convenio
+            },
             placeholderPesquisa = "Buscar por nome ou CNPJ..."
         ) { convenio ->
-            // Mapeamento das propriedades do objeto Convenio para as colunas
-            Text(
+            CelulaTabelaTexto(
                 text = convenio.nome,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.8f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.8f,
+                isBold = true,
+                fontSize = 14
             )
-            Text(
+            CelulaTabelaTexto(
                 text = convenio.cnpj,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.4f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.4f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = "${convenio.percentualCobertura}%",
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.0f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.0f
+            )
+        }
+
+        // Modal de Exclusão Reutilizável
+        convenioParaExcluir.value?.let { convenio ->
+            AppDeleteModal(
+                title = "Confirmar Exclusão",
+                message = "Tem certeza de que deseja excluir o convênio '${convenio.nome}'? Esta ação não pode ser desfeita.",
+                onDismiss = { convenioParaExcluir.value = null },
+                onConfirm = {
+                    vm.apagar(convenio)
+                    convenioParaExcluir.value = null
+                }
             )
         }
     }

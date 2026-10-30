@@ -24,34 +24,45 @@ fun BloqueioAgendaFormulario(
             mensagemFeedback = vm.mensagem.value
         ) {
             CampoTextoPadrao(
-                value = vm.psicologo.value,
-                onValueChange = { vm.psicologo.value = it },
-                label = "Nome do psicólogo"
+                value = vm.psicologo.valor.value,
+                onValueChange = { vm.psicologo.definir(it) },
+                label = "Nome do psicólogo",
+                isError = vm.psicologo.temErro.value,
+                errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.dataHoraInicio.value,
-                onValueChange = { vm.dataHoraInicio.value = it },
-                label = "Data e hora de início"
+                value = vm.dataHoraInicio.valor.value,
+                onValueChange = { vm.dataHoraInicio.definir(it) },
+                label = "Data e hora de início",
+                isError = vm.dataHoraInicio.temErro.value,
+                errorMessage = if (vm.dataHoraInicio.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.dataHoraFim.value,
-                onValueChange = { vm.dataHoraFim.value = it },
-                label = "Data e hora de fim"
+                value = vm.dataHoraFim.valor.value,
+                onValueChange = { vm.dataHoraFim.definir(it) },
+                label = "Data e hora de fim",
+                isError = vm.dataHoraFim.temErro.value,
+                errorMessage = if (vm.dataHoraFim.temErro.value) "Campo obrigatório" else null,
+            
             )
 
             CampoTextoPadrao(
-                value = vm.motivo.value,
-                onValueChange = { vm.motivo.value = it },
-                label = "Motivo do bloqueio"
+                value = vm.motivo.valor.value,
+                onValueChange = { vm.motivo.definir(it) },
+                label = "Motivo do bloqueio",
+                isError = vm.motivo.temErro.value,
+                errorMessage = if (vm.motivo.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.ativo.value,
-                onValueChange = { vm.ativo.value = it },
+                value = vm.ativo.valor.value,
+                onValueChange = { vm.ativo.definir(it) },
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false"
+                placeholder = "Ativo? Digite true ou false",
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

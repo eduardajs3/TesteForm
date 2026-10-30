@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Psicologo
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class PsicologoViewModel : ViewModel() {
@@ -47,30 +48,45 @@ class PsicologoViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário
+    // Campos do formulário geridos pelo validador
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val cpf = mutableStateOf("")
-    val email = mutableStateOf("")
-    val telefone = mutableStateOf("")
-    val senha = mutableStateOf("")
-    val crp = mutableStateOf("")
-    val especialidade = mutableStateOf("")
-    val ativo = mutableStateOf("true")
+    val nome = CampoValidado()
+    val cpf = CampoValidado()
+    val email = CampoValidado()
+    val telefone = CampoValidado()
+    val senha = CampoValidado()
+    val crp = CampoValidado()
+    val especialidade = CampoValidado()
+    val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = nome.validar()
+        val v2 = cpf.validar()
+        val v3 = email.validar()
+        val v4 = telefone.validar()
+        val v5 = senha.validar()
+        val v6 = crp.validar()
+        val v7 = especialidade.validar()
+        val v8 = ativo.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val psicologo = Psicologo(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                cpf = cpf.value,
-                email = email.value,
-                telefone = telefone.value,
-                senha = senha.value,
-                crp = crp.value,
-                especialidade = especialidade.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+                nome = nome.valor.value,
+                cpf = cpf.valor.value,
+                email = email.valor.value,
+                telefone = telefone.valor.value,
+                senha = senha.valor.value,
+                crp = crp.valor.value,
+                especialidade = especialidade.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
             )
 
             if (id.value.isEmpty()) {
@@ -83,6 +99,7 @@ class PsicologoViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Psicólogo salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -96,40 +113,33 @@ class PsicologoViewModel : ViewModel() {
     fun novoPsicologo() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        crp.value = ""
-        especialidade.value = ""
-        ativo.value = "true"
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(psicologo: Psicologo) {
         tela.value = "form"
         id.value = psicologo.id.toString()
-        nome.value = psicologo.nome
-        cpf.value = psicologo.cpf
-        email.value = psicologo.email
-        telefone.value = psicologo.telefone
-        senha.value = psicologo.senha
-        crp.value = psicologo.crp
-        especialidade.value = psicologo.especialidade
-        ativo.value = psicologo.ativo.toString()
+        nome.definir(psicologo.nome)
+        cpf.definir(psicologo.cpf)
+        email.definir(psicologo.email)
+        telefone.definir(psicologo.telefone)
+        senha.definir(psicologo.senha)
+        crp.definir(psicologo.crp)
+        especialidade.definir(psicologo.especialidade)
+        ativo.definir(psicologo.ativo.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        cpf.value = ""
-        email.value = ""
-        telefone.value = ""
-        senha.value = ""
-        crp.value = ""
-        especialidade.value = ""
-        ativo.value = "true"
+        nome.limpar()
+        cpf.limpar()
+        email.limpar()
+        telefone.limpar()
+        senha.limpar()
+        crp.limpar()
+        especialidade.limpar()
+        ativo.definir("true")
         mensagem.value = "Campos limpos."
     }
 }

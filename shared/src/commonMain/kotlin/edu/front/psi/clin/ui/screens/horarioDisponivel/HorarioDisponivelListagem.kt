@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
 
 private val CorTextoLinha = Color(0xFF1F2937)

@@ -1,15 +1,16 @@
 package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.ui.components.LayoutListagemBase
+import edu.front.psi.clin.BloqueioAgenda
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
 
 private val CorTextoLinha = Color(0xFF1F2937)
@@ -21,6 +22,9 @@ fun BloqueioAgendaListagem(
 ) {
     val lista = vm.bloqueiosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
+    
+    // Estado para controlar qual item vai abrir o modal de exclusão
+    val itemParaExcluir = remember { mutableStateOf<BloqueioAgenda?>(null) }
 
     // Definindo as colunas e as proporções de largura na tabela
     val colunas = listOf(
@@ -40,41 +44,42 @@ fun BloqueioAgendaListagem(
             colunas = colunas,
             itens = lista.value,
             onEditar = vm::editar,
-            onApagar = vm::apagar,
+            // Guarda o item para abrir o modal de exclusão personalizado
+            onApagar = { bloqueio -> 
+                itemParaExcluir.value = bloqueio 
+            },
             placeholderPesquisa = "Buscar por psicólogo ou motivo..."
         ) { bloqueio ->
-            Text(
+            CelulaTabelaTexto(
                 text = bloqueio.psicologo,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f,
+                isBold = true,
+                fontSize = 14
             )
-            Text(
+            CelulaTabelaTexto(
                 text = bloqueio.dataHoraInicio,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = bloqueio.dataHoraFim,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = bloqueio.motivo,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f
+            )
+        }
+
+        // Modal de Exclusão Reutilizável
+        itemParaExcluir.value?.let { item ->
+            AppDeleteModal(
+                title = "Confirmar Exclusão",
+                message = "Tem certeza de que deseja excluir este registo? Esta ação não pode ser desfeita.",
+                onDismiss = { itemParaExcluir.value = null },
+                onConfirm = {
+                    vm.apagar(item)
+                    itemParaExcluir.value = null
+                }
             )
         }
     }
