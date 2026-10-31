@@ -8,9 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,11 +19,15 @@ import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Paciente
 import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.BarraPesquisa
+import edu.front.psi.clin.ui.components.ModalDetalhesBase
+import edu.front.psi.clin.ui.components.ItemDetalhe
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
+import frontpsiclinic.shared.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 
 private val CorTextoLinha = Color(0xFF1F2937)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PacienteListagem(
     innerPadding: PaddingValues,
@@ -82,31 +83,16 @@ fun PacienteListagem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de Busca
-            OutlinedTextField(
-                value = filtro.value,
-                onValueChange = vm::atualizarFiltro,
-                placeholder = { Text("Buscar por nome ou CPF...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Pesquisar",
-                        tint = Color.Gray
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = VerdeClinica,
-                    unfocusedBorderColor = Color(0xFFE5E7EB)
-                )
+            // Barra de Pesquisa Padronizada
+            BarraPesquisa(
+                text = filtro.value,
+                onTextChange = vm::atualizarFiltro,
+                placeholderText = "Buscar por nome ou CPF..."
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Lista de Cards de Pacientes
             LazyColumn(
@@ -124,107 +110,72 @@ fun PacienteListagem(
             }
         }
 
-        // Modal de Seleção de Ações do Paciente
+        // Modal de Seleção de Ações e Ações Rápidas
         pacienteSelecionado.value?.let { paciente ->
             if (!exibirDetalhesCadastrais) {
-                AlertDialog(
-                    onDismissRequest = { pacienteSelecionado.value = null },
-                    containerColor = Color.White,
-                    shape = RoundedCornerShape(20.dp),
-                    title = {
+                ModalDetalhesBase(
+                    titulo = paciente.nome,
+                    onDismiss = { pacienteSelecionado.value = null },
+                    conteudo = {
                         Text(
-                            text = paciente.nome,
-                            fontWeight = FontWeight.Bold,
-                            color = VerdeClinica,
-                            fontSize = 20.sp
+                            text = "Selecione a opção desejada:",
+                            color = Color.Gray,
+                            fontSize = 14.sp
                         )
                     },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.fillMaxWidth()
+                    acoesExtras = {
+                        Button(
+                            onClick = {
+                                val target = paciente
+                                pacienteSelecionado.value = null
+                                onNavegarParaProntuario(target)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text(
-                                text = "Selecione a opção desejada:",
-                                color = Color.Gray,
-                                fontSize = 14.sp
-                            )
-
-                            Button(
-                                onClick = {
-                                    val targetPaciente = paciente
-                                    pacienteSelecionado.value = null
-                                    onNavegarParaProntuario(targetPaciente)
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("Prontuário", color = Color.White)
-                            }
-
-                            Button(
-                                onClick = {
-                                    val targetPaciente = paciente
-                                    pacienteSelecionado.value = null
-                                    onNavegarParaEvolucao(targetPaciente)
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("Evolução Clínica", color = Color.White)
-                            }
-
-                            OutlinedButton(
-                                onClick = { exibirDetalhesCadastrais = true },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Text("Informações Cadastrais", color = VerdeClinica)
-                            }
+                            Text("Prontuário", color = Color.White)
                         }
-                    },
-                    confirmButton = {},
-                    dismissButton = {
-                        TextButton(onClick = { pacienteSelecionado.value = null }) {
-                            Text("Cancelar", color = Color.Gray)
+
+                        Button(
+                            onClick = {
+                                val target = paciente
+                                pacienteSelecionado.value = null
+                                onNavegarParaEvolucao(target)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Evolução Clínica", color = Color.White)
+                        }
+
+                        OutlinedButton(
+                            onClick = { exibirDetalhesCadastrais = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Informações Cadastrais", color = VerdeClinica)
                         }
                     }
                 )
             } else {
                 // Modal de Dados Cadastrais
-                AlertDialog(
-                    onDismissRequest = {
+                ModalDetalhesBase(
+                    titulo = "Informações Cadastrais",
+                    onDismiss = {
                         exibirDetalhesCadastrais = false
                         pacienteSelecionado.value = null
                     },
-                    containerColor = Color.White,
-                    shape = RoundedCornerShape(20.dp),
-                    title = {
-                        Text(
-                            text = "Informações Cadastrais",
-                            fontWeight = FontWeight.Bold,
-                            color = VerdeClinica,
-                            fontSize = 18.sp
-                        )
-                    },
-                    text = {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            ItemInfo("Nome", paciente.nome)
-                            ItemInfo("CPF", paciente.cpf)
-                            ItemInfo("Data de nascimento", paciente.dataNascimento)
-                            ItemInfo("E-mail", paciente.email)
-                            ItemInfo("Telefone", paciente.telefone)
-                            ItemInfo("Endereço", paciente.endereco)
-                            ItemInfo("Observações", paciente.observacoes)
-                            ItemInfo("Status", if (paciente.ativo) "Ativo" else "Inativo")
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { exibirDetalhesCadastrais = false }) {
-                            Text("Voltar", color = VerdeClinica, fontWeight = FontWeight.Bold)
-                        }
+                    conteudo = {
+                        ItemDetalhe("Nome", paciente.nome)
+                        ItemDetalhe("CPF", paciente.cpf)
+                        ItemDetalhe("Data de nascimento", paciente.dataNascimento)
+                        ItemDetalhe("E-mail", paciente.email)
+                        ItemDetalhe("Telefone", paciente.telefone)
+                        ItemDetalhe("Endereço", paciente.endereco)
+                        ItemDetalhe("Observações", paciente.observacoes)
+                        ItemDetalhe("Status", if (paciente.ativo) "Ativo" else "Inativo")
                     }
                 )
             }
@@ -304,47 +255,32 @@ private fun CardPaciente(
                     )
                 }
 
-                // Botão Editar
+                // Botão Editar com Ícone XML (certifique-se de ter o arquivo correspondente na pasta drawable)
                 IconButton(
                     onClick = onEditarClick,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        painter = painterResource(Res.drawable.edit_square_24px),
                         contentDescription = "Editar Paciente",
-                        tint = Color.Gray
+                        tint = Color.Gray,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Botão Excluir
+                // Botão Excluir com Ícone XML (certifique-se de ter o arquivo correspondente na pasta drawable)
                 IconButton(
                     onClick = onExcluirClick,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
+                        painter = painterResource(Res.drawable.delete_24px),
                         contentDescription = "Excluir Paciente",
-                        tint = Color(0xFFEF4444)
+                        tint = Color(0xFFEF4444),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ItemInfo(rotulo: String, valor: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$rotulo: ",
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
-            fontSize = 14.sp
-        )
-        Text(
-            text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
-            fontSize = 14.sp
-        )
     }
 }

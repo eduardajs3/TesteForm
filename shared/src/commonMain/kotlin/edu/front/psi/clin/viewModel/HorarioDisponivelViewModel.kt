@@ -3,7 +3,8 @@ package edu.front.psi.clin.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.front.psi.clin.HorarioDisponivel // Ajuste para o pacote correto do seu Model
+import edu.front.psi.clin.HorarioDisponivel
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class HorarioDisponivelViewModel : ViewModel() {
@@ -29,24 +30,39 @@ class HorarioDisponivelViewModel : ViewModel() {
     val tela = mutableStateOf("list") // "list" ou "form"
 
     val id = mutableStateOf("")
-    val psicologo = mutableStateOf("")
-    val diaSemana = mutableStateOf("")
-    val horaInicio = mutableStateOf("")
-    val horaFim = mutableStateOf("")
-    val descricao = mutableStateOf("")
-    val ativo = mutableStateOf("true")
+    
+    // Campos do formulário geridos pelo validador
+    val psicologo = CampoValidado()
+    val diaSemana = CampoValidado()
+    val horaInicio = CampoValidado()
+    val horaFim = CampoValidado()
+    val descricao = CampoValidado()
+    val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        // Validação de todos os campos obrigatórios
+        val v1 = psicologo.validar()
+        val v2 = diaSemana.validar()
+        val v3 = horaInicio.validar()
+        val v4 = horaFim.validar()
+        val v5 = descricao.validar()
+        val v6 = ativo.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
+            mensagem.value = "Preencha todos os campos obrigatórios."
+            return
+        }
+
         try {
             val horario = HorarioDisponivel(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                psicologo = psicologo.value,
-                diaSemana = diaSemana.value,
-                horaInicio = horaInicio.value,
-                horaFim = horaFim.value,
-                descricao = descricao.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+                psicologo = psicologo.valor.value,
+                diaSemana = diaSemana.valor.value,
+                horaInicio = horaInicio.valor.value,
+                horaFim = horaFim.valor.value,
+                descricao = descricao.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
             )
 
             if (id.value.isEmpty()) {
@@ -59,6 +75,7 @@ class HorarioDisponivelViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Horário disponível salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -72,34 +89,29 @@ class HorarioDisponivelViewModel : ViewModel() {
     fun novoHorario() {
         tela.value = "form"
         id.value = ""
-        psicologo.value = ""
-        diaSemana.value = ""
-        horaInicio.value = ""
-        horaFim.value = ""
-        descricao.value = ""
-        ativo.value = "true"
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(horario: HorarioDisponivel) {
         tela.value = "form"
         id.value = horario.id.toString()
-        psicologo.value = horario.psicologo
-        diaSemana.value = horario.diaSemana
-        horaInicio.value = horario.horaInicio
-        horaFim.value = horario.horaFim
-        descricao.value = horario.descricao
-        ativo.value = horario.ativo.toString()
+        psicologo.definir(horario.psicologo)
+        diaSemana.definir(horario.diaSemana)
+        horaInicio.definir(horario.horaInicio)
+        horaFim.definir(horario.horaFim)
+        descricao.definir(horario.descricao)
+        ativo.definir(horario.ativo.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        psicologo.value = ""
-        diaSemana.value = ""
-        horaInicio.value = ""
-        horaFim.value = ""
-        descricao.value = ""
-        ativo.value = "true"
+        psicologo.limpar()
+        diaSemana.limpar()
+        horaInicio.limpar()
+        horaFim.limpar()
+        descricao.limpar()
+        ativo.definir("true")
         mensagem.value = "Campos limpos."
     }
 }

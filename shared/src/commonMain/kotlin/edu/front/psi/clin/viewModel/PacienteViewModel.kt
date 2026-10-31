@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Paciente
+import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class PacienteViewModel : ViewModel() {
@@ -31,28 +32,29 @@ class PacienteViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário
+    // Campos do formulário geridos pelo validador
     val id = mutableStateOf("")
-    val nome = mutableStateOf("")
-    val cpf = mutableStateOf("")
-    val dataNascimento = mutableStateOf("")
-    val email = mutableStateOf("")
-    val telefone = mutableStateOf("")
-    val endereco = mutableStateOf("")
-    val observacoes = mutableStateOf("")
-    val ativo = mutableStateOf("true")
+    val nome = CampoValidado()
+    val cpf = CampoValidado()
+    val dataNascimento = CampoValidado()
+    val email = CampoValidado()
+    val telefone = CampoValidado()
+    val endereco = CampoValidado()
+    val observacoes = CampoValidado() // Opcional
+    val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação: apenas observacoes não é obrigatório
-        if (nome.value.isBlank() ||
-            cpf.value.isBlank() ||
-            dataNascimento.value.isBlank() ||
-            email.value.isBlank() ||
-            telefone.value.isBlank() ||
-            endereco.value.isBlank() ||
-            ativo.value.isBlank()
-        ) {
+        // Validação de todos os campos obrigatórios (observações é opcional)
+        val v1 = nome.validar()
+        val v2 = cpf.validar()
+        val v3 = dataNascimento.validar()
+        val v4 = email.validar()
+        val v5 = telefone.validar()
+        val v6 = endereco.validar()
+        val v7 = ativo.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Por favor, preencha todos os campos obrigatórios."
             return
         }
@@ -60,14 +62,14 @@ class PacienteViewModel : ViewModel() {
         try {
             val paciente = Paciente(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.value,
-                cpf = cpf.value,
-                dataNascimento = dataNascimento.value,
-                email = email.value,
-                telefone = telefone.value,
-                endereco = endereco.value,
-                observacoes = observacoes.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+                nome = nome.valor.value,
+                cpf = cpf.valor.value,
+                dataNascimento = dataNascimento.valor.value,
+                email = email.valor.value,
+                telefone = telefone.valor.value,
+                endereco = endereco.valor.value,
+                observacoes = observacoes.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
             )
 
             if (id.value.isEmpty()) {
@@ -80,6 +82,7 @@ class PacienteViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Paciente salvo com sucesso!"
+            limparCampos()
             tela.value = "list"
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
@@ -93,40 +96,33 @@ class PacienteViewModel : ViewModel() {
     fun novoPaciente() {
         tela.value = "form"
         id.value = ""
-        nome.value = ""
-        cpf.value = ""
-        dataNascimento.value = ""
-        email.value = ""
-        telefone.value = ""
-        endereco.value = ""
-        observacoes.value = ""
-        ativo.value = "true"
+        limparCampos()
         mensagem.value = ""
     }
 
     fun editar(paciente: Paciente) {
         tela.value = "form"
         id.value = paciente.id.toString()
-        nome.value = paciente.nome
-        cpf.value = paciente.cpf
-        dataNascimento.value = paciente.dataNascimento
-        email.value = paciente.email
-        telefone.value = paciente.telefone
-        endereco.value = paciente.endereco
-        observacoes.value = paciente.observacoes
-        ativo.value = paciente.ativo.toString()
+        nome.definir(paciente.nome)
+        cpf.definir(paciente.cpf)
+        dataNascimento.definir(paciente.dataNascimento)
+        email.definir(paciente.email)
+        telefone.definir(paciente.telefone)
+        endereco.definir(paciente.endereco)
+        observacoes.definir(paciente.observacoes)
+        ativo.definir(paciente.ativo.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        nome.value = ""
-        cpf.value = ""
-        dataNascimento.value = ""
-        email.value = ""
-        telefone.value = ""
-        endereco.value = ""
-        observacoes.value = ""
-        ativo.value = "true"
+        nome.limpar()
+        cpf.limpar()
+        dataNascimento.limpar()
+        email.limpar()
+        telefone.limpar()
+        endereco.limpar()
+        observacoes.limpar()
+        ativo.definir("true")
         mensagem.value = "Campos limpos."
     }
 }
