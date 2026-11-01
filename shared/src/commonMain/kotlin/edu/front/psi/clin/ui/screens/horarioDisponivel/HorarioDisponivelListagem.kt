@@ -1,18 +1,14 @@
 package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun HorarioDisponivelListagem(
@@ -43,38 +39,23 @@ fun HorarioDisponivelListagem(
             onApagar = vm::apagar,
             placeholderPesquisa = "Buscar por psicólogo, dia ou horário..."
         ) { horario ->
-            Text(
+            CelulaTabelaTexto(
                 text = horario.psicologo,
-                fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f,
+                isBold = true,
+                fontSize = 14
             )
-            Text(
+            CelulaTabelaTexto(
                 text = horario.diaSemana,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.2f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.2f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = "${horario.horaInicio} às ${horario.horaFim}",
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.3f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.3f
             )
-            Text(
+            CelulaTabelaTexto(
                 text = horario.descricao,
-                color = CorTextoLinha,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                weight = 1.5f
             )
         }
     }

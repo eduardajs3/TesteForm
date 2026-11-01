@@ -1,4 +1,3 @@
-
 package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.animation.animateContentSize
@@ -15,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.components.CabecalhoTela
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
@@ -42,43 +41,17 @@ fun <T> LayoutListagemBase(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
-        // 1. Cabeçalho: Título + Botão Novo
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = titulo,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica
-            )
+        // 1. Cabeçalho Padronizado (CabecalhoTela)
+        CabecalhoTela(
+            titulo = titulo,
+            textoBotao = textoBotaoNovo,
+            iconeBotao = painterResource(Res.drawable.add),
+            onClickBotao = onNovoClick
+        )
 
-            Button(
-                onClick = onNovoClick,
-                colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.edit_square_24px),
-                    contentDescription = textoBotaoNovo,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = textoBotaoNovo,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
         // 2. Barra de Pesquisa
         BarraPesquisa(
@@ -87,11 +60,12 @@ fun <T> LayoutListagemBase(
             placeholderText = placeholderPesquisa
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         // 3. Tabela
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
                 .animateContentSize(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
