@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.ConvenioViewModel
 
@@ -16,6 +17,10 @@ fun ConvenioFormulario(
     vm: ConvenioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Declaração limpa das opções e conversão de status no topo
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -32,22 +37,22 @@ fun ConvenioFormulario(
                 errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
+            // CNPJ com máscara automática tratada no ViewModel (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.cnpj.valor.value,
                 onValueChange = { vm.cnpj.definir(it) },
                 label = "CNPJ",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.cnpj.temErro.value,
                 errorMessage = if (vm.cnpj.temErro.value) "Campo obrigatório" else null
             )
 
+            // Telefone com máscara automática tratada no ViewModel (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.telefone.valor.value,
                 onValueChange = { vm.telefone.definir(it) },
                 label = "Telefone",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.telefone.temErro.value,
                 errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )
@@ -62,12 +67,15 @@ fun ConvenioFormulario(
                 errorMessage = if (vm.percentualCobertura.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.valor.value,
-                onValueChange = { vm.ativo.definir(it) },
+            // Dropdown padronizado para o Status
+            CampoDropdownPadrao(
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false",
-                obrigatorio = true,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
+                },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )

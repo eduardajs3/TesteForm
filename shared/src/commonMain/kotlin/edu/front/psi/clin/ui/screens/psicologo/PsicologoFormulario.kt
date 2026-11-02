@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
 
@@ -16,6 +17,10 @@ fun PsicologoFormulario(
     vm: PsicologoViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Declaração limpa das opções e conversão de status no topo
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -32,31 +37,32 @@ fun PsicologoFormulario(
                 errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
+            // CPF com máscara automática (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.cpf.valor.value,
                 onValueChange = { vm.cpf.definir(it) },
                 label = "CPF",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.cpf.temErro.value,
                 errorMessage = if (vm.cpf.temErro.value) "Campo obrigatório" else null
             )
 
+            // E-mail com suporte a validação dinâmica de formato
             CampoTextoPadrao(
                 value = vm.email.valor.value,
                 onValueChange = { vm.email.definir(it) },
                 label = "E-mail",
                 obrigatorio = true,
                 isError = vm.email.temErro.value,
-                errorMessage = if (vm.email.temErro.value) "Campo obrigatório" else null
+                errorMessage = if (vm.email.temErro.value) vm.email.mensagemErro.value else null
             )
 
+            // Telefone com máscara automática (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.telefone.valor.value,
                 onValueChange = { vm.telefone.definir(it) },
                 label = "Telefone",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.telefone.temErro.value,
                 errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )
@@ -70,10 +76,12 @@ fun PsicologoFormulario(
                 errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
             )
 
+            // CRP com máscara automática (00/00000)
             CampoTextoPadrao(
                 value = vm.crp.valor.value,
                 onValueChange = { vm.crp.definir(it) },
                 label = "CRP",
+                placeholder = "00/00000",
                 obrigatorio = true,
                 isError = vm.crp.temErro.value,
                 errorMessage = if (vm.crp.temErro.value) "Campo obrigatório" else null
@@ -88,12 +96,15 @@ fun PsicologoFormulario(
                 errorMessage = if (vm.especialidade.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.valor.value,
-                onValueChange = { vm.ativo.definir(it) },
+            // Dropdown padronizado para o Status
+            CampoDropdownPadrao(
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false",
-                obrigatorio = true,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
+                },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )

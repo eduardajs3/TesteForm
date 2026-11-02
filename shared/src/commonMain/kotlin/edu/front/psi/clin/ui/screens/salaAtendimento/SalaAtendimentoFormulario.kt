@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
 import edu.front.psi.clin.ui.components.CampoDataPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
 
@@ -17,6 +18,10 @@ fun SalaAtendimentoFormulario(
     vm: SalaAtendimentoViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Declaração limpa das opções e conversão de status no topo
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -52,12 +57,15 @@ fun SalaAtendimentoFormulario(
                 errorMessage = if (vm.capacidade.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.valor.value,
-                onValueChange = { vm.ativo.definir(it) },
+            // Dropdown padronizado para o Status
+            CampoDropdownPadrao(
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false",
-                obrigatorio = true,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
+                },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )

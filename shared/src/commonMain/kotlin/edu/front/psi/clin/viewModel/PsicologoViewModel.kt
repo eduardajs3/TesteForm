@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Psicologo
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PsicologoViewModel : ViewModel() {
@@ -48,20 +49,22 @@ class PsicologoViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário geridos pelo validador
+    // Campos do formulário geridos pelo validador com máscaras e validações integradas
     val id = mutableStateOf("")
     val nome = CampoValidado()
-    val cpf = CampoValidado()
-    val email = CampoValidado()
-    val telefone = CampoValidado()
+    val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
+    val email = CampoValidado(
+        validadorExtra = { MaskUtils.validarEmail(it) },
+        mensagemErroPersonalizada = "E-mail inválido"
+    )
+    val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val senha = CampoValidado()
-    val crp = CampoValidado()
+    val crp = CampoValidado(formatador = { MaskUtils.aplicarMascaraCrp(it) })
     val especialidade = CampoValidado()
     val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Pagamento
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PagamentoViewModel : ViewModel() {
@@ -31,19 +32,18 @@ class PagamentoViewModel : ViewModel() {
 
     val id = mutableStateOf("")
     
-    // Campos geridos pelo validador
+    // Campos geridos pelo validador (valores com máscara de moeda aplicada automaticamente)
     val paciente = CampoValidado()
     val convenio = CampoValidado()
-    val valorTotal = CampoValidado()
-    val valorConvenio = CampoValidado()
-    val valorPaciente = CampoValidado()
+    val valorTotal = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
+    val valorConvenio = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
+    val valorPaciente = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
     val formaPagamento = CampoValidado()
     val dataPagamento = CampoValidado()
     val status = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
         val v1 = paciente.validar()
         val v2 = convenio.validar()
         val v3 = valorTotal.validar()
@@ -59,13 +59,20 @@ class PagamentoViewModel : ViewModel() {
         }
 
         try {
+            // Função auxiliar para converter o formato monetário "R$ 1.234,56" de volta para Double
+            fun converterMoedaParaDouble(valorStr: String): Double {
+                val apenasDigitos = valorStr.filter { it.isDigit() }
+                if (apenasDigitos.isEmpty()) return 0.0
+                return apenasDigitos.toDouble() / 100.0
+            }
+
             val pagamento = Pagamento(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
                 paciente = paciente.valor.value,
                 convenio = convenio.valor.value,
-                valorTotal = valorTotal.valor.value.toDoubleOrNull() ?: 0.0,
-                valorConvenio = valorConvenio.valor.value.toDoubleOrNull() ?: 0.0,
-                valorPaciente = valorPaciente.valor.value.toDoubleOrNull() ?: 0.0,
+                valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
+                valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
+                valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
                 formaPagamento = formaPagamento.valor.value,
                 dataPagamento = dataPagamento.valor.value,
                 status = status.valor.value.toBooleanStrictOrNull()
@@ -105,9 +112,12 @@ class PagamentoViewModel : ViewModel() {
         id.value = pagamento.id.toString()
         paciente.definir(pagamento.paciente)
         convenio.definir(pagamento.convenio)
+        
+        // Atribui diretamente convertendo o valor numérico para string (ex: "150.0" -> passa direto para o formatador)
         valorTotal.definir(pagamento.valorTotal.toString())
         valorConvenio.definir(pagamento.valorConvenio.toString())
         valorPaciente.definir(pagamento.valorPaciente.toString())
+        
         formaPagamento.definir(pagamento.formaPagamento)
         dataPagamento.definir(pagamento.dataPagamento)
         status.definir(pagamento.status.toString())

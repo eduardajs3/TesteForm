@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Paciente
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PacienteViewModel : ViewModel() {
@@ -32,20 +33,25 @@ class PacienteViewModel : ViewModel() {
 
     val tela = mutableStateOf("list") // "list" ou "form"
 
-    // Campos do formulário geridos pelo validador
+    // Campos do formulário
     val id = mutableStateOf("")
     val nome = CampoValidado()
-    val cpf = CampoValidado()
+    val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
     val dataNascimento = CampoValidado()
-    val email = CampoValidado()
-    val telefone = CampoValidado()
+    
+    // E-mail com validação de formato integrada
+    val email = CampoValidado(
+        validadorExtra = { MaskUtils.validarEmail(it) },
+        mensagemErroPersonalizada = "E-mail inválido"
+    )
+    
+    val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val endereco = CampoValidado()
     val observacoes = CampoValidado() // Opcional
     val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios (observações é opcional)
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = dataNascimento.validar()
@@ -55,7 +61,7 @@ class PacienteViewModel : ViewModel() {
         val v7 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
-            mensagem.value = "Por favor, preencha todos os campos obrigatórios."
+            mensagem.value = "Por favor, corrija os erros no formulário."
             return
         }
 

@@ -54,7 +54,7 @@ fun CampoDataPadrao(
                 isError = isError,
                 trailingIcon = {
                     Icon(
-                        painter = painterResource(Res.drawable.calendar_check_24px),
+                        painter = painterResource(Res.drawable.calendar_month),
                         contentDescription = "Selecionar data",
                         tint = VerdeClinica,
                         modifier = Modifier.size(24.dp)

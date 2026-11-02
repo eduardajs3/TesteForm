@@ -2,11 +2,12 @@ package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddinggit checkout -b mascara-campos
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
 
@@ -16,6 +17,20 @@ fun HorarioDisponivelFormulario(
     vm: HorarioDisponivelViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Listas e variáveis auxiliares declaradas de forma limpa no início
+    val diasDaSemana = listOf(
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado",
+        "Domingo"
+    )
+
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -32,11 +47,11 @@ fun HorarioDisponivelFormulario(
                 errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.diaSemana.valor.value,
-                onValueChange = { vm.diaSemana.definir(it) },
+            CampoDropdownPadrao(
                 label = "Dia da semana",
-                obrigatorio = true,
+                valorSelecionado = vm.diaSemana.valor.value,
+                opcoes = diasDaSemana,
+                onOpcaoSelecionada = { vm.diaSemana.definir(it) },
                 isError = vm.diaSemana.temErro.value,
                 errorMessage = if (vm.diaSemana.temErro.value) "Campo obrigatório" else null
             )
@@ -44,7 +59,8 @@ fun HorarioDisponivelFormulario(
             CampoTextoPadrao(
                 value = vm.horaInicio.valor.value,
                 onValueChange = { vm.horaInicio.definir(it) },
-                label = "Hora de início (ex.: 08:00)",
+                label = "Hora de início",
+                placeholder = "HH:mm (ex.: 08:00)",
                 obrigatorio = true,
                 isError = vm.horaInicio.temErro.value,
                 errorMessage = if (vm.horaInicio.temErro.value) "Campo obrigatório" else null
@@ -53,7 +69,8 @@ fun HorarioDisponivelFormulario(
             CampoTextoPadrao(
                 value = vm.horaFim.valor.value,
                 onValueChange = { vm.horaFim.definir(it) },
-                label = "Hora de fim (ex.: 09:00)",
+                label = "Hora de fim",
+                placeholder = "HH:mm (ex.: 09:00)",
                 obrigatorio = true,
                 isError = vm.horaFim.temErro.value,
                 errorMessage = if (vm.horaFim.temErro.value) "Campo obrigatório" else null
@@ -68,12 +85,14 @@ fun HorarioDisponivelFormulario(
                 errorMessage = if (vm.descricao.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.valor.value,
-                onValueChange = { vm.ativo.definir(it) },
+            CampoDropdownPadrao(
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false",
-                obrigatorio = true,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
+                },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )

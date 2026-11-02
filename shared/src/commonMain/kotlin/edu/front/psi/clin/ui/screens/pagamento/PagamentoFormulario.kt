@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
 import edu.front.psi.clin.ui.components.CampoDataPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
 
@@ -17,6 +18,10 @@ fun PagamentoFormulario(
     vm: PagamentoViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Declaração limpa das opções e conversão de status no topo
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.status.valor.value == "true" || vm.status.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -42,32 +47,32 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.convenio.temErro.value) "Campo obrigatório" else null
             )
 
+            // Valor total com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorTotal.valor.value,
                 onValueChange = { vm.valorTotal.definir(it) },
                 label = "Valor total",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.valorTotal.temErro.value,
                 errorMessage = if (vm.valorTotal.temErro.value) "Campo obrigatório" else null
             )
 
+            // Valor do convênio com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorConvenio.valor.value,
                 onValueChange = { vm.valorConvenio.definir(it) },
                 label = "Valor do convênio",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.valorConvenio.temErro.value,
                 errorMessage = if (vm.valorConvenio.temErro.value) "Campo obrigatório" else null
             )
 
+            // Valor do paciente com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorPaciente.valor.value,
                 onValueChange = { vm.valorPaciente.definir(it) },
                 label = "Valor do paciente",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.valorPaciente.temErro.value,
                 errorMessage = if (vm.valorPaciente.temErro.value) "Campo obrigatório" else null
             )
@@ -90,12 +95,15 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.dataPagamento.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.status.valor.value,
-                onValueChange = { vm.status.definir(it) },
+            // Dropdown padronizado para o Status do pagamento
+            CampoDropdownPadrao(
                 label = "Status do pagamento",
-                placeholder = "true ou false",
-                obrigatorio = true,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.status.definir(valorBoolean)
+                },
                 isError = vm.status.temErro.value,
                 errorMessage = if (vm.status.temErro.value) "Campo obrigatório" else null
             )

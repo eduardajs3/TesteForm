@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.Convenio
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class ConvenioViewModel : ViewModel() {
@@ -31,11 +32,13 @@ class ConvenioViewModel : ViewModel() {
 
     val id = mutableStateOf("")
     
-    // Campos geridos pelo validador
+    // Campos geridos pelo validador com máscaras automáticas aplicadas
     val nome = CampoValidado()
-    val cnpj = CampoValidado()
-    val telefone = CampoValidado()
-    val percentualCobertura = CampoValidado()
+    val cnpj = CampoValidado(formatador = { MaskUtils.aplicarMascaraCnpj(it) })
+    val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
+    val percentualCobertura = CampoValidado(
+        formatador = { MaskUtils.aplicarMascaraPercentual(it) }
+    )
     val ativo = CampoValidado("true")
     
     val mensagem = mutableStateOf("")

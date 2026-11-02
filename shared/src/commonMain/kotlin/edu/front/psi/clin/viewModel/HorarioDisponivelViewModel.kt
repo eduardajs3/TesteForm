@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.HorarioDisponivel
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class HorarioDisponivelViewModel : ViewModel() {
@@ -31,11 +32,11 @@ class HorarioDisponivelViewModel : ViewModel() {
 
     val id = mutableStateOf("")
     
-    // Campos do formulário geridos pelo validador
+    // Campos do formulário com as máscaras de hora aplicadas na hora de início e de fim
     val psicologo = CampoValidado()
     val diaSemana = CampoValidado()
-    val horaInicio = CampoValidado()
-    val horaFim = CampoValidado()
+    val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
+    val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val descricao = CampoValidado()
     val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")

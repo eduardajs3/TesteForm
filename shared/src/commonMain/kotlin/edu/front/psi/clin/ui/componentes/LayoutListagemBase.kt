@@ -140,7 +140,7 @@ fun <T> LayoutListagemBase(
                                         modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(Res.drawable.badge_24px),
+                                            painter = painterResource(Res.drawable.visibility),
                                             contentDescription = "Visualizar",
                                             tint = CorTextoCabecalho,
                                             modifier = Modifier.size(20.dp)

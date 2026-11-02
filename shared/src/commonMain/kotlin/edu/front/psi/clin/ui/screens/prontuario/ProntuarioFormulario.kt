@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
 import edu.front.psi.clin.ui.components.CampoDataPadrao
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 
@@ -17,6 +18,10 @@ fun ProntuarioFormulario(
     vm: ProntuarioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    // Declaração limpa das opções e conversão de status no topo
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -48,11 +53,15 @@ fun ProntuarioFormulario(
                 label = "Status do prontuário"
             )
 
-            CampoTextoPadrao(
-                value = vm.ativo.value,
-                onValueChange = { vm.ativo.value = it },
+            // Dropdown padronizado para o Status
+            CampoDropdownPadrao(
                 label = "Status",
-                placeholder = "Ativo? Digite true ou false"
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.value = valorBoolean
+                }
             )
 
             BotoesAcaoFormulario(

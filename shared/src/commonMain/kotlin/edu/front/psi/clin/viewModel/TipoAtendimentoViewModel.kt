@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.front.psi.clin.TipoAtendimento
 import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class TipoAtendimentoViewModel : ViewModel() {
@@ -31,10 +32,10 @@ class TipoAtendimentoViewModel : ViewModel() {
 
     val id = mutableStateOf("")
     
-    // Campos do formulário geridos pelo validador
+    // Campos do formulário geridos pelo validador (duração com máscara de hora)
     val nome = CampoValidado()
     val descricao = CampoValidado()
-    val duracao = CampoValidado()
+    val duracao = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val ativo = CampoValidado("true")
     val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
