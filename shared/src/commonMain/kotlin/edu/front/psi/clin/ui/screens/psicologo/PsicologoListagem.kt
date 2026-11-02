@@ -9,8 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.Psicologo
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.components.BadgeStatus
 import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
@@ -27,12 +28,13 @@ fun PsicologoListagem(
     // Estado para controlar qual psicólogo vai abrir o modal de exclusão
     val psicologoParaExcluir = remember { mutableStateOf<Psicologo?>(null) }
 
-    // Mapeamento das colunas da tabela e suas proporções de largura
+    // Mapeamento das colunas da tabela (incluindo Status)
     val colunas = listOf(
         "Nome" to 1.5f,
-        "CRP" to 1.2f,
-        "Telefone" to 1.2f,
-        "Especialidade" to 1.6f
+        "CRP" to 1.1f,
+        "Telefone" to 1.1f,
+        "Especialidade" to 1.4f,
+        "Status" to 0.8f
     )
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -49,6 +51,8 @@ fun PsicologoListagem(
             onApagar = { psicologo -> psicologoParaExcluir.value = psicologo },
             placeholderPesquisa = "Buscar por nome, CRP ou especialidade..."
         ) { psicologo ->
+            val isAtivo = psicologo.ativo
+
             CelulaTabelaTexto(
                 text = psicologo.nome,
                 weight = 1.5f,
@@ -57,28 +61,44 @@ fun PsicologoListagem(
             )
             CelulaTabelaTexto(
                 text = psicologo.crp,
-                weight = 1.2f
+                weight = 1.1f
             )
             CelulaTabelaTexto(
                 text = psicologo.telefone,
-                weight = 1.2f
+                weight = 1.1f
             )
             CelulaTabelaTexto(
                 text = psicologo.especialidade,
-                weight = 1.6f
+                weight = 1.4f
             )
+            
+            // Célula de Status com badge visual na tabela
+            Box(modifier = Modifier.weight(0.8f)) {
+                BadgeStatus(
+                    texto = if (isAtivo) "Ativo" else "Inativo",
+                    isAtivo = isAtivo
+                )
+            }
         }
 
         // Modal Reutilizável de Detalhes do Psicólogo
         psicologoSelecionado.value?.let { psicologo ->
+            val isAtivo = psicologo.ativo
             ModalDetalhesBase(
                 titulo = psicologo.nome,
                 onDismiss = { psicologoSelecionado.value = null },
                 conteudo = {
+                    ItemDetalhe("Nome completo", psicologo.nome)
                     ItemDetalhe("CRP", psicologo.crp)
+                    ItemDetalhe("CPF", psicologo.cpf)
                     ItemDetalhe("Especialidade", psicologo.especialidade)
                     ItemDetalhe("Telefone", psicologo.telefone)
                     ItemDetalhe("E-mail", psicologo.email)
+                    ItemDetalhe(
+                        rotulo = "Status",
+                        valor = if (isAtivo) "Ativo" else "Inativo",
+                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                    )
                 }
             )
         }

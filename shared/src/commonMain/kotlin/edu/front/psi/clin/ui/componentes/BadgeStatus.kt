@@ -18,7 +18,6 @@ fun BadgeStatus(
     isAtivo: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // Define as cores com base no estado (ex: Verde para ativo, Amarelo/Laranja para inativo ou pendente)
     val corFundo = if (isAtivo) Color(0xFFA2C99B) else Color(0xFFFEF3C7)
     val corTexto = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
 

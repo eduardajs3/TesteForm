@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.Funcionario
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.BadgeStatus
+import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.FuncionarioViewModel
@@ -23,15 +26,17 @@ fun FuncionarioListagem(
     val lista = vm.funcionariosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
 
-    // Estado para controlar qual funcionário vai abrir o modal de exclusão
+    // Estados para controlar o funcionário selecionado para detalhes (botão do olho) e exclusão
+    val funcionarioSelecionado = remember { mutableStateOf<Funcionario?>(null) }
     val funcionarioParaExcluir = remember { mutableStateOf<Funcionario?>(null) }
 
-    // Definição das colunas da tabela com seus respetivos pesos de largura
+    // Definição das colunas da tabela com seus respetivos pesos de largura (incluindo Status)
     val colunas = listOf(
         "Nome" to 1.5f,
-        "CPF" to 1.3f,
-        "Telefone" to 1.2f,
-        "E-mail" to 1.8f
+        "CPF" to 1.2f,
+        "Telefone" to 1.1f,
+        "E-mail" to 1.6f,
+        "Status" to 0.8f
     )
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -43,13 +48,15 @@ fun FuncionarioListagem(
             onNovoClick = vm::novoFuncionario,
             colunas = colunas,
             itens = lista.value,
+            onVisualizar = { funcionario -> funcionarioSelecionado.value = funcionario },
             onEditar = vm::editar,
-            // Guarda o item para abrir o modal de exclusão personalizado
             onApagar = { funcionario ->
                 funcionarioParaExcluir.value = funcionario
             },
             placeholderPesquisa = "Buscar por nome, CPF ou e-mail..."
         ) { funcionario ->
+            val isAtivo = funcionario.ativo
+
             CelulaTabelaTexto(
                 text = funcionario.nome,
                 weight = 1.5f,
@@ -58,15 +65,44 @@ fun FuncionarioListagem(
             )
             CelulaTabelaTexto(
                 text = funcionario.cpf,
-                weight = 1.3f
-            )
-            CelulaTabelaTexto(
-                text = funcionario.telefone,
                 weight = 1.2f
             )
             CelulaTabelaTexto(
+                text = funcionario.telefone,
+                weight = 1.1f
+            )
+            CelulaTabelaTexto(
                 text = funcionario.email,
-                weight = 1.8f
+                weight = 1.6f
+            )
+            
+            // Célula de Status com badge visual na tabela
+            Box(modifier = Modifier.weight(0.8f)) {
+                BadgeStatus(
+                    texto = if (isAtivo) "Ativo" else "Inativo",
+                    isAtivo = isAtivo
+                )
+            }
+        }
+
+        // Modal de Detalhes (ativado pelo botão do olho)
+        funcionarioSelecionado.value?.let { funcionario ->
+            val isAtivo = funcionario.ativo
+            ModalDetalhesBase(
+                titulo = funcionario.nome,
+                onDismiss = { funcionarioSelecionado.value = null },
+                conteudo = {
+                    ItemDetalhe(rotulo = "Nome completo", valor = funcionario.nome)
+                    ItemDetalhe(rotulo = "CPF", valor = funcionario.cpf)
+                    ItemDetalhe(rotulo = "E-mail", valor = funcionario.email)
+                    ItemDetalhe(rotulo = "Telefone", valor = funcionario.telefone)
+                    ItemDetalhe(rotulo = "Data de cadastro", valor = funcionario.dataCadastro)
+                    ItemDetalhe(
+                        rotulo = "Status",
+                        valor = if (isAtivo) "Ativo" else "Inativo",
+                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                    )
+                }
             )
         }
 

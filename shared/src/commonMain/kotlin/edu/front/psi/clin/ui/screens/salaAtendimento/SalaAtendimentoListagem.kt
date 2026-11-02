@@ -9,8 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.SalaAtendimento
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.components.BadgeStatus
 import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
@@ -27,11 +28,12 @@ fun SalaAtendimentoListagem(
     // Estado para controlar qual sala vai abrir o modal de exclusão
     val salaParaExcluir = remember { mutableStateOf<SalaAtendimento?>(null) }
 
-    // Mapeamento das colunas da tabela e suas proporções de largura
+    // Mapeamento das colunas da tabela e suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Nome da Sala" to 1.5f,
-        "Capacidade" to 1.0f,
-        "Descrição" to 2.0f
+        "Capacidade" to 0.9f,
+        "Descrição" to 1.6f,
+        "Status" to 0.8f
     )
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -48,6 +50,8 @@ fun SalaAtendimentoListagem(
             onApagar = { sala -> salaParaExcluir.value = sala },
             placeholderPesquisa = "Buscar por nome ou descrição..."
         ) { sala ->
+            val isAtivo = sala.ativo
+
             CelulaTabelaTexto(
                 text = sala.nome,
                 weight = 1.5f,
@@ -56,22 +60,38 @@ fun SalaAtendimentoListagem(
             )
             CelulaTabelaTexto(
                 text = "${sala.capacidade} pessoas",
-                weight = 1.0f
+                weight = 0.9f
             )
             CelulaTabelaTexto(
                 text = sala.descricao,
-                weight = 2.0f
+                weight = 1.6f
             )
+            
+            // Célula de Status com badge visual na tabela
+            Box(modifier = Modifier.weight(0.8f)) {
+                BadgeStatus(
+                    texto = if (isAtivo) "Ativo" else "Inativo",
+                    isAtivo = isAtivo
+                )
+            }
         }
 
         // Modal Reutilizável de Detalhes da Sala de Atendimento
         salaSelecionada.value?.let { sala ->
+            val isAtivo = sala.ativo
             ModalDetalhesBase(
                 titulo = sala.nome,
                 onDismiss = { salaSelecionada.value = null },
                 conteudo = {
+                    ItemDetalhe("Nome da sala", sala.nome)
                     ItemDetalhe("Capacidade", "${sala.capacidade} pessoas")
                     ItemDetalhe("Descrição", sala.descricao)
+                    ItemDetalhe("Data de cadastro", sala.dataCadastro)
+                    ItemDetalhe(
+                        rotulo = "Status",
+                        valor = if (isAtivo) "Ativo" else "Inativo",
+                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                    )
                 }
             )
         }

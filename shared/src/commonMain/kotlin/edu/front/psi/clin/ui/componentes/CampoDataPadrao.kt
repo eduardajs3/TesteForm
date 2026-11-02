@@ -32,7 +32,6 @@ fun CampoDataPadrao(
     var mostrarPicker by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Envolvemos o campo num Box clicável que aciona o DatePicker ao toque/clique
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -47,7 +46,7 @@ fun CampoDataPadrao(
                 value = value,
                 onValueChange = {},
                 readOnly = true,
-                enabled = false, // Mantido false para o utilizador não digitar manualmente via teclado
+                enabled = false, 
                 label = {
                     Text(if (obrigatorio) "$label *" else label)
                 },

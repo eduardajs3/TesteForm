@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.BloqueioAgenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.components.BadgeStatus
+import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
@@ -23,15 +26,16 @@ fun BloqueioAgendaListagem(
     val lista = vm.bloqueiosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
     
-    // Estado para controlar qual item vai abrir o modal de exclusão
+    // Estados para controlar o item selecionado para detalhes (botão do olho) e exclusão
+    val itemSelecionado = remember { mutableStateOf<BloqueioAgenda?>(null) }
     val itemParaExcluir = remember { mutableStateOf<BloqueioAgenda?>(null) }
 
-    // Definindo as colunas e as proporções de largura na tabela
+    // Definindo as colunas da tabela (Psicólogo, Início, Fim e Status)
     val colunas = listOf(
-        "Psicólogo(a)" to 1.5f,
-        "Início" to 1.2f,
-        "Fim" to 1.2f,
-        "Motivo" to 1.5f
+        "Psicólogo(a)" to 1.8f,
+        "Início" to 1.3f,
+        "Fim" to 1.3f,
+        "Status" to 0.9f
     )
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -43,30 +47,55 @@ fun BloqueioAgendaListagem(
             onNovoClick = vm::novoBloqueio,
             colunas = colunas,
             itens = lista.value,
+            onVisualizar = { item -> itemSelecionado.value = item },
             onEditar = vm::editar,
-            // Guarda o item para abrir o modal de exclusão personalizado
-            onApagar = { bloqueio -> 
-                itemParaExcluir.value = bloqueio 
+            onApagar = { item -> 
+                itemParaExcluir.value = item 
             },
-            placeholderPesquisa = "Buscar por psicólogo ou motivo..."
+            placeholderPesquisa = "Buscar por psicólogo..."
         ) { bloqueio ->
+            val isAtivo = bloqueio.ativo
+
             CelulaTabelaTexto(
                 text = bloqueio.psicologo,
-                weight = 1.5f,
+                weight = 1.8f,
                 isBold = true,
                 fontSize = 14
             )
             CelulaTabelaTexto(
                 text = bloqueio.dataHoraInicio,
-                weight = 1.2f
+                weight = 1.3f
             )
             CelulaTabelaTexto(
                 text = bloqueio.dataHoraFim,
-                weight = 1.2f
+                weight = 1.3f
             )
-            CelulaTabelaTexto(
-                text = bloqueio.motivo,
-                weight = 1.5f
+            
+            // Célula de Status com badge visual na tabela
+            Box(modifier = Modifier.weight(0.9f)) {
+                BadgeStatus(
+                    texto = if (isAtivo) "Ativo" else "Inativo",
+                    isAtivo = isAtivo
+                )
+            }
+        }
+
+        // Modal de Detalhes (ativado pelo botão do olho)
+        itemSelecionado.value?.let { bloqueio ->
+            val isAtivo = bloqueio.ativo
+            ModalDetalhesBase(
+                titulo = "Detalhes do Bloqueio",
+                onDismiss = { itemSelecionado.value = null },
+                conteudo = {
+                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = bloqueio.psicologo)
+                    ItemDetalhe(rotulo = "Data e hora de início", valor = bloqueio.dataHoraInicio)
+                    ItemDetalhe(rotulo = "Data e hora de fim", valor = bloqueio.dataHoraFim)
+                    ItemDetalhe(
+                        rotulo = "Status",
+                        valor = if (isAtivo) "Ativo" else "Inativo",
+                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                    )
+                }
             )
         }
 

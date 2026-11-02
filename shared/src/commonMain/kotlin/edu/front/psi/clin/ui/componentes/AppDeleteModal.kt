@@ -47,7 +47,6 @@ fun AppDeleteModal(
             Column(
                 modifier = Modifier.padding(28.dp)
             ) {
-                // Cabeçalho: Título e Ícone de Fechar (X)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

@@ -30,7 +30,6 @@ fun CampoTextoPadrao(
         OutlinedTextField(
             value = value,
             onValueChange = { novoTexto ->
-                // Se apenasNumeros for true, filtra para manter apenas dígitos (0-9)
                 if (apenasNumeros) {
                     onValueChange(novoTexto.filter { it.isDigit() })
                 } else {
@@ -42,7 +41,6 @@ fun CampoTextoPadrao(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             isError = isError,
-            // Exibe o teclado numérico no telemóvel/dispositivo se apenasNumeros for verdadeiro
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (apenasNumeros) KeyboardType.Number else KeyboardType.Text
             ),

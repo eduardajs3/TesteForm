@@ -2,7 +2,7 @@ package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.paddinggit checkout -b mascara-campos
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario

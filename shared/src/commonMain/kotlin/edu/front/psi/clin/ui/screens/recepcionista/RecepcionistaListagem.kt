@@ -9,8 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.Recepcionista
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.components.CelulaTabelaTexto
+import edu.front.psi.clin.ui.components.BadgeStatus
 import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.components.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.components.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
@@ -27,12 +28,13 @@ fun RecepcionistaListagem(
     // Estado para controlar qual recepcionista vai abrir o modal de exclusão
     val recepcionistaParaExcluir = remember { mutableStateOf<Recepcionista?>(null) }
 
-    // Mapeamento das colunas da tabela com suas proporções de largura
+    // Mapeamento das colunas da tabela com suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Nome" to 1.5f,
-        "CPF" to 1.3f,
-        "Telefone" to 1.2f,
-        "Setor" to 1.2f
+        "CPF" to 1.2f,
+        "Telefone" to 1.1f,
+        "Setor" to 1.1f,
+        "Status" to 0.8f
     )
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -49,6 +51,8 @@ fun RecepcionistaListagem(
             onApagar = { recepcionista -> recepcionistaParaExcluir.value = recepcionista },
             placeholderPesquisa = "Buscar por nome, CPF ou setor..."
         ) { recepcionista ->
+            val isAtivo = recepcionista.ativo
+
             CelulaTabelaTexto(
                 text = recepcionista.nome,
                 weight = 1.5f,
@@ -57,28 +61,44 @@ fun RecepcionistaListagem(
             )
             CelulaTabelaTexto(
                 text = recepcionista.cpf,
-                weight = 1.3f
+                weight = 1.2f
             )
             CelulaTabelaTexto(
                 text = recepcionista.telefone,
-                weight = 1.2f
+                weight = 1.1f
             )
             CelulaTabelaTexto(
                 text = recepcionista.setor,
-                weight = 1.2f
+                weight = 1.1f
             )
+            
+            // Célula de Status com badge visual na tabela
+            Box(modifier = Modifier.weight(0.8f)) {
+                BadgeStatus(
+                    texto = if (isAtivo) "Ativo" else "Inativo",
+                    isAtivo = isAtivo
+                )
+            }
         }
 
         // Modal Reutilizável de Detalhes da Recepcionista
         recepcionistaSelecionada.value?.let { recepcionista ->
+            val isAtivo = recepcionista.ativo
             ModalDetalhesBase(
                 titulo = recepcionista.nome,
                 onDismiss = { recepcionistaSelecionada.value = null },
                 conteudo = {
+                    ItemDetalhe("Nome completo", recepcionista.nome)
                     ItemDetalhe("CPF", recepcionista.cpf)
                     ItemDetalhe("Setor", recepcionista.setor)
                     ItemDetalhe("Telefone", recepcionista.telefone)
                     ItemDetalhe("E-mail", recepcionista.email)
+                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro)
+                    ItemDetalhe(
+                        rotulo = "Status",
+                        valor = if (isAtivo) "Ativo" else "Inativo",
+                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                    )
                 }
             )
         }
