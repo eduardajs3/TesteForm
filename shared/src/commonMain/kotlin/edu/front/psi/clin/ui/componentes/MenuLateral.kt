@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.CremeCampo
 import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.componentes.AppDeleteModal // Importando o seu componente de modal reutilizável
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -64,8 +66,8 @@ fun MenuLateral(
             nome = "Cadastros",
             iconeRes = Res.drawable.assignment_24px,
             subItens = listOf(
-                SubMenuItemData("Convênios", "convenio",Res.drawable.handshake_24px ),
-                SubMenuItemData("Salas de Atendimento", "sala",Res.drawable.door_open ),
+                SubMenuItemData("Convênios", "convenio", Res.drawable.handshake_24px),
+                SubMenuItemData("Salas de Atendimento", "sala", Res.drawable.door_open),
                 SubMenuItemData("Tipos de Atendimento", "tipo", Res.drawable.stethoscope_24px)
             )
         ),
@@ -87,12 +89,15 @@ fun MenuLateral(
             nome = "Funcionários",
             iconeRes = Res.drawable.badge_24px,
             subItens = listOf(
-                SubMenuItemData("Funcionários", "funcionario",Res.drawable.badge_24px),
+                SubMenuItemData("Funcionários", "funcionario", Res.drawable.badge_24px),
                 SubMenuItemData("Psicólogos", "psicologo", Res.drawable.neurology_24px),
                 SubMenuItemData("Recepcionistas", "recepcionista", Res.drawable.headset_mic_24px)
             )
         )
     )
+
+    // Estado para controlar a exibição do modal de confirmação de saída
+    var mostrarModalSair by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -121,7 +126,12 @@ fun MenuLateral(
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    // Lista de itens do menu rolável
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         itensMenu.forEach { item ->
                             if (item.subItens != null) {
                                 var expandido by remember {
@@ -214,9 +224,49 @@ fun MenuLateral(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Botão Sair fixo na parte inferior do menu lateral com ícone nativo
+                    NavigationDrawerItem(
+                        label = { Text("Sair", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold) },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            mostrarModalSair = true
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Sair",
+                                tint = Color(0xFFB91C1C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
                 }
             }
         },
         content = content
     )
+
+    // Utilizando o componente reutilizável AppDeleteModal para confirmar a saída
+    if (mostrarModalSair) {
+        AppDeleteModal(
+            title = "Encerrar Sessão",
+            message = "Tem certeza de que deseja sair do sistema?",
+            onDismiss = { mostrarModalSair = false },
+            onConfirm = {
+                mostrarModalSair = false
+                onNavigate("login")
+            }
+        )
+    }
 }

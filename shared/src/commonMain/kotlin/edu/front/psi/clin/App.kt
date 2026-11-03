@@ -4,29 +4,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.ui.componentes.MenuLateral
 
 // Imports das telas de Formulário
@@ -45,6 +32,7 @@ import edu.front.psi.clin.ui.screen.SalaAtendimentoFormulario
 import edu.front.psi.clin.ui.screen.TipoAtendimentoFormulario
 
 // Imports das telas de Listagem e Dashboard
+import com.psiclin.front.ui.screens.auth.LoginScreen
 import edu.front.psi.clin.ui.screen.AgendaListagem
 import edu.front.psi.clin.ui.screen.BloqueioAgendaListagem
 import edu.front.psi.clin.ui.screen.ConvenioListagem
@@ -83,14 +71,15 @@ val VerdeClinica = Color(0xFF3B5760)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
-    val tela = remember { mutableStateOf("dashboard") }
+    // Pilha de navegação (backstack) baseada nas rotas tipadas ensinadas na aula
+    val backstack = remember { mutableStateListOf<Route>(Route.Dashboard) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     // Estado para guardar o nome do paciente selecionado entre telas
     var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
-    // ViewModels
+    // ViewModels instanciados
     val pacienteVm: PacienteViewModel = viewModel(factory = viewModelFactory { initializer { PacienteViewModel() } })
     val pagamentoVm: PagamentoViewModel = viewModel(factory = viewModelFactory { initializer { PagamentoViewModel() } })
     val convenioVm: ConvenioViewModel = viewModel(factory = viewModelFactory { initializer { ConvenioViewModel() } })
@@ -105,43 +94,74 @@ fun App() {
     val psicologoVm: PsicologoViewModel = viewModel(factory = viewModelFactory { initializer { PsicologoViewModel() } })
     val agendaVm: AgendaViewModel = viewModel(factory = viewModelFactory { initializer { AgendaViewModel() } })
 
-    fun tratarVoltar() {
-        val estaEmForm = when (tela.value) {
-            "paciente" -> pacienteVm.tela.value == "form"
-            "pagamento" -> pagamentoVm.tela.value == "form"
-            "convenio" -> convenioVm.tela.value == "form"
-            "horario" -> horarioVm.tela.value == "form"
-            "sala" -> salaVm.tela.value == "form"
-            "tipo" -> tipoVm.tela.value == "form"
-            "bloqueio" -> bloqueioVm.tela.value == "form"
-            "evolucao" -> evolucaoVm.tela.value == "form"
-            "prontuario" -> prontuarioVm.tela.value == "form"
-            "recepcionista" -> recepcionistaVm.tela.value == "form"
-            "funcionario" -> funcionarioVm.tela.value == "form"
-            "psicologo" -> psicologoVm.tela.value == "form"
-            "agenda" -> agendaVm.tela.value == "form"
+    // Rota atualmente visível no topo da pilha
+    val rotaAtual = backstack.lastOrNull() ?: Route.Dashboard
+
+    // Identifica se está em modo de formulário em alguma das telas
+    fun estaEmFormulario(): Boolean {
+        return when (rotaAtual) {
+            is Route.Paciente -> pacienteVm.tela.value == "form"
+            is Route.Pagamento -> pagamentoVm.tela.value == "form"
+            is Route.Convenio -> convenioVm.tela.value == "form"
+            is Route.HorarioDisponivel -> horarioVm.tela.value == "form"
+            is Route.SalaAtendimento -> salaVm.tela.value == "form"
+            is Route.TipoAtendimento -> tipoVm.tela.value == "form"
+            is Route.BloqueioAgenda -> bloqueioVm.tela.value == "form"
+            is Route.EvolucaoClinica -> evolucaoVm.tela.value == "form"
+            is Route.Prontuario -> prontuarioVm.tela.value == "form"
+            is Route.Recepcionista -> recepcionistaVm.tela.value == "form"
+            is Route.Funcionario -> funcionarioVm.tela.value == "form"
+            is Route.Psicologo -> psicologoVm.tela.value == "form"
+            is Route.Agenda -> agendaVm.tela.value == "form"
             else -> false
         }
+    }
 
-        if (estaEmForm) {
-            when (tela.value) {
-                "paciente" -> pacienteVm.tela.value = "list"
-                "pagamento" -> pagamentoVm.tela.value = "list"
-                "convenio" -> convenioVm.tela.value = "list"
-                "horario" -> horarioVm.tela.value = "list"
-                "sala" -> salaVm.tela.value = "list"
-                "tipo" -> tipoVm.tela.value = "list"
-                "bloqueio" -> bloqueioVm.tela.value = "list"
-                "evolucao" -> evolucaoVm.tela.value = "list"
-                "prontuario" -> prontuarioVm.tela.value = "list"
-                "recepcionista" -> recepcionistaVm.tela.value = "list"
-                "funcionario" -> funcionarioVm.tela.value = "list"
-                "psicologo" -> psicologoVm.tela.value = "list"
-                "agenda" -> agendaVm.tela.value = "list"
+    fun tratarVoltar() {
+        if (estaEmFormulario()) {
+            when (rotaAtual) {
+                is Route.Paciente -> pacienteVm.tela.value = "list"
+                is Route.Pagamento -> pagamentoVm.tela.value = "list"
+                is Route.Convenio -> convenioVm.tela.value = "list"
+                is Route.HorarioDisponivel -> horarioVm.tela.value = "list"
+                is Route.SalaAtendimento -> salaVm.tela.value = "list"
+                is Route.TipoAtendimento -> tipoVm.tela.value = "list"
+                is Route.BloqueioAgenda -> bloqueioVm.tela.value = "list"
+                is Route.EvolucaoClinica -> evolucaoVm.tela.value = "list"
+                is Route.Prontuario -> prontuarioVm.tela.value = "list"
+                is Route.Recepcionista -> recepcionistaVm.tela.value = "list"
+                is Route.Funcionario -> funcionarioVm.tela.value = "list"
+                is Route.Psicologo -> psicologoVm.tela.value = "list"
+                is Route.Agenda -> agendaVm.tela.value = "list"
+                else -> {}
             }
         } else {
-            tela.value = "dashboard"
+            if (backstack.size > 1) {
+                backstack.removeAt(backstack.lastIndex)
+            } else {
+                backstack.clear()
+                backstack.add(Route.Dashboard)
+            }
         }
+    }
+
+    // String identificadora da tela atual para o MenuLateral
+    val stringTelaAtual = when (rotaAtual) {
+        is Route.Dashboard -> "dashboard"
+        is Route.Paciente -> "paciente"
+        is Route.Pagamento -> "pagamento"
+        is Route.Convenio -> "convenio"
+        is Route.HorarioDisponivel -> "horario"
+        is Route.SalaAtendimento -> "sala"
+        is Route.TipoAtendimento -> "tipo"
+        is Route.BloqueioAgenda -> "bloqueio"
+        is Route.EvolucaoClinica -> "evolucao"
+        is Route.Prontuario -> "prontuario"
+        is Route.Recepcionista -> "recepcionista"
+        is Route.Funcionario -> "funcionario"
+        is Route.Psicologo -> "psicologo"
+        is Route.Agenda -> "agenda"
+        else -> "dashboard"
     }
 
     MaterialTheme(
@@ -153,127 +173,193 @@ fun App() {
         MenuLateral(
             drawerState = drawerState,
             scope = scope,
-            telaAtual = tela.value,
-            onNavigate = { novaTela -> tela.value = novaTela }
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = when (tela.value) {
-                                    "dashboard" -> "Dashboard"
-                                    "paciente" -> "Pacientes"
-                                    "pagamento" -> "Pagamentos"
-                                    "convenio" -> "Convênios"
-                                    "horario" -> "Horários Disponíveis"
-                                    "sala" -> "Salas de Atendimento"
-                                    "tipo" -> "Tipos de Atendimento"
-                                    "bloqueio" -> "Bloqueios"
-                                    "evolucao" -> "Evoluções"
-                                    "prontuario" -> "Prontuários"
-                                    "recepcionista" -> "Recepcionistas"
-                                    "funcionario" -> "Funcionários"
-                                    "psicologo" -> "Psicólogos"
-                                    "agenda" -> "Agendas"
-                                    else -> "PsiClin"
-                                },
-                                color = Color.White
-                            )
-                        },
-                        navigationIcon = {
-                            val estaEmForm = when (tela.value) {
-                                "paciente" -> pacienteVm.tela.value == "form"
-                                "pagamento" -> pagamentoVm.tela.value == "form"
-                                "convenio" -> convenioVm.tela.value == "form"
-                                "horario" -> horarioVm.tela.value == "form"
-                                "sala" -> salaVm.tela.value == "form"
-                                "tipo" -> tipoVm.tela.value == "form"
-                                "bloqueio" -> bloqueioVm.tela.value == "form"
-                                "evolucao" -> evolucaoVm.tela.value == "form"
-                                "prontuario" -> prontuarioVm.tela.value == "form"
-                                "recepcionista" -> recepcionistaVm.tela.value == "form"
-                                "funcionario" -> funcionarioVm.tela.value == "form"
-                                "psicologo" -> psicologoVm.tela.value == "form"
-                                "agenda" -> agendaVm.tela.value == "form"
-                                else -> false
-                            }
+            telaAtual = stringTelaAtual,
+            onNavigate = { destino ->
+                val novaRota = when (destino) {
+                    "dashboard" -> Route.Dashboard
+                    "paciente" -> Route.Paciente
+                    "pagamento" -> Route.Pagamento
+                    "convenio" -> Route.Convenio
+                    "horario" -> Route.HorarioDisponivel
+                    "sala" -> Route.SalaAtendimento
+                    "tipo" -> Route.TipoAtendimento
+                    "bloqueio" -> Route.BloqueioAgenda
+                    "pagamento" -> Route.Pagamento
+                    "funcionario" -> Route.Funcionario
+                    "psicologo" -> Route.Psicologo
+                    "recepcionista" -> Route.Recepcionista
+                    "agenda" -> Route.Agenda
+                    "login" -> Route.Login
+                    else -> Route.Dashboard
+                }
 
-                            if (estaEmForm) {
-                                IconButton(onClick = { tratarVoltar() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Voltar",
-                                        tint = Color.White
-                                    )
-                                }
-                            } else {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Menu,
-                                        contentDescription = "Abrir Menu Lateral",
-                                        tint = Color.White
-                                    )
-                                }
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdeClinica)
-                    )
-                },
-                containerColor = Branco
-            ) { contentPadding ->
-                when (tela.value) {
-                    "dashboard" -> DashboardTela(contentPadding)
-                    "paciente" -> if (pacienteVm.tela.value == "form") {
-                        PacienteFormulario(contentPadding, pacienteVm)
-                    } else {
-                        PacienteListagem(
-                            innerPadding = contentPadding,
-                            vm = pacienteVm,
-                            onNavegarParaProntuario = { paciente ->
-                                pacienteSelecionadoNome = paciente.nome
-                                prontuarioVm.paciente.value = paciente.nome
-                                prontuarioVm.atualizarFiltro(paciente.nome)
-                                prontuarioVm.tela.value = "list"
-                                tela.value = "prontuario"
+                if (novaRota == Route.Login) {
+                    backstack.clear()
+                    backstack.add(Route.Login)
+                } else {
+                    backstack.clear()
+                    backstack.add(Route.Dashboard)
+                    if (novaRota != Route.Dashboard) {
+                        backstack.add(novaRota)
+                    }
+                }
+            }
+        ) {
+            // Se estiver na rota de Login, exibe apenas a tela de login sem o Scaffold do Dashboard
+            if (rotaAtual is Route.Login) {
+                LoginScreen(
+                    onNavigate = { rota ->
+                        backstack.clear()
+                        backstack.add(rota)
+                    }
+                )
+            } else {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = when (rotaAtual) {
+                                        is Route.Dashboard -> "Dashboard"
+                                        is Route.Paciente -> "Pacientes"
+                                        is Route.Pagamento -> "Pagamentos"
+                                        is Route.Convenio -> "Convênios"
+                                        is Route.HorarioDisponivel -> "Horários Disponíveis"
+                                        is Route.SalaAtendimento -> "Salas de Atendimento"
+                                        is Route.TipoAtendimento -> "Tipos de Atendimento"
+                                        is Route.BloqueioAgenda -> "Bloqueios"
+                                        is Route.EvolucaoClinica -> "Evoluções"
+                                        is Route.Prontuario -> "Prontuários"
+                                        is Route.Recepcionista -> "Recepcionistas"
+                                        is Route.Funcionario -> "Funcionários"
+                                        is Route.Psicologo -> "Psicólogos"
+                                        is Route.Agenda -> "Agendas"
+                                        else -> "PsiClin"
+                                    },
+                                    color = Color.White
+                                )
                             },
-                            onNavegarParaEvolucao = { paciente ->
-                                pacienteSelecionadoNome = paciente.nome
-                                evolucaoVm.prontuario.value = paciente.nome
-                                evolucaoVm.atualizarFiltro(paciente.nome)
-                                evolucaoVm.tela.value = "list"
-                                tela.value = "evolucao"
+                            navigationIcon = {
+                                val mostrarVoltar = estaEmFormulario() || backstack.size > 1
+                                if (mostrarVoltar) {
+                                    IconButton(onClick = { tratarVoltar() }) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Voltar",
+                                            tint = Color.White
+                                        )
+                                    }
+                                } else {
+                                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Menu,
+                                            contentDescription = "Abrir Menu Lateral",
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdeClinica)
+                        )
+                    },
+                    containerColor = Branco
+                ) { contentPadding ->
+                    // NavDisplay gerenciando as entradas do Navigation 3 com base no backstack
+                    NavDisplay(
+                        backStack = backstack,
+                        onBack = { tratarVoltar() },
+                        entryProvider = entryProvider {
+                            entry<Route.Dashboard> {
+                                DashboardTela(contentPadding)
                             }
-                        )
-                    }
-                    "pagamento" -> if (pagamentoVm.tela.value == "form") PagamentoFormulario(contentPadding, pagamentoVm) else PagamentoListagem(contentPadding, pagamentoVm)
-                    "convenio" -> if (convenioVm.tela.value == "form") ConvenioFormulario(contentPadding, convenioVm) else ConvenioListagem(contentPadding, convenioVm)
-                    "horario" -> if (horarioVm.tela.value == "form") HorarioDisponivelFormulario(contentPadding, horarioVm) else HorarioDisponivelListagem(contentPadding, horarioVm)
-                    "sala" -> if (salaVm.tela.value == "form") SalaAtendimentoFormulario(contentPadding, salaVm) else SalaAtendimentoListagem(contentPadding, salaVm)
-                    "tipo" -> if (tipoVm.tela.value == "form") TipoAtendimentoFormulario(contentPadding, tipoVm) else TipoAtendimentoListagem(contentPadding, tipoVm)
-                    "bloqueio" -> if (bloqueioVm.tela.value == "form") BloqueioAgendaFormulario(contentPadding, bloqueioVm) else BloqueioAgendaListagem(contentPadding, bloqueioVm)
-                    "evolucao" -> if (evolucaoVm.tela.value == "form") {
-                        EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
-                    } else {
-                        EvolucaoClinicaListagem(
-                            innerPadding = contentPadding,
-                            vm = evolucaoVm,
-                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
-                        )
-                    }
-                    "prontuario" -> if (prontuarioVm.tela.value == "form") {
-                        ProntuarioFormulario(contentPadding, prontuarioVm)
-                    } else {
-                        ProntuarioListagem(
-                            innerPadding = contentPadding,
-                            vm = prontuarioVm,
-                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
-                        )
-                    }
-                    "recepcionista" -> if (recepcionistaVm.tela.value == "form") RecepcionistaFormulario(contentPadding, recepcionistaVm) else RecepcionistaListagem(contentPadding, recepcionistaVm)
-                    "funcionario" -> if (funcionarioVm.tela.value == "form") FuncionarioFormulario(contentPadding, funcionarioVm) else FuncionarioListagem(contentPadding, funcionarioVm)
-                    "psicologo" -> if (psicologoVm.tela.value == "form") PsicologoFormulario(contentPadding, psicologoVm) else PsicologoListagem(contentPadding, psicologoVm)
-                    "agenda" -> if (agendaVm.tela.value == "form") AgendaFormulario(contentPadding, agendaVm) else AgendaListagem(contentPadding, agendaVm)
+                            entry<Route.Paciente> {
+                                if (pacienteVm.tela.value == "form") {
+                                    PacienteFormulario(contentPadding, pacienteVm)
+                                } else {
+                                    PacienteListagem(
+                                        innerPadding = contentPadding,
+                                        vm = pacienteVm,
+                                        onNavegarParaProntuario = { paciente ->
+                                            pacienteSelecionadoNome = paciente.nome
+                                            prontuarioVm.paciente.value = paciente.nome
+                                            prontuarioVm.atualizarFiltro(paciente.nome)
+                                            prontuarioVm.tela.value = "list"
+                                            backstack.add(Route.Prontuario)
+                                        },
+                                        onNavegarParaEvolucao = { paciente ->
+                                            pacienteSelecionadoNome = paciente.nome
+                                            evolucaoVm.prontuario.value = paciente.nome
+                                            evolucaoVm.atualizarFiltro(paciente.nome)
+                                            evolucaoVm.tela.value = "list"
+                                            backstack.add(Route.EvolucaoClinica)
+                                        }
+                                    )
+                                }
+                            }
+                            entry<Route.Pagamento> {
+                                if (pagamentoVm.tela.value == "form") PagamentoFormulario(contentPadding, pagamentoVm)
+                                else PagamentoListagem(contentPadding, pagamentoVm)
+                            }
+                            entry<Route.Convenio> {
+                                if (convenioVm.tela.value == "form") ConvenioFormulario(contentPadding, convenioVm)
+                                else ConvenioListagem(contentPadding, convenioVm)
+                            }
+                            entry<Route.HorarioDisponivel> {
+                                if (horarioVm.tela.value == "form") HorarioDisponivelFormulario(contentPadding, horarioVm)
+                                else HorarioDisponivelListagem(contentPadding, horarioVm)
+                            }
+                            entry<Route.SalaAtendimento> {
+                                if (salaVm.tela.value == "form") SalaAtendimentoFormulario(contentPadding, salaVm)
+                                else SalaAtendimentoListagem(contentPadding, salaVm)
+                            }
+                            entry<Route.TipoAtendimento> {
+                                if (tipoVm.tela.value == "form") TipoAtendimentoFormulario(contentPadding, tipoVm)
+                                else TipoAtendimentoListagem(contentPadding, tipoVm)
+                            }
+                            entry<Route.BloqueioAgenda> {
+                                if (bloqueioVm.tela.value == "form") BloqueioAgendaFormulario(contentPadding, bloqueioVm)
+                                else BloqueioAgendaListagem(contentPadding, bloqueioVm)
+                            }
+                            entry<Route.EvolucaoClinica> {
+                                if (evolucaoVm.tela.value == "form") {
+                                    EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
+                                } else {
+                                    EvolucaoClinicaListagem(
+                                        innerPadding = contentPadding,
+                                        vm = evolucaoVm,
+                                        nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                                    )
+                                }
+                            }
+                            entry<Route.Prontuario> {
+                                if (prontuarioVm.tela.value == "form") {
+                                    ProntuarioFormulario(contentPadding, prontuarioVm)
+                                } else {
+                                    ProntuarioListagem(
+                                        innerPadding = contentPadding,
+                                        vm = prontuarioVm,
+                                        nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                                    )
+                                }
+                            }
+                            entry<Route.Recepcionista> {
+                                if (recepcionistaVm.tela.value == "form") RecepcionistaFormulario(contentPadding, recepcionistaVm)
+                                else RecepcionistaListagem(contentPadding, recepcionistaVm)
+                            }
+                            entry<Route.Funcionario> {
+                                if (funcionarioVm.tela.value == "form") FuncionarioFormulario(contentPadding, funcionarioVm)
+                                else FuncionarioListagem(contentPadding, funcionarioVm)
+                            }
+                            entry<Route.Psicologo> {
+                                if (psicologoVm.tela.value == "form") PsicologoFormulario(contentPadding, psicologoVm)
+                                else PsicologoListagem(contentPadding, psicologoVm)
+                            }
+                            entry<Route.Agenda> {
+                                if (agendaVm.tela.value == "form") AgendaFormulario(contentPadding, agendaVm)
+                                else AgendaListagem(contentPadding, agendaVm)
+                            }
+                        }
+                    )
                 }
             }
         }
