@@ -1,12 +1,17 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Agenda
+import edu.front.psi.clin.navigation.AgendaRotas
 import kotlinx.coroutines.flow.*
 
-class AgendaViewModel : ViewModel() {
+class AgendaViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 2
 
@@ -47,7 +52,9 @@ class AgendaViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack = NavBackStack<AgendaRotas>(
+        AgendaRotas.Listagem
+    )
 
     // Campos do formulário
     val id = mutableStateOf("")
@@ -89,18 +96,26 @@ class AgendaViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Agendamento salvo com sucesso!"
-            tela.value = "list"
+            mandarMensagem("Agendamento salvo com sucesso!", SnackbarDuration.Short)
+            limparCampos()
+            
+            backStack.clear()
+            backStack.add(AgendaRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(agendamento: Agenda) {
         _agendamentos.update { lista -> lista - agendamento }
+        mandarMensagem("Agendamento apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoAgendamento() {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(AgendaRotas.Formulario)
         id.value = ""
         paciente.value = ""
         psicologo.value = ""
@@ -116,7 +131,8 @@ class AgendaViewModel : ViewModel() {
     }
 
     fun editar(agendamento: Agenda) {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(AgendaRotas.Formulario)
         id.value = agendamento.id.toString()
         paciente.value = agendamento.paciente
         psicologo.value = agendamento.psicologo

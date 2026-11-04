@@ -1,14 +1,19 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.TipoAtendimento
+import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.components.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
-class TipoAtendimentoViewModel : ViewModel() {
+class TipoAtendimentoViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 0
     private val _tiposAtendimento = MutableStateFlow<List<TipoAtendimento>>(listOf())
@@ -28,7 +33,9 @@ class TipoAtendimentoViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack = NavBackStack<TipoAtendimentoRotas>(
+        TipoAtendimentoRotas.Listagem
+    )
 
     val id = mutableStateOf("")
     
@@ -50,6 +57,7 @@ class TipoAtendimentoViewModel : ViewModel() {
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
+            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
             return
         }
 
@@ -73,26 +81,34 @@ class TipoAtendimentoViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Tipo de atendimento salvo com sucesso!"
+            mandarMensagem("Tipo de atendimento salvo com sucesso!", SnackbarDuration.Short)
             limparCampos()
-            tela.value = "list"
+            
+            backStack.clear()
+            backStack.add(TipoAtendimentoRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(tipo: TipoAtendimento) {
         _tiposAtendimento.update { lista -> lista - tipo }
+        mandarMensagem("Tipo de atendimento apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoTipo() {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(TipoAtendimentoRotas.Formulario)
         id.value = ""
         limparCampos()
         mensagem.value = ""
     }
 
     fun editar(tipo: TipoAtendimento) {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(TipoAtendimentoRotas.Formulario)
         id.value = tipo.id.toString()
         nome.definir(tipo.nome)
         descricao.definir(tipo.descricao)

@@ -1,20 +1,26 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Convenio
 import edu.front.psi.clin.ui.components.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import edu.front.psi.clin.navigation.ConvenioRotas
 
-class ConvenioViewModel : ViewModel() {
+class ConvenioViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 0
     private val _convenios = MutableStateFlow<List<Convenio>>(listOf())
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    val mensagem = mutableStateOf("")
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -28,11 +34,13 @@ class ConvenioViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack =
+        NavBackStack<ConvenioRotas>(
+            ConvenioRotas.Listagem
+        )
 
     val id = mutableStateOf("")
     
-    // Campos geridos pelo validador com máscaras automáticas aplicadas
     val nome = CampoValidado()
     val cnpj = CampoValidado(formatador = { MaskUtils.aplicarMascaraCnpj(it) })
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
@@ -40,11 +48,8 @@ class ConvenioViewModel : ViewModel() {
         formatador = { MaskUtils.aplicarMascaraPercentual(it) }
     )
     val ativo = CampoValidado("true")
-    
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
         val v1 = nome.validar()
         val v2 = cnpj.validar()
         val v3 = telefone.validar()
@@ -52,7 +57,7 @@ class ConvenioViewModel : ViewModel() {
         val v5 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
+            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
             return
         }
 
@@ -76,33 +81,46 @@ class ConvenioViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Convênio salvo com sucesso!"
+            mandarMensagem("Convênio salvo com sucesso!", SnackbarDuration.Short)
             limparCampos()
-            tela.value = "list"
+          
+            backStack.clear()
+            backStack.add(
+                ConvenioRotas.Listagem
+            )
+
+            
         } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(convenio: Convenio) {
         _convenios.update { lista -> lista - convenio }
+        mandarMensagem("Convênio apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoConvenio() {
-        tela.value = "form"
         id.value = ""
         limparCampos()
-        mensagem.value = ""
+        backStack.clear()
+        backStack.add(
+            ConvenioRotas.Formulario
+        )
     }
 
     fun editar(convenio: Convenio) {
-        tela.value = "form"
         id.value = convenio.id.toString()
         nome.definir(convenio.nome)
         cnpj.definir(convenio.cnpj)
         telefone.definir(convenio.telefone)
         percentualCobertura.definir(convenio.percentualCobertura.toString())
         ativo.definir(convenio.ativo.toString())
-        mensagem.value = ""
+        
+        backStack.clear()
+        backStack.add(
+            ConvenioRotas.Formulario
+        )
     }
 
     fun limparCampos() {
@@ -111,6 +129,5 @@ class ConvenioViewModel : ViewModel() {
         telefone.limpar()
         percentualCobertura.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

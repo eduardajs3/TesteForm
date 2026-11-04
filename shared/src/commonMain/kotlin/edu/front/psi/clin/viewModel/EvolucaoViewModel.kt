@@ -1,12 +1,17 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.EvolucaoClinica
+import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import kotlinx.coroutines.flow.*
 
-class EvolucaoClinicaViewModel : ViewModel() {
+class EvolucaoClinicaViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 1
 
@@ -43,7 +48,9 @@ class EvolucaoClinicaViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack = NavBackStack<EvolucaoClinicaRotas>(
+        EvolucaoClinicaRotas.Listagem
+    )
 
     // Campos do formulário
     val id = mutableStateOf("")
@@ -59,6 +66,7 @@ class EvolucaoClinicaViewModel : ViewModel() {
         try {
             if (descricao.value.isBlank()) {
                 mensagem.value = "A descrição da evolução é obrigatória!"
+                mandarMensagem("A descrição da evolução é obrigatória!", SnackbarDuration.Short)
                 return
             }
 
@@ -89,27 +97,36 @@ class EvolucaoClinicaViewModel : ViewModel() {
             }
 
             _filtro.value = "" // Limpa busca para o novo item aparecer
-            limparCampos()
             mensagem.value = "Evolução clínica salva com sucesso!"
-            tela.value = "list"
+            mandarMensagem("Evolução clínica salva com sucesso!", SnackbarDuration.Short)
+            limparCampos()
+            
+            backStack.clear()
+            backStack.add(EvolucaoClinicaRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(evolucao: EvolucaoClinica) {
         _evolucoes.update { lista -> lista.filterNot { it.id == evolucao.id } }
+        mandarMensagem("Evolução clínica apagada com sucesso!", SnackbarDuration.Short)
     }
 
     fun novaEvolucao(nomePaciente: String = "") {
+        backStack.clear()
+        backStack.add(EvolucaoClinicaRotas.Formulario)
         limparCampos()
         if (nomePaciente.isNotEmpty()) {
             prontuario.value = nomePaciente
         }
-        tela.value = "form"
     }
 
     fun editar(evolucao: EvolucaoClinica) {
+        backStack.clear()
+        backStack.add(EvolucaoClinicaRotas.Formulario)
         id.value = evolucao.id.toString()
         prontuario.value = evolucao.prontuario
         psicologo.value = evolucao.psicologo
@@ -118,7 +135,6 @@ class EvolucaoClinicaViewModel : ViewModel() {
         descricao.value = evolucao.descricao
         ativo.value = evolucao.ativo.toString()
         mensagem.value = ""
-        tela.value = "form"
     }
 
     fun limparCampos() {
@@ -129,6 +145,6 @@ class EvolucaoClinicaViewModel : ViewModel() {
         dataRegistro.value = ""
         descricao.value = ""
         ativo.value = "true"
-        mensagem.value = ""
+        mensagem.value = "Campos limpos."
     }
 }

@@ -22,9 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.CremeCampo
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.componentes.AppDeleteModal // Importando o seu componente de modal reutilizável
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel // <-- Import do PrincipalViewModel
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -45,8 +43,7 @@ data class MenuItemData(
 
 @Composable
 fun MenuLateral(
-    drawerState: DrawerState,
-    scope: CoroutineScope,
+    viewModel: PrincipalViewModel, // <-- Recebe o PrincipalViewModel diretamente
     telaAtual: String,
     onNavigate: (String) -> Unit,
     content: @Composable () -> Unit
@@ -100,7 +97,7 @@ fun MenuLateral(
     var mostrarModalSair by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
-        drawerState = drawerState,
+        drawerState = viewModel.drawerState, // <-- Usa diretamente o estado do ViewModel
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = CremeCampo,
@@ -138,6 +135,8 @@ fun MenuLateral(
                                     mutableStateOf(item.subItens.any { it.tela == telaAtual })
                                 }
 
+                                // ... dentro do loop dos itens de menu que possuem subItens:
+
                                 NavigationDrawerItem(
                                     label = { Text(item.nome, color = VerdeClinica, fontWeight = FontWeight.Bold) },
                                     selected = false,
@@ -152,9 +151,11 @@ fun MenuLateral(
                                     },
                                     badge = {
                                         Icon(
-                                            imageVector = if (expandido) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            // Substituído os ícones padrão do Material por painterResource com o seu XML
+                                            painter = painterResource(if (expandido) Res.drawable.keyboard_arrow_up else Res.drawable.keyboard_arrow_down), 
                                             contentDescription = "Expandir/Recolher",
-                                            tint = VerdeClinica
+                                            tint = VerdeClinica,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     },
                                     colors = NavigationDrawerItemDefaults.colors(
@@ -177,7 +178,7 @@ fun MenuLateral(
                                                 selected = selecionado,
                                                 onClick = {
                                                     onNavigate(subItem.tela)
-                                                    scope.launch { drawerState.close() }
+                                                    viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
                                                 },
                                                 icon = {
                                                     Icon(
@@ -204,7 +205,7 @@ fun MenuLateral(
                                     selected = selecionado,
                                     onClick = {
                                         item.tela?.let { onNavigate(it) }
-                                        scope.launch { drawerState.close() }
+                                        viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
                                     },
                                     icon = {
                                         Icon(
@@ -234,7 +235,7 @@ fun MenuLateral(
                         label = { Text("Sair", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold) },
                         selected = false,
                         onClick = {
-                            scope.launch { drawerState.close() }
+                            viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
                             mostrarModalSair = true
                         },
                         icon = {

@@ -26,6 +26,7 @@ import frontpsiclinic.shared.generated.resources.fundo_login
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.CremeCampo
 import edu.front.psi.clin.VerdeClinica
+import androidx.compose.foundation.clickable
 
 @Composable
 fun LoginScreen(
@@ -163,7 +164,21 @@ fun LoginScreen(
                         cursorColor = VerdeClinica
                     )
                 )
-
+                // Dentro da Column do formulário da LoginScreen, logo abaixo do OutlinedTextField da senha:
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "Esqueci a senha",
+                        modifier = Modifier.clickable {
+                            onNavigate(Route.RecoverPassword)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = VerdeClinica
+                    )
+                }
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Button(

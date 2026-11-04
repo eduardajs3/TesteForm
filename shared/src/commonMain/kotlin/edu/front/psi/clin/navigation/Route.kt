@@ -50,4 +50,5 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Agenda : Route
+    @Serializable data object RecoverPassword : Route
 }

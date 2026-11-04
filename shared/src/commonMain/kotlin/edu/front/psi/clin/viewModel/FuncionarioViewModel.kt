@@ -1,14 +1,19 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Funcionario
+import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.ui.components.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
-class FuncionarioViewModel : ViewModel() {
+class FuncionarioViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 2
 
@@ -46,7 +51,10 @@ class FuncionarioViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack =
+        NavBackStack<FuncionarioRotas>(
+            FuncionarioRotas.Listagem
+        )
 
     // Campos do formulário geridos pelo validador com máscaras e validações integradas
     val id = mutableStateOf("")
@@ -60,6 +68,8 @@ class FuncionarioViewModel : ViewModel() {
     val senha = CampoValidado()
     val ativo = CampoValidado("true")
     val dataCadastro = CampoValidado()
+    
+    // Propriedade de mensagem adicionada para coincidir com o Convênio
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -73,6 +83,7 @@ class FuncionarioViewModel : ViewModel() {
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
+            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
             return
         }
 
@@ -98,26 +109,38 @@ class FuncionarioViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Funcionário salvo com sucesso!"
+            mandarMensagem("Funcionário salvo com sucesso!", SnackbarDuration.Short)
             limparCampos()
-            tela.value = "list"
+            backStack.clear()
+            backStack.add(
+                FuncionarioRotas.Listagem
+            )
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(funcionario: Funcionario) {
         _funcionarios.update { lista -> lista - funcionario }
+        mandarMensagem("Funcionário apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoFuncionario() {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(
+            FuncionarioRotas.Formulario
+        )
         id.value = ""
         limparCampos()
         mensagem.value = ""
     }
 
     fun editar(funcionario: Funcionario) {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(
+            FuncionarioRotas.Formulario
+        )
         id.value = funcionario.id.toString()
         nome.definir(funcionario.nome)
         cpf.definir(funcionario.cpf)
@@ -137,6 +160,5 @@ class FuncionarioViewModel : ViewModel() {
         senha.limpar()
         ativo.definir("true")
         dataCadastro.limpar()
-        mensagem.value = "Campos limpos."
     }
 }

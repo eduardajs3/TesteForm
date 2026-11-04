@@ -1,12 +1,17 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Prontuario
+import edu.front.psi.clin.navigation.ProntuarioRotas
 import kotlinx.coroutines.flow.*
 
-class ProntuarioViewModel : ViewModel() {
+class ProntuarioViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 1
 
@@ -41,8 +46,9 @@ class ProntuarioViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Estado de navegação interno ("list" ou "form")
-    val tela = mutableStateOf("list")
+    val backStack = NavBackStack<ProntuarioRotas>(
+        ProntuarioRotas.Listagem
+    )
 
     // Campos do formulário
     val id = mutableStateOf("")
@@ -57,13 +63,13 @@ class ProntuarioViewModel : ViewModel() {
         try {
             if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
                 mensagem.value = "Preencha os campos obrigatórios!"
+                mandarMensagem("Preencha os campos obrigatórios!", SnackbarDuration.Short)
                 return
             }
 
             val ehNovo = id.value.isEmpty()
             val novoId = if (ehNovo) ++idCounter else id.value.toInt()
             
-            // Tratamento permissivo para o campo booleano
             val statusBooleano = when (ativo.value.trim().lowercase()) {
                 "false", "0", "inativo", "não", "nao" -> false
                 else -> true
@@ -86,30 +92,37 @@ class ProntuarioViewModel : ViewModel() {
                 }
             }
 
-            // Limpa o filtro de busca para garantir que o novo prontuário apareça na lista
-            _filtro.value = ""
-            
-            limparCampos()
+            _filtro.value = "" // Limpa o filtro de busca
             mensagem.value = "Prontuário salvo com sucesso!"
-            tela.value = "list" // Retorna à listagem
+            mandarMensagem("Prontuário salvo com sucesso!", SnackbarDuration.Short)
+            limparCampos()
+            
+            backStack.clear()
+            backStack.add(ProntuarioRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(prontuario: Prontuario) {
         _prontuarios.update { lista -> lista.filterNot { it.id == prontuario.id } }
+        mandarMensagem("Prontuário apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoProntuario(nomePaciente: String = "") {
+        backStack.clear()
+        backStack.add(ProntuarioRotas.Formulario)
         limparCampos()
         if (nomePaciente.isNotEmpty()) {
             paciente.value = nomePaciente
         }
-        tela.value = "form"
     }
 
     fun editar(prontuario: Prontuario) {
+        backStack.clear()
+        backStack.add(ProntuarioRotas.Formulario)
         id.value = prontuario.id.toString()
         paciente.value = prontuario.paciente
         dataAbertura.value = prontuario.dataAbertura
@@ -117,7 +130,6 @@ class ProntuarioViewModel : ViewModel() {
         status.value = prontuario.status
         ativo.value = prontuario.ativo.toString()
         mensagem.value = ""
-        tela.value = "form"
     }
 
     fun limparCampos() {
@@ -127,6 +139,6 @@ class ProntuarioViewModel : ViewModel() {
         queixaPrincipal.value = ""
         status.value = ""
         ativo.value = "true"
-        mensagem.value = ""
+        mensagem.value = "Campos limpos."
     }
 }

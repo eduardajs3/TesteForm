@@ -1,13 +1,18 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.BloqueioAgenda
+import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
-class BloqueioAgendaViewModel : ViewModel() {
+class BloqueioAgendaViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 0
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(listOf())
@@ -27,7 +32,9 @@ class BloqueioAgendaViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list")
+    val backStack = NavBackStack<BloqueioAgendaRotas>(
+        BloqueioAgendaRotas.Listagem
+    )
 
     val id = mutableStateOf("")
     
@@ -50,6 +57,7 @@ class BloqueioAgendaViewModel : ViewModel() {
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
+            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
             return
         }
 
@@ -73,26 +81,34 @@ class BloqueioAgendaViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Bloqueio de agenda salvo com sucesso!"
+            mandarMensagem("Bloqueio de agenda salvo com sucesso!", SnackbarDuration.Short)
             limparCampos()
-            tela.value = "list"
+            
+            backStack.clear()
+            backStack.add(BloqueioAgendaRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(bloqueio: BloqueioAgenda) {
         _bloqueios.update { lista -> lista - bloqueio }
+        mandarMensagem("Bloqueio apagado com sucesso!", SnackbarDuration.Short)
     }
 
     fun novoBloqueio() {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = ""
         limparCampos()
         mensagem.value = ""
     }
 
     fun editar(bloqueio: BloqueioAgenda) {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = bloqueio.id.toString()
         psicologo.definir(bloqueio.psicologo)
         dataHoraInicio.definir(bloqueio.dataHoraInicio)

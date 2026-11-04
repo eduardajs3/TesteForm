@@ -1,14 +1,19 @@
 package edu.front.psi.clin.ui.viewmodel
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Recepcionista
+import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.ui.components.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
-class RecepcionistaViewModel : ViewModel() {
+class RecepcionistaViewModel(
+    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+) : ViewModel() {
 
     private var idCounter: Int = 2
 
@@ -47,7 +52,9 @@ class RecepcionistaViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tela = mutableStateOf("list") // "list" ou "form"
+    val backStack = NavBackStack<RecepcionistaRotas>(
+        RecepcionistaRotas.Listagem
+    )
 
     // Campos do formulário geridos pelo validador com máscaras e validações integradas
     val id = mutableStateOf("")
@@ -77,6 +84,7 @@ class RecepcionistaViewModel : ViewModel() {
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
+            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
             return
         }
 
@@ -103,26 +111,34 @@ class RecepcionistaViewModel : ViewModel() {
                 }
             }
             mensagem.value = "Recepcionista salva com sucesso!"
+            mandarMensagem("Recepcionista salva com sucesso!", SnackbarDuration.Short)
             limparCampos()
-            tela.value = "list"
+            
+            backStack.clear()
+            backStack.add(RecepcionistaRotas.Listagem)
+
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
+            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
         }
     }
 
     fun apagar(recepcionista: Recepcionista) {
         _recepcionistas.update { lista -> lista - recepcionista }
+        mandarMensagem("Recepcionista apagada com sucesso!", SnackbarDuration.Short)
     }
 
     fun novaRecepcionista() {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(RecepcionistaRotas.Formulario)
         id.value = ""
         limparCampos()
         mensagem.value = ""
     }
 
     fun editar(recepcionista: Recepcionista) {
-        tela.value = "form"
+        backStack.clear()
+        backStack.add(RecepcionistaRotas.Formulario)
         id.value = recepcionista.id.toString()
         nome.definir(recepcionista.nome)
         cpf.definir(recepcionista.cpf)
