@@ -10,11 +10,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun LayoutFormularioBase(
@@ -33,12 +32,12 @@ fun LayoutFormularioBase(
             text = titulo,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica
+            color = CoresApp.Primaria
         )
         Text(
             text = subtitulo,
             fontSize = 14.sp,
-            color = Color.Gray
+            color = CoresApp.TextoSecundario
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -49,7 +48,7 @@ fun LayoutFormularioBase(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = mensagemFeedback,
-                color = VerdeClinica,
+                color = CoresApp.Primaria,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp
             )

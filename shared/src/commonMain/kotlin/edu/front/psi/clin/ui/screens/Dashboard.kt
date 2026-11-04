@@ -19,8 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.CremeCampo
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun DashboardTela(innerPadding: PaddingValues) {
@@ -34,12 +33,12 @@ fun DashboardTela(innerPadding: PaddingValues) {
             text = "Painel Geral",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica
+            color = CoresApp.Primaria
         )
         Text(
             text = "Bem-vindo(a) ao sistema de gestão PsiClin.",
             fontSize = 14.sp,
-            color = VerdeClinica.copy(alpha = 0.7f)
+            color = CoresApp.Primaria.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -68,7 +67,7 @@ fun DashboardTela(innerPadding: PaddingValues) {
 private fun CardMetrica(titulo: String, valor: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.height(100.dp),
-        colors = CardDefaults.cardColors(containerColor = CremeCampo),
+        colors = CardDefaults.cardColors(containerColor = CoresApp.FundoFormulario),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -77,9 +76,9 @@ private fun CardMetrica(titulo: String, valor: String, modifier: Modifier = Modi
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = titulo, fontSize = 12.sp, color = VerdeClinica)
+            Text(text = titulo, fontSize = 12.sp, color = CoresApp.Primaria)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = valor, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = VerdeClinica)
+            Text(text = valor, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = CoresApp.Primaria)
         }
     }
 }

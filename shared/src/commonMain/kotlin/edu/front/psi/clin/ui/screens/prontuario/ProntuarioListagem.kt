@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,11 +20,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Prontuario
-import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun ProntuarioListagem(
@@ -58,7 +57,7 @@ fun ProntuarioListagem(
             Text(
                 text = prontuario.paciente,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -66,7 +65,7 @@ fun ProntuarioListagem(
             )
             Text(
                 text = prontuario.dataAbertura,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.1f),
                 maxLines = 1,
@@ -74,7 +73,7 @@ fun ProntuarioListagem(
             )
             Text(
                 text = prontuario.queixaPrincipal,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.8f),
                 maxLines = 1,
@@ -88,15 +87,15 @@ fun ProntuarioListagem(
                 val isEncerrado = statusLower.contains("encerrado") || statusLower.contains("inativo") || statusLower.contains("concluído")
 
                 val corFundo = when {
-                    isAtivo -> Color(0xFFA2C99B)     // Verde suave
-                    isEncerrado -> Color(0xFFFEF3C7) // Amarelo suave
-                    else -> Color(0xFFE5E7EB)       // Cinza claro neutro
+                    isAtivo -> CoresApp.FundoBadgeAtivo
+                    isEncerrado -> CoresApp.FundoBadgeAlerta
+                    else -> CoresApp.BordaContainer
                 }
 
                 val corTexto = when {
-                    isAtivo -> Color(0xFF2E5927)
-                    isEncerrado -> Color(0xFF92400E)
-                    else -> Color(0xFF374151)
+                    isAtivo -> CoresApp.TextoBadgeAtivo
+                    isEncerrado -> CoresApp.TextoBadgeAlerta
+                    else -> CoresApp.TextoBadgeNeutro
                 }
 
                 Box(
@@ -121,13 +120,13 @@ fun ProntuarioListagem(
         prontuarioSelecionado.value?.let { prontuario ->
             AlertDialog(
                 onDismissRequest = { prontuarioSelecionado.value = null },
-                containerColor = Color.White,
+                containerColor = CoresApp.Branco,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
                         text = "Prontuário - ${prontuario.paciente}",
                         fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
+                        color = CoresApp.Primaria,
                         fontSize = 20.sp
                     )
                 },
@@ -143,7 +142,7 @@ fun ProntuarioListagem(
                     TextButton(onClick = { prontuarioSelecionado.value = null }) {
                         Text(
                             text = "Fechar",
-                            color = VerdeClinica,
+                            color = CoresApp.Primaria,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -159,12 +158,12 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
         Text(
             text = "$rotulo: ",
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
+            color = CoresApp.Primaria,
             fontSize = 14.sp
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
+            color = CoresApp.TextoPrincipal,
             fontSize = 14.sp
         )
     }

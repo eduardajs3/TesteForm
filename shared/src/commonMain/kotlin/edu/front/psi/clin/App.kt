@@ -8,19 +8,16 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -43,6 +40,8 @@ import edu.front.psi.clin.ui.screen.SalaAtendimentoFormulario
 import edu.front.psi.clin.ui.screen.TipoAtendimentoFormulario
 
 // Imports das telas de Listagem e Dashboard
+import edu.front.psi.clin.ui.theme.AppTheme
+import edu.front.psi.clin.ui.theme.CoresApp
 import edu.front.psi.clin.ui.screen.AgendaListagem
 import edu.front.psi.clin.ui.screen.BloqueioAgendaListagem
 import edu.front.psi.clin.ui.screen.ConvenioListagem
@@ -73,10 +72,6 @@ import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
 import kotlinx.coroutines.launch
-
-private val Branco = Color.White
-val CremeCampo = Color(0xFFF6F3EC)
-val VerdeClinica = Color(0xFF3B5760)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,12 +134,7 @@ fun App() {
         }
     }
 
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = VerdeClinica,
-            onPrimary = Color.White
-        )
-    ) {
+    AppTheme {
         MenuLateral(
             drawerState = drawerState,
             scope = scope,
@@ -173,7 +163,7 @@ fun App() {
                                     "agenda" -> "Agendas"
                                     else -> "PsiClin"
                                 },
-                                color = Color.White
+                                color = CoresApp.Branco
                             )
                         },
                         navigationIcon = {
@@ -199,7 +189,7 @@ fun App() {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = "Voltar",
-                                        tint = Color.White
+                                        tint = CoresApp.Branco
                                     )
                                 }
                             } else {
@@ -207,15 +197,15 @@ fun App() {
                                     Icon(
                                         imageVector = Icons.Filled.Menu,
                                         contentDescription = "Abrir Menu Lateral",
-                                        tint = Color.White
+                                        tint = CoresApp.Branco
                                     )
                                 }
                             }
                         },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdeClinica)
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = CoresApp.Primaria)
                     )
                 },
-                containerColor = Branco
+                containerColor = CoresApp.Branco
             ) { contentPadding ->
                 when (tela.value) {
                     "dashboard" -> DashboardTela(contentPadding)

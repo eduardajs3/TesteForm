@@ -40,8 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.CremeCampo
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -104,7 +103,7 @@ fun MenuLateral(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = CremeCampo,
+                drawerContainerColor = CoresApp.FundoFormulario,
                 modifier = Modifier.width(280.dp)
             ) {
                 Column(
@@ -116,17 +115,17 @@ fun MenuLateral(
                         text = "PsiClin",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
+                        color = CoresApp.Primaria,
                         modifier = Modifier.padding(vertical = 12.dp)
                     )
                     Text(
                         text = "Gestão de Psicologia",
                         fontSize = 12.sp,
-                        color = VerdeClinica.copy(alpha = 0.7f)
+                        color = CoresApp.Primaria.copy(alpha = 0.7f)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
+                    HorizontalDivider(color = CoresApp.Primaria.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -138,7 +137,7 @@ fun MenuLateral(
                                 }
 
                                 NavigationDrawerItem(
-                                    label = { Text(item.nome, color = VerdeClinica, fontWeight = FontWeight.Bold) },
+                                    label = { Text(item.nome, color = CoresApp.Primaria, fontWeight = FontWeight.Bold) },
                                     selected = false,
                                     onClick = { expandido = !expandido },
                                     icon = {
@@ -150,14 +149,14 @@ fun MenuLateral(
                                                 else -> Icons.Filled.Description
                                             },
                                             contentDescription = item.nome,
-                                            tint = VerdeClinica
+                                            tint = CoresApp.Primaria
                                         )
                                     },
                                     badge = {
                                         Icon(
                                             imageVector = if (expandido) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                                             contentDescription = "Expandir/Recolher",
-                                            tint = VerdeClinica
+                                            tint = CoresApp.Primaria
                                         )
                                     },
                                     colors = NavigationDrawerItemDefaults.colors(
@@ -177,14 +176,14 @@ fun MenuLateral(
                                         item.subItens.forEach { subItem ->
                                             val selecionado = telaAtual == subItem.tela
                                             NavigationDrawerItem(
-                                                label = { Text(subItem.nome, color = VerdeClinica, fontSize = 13.sp) },
+                                                label = { Text(subItem.nome, color = CoresApp.Primaria, fontSize = 13.sp) },
                                                 selected = selecionado,
                                                 onClick = {
                                                     onNavigate(subItem.tela)
                                                     scope.launch { drawerState.close() }
                                                 },
                                                 colors = NavigationDrawerItemDefaults.colors(
-                                                    selectedContainerColor = VerdeClinica.copy(alpha = 0.15f),
+                                                    selectedContainerColor = CoresApp.Primaria.copy(alpha = 0.15f),
                                                     unselectedContainerColor = Color.Transparent
                                                 ),
                                                 shape = RoundedCornerShape(12.dp),
@@ -197,7 +196,7 @@ fun MenuLateral(
                                 // Item Direto
                                 val selecionado = telaAtual == item.tela
                                 NavigationDrawerItem(
-                                    label = { Text(item.nome, color = VerdeClinica) },
+                                    label = { Text(item.nome, color = CoresApp.Primaria) },
                                     selected = selecionado,
                                     onClick = {
                                         item.tela?.let { onNavigate(it) }
@@ -212,11 +211,11 @@ fun MenuLateral(
                                                 else -> Icons.Filled.Description
                                             },
                                             contentDescription = item.nome,
-                                            tint = VerdeClinica
+                                            tint = CoresApp.Primaria
                                         )
                                     },
                                     colors = NavigationDrawerItemDefaults.colors(
-                                        selectedContainerColor = VerdeClinica.copy(alpha = 0.15f),
+                                        selectedContainerColor = CoresApp.Primaria.copy(alpha = 0.15f),
                                         unselectedContainerColor = Color.Transparent
                                     ),
                                     shape = RoundedCornerShape(12.dp),

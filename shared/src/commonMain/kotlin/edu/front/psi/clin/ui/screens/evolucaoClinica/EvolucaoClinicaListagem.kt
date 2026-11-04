@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -17,8 +19,6 @@ import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.EvolucaoClinica
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun EvolucaoClinicaListagem(
@@ -54,7 +54,7 @@ fun EvolucaoClinicaListagem(
             Text(
                 text = evolucao.prontuario,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -62,7 +62,7 @@ fun EvolucaoClinicaListagem(
             )
             Text(
                 text = evolucao.psicologo,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -70,7 +70,7 @@ fun EvolucaoClinicaListagem(
             )
             Text(
                 text = evolucao.dataRegistro,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.1f),
                 maxLines = 1,
@@ -78,7 +78,7 @@ fun EvolucaoClinicaListagem(
             )
             Text(
                 text = evolucao.descricao,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.8f),
                 maxLines = 1,

@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,11 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Recepcionista
-import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun RecepcionistaListagem(
@@ -57,7 +56,7 @@ fun RecepcionistaListagem(
             Text(
                 text = recepcionista.nome,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -65,7 +64,7 @@ fun RecepcionistaListagem(
             )
             Text(
                 text = recepcionista.cpf,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.3f),
                 maxLines = 1,
@@ -73,7 +72,7 @@ fun RecepcionistaListagem(
             )
             Text(
                 text = recepcionista.telefone,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -81,7 +80,7 @@ fun RecepcionistaListagem(
             )
             Text(
                 text = recepcionista.setor,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -93,13 +92,13 @@ fun RecepcionistaListagem(
         recepcionistaSelecionada.value?.let { recepcionista ->
             AlertDialog(
                 onDismissRequest = { recepcionistaSelecionada.value = null },
-                containerColor = Color.White,
+                containerColor = CoresApp.Branco,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
                         text = recepcionista.nome,
                         fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
+                        color = CoresApp.Primaria,
                         fontSize = 20.sp
                     )
                 },
@@ -115,7 +114,7 @@ fun RecepcionistaListagem(
                     TextButton(onClick = { recepcionistaSelecionada.value = null }) {
                         Text(
                             text = "Fechar",
-                            color = VerdeClinica,
+                            color = CoresApp.Primaria,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -131,12 +130,12 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
         Text(
             text = "$rotulo: ",
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
+            color = CoresApp.Primaria,
             fontSize = 14.sp
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
+            color = CoresApp.TextoPrincipal,
             fontSize = 14.sp
         )
     }

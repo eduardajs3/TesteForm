@@ -1,5 +1,6 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -16,11 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Agenda
-import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun AgendaListagem(
@@ -56,7 +54,7 @@ fun AgendaListagem(
             Text(
                 text = agendamento.paciente,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -64,7 +62,7 @@ fun AgendaListagem(
             )
             Text(
                 text = agendamento.psicologo,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -72,7 +70,7 @@ fun AgendaListagem(
             )
             Text(
                 text = agendamento.dataHoraInicio,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -80,7 +78,7 @@ fun AgendaListagem(
             )
             Text(
                 text = agendamento.status,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.0f),
                 maxLines = 1,
@@ -92,13 +90,13 @@ fun AgendaListagem(
         agendamentoSelecionado.value?.let { agendamento ->
             AlertDialog(
                 onDismissRequest = { agendamentoSelecionado.value = null },
-                containerColor = Color.White,
+                containerColor = CoresApp.Branco,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
                         text = "Detalhes do Agendamento",
                         fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
+                        color = CoresApp.Primaria,
                         fontSize = 20.sp
                     )
                 },
@@ -119,7 +117,7 @@ fun AgendaListagem(
                     TextButton(onClick = { agendamentoSelecionado.value = null }) {
                         Text(
                             text = "Fechar",
-                            color = VerdeClinica,
+                            color = CoresApp.Primaria,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -135,12 +133,12 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
         Text(
             text = "$rotulo: ",
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
+            color = CoresApp.Primaria,
             fontSize = 14.sp
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
+            color = CoresApp.TextoPrincipal,
             fontSize = 14.sp
         )
     }

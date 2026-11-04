@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun BarraPesquisa(
@@ -26,9 +27,6 @@ fun BarraPesquisa(
     modifier: Modifier = Modifier,
     placeholderText: String = "Buscar"
 ) {
-    val cinzaBorda = Color(0xFFD0D0D0)
-    val cinzaTexto = Color(0xFF6E6E6E)
-
     OutlinedTextField(
         value = text,
         onValueChange = onTextChange,
@@ -36,11 +34,11 @@ fun BarraPesquisa(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(50.dp)
-            .background(Color.White, shape = RoundedCornerShape(50.dp)),
+            .background(CoresApp.Branco, shape = RoundedCornerShape(50.dp)),
         placeholder = {
             Text(
                 text = placeholderText,
-                color = cinzaTexto,
+                color = CoresApp.TextoSecundario,
                 fontSize = 14.sp
             )
         },
@@ -48,7 +46,7 @@ fun BarraPesquisa(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Buscar",
-                tint = cinzaTexto
+                tint = CoresApp.TextoSecundario
             )
         },
         trailingIcon = {
@@ -57,7 +55,7 @@ fun BarraPesquisa(
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Limpar",
-                        tint = cinzaTexto
+                        tint = CoresApp.TextoSecundario
                     )
                 }
             }
@@ -65,12 +63,12 @@ fun BarraPesquisa(
         singleLine = true,
         shape = RoundedCornerShape(50.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = cinzaBorda,
-            unfocusedBorderColor = cinzaBorda,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
+            focusedBorderColor = CoresApp.BordaPesquisa,
+            unfocusedBorderColor = CoresApp.BordaPesquisa,
+            focusedContainerColor = CoresApp.Branco,
+            unfocusedContainerColor = CoresApp.Branco,
+            focusedTextColor = CoresApp.Preto,
+            unfocusedTextColor = CoresApp.Preto
         )
     )
 }

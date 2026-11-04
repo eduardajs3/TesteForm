@@ -10,9 +10,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun CampoTextoPadrao(
@@ -31,11 +30,11 @@ fun CampoTextoPadrao(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = VerdeClinica,
-                unfocusedBorderColor = Color(0xFFE5E7EB),
-                focusedLabelColor = VerdeClinica
+                focusedContainerColor = CoresApp.Branco,
+                unfocusedContainerColor = CoresApp.Branco,
+                focusedBorderColor = CoresApp.Primaria,
+                unfocusedBorderColor = CoresApp.BordaContainer,
+                focusedLabelColor = CoresApp.Primaria
             )
         )
         Spacer(modifier = Modifier.height(12.dp))

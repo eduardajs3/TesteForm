@@ -9,10 +9,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun BotoesAcaoFormulario(
@@ -28,8 +27,8 @@ fun BotoesAcaoFormulario(
         Button(
             onClick = onLimpar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFF3F4F6),
-                contentColor = Color(0xFF4B5563)
+                containerColor = CoresApp.FundoBotaoSecundario,
+                contentColor = CoresApp.TextoBotaoSecundario
             ),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.weight(1f)
@@ -40,8 +39,8 @@ fun BotoesAcaoFormulario(
         Button(
             onClick = onSalvar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = VerdeClinica,
-                contentColor = Color.White
+                containerColor = CoresApp.Primaria,
+                contentColor = CoresApp.Branco
             ),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.weight(1f)

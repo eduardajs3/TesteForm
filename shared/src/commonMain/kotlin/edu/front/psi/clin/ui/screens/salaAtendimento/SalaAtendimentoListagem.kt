@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -16,11 +18,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.SalaAtendimento
-import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun SalaAtendimentoListagem(
@@ -55,7 +54,7 @@ fun SalaAtendimentoListagem(
             Text(
                 text = sala.nome,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -63,7 +62,7 @@ fun SalaAtendimentoListagem(
             )
             Text(
                 text = "${sala.capacidade} pessoas",
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.0f),
                 maxLines = 1,
@@ -71,7 +70,7 @@ fun SalaAtendimentoListagem(
             )
             Text(
                 text = sala.descricao,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(2.0f),
                 maxLines = 1,
@@ -83,13 +82,13 @@ fun SalaAtendimentoListagem(
         salaSelecionada.value?.let { sala ->
             AlertDialog(
                 onDismissRequest = { salaSelecionada.value = null },
-                containerColor = Color.White,
+                containerColor = CoresApp.Branco,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
                         text = sala.nome,
                         fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
+                        color = CoresApp.Primaria,
                         fontSize = 20.sp
                     )
                 },
@@ -103,7 +102,7 @@ fun SalaAtendimentoListagem(
                     TextButton(onClick = { salaSelecionada.value = null }) {
                         Text(
                             text = "Fechar",
-                            color = VerdeClinica,
+                            color = CoresApp.Primaria,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -119,12 +118,12 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
         Text(
             text = "$rotulo: ",
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
+            color = CoresApp.Primaria,
             fontSize = 14.sp
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoLinha,
+            color = CoresApp.TextoPrincipal,
             fontSize = 14.sp
         )
     }

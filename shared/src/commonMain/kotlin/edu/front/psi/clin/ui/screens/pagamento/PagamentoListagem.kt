@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun PagamentoListagem(
@@ -50,7 +50,7 @@ fun PagamentoListagem(
             Text(
                 text = pagamento.paciente,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -58,7 +58,7 @@ fun PagamentoListagem(
             )
             Text(
                 text = "R$ ${pagamento.valorTotal}",
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -66,7 +66,7 @@ fun PagamentoListagem(
             )
             Text(
                 text = pagamento.dataPagamento,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -78,13 +78,13 @@ fun PagamentoListagem(
                 val isPago = pagamento.status
 
                 val corFundo = when {
-                    isPago -> Color(0xFFA2C99B)
-                    else -> Color(0xFFFEF3C7)
+                    isPago -> CoresApp.FundoBadgeAtivo
+                    else -> CoresApp.FundoBadgeAlerta
                 }
 
                 val corTexto = when {
-                    isPago -> Color(0xFF2E5927)
-                    else -> Color(0xFF92400E)
+                    isPago -> CoresApp.TextoBadgeAtivo
+                    else -> CoresApp.TextoBadgeAlerta
                 }
 
                 Box(

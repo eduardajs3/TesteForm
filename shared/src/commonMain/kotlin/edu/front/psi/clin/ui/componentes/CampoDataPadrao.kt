@@ -24,9 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CoresApp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,17 +53,17 @@ fun CampoDataPadrao(
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = "Selecionar data",
-                        tint = VerdeClinica
+                        tint = CoresApp.Primaria
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledContainerColor = Color.White,
-                    disabledBorderColor = Color(0xFFE5E7EB),
-                    disabledLabelColor = VerdeClinica,
-                    disabledTextColor = Color(0xFF1F2937),
-                    disabledTrailingIconColor = VerdeClinica
+                    disabledContainerColor = CoresApp.Branco,
+                    disabledBorderColor = CoresApp.BordaContainer,
+                    disabledLabelColor = CoresApp.Primaria,
+                    disabledTextColor = CoresApp.TextoPrincipal,
+                    disabledTrailingIconColor = CoresApp.Primaria
                 )
             )
 
@@ -99,12 +98,12 @@ fun CampoDataPadrao(
                         mostrarPicker = false
                     }
                 ) {
-                    Text("OK", color = VerdeClinica)
+                    Text("OK", color = CoresApp.Primaria)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarPicker = false }) {
-                    Text("Cancelar", color = Color.Gray)
+                    Text("Cancelar", color = CoresApp.TextoSecundario)
                 }
             }
         ) {

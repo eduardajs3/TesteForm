@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,8 +13,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun BloqueioAgendaListagem(
@@ -46,7 +46,7 @@ fun BloqueioAgendaListagem(
             Text(
                 text = bloqueio.psicologo,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,
@@ -54,7 +54,7 @@ fun BloqueioAgendaListagem(
             )
             Text(
                 text = bloqueio.dataHoraInicio,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -62,7 +62,7 @@ fun BloqueioAgendaListagem(
             )
             Text(
                 text = bloqueio.dataHoraFim,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -70,7 +70,7 @@ fun BloqueioAgendaListagem(
             )
             Text(
                 text = bloqueio.motivo,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.5f),
                 maxLines = 1,

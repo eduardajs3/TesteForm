@@ -1,5 +1,6 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,8 +19,6 @@ import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Paciente
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun PacienteListagem(
@@ -57,7 +56,7 @@ fun PacienteListagem(
             Text(
                 text = paciente.nome,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -65,7 +64,7 @@ fun PacienteListagem(
             )
             Text(
                 text = paciente.cpf,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.3f),
                 maxLines = 1,
@@ -73,7 +72,7 @@ fun PacienteListagem(
             )
             Text(
                 text = paciente.telefone,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.2f),
                 maxLines = 1,
@@ -81,7 +80,7 @@ fun PacienteListagem(
             )
             Text(
                 text = "Unimed",
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.1f),
                 maxLines = 1,
@@ -94,14 +93,14 @@ fun PacienteListagem(
                 Box(
                     modifier = Modifier
                         .background(
-                            color = if (isAtivo) Color(0xFFA2C99B) else Color(0xFFFEF3C7),
+                            color = if (isAtivo) CoresApp.FundoBadgeAtivo else CoresApp.FundoBadgeAlerta,
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = if (isAtivo) "Ativo" else "Inativo",
-                        color = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E),
+                        color = if (isAtivo) CoresApp.TextoBadgeAtivo else CoresApp.TextoBadgeAlerta,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )

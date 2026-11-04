@@ -18,11 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
-
-val CorBordaContainer = Color(0xFFE5E7EB)
-val CorLinhaDivisoria = Color(0xFFF3F4F6)
-val CorTextoCabecalho = Color(0xFF9CA3AF)
+import edu.front.psi.clin.ui.theme.CoresApp
 
 @Composable
 fun <T> LayoutListagemBase(
@@ -56,25 +52,25 @@ fun <T> LayoutListagemBase(
                 text = titulo,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = VerdeClinica
+                color = CoresApp.Primaria
             )
 
             Button(
                 onClick = onNovoClick,
-                colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
+                colors = ButtonDefaults.buttonColors(containerColor = CoresApp.Primaria),
                 shape = RoundedCornerShape(20.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = textoBotaoNovo,
-                    tint = Color.White,
+                    tint = CoresApp.Branco,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = textoBotaoNovo,
-                    color = Color.White,
+                    color = CoresApp.Branco,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -95,8 +91,8 @@ fun <T> LayoutListagemBase(
                 .padding(16.dp)
                 .animateContentSize(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CorBordaContainer)
+            colors = CardDefaults.cardColors(containerColor = CoresApp.Branco),
+            border = androidx.compose.foundation.BorderStroke(1.dp, CoresApp.BordaContainer)
         ) {
             Column(
                 modifier = Modifier
@@ -117,7 +113,7 @@ fun <T> LayoutListagemBase(
                         Text(
                             text = nome,
                             fontWeight = FontWeight.Bold,
-                            color = CorTextoCabecalho,
+                            color = CoresApp.TextoCabecalho,
                             fontSize = 14.sp,
                             modifier = Modifier.weight(peso)
                         )
@@ -125,7 +121,7 @@ fun <T> LayoutListagemBase(
                     Spacer(modifier = Modifier.width(larguraAcoes))
                 }
 
-                HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                HorizontalDivider(color = CoresApp.LinhaDivisoria, thickness = 1.dp)
 
                 // Linhas de dados
                 itens.forEachIndexed { index, item ->
@@ -152,7 +148,7 @@ fun <T> LayoutListagemBase(
                                     Icon(
                                         imageVector = Icons.Outlined.Visibility,
                                         contentDescription = "Visualizar",
-                                        tint = CorTextoCabecalho,
+                                        tint = CoresApp.TextoCabecalho,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -164,7 +160,7 @@ fun <T> LayoutListagemBase(
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = "Editar",
-                                    tint = CorTextoCabecalho,
+                                    tint = CoresApp.TextoCabecalho,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -175,7 +171,7 @@ fun <T> LayoutListagemBase(
                                 Icon(
                                     imageVector = Icons.Outlined.Delete,
                                     contentDescription = "Remover",
-                                    tint = Color(0xFFEF4444),
+                                    tint = CoresApp.Erro,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -183,7 +179,7 @@ fun <T> LayoutListagemBase(
                     }
 
                     if (index < itens.size - 1) {
-                        HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                        HorizontalDivider(color = CoresApp.LinhaDivisoria, thickness = 1.dp)
                     }
                 }
             }

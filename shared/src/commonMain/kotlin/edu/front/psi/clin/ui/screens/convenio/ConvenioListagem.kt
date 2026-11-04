@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screen
 
+import edu.front.psi.clin.ui.theme.CoresApp
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,8 +13,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.ui.components.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.ConvenioViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun ConvenioListagem(
@@ -46,7 +46,7 @@ fun ConvenioListagem(
             Text(
                 text = convenio.nome,
                 fontWeight = FontWeight.Bold,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(1.8f),
                 maxLines = 1,
@@ -54,7 +54,7 @@ fun ConvenioListagem(
             )
             Text(
                 text = convenio.cnpj,
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.4f),
                 maxLines = 1,
@@ -62,7 +62,7 @@ fun ConvenioListagem(
             )
             Text(
                 text = "${convenio.percentualCobertura}%",
-                color = CorTextoLinha,
+                color = CoresApp.TextoPrincipal,
                 fontSize = 13.sp,
                 modifier = Modifier.weight(1.0f),
                 maxLines = 1,
