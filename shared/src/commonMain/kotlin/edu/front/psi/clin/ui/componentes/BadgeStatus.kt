@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

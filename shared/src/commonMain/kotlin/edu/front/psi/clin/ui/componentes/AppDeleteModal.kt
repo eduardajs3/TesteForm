@@ -1,35 +1,26 @@
 package edu.front.psi.clin.ui.componentes
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.BotaoExcluir
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
 import org.jetbrains.compose.resources.painterResource
-
 import frontpsiclinic.shared.generated.resources.*
-
-private val CorTextoTitulo = Color(0xFF1F2937)
-private val CorTextoSubtitulo = Color(0xFF9CA3AF)
-private val CorBotaoExcluir = Color(0xFFA30D18)
 
 @Composable
 fun AppDeleteModal(
@@ -42,7 +33,7 @@ fun AppDeleteModal(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = Color.White,
+            color = Branco,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -55,18 +46,17 @@ fun AppDeleteModal(
                 ) {
                     Text(
                         text = title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CorTextoTitulo
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TextoPrincipal
                     )
                     IconButton(
                         onClick = onDismiss,
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.close), 
+                            painter = painterResource(Res.drawable.close),
                             contentDescription = "Fechar modal",
-                            tint = Color.Gray
+                            tint = TextoSecundario
                         )
                     }
                 }
@@ -75,8 +65,8 @@ fun AppDeleteModal(
 
                 Text(
                     text = message,
-                    fontSize = 15.sp,
-                    color = CorTextoSubtitulo
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextoSecundario
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -87,15 +77,14 @@ fun AppDeleteModal(
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = CorBotaoExcluir
+                        containerColor = BotaoExcluir
                     ),
                     shape = CircleShape
                 ) {
                     Text(
                         text = confirmText,
-                        color = Color.White,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Branco
                     )
                 }
             }

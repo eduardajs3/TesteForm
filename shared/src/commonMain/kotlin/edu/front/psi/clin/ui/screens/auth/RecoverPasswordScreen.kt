@@ -1,4 +1,4 @@
-package com.psiclin.front.ui.screens.auth
+package com.psiclin.front.ui.screenss.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,17 +9,19 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 import edu.front.psi.clin.navigation.Route
-import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.AuthLayout
-import edu.front.psi.clin.ui.components.AuthTextField
+import edu.front.psi.clin.ui.componentes.AuthLayout
+import edu.front.psi.clin.ui.componentes.AuthTextField
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.VerdeClinica
+
 @Composable
 fun RecoverPasswordScreen(
     onNavigate: (Route) -> Unit
@@ -33,17 +35,16 @@ fun RecoverPasswordScreen(
     AuthLayout {
         Text(
             text = "Recuperar senha",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1F2937)
+            style = MaterialTheme.typography.titleLarge,
+            color = TextoPrincipal
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Informe seus dados e defina sua nova senha",
-            fontSize = 14.sp,
-            color = Color.Gray
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextoSecundario
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -109,9 +110,9 @@ fun RecoverPasswordScreen(
         ) {
             Text(
                 text = "Redefinir Senha",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Branco
             )
         }
 
@@ -123,12 +124,12 @@ fun RecoverPasswordScreen(
         ) {
             Text(
                 text = "Lembrou a senha? ",
-                fontSize = 13.sp,
-                color = Color(0xFF6B7280)
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoSecundario
             )
             Text(
                 text = "Entrar na conta",
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = VerdeClinica,
                 modifier = Modifier.clickable {

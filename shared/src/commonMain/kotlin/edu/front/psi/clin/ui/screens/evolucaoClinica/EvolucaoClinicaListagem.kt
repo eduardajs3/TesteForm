@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.evolucaoClinica
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.EvolucaoClinica
-import edu.front.psi.clin.ui.components.*
+import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 import org.jetbrains.compose.resources.painterResource

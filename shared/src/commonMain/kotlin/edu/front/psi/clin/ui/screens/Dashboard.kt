@@ -1,26 +1,18 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.CremeCampo
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CremeCampo
+import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @Composable
 fun DashboardTela(innerPadding: PaddingValues) {
@@ -32,14 +24,13 @@ fun DashboardTela(innerPadding: PaddingValues) {
     ) {
         Text(
             text = "Painel Geral",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
             color = VerdeClinica
         )
         Text(
             text = "Bem-vindo(a) ao sistema de gestão PsiClin.",
-            fontSize = 14.sp,
-            color = VerdeClinica.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextoSecundario
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -77,9 +68,18 @@ private fun CardMetrica(titulo: String, valor: String, modifier: Modifier = Modi
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = titulo, fontSize = 12.sp, color = VerdeClinica)
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextoSecundario
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = valor, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = VerdeClinica)
+            Text(
+                text = valor,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = VerdeClinica
+            )
         }
     }
 }

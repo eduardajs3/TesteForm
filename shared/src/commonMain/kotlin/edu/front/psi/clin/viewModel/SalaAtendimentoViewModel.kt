@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.SalaAtendimento
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
-import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.ui.componentes.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class SalaAtendimentoViewModel(

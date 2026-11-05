@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.tipoAtendimento
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -9,11 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import edu.front.psi.clin.TipoAtendimento
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.components.BadgeStatus
-import edu.front.psi.clin.ui.components.CelulaTabelaTexto
-import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.BadgeStatus
+import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
-import edu.front.psi.clin.ui.components.ModalDetalhesBase
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
 
 @Composable

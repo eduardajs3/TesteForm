@@ -7,18 +7,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Prontuario
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.components.*
+import edu.front.psi.clin.ui.componentes.*
+import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
-
-private val CorTextoPrincipal = Color(0xFF1F2937)
 
 @Composable
 fun ProntuarioListagem(
@@ -84,9 +81,9 @@ fun ProntuarioListagem(
                         ) {
                             Text(
                                 text = "Situação: ",
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = CorTextoPrincipal
+                                color = TextoPrincipal
                             )
 
                             BadgeStatus(

@@ -9,18 +9,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.ui.components.CabecalhoTela
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CardBordaCinza
+import edu.front.psi.clin.ui.theme.LinhaDivisoria
+import edu.front.psi.clin.ui.theme.TextoErro
+import edu.front.psi.clin.ui.theme.TextoSecundario
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
-
-val CorBordaContainer = Color(0xFFE5E7EB)
-val CorLinhaDivisoria = Color(0xFFF3F4F6)
-val CorTextoCabecalho = Color(0xFF9CA3AF)
 
 @Composable
 fun <T> LayoutListagemBase(
@@ -31,7 +27,7 @@ fun <T> LayoutListagemBase(
     onNovoClick: () -> Unit,
     colunas: List<Pair<String, Float>>,
     itens: List<T>,
-    onVisualizar: ((T) -> Unit)? = null, 
+    onVisualizar: ((T) -> Unit)? = null,
     onEditar: (T) -> Unit,
     onApagar: (T) -> Unit,
     placeholderPesquisa: String = "Buscar...",
@@ -65,17 +61,15 @@ fun <T> LayoutListagemBase(
                 .fillMaxWidth()
                 .animateContentSize(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CorBordaContainer)
+            colors = CardDefaults.cardColors(containerColor = Branco),
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardBordaCinza)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-              
                 val larguraAcoes = if (onVisualizar != null) 108.dp else 72.dp
-
 
                 Row(
                     modifier = Modifier
@@ -86,16 +80,15 @@ fun <T> LayoutListagemBase(
                     colunas.forEach { (nome, peso) ->
                         Text(
                             text = nome,
-                            fontWeight = FontWeight.Bold,
-                            color = CorTextoCabecalho,
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextoSecundario,
                             modifier = Modifier.weight(peso)
                         )
                     }
                     Spacer(modifier = Modifier.width(larguraAcoes))
                 }
 
-                HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
 
                 if (itens.isEmpty()) {
                     Box(
@@ -106,14 +99,12 @@ fun <T> LayoutListagemBase(
                     ) {
                         Text(
                             text = "Não há registros cadastrados.",
-                            color = CorTextoCabecalho,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextoSecundario,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 } else {
-              
                     itens.forEachIndexed { index, item ->
                         Row(
                             modifier = Modifier
@@ -121,9 +112,7 @@ fun <T> LayoutListagemBase(
                                 .padding(vertical = 12.dp, horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-               
                             linhaContent(item)
-
 
                             Row(
                                 horizontalArrangement = Arrangement.End,
@@ -138,7 +127,7 @@ fun <T> LayoutListagemBase(
                                         Icon(
                                             painter = painterResource(Res.drawable.visibility),
                                             contentDescription = "Visualizar",
-                                            tint = CorTextoCabecalho,
+                                            tint = TextoSecundario,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -150,7 +139,7 @@ fun <T> LayoutListagemBase(
                                     Icon(
                                         painter = painterResource(Res.drawable.edit_square_24px),
                                         contentDescription = "Editar",
-                                        tint = CorTextoCabecalho,
+                                        tint = TextoSecundario,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -161,7 +150,7 @@ fun <T> LayoutListagemBase(
                                     Icon(
                                         painter = painterResource(Res.drawable.delete_24px),
                                         contentDescription = "Remover",
-                                        tint = Color(0xFFEF4444),
+                                        tint = TextoErro,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -169,7 +158,7 @@ fun <T> LayoutListagemBase(
                         }
 
                         if (index < itens.size - 1) {
-                            HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
+                            HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
                         }
                     }
                 }

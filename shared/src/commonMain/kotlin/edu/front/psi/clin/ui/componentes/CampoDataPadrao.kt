@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -7,10 +7,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CinzaBordaCampo
+import edu.front.psi.clin.ui.theme.CinzaTextoData
+import edu.front.psi.clin.ui.theme.TextoErro
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.VerdeClinica
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 import java.text.SimpleDateFormat
@@ -46,9 +49,12 @@ fun CampoDataPadrao(
                 value = value,
                 onValueChange = {},
                 readOnly = true,
-                enabled = false, 
+                enabled = false,
                 label = {
-                    Text(if (obrigatorio) "$label *" else label)
+                    Text(
+                        text = if (obrigatorio) "$label *" else label,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 },
                 isError = isError,
                 trailingIcon = {
@@ -62,10 +68,10 @@ fun CampoDataPadrao(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledContainerColor = Color.White,
-                    disabledBorderColor = if (isError) Color(0xFFEF4444) else Color(0xFFE5E7EB),
-                    disabledLabelColor = if (isError) Color(0xFFEF4444) else VerdeClinica,
-                    disabledTextColor = Color(0xFF1F2937),
+                    disabledContainerColor = Branco,
+                    disabledBorderColor = if (isError) TextoErro else CinzaBordaCampo,
+                    disabledLabelColor = if (isError) TextoErro else VerdeClinica,
+                    disabledTextColor = TextoPrincipal,
                     disabledTrailingIconColor = VerdeClinica
                 )
             )
@@ -74,8 +80,8 @@ fun CampoDataPadrao(
         if (isError && !errorMessage.isNullOrBlank()) {
             Text(
                 text = errorMessage,
-                color = Color(0xFFEF4444),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextoErro,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
         }
@@ -100,14 +106,22 @@ fun CampoDataPadrao(
                         mostrarPicker = false
                     }
                 ) {
-                    Text(text = "OK", color = VerdeClinica)
+                    Text(
+                        text = "OK",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = VerdeClinica
+                    )
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { mostrarPicker = false }
                 ) {
-                    Text(text = "Cancelar", color = Color.Gray)
+                    Text(
+                        text = "Cancelar",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = CinzaTextoData
+                    )
                 }
             }
         ) {

@@ -1,17 +1,18 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @Composable
 fun ModalDetalhesBase(
@@ -22,13 +23,12 @@ fun ModalDetalhesBase(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
+        title = {
             Text(
                 text = titulo,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica,
-                fontSize = 18.sp
-            ) 
+                style = MaterialTheme.typography.titleLarge,
+                color = VerdeClinica
+            )
         },
         text = {
             Column(
@@ -37,15 +37,14 @@ fun ModalDetalhesBase(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-               
+                conteudo()
 
                 if (acoesExtras != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Ações Rápidas",
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
-                        fontSize = 15.sp
+                        style = MaterialTheme.typography.titleMedium,
+                        color = VerdeClinica
                     )
                     acoesExtras()
                 }
@@ -53,30 +52,32 @@ fun ModalDetalhesBase(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fechar", color = VerdeClinica)
+                Text(
+                    text = "Fechar",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = VerdeClinica
+                )
             }
         }
     )
 }
 
-
 @Composable
 fun ItemDetalhe(
     rotulo: String,
     valor: String,
-    corTextoValor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color(0xFF1F2937)
+    corTextoValor: Color = TextoPrincipal
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "$rotulo: ",
-            fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.bodyMedium,
+            color = VerdeClinica
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = corTextoValor,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.bodyMedium,
+            color = corTextoValor
         )
     }
 }

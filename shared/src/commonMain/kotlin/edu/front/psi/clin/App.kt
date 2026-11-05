@@ -2,13 +2,11 @@ package edu.front.psi.clin
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,41 +14,42 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.ui.componentes.MenuLateral
-import edu.front.psi.clin.ui.components.NotificacaoFlutuante // <-- Import do seu novo componente flutuante
-import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
+import edu.front.psi.clin.ui.componentes.NotificacaoFlutuante
+import edu.front.psi.clin.ui.theme.PsiClinTheme
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
-// Imports das telas de Formulário
-import edu.front.psi.clin.ui.screen.AgendaFormulario
-import edu.front.psi.clin.ui.screen.BloqueioAgendaFormulario
-import edu.front.psi.clin.ui.screen.ConvenioFormulario
-import edu.front.psi.clin.ui.screen.EvolucaoClinicaFormulario
-import edu.front.psi.clin.ui.screen.FuncionarioFormulario
-import edu.front.psi.clin.ui.screen.HorarioDisponivelFormulario
-import edu.front.psi.clin.ui.screens.paciente.PacienteFormulario 
-import edu.front.psi.clin.ui.screen.PagamentoFormulario
-import edu.front.psi.clin.ui.screen.ProntuarioFormulario
-import edu.front.psi.clin.ui.screen.PsicologoFormulario
-import edu.front.psi.clin.ui.screen.RecepcionistaFormulario
-import edu.front.psi.clin.ui.screen.SalaAtendimentoFormulario
-import edu.front.psi.clin.ui.screen.TipoAtendimentoFormulario
+import edu.front.psi.clin.ui.screens.agenda.AgendaFormulario
+import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaFormulario
+import edu.front.psi.clin.ui.screens.convenio.ConvenioFormulario
+import edu.front.psi.clin.ui.screens.evolucaoClinica.EvolucaoClinicaFormulario
+import edu.front.psi.clin.ui.screens.funcionario.FuncionarioFormulario
+import edu.front.psi.clin.ui.screens.horarioDisponivel.HorarioDisponivelFormulario
+import edu.front.psi.clin.ui.screens.paciente.PacienteFormulario
+import edu.front.psi.clin.ui.screens.pagamento.PagamentoFormulario
+import edu.front.psi.clin.ui.screens.prontuario.ProntuarioFormulario
+import edu.front.psi.clin.ui.screens.psicologo.PsicologoFormulario
+import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaFormulario
+import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoFormulario
+import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoFormulario
 
 // Imports das telas de Listagem e Dashboard
-import com.psiclin.front.ui.screens.auth.LoginScreen
-import com.psiclin.front.ui.screens.auth.RecoverPasswordScreen
-import edu.front.psi.clin.ui.screen.AgendaListagem
-import edu.front.psi.clin.ui.screen.BloqueioAgendaListagem
-import edu.front.psi.clin.ui.screen.ConvenioListagem
-import edu.front.psi.clin.ui.screen.DashboardTela
-import edu.front.psi.clin.ui.screen.EvolucaoClinicaListagem
-import edu.front.psi.clin.ui.screen.FuncionarioListagem
-import edu.front.psi.clin.ui.screen.HorarioDisponivelListagem
-import edu.front.psi.clin.ui.screen.PacienteListagem
-import edu.front.psi.clin.ui.screen.PagamentoListagem
+import com.psiclin.front.ui.screenss.auth.LoginScreen
+import com.psiclin.front.ui.screenss.auth.RecoverPasswordScreen
+import edu.front.psi.clin.ui.screens.agenda.AgendaListagem
+import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaListagem
+import edu.front.psi.clin.ui.screens.convenio.ConvenioListagem
+import edu.front.psi.clin.ui.screens.DashboardTela
+import edu.front.psi.clin.ui.screens.evolucaoClinica.EvolucaoClinicaListagem
+import edu.front.psi.clin.ui.screens.funcionario.FuncionarioListagem
+import edu.front.psi.clin.ui.screens.horarioDisponivel.HorarioDisponivelListagem
+import edu.front.psi.clin.ui.screens.paciente.PacienteListagem
+import edu.front.psi.clin.ui.screens.pagamento.PagamentoListagem
 import edu.front.psi.clin.ui.screens.prontuario.ProntuarioListagem
-import edu.front.psi.clin.ui.screen.PsicologoListagem
-import edu.front.psi.clin.ui.screen.RecepcionistaListagem
-import edu.front.psi.clin.ui.screen.SalaAtendimentoListagem
-import edu.front.psi.clin.ui.screen.TipoAtendimentoListagem
+import edu.front.psi.clin.ui.screens.psicologo.PsicologoListagem
+import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaListagem
+import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoListagem
+import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoListagem
 
 // Imports das ViewModels
 import edu.front.psi.clin.ui.viewmodel.*
@@ -67,25 +66,20 @@ import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.navigation.PacienteRotas
 import edu.front.psi.clin.navigation.AgendaRotas
-
-private val Branco = Color.White
-val CremeCampo = Color(0xFFF6F3EC)
-val VerdeClinica = Color(0xFF3B5760)
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
     val scope = rememberCoroutineScope()
 
-    // 1. ViewModel Principal centralizando a navegação global, gaveta e notificação
     val principalVm: PrincipalViewModel = viewModel(
         factory = viewModelFactory { initializer { PrincipalViewModel(scope) } }
     )
 
-    // Estado para guardar o nome do paciente selecionado entre telas
     var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
-    // 2. ViewModels instanciados (todos utilizando a nova notificação flutuante se necessário)
     val pacienteVm: PacienteViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
@@ -182,7 +176,6 @@ fun App() {
 
     val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Login
 
-    // String identificadora da tela atual para o MenuLateral
     val stringTelaAtual = when (rotaAtual) {
         Route.Dashboard -> "dashboard"
         Route.Paciente -> "paciente"
@@ -201,15 +194,8 @@ fun App() {
         else -> "login"
     }
 
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = VerdeClinica,
-            onPrimary = Color.White
-        )
-    ) {
-        // Envolvemos a aplicação num Box para permitir que a NotificacaoFlutuante fique por cima
+    PsiClinTheme {
         Box(modifier = Modifier.fillMaxSize()) {
-            
             MenuLateral(
                 viewModel = principalVm,
                 telaAtual = stringTelaAtual,
@@ -280,7 +266,8 @@ fun App() {
                                             Route.Agenda -> "Agendas"
                                             else -> "PsiClin"
                                         },
-                                        color = Color.White
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = Branco
                                     )
                                 },
                                 navigationIcon = {
@@ -288,7 +275,7 @@ fun App() {
                                         Icon(
                                             imageVector = Icons.Filled.Menu,
                                             contentDescription = "Abrir Menu Lateral",
-                                            tint = Color.White
+                                            tint = Branco
                                         )
                                     }
                                 },
@@ -445,7 +432,6 @@ fun App() {
                 }
             }
 
-            // Exibe o balão de notificação no canto inferior direito de qualquer tela
             NotificacaoFlutuante(mensagem = principalVm.mensagemNotificacao)
         }
     }

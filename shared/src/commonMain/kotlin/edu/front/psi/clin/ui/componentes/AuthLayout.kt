@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -7,9 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.ui.theme.Branco
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.Res
 import frontpsiclinic.shared.generated.resources.fundo_login
@@ -19,7 +19,6 @@ fun AuthLayout(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(Res.drawable.fundo_login),
             contentDescription = null,
@@ -34,7 +33,7 @@ fun AuthLayout(
                 .width(470.dp),
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White.copy(alpha = 0.95f)
+                containerColor = Branco.copy(alpha = 0.95f)
             ),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 12.dp

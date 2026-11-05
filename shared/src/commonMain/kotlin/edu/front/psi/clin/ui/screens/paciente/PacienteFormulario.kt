@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.components.CampoDataPadrao
-import edu.front.psi.clin.ui.components.CampoTextoPadrao
-import edu.front.psi.clin.ui.components.CampoDropdownPadrao
-import edu.front.psi.clin.ui.components.LayoutFormularioBase
+import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
+import edu.front.psi.clin.ui.componentes.CampoDataPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
 
 @Composable

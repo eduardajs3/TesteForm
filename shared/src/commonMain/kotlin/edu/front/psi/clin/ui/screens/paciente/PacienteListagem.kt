@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.paciente
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,18 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.Paciente
-import edu.front.psi.clin.VerdeClinica
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BarraPesquisa
-import edu.front.psi.clin.ui.components.ModalDetalhesBase
-import edu.front.psi.clin.ui.components.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.TextoErro
+import edu.front.psi.clin.ui.theme.TextoInativo
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun PacienteListagem(
@@ -48,7 +50,6 @@ fun PacienteListagem(
             .padding(24.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Cabeçalho e Botão de Novo Paciente
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,14 +58,13 @@ fun PacienteListagem(
                 Column {
                     Text(
                         text = "Pacientes",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge,
                         color = VerdeClinica
                     )
                     Text(
                         text = "Gerencie os pacientes cadastrados na clínica",
-                        fontSize = 14.sp,
-                        color = Color.Gray
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextoSecundario
                     )
                 }
 
@@ -76,16 +76,19 @@ fun PacienteListagem(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Novo Paciente",
-                        tint = Color.White
+                        tint = Branco
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Novo Paciente", color = Color.White)
+                    Text(
+                        text = "Novo Paciente",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Branco
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Barra de Pesquisa Padronizada
             BarraPesquisa(
                 text = filtro.value,
                 onTextChange = vm::atualizarFiltro,
@@ -94,7 +97,6 @@ fun PacienteListagem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Lista de Cards de Pacientes
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
@@ -110,7 +112,6 @@ fun PacienteListagem(
             }
         }
 
-        // Modal de Seleção de Ações e Ações Rápidas
         pacienteSelecionado.value?.let { paciente ->
             if (!exibirDetalhesCadastrais) {
                 ModalDetalhesBase(
@@ -119,8 +120,8 @@ fun PacienteListagem(
                     conteudo = {
                         Text(
                             text = "Selecione a opção desejada:",
-                            color = Color.Gray,
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextoSecundario
                         )
                     },
                     acoesExtras = {
@@ -134,7 +135,11 @@ fun PacienteListagem(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Prontuário", color = Color.White)
+                            Text(
+                                text = "Prontuário",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Branco
+                            )
                         }
 
                         Button(
@@ -147,7 +152,11 @@ fun PacienteListagem(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Evolução Clínica", color = Color.White)
+                            Text(
+                                text = "Evolução Clínica",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Branco
+                            )
                         }
 
                         OutlinedButton(
@@ -155,12 +164,15 @@ fun PacienteListagem(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Informações Cadastrais", color = VerdeClinica)
+                            Text(
+                                text = "Informações Cadastrais",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = VerdeClinica
+                            )
                         }
                     }
                 )
             } else {
-                // Modal de Dados Cadastrais
                 ModalDetalhesBase(
                     titulo = "Informações Cadastrais",
                     onDismiss = {
@@ -175,13 +187,16 @@ fun PacienteListagem(
                         ItemDetalhe("Telefone", paciente.telefone)
                         ItemDetalhe("Endereço", paciente.endereco)
                         ItemDetalhe("Observações", paciente.observacoes)
-                        ItemDetalhe("Status", if (paciente.ativo) "Ativo" else "Inativo")
+                        ItemDetalhe(
+                            rotulo = "Status",
+                            valor = if (paciente.ativo) "Ativo" else "Inativo",
+                            corTextoValor = if (paciente.ativo) VerdeClinica else TextoInativo
+                        )
                     }
                 )
             }
         }
 
-        // Modal de Exclusão de Paciente
         pacienteParaExcluir?.let { paciente ->
             AppDeleteModal(
                 title = "Exclusão de paciente",
@@ -205,7 +220,7 @@ private fun CardPaciente(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Branco),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -221,15 +236,15 @@ private fun CardPaciente(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = paciente.nome,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = CorTextoLinha
+                    color = TextoPrincipal
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "CPF: ${paciente.cpf}",
-                    fontSize = 13.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextoSecundario
                 )
             }
 
@@ -237,7 +252,6 @@ private fun CardPaciente(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Badge com Status (Ativo / Inativo)
                 val isAtivo = paciente.ativo
                 Box(
                     modifier = Modifier
@@ -249,13 +263,12 @@ private fun CardPaciente(
                 ) {
                     Text(
                         text = if (isAtivo) "Ativo" else "Inativo",
-                        color = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E),
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isAtivo) VerdeClinica else TextoInativo,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                // Botão Editar com Ícone XML (certifique-se de ter o arquivo correspondente na pasta drawable)
                 IconButton(
                     onClick = onEditarClick,
                     modifier = Modifier.size(32.dp)
@@ -263,12 +276,11 @@ private fun CardPaciente(
                     Icon(
                         painter = painterResource(Res.drawable.edit_square_24px),
                         contentDescription = "Editar Paciente",
-                        tint = Color.Gray,
+                        tint = TextoSecundario,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Botão Excluir com Ícone XML (certifique-se de ter o arquivo correspondente na pasta drawable)
                 IconButton(
                     onClick = onExcluirClick,
                     modifier = Modifier.size(32.dp)
@@ -276,7 +288,7 @@ private fun CardPaciente(
                     Icon(
                         painter = painterResource(Res.drawable.delete_24px),
                         contentDescription = "Excluir Paciente",
-                        tint = Color(0xFFEF4444),
+                        tint = TextoErro,
                         modifier = Modifier.size(20.dp)
                     )
                 }

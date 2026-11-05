@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
-import edu.front.psi.clin.ui.components.CampoValidado
+import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 

@@ -6,18 +6,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CinzaBordaPesquisa
+import edu.front.psi.clin.ui.theme.CinzaTextoPesquisa
+import edu.front.psi.clin.ui.theme.TextoPrincipal
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
@@ -28,9 +29,6 @@ fun BarraPesquisa(
     modifier: Modifier = Modifier,
     placeholderText: String = "Buscar"
 ) {
-    val cinzaBorda = Color(0xFFD0D0D0)
-    val cinzaTexto = Color(0xFF6E6E6E)
-
     OutlinedTextField(
         value = text,
         onValueChange = onTextChange,
@@ -38,19 +36,19 @@ fun BarraPesquisa(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(50.dp)
-            .background(Color.White, shape = RoundedCornerShape(50.dp)),
+            .background(Branco, shape = RoundedCornerShape(50.dp)),
         placeholder = {
             Text(
                 text = placeholderText,
-                color = cinzaTexto,
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodyMedium,
+                color = CinzaTextoPesquisa
             )
         },
         leadingIcon = {
             Icon(
-                painter = painterResource(Res.drawable.search_24px), 
+                painter = painterResource(Res.drawable.search_24px),
                 contentDescription = "Buscar",
-                tint = cinzaTexto,
+                tint = CinzaTextoPesquisa,
                 modifier = Modifier.size(20.dp)
             )
         },
@@ -58,22 +56,24 @@ fun BarraPesquisa(
             if (text.isNotEmpty()) {
                 IconButton(onClick = { onTextChange("") }) {
                     Icon(
-                        imageVector = Icons.Default.Clear,
+                        painter = painterResource(Res.drawable.close),
                         contentDescription = "Limpar",
-                        tint = cinzaTexto
+                        tint = CinzaTextoPesquisa,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         },
         singleLine = true,
         shape = RoundedCornerShape(50.dp),
+        textStyle = MaterialTheme.typography.bodyLarge,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = cinzaBorda,
-            unfocusedBorderColor = cinzaBorda,
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
+            focusedBorderColor = CinzaBordaPesquisa,
+            unfocusedBorderColor = CinzaBordaPesquisa,
+            focusedContainerColor = Branco,
+            unfocusedContainerColor = Branco,
+            focusedTextColor = TextoPrincipal,
+            unfocusedTextColor = TextoPrincipal
         )
     )
 }

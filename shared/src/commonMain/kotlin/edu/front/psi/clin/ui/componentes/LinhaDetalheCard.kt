@@ -1,31 +1,31 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
 
 @Composable
 fun LinhaDetalheCard(
     rotulo: String,
     valor: String,
-    corTexto: Color = Color.Gray
+    corTexto: Color = TextoSecundario
 ) {
     if (valor.isNotEmpty()) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = rotulo,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color(0xFF1F2937)
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoPrincipal
             )
             Text(
                 text = valor,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = corTexto
             )
         }

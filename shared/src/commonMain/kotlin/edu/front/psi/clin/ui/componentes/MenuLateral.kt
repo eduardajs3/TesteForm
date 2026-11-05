@@ -14,15 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.CremeCampo
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.CremeCampo
+import edu.front.psi.clin.ui.theme.TextoErro
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-
 import frontpsiclinic.shared.generated.resources.*
 
 data class SubMenuItemData(
@@ -47,13 +46,13 @@ fun MenuLateral(
 ) {
     val itensMenu = listOf(
         MenuItemData(
-            nome = "Dashboard", 
-            iconeRes = Res.drawable.dashboard, 
+            nome = "Dashboard",
+            iconeRes = Res.drawable.dashboard,
             tela = "dashboard"
         ),
         MenuItemData(
-            nome = "Pacientes", 
-            iconeRes = Res.drawable.group_24px, 
+            nome = "Pacientes",
+            iconeRes = Res.drawable.group_24px,
             tela = "paciente"
         ),
         MenuItemData(
@@ -75,8 +74,8 @@ fun MenuLateral(
             )
         ),
         MenuItemData(
-            nome = "Pagamentos", 
-            iconeRes = Res.drawable.description_24px, 
+            nome = "Pagamentos",
+            iconeRes = Res.drawable.description_24px,
             tela = "pagamento"
         ),
         MenuItemData(
@@ -90,7 +89,6 @@ fun MenuLateral(
         )
     )
 
-    // Estado para controlar a exibição do modal de confirmação de saída
     var mostrarModalSair by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
@@ -103,7 +101,6 @@ fun MenuLateral(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 ) {
-                    // Logo substituindo o texto "PsiClin"
                     Image(
                         painter = painterResource(Res.drawable.psiclin_logo),
                         contentDescription = "Logotipo PsiClin",
@@ -116,7 +113,6 @@ fun MenuLateral(
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Lista de itens do menu rolável
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -129,7 +125,13 @@ fun MenuLateral(
                                 }
 
                                 NavigationDrawerItem(
-                                    label = { Text(item.nome, color = VerdeClinica, fontWeight = FontWeight.Bold) },
+                                    label = {
+                                        Text(
+                                            text = item.nome,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = VerdeClinica
+                                        )
+                                    },
                                     selected = false,
                                     onClick = { expandido = !expandido },
                                     icon = {
@@ -142,7 +144,7 @@ fun MenuLateral(
                                     },
                                     badge = {
                                         Icon(
-                                            painter = painterResource(if (expandido) Res.drawable.keyboard_arrow_up else Res.drawable.keyboard_arrow_down), 
+                                            painter = painterResource(if (expandido) Res.drawable.keyboard_arrow_up else Res.drawable.keyboard_arrow_down),
                                             contentDescription = "Expandir/Recolher",
                                             tint = VerdeClinica,
                                             modifier = Modifier.size(20.dp)
@@ -164,7 +166,13 @@ fun MenuLateral(
                                         item.subItens.forEach { subItem ->
                                             val selecionado = telaAtual == subItem.tela
                                             NavigationDrawerItem(
-                                                label = { Text(subItem.nome, color = VerdeClinica, fontSize = 13.sp) },
+                                                label = {
+                                                    Text(
+                                                        text = subItem.nome,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = VerdeClinica
+                                                    )
+                                                },
                                                 selected = selecionado,
                                                 onClick = {
                                                     onNavigate(subItem.tela)
@@ -191,7 +199,13 @@ fun MenuLateral(
                             } else {
                                 val selecionado = telaAtual == item.tela
                                 NavigationDrawerItem(
-                                    label = { Text(item.nome, color = VerdeClinica) },
+                                    label = {
+                                        Text(
+                                            text = item.nome,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = VerdeClinica
+                                        )
+                                    },
                                     selected = selecionado,
                                     onClick = {
                                         item.tela?.let { onNavigate(it) }
@@ -220,9 +234,14 @@ fun MenuLateral(
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Botão Sair fixo na parte inferior
                     NavigationDrawerItem(
-                        label = { Text("Sair", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold) },
+                        label = {
+                            Text(
+                                text = "Sair",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = TextoErro
+                            )
+                        },
                         selected = false,
                         onClick = {
                             viewModel.fecharGaveta()
@@ -232,7 +251,7 @@ fun MenuLateral(
                             Icon(
                                 painter = painterResource(Res.drawable.logout),
                                 contentDescription = "Sair",
-                                tint = Color(0xFFB91C1C),
+                                tint = TextoErro,
                                 modifier = Modifier.size(24.dp)
                             )
                         },

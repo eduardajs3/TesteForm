@@ -1,6 +1,6 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.agenda
 
-import androidx.compose.foundation.BorderStroke // <-- Import correto da borda
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,18 +15,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 
 import frontpsiclinic.shared.generated.resources.*
 
 import edu.front.psi.clin.Agenda
-import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.components.CabecalhoTela
+import edu.front.psi.clin.ui.componentes.CabecalhoTela
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CardBordaCinza
+import edu.front.psi.clin.ui.theme.FundoSucesso
+import edu.front.psi.clin.ui.theme.TextoInativo
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.VerdeClinica
+import edu.front.psi.clin.ui.theme.VerdeSucesso
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
-
-private val CorTextoPrincipal = Color(0xFF1F2937)
-private val CorBordaCard = Color(0xFFE5E7EB)
 
 data class DiaSemanaAgenda(
     val nomeDia: String,
@@ -70,9 +73,9 @@ fun AgendaListagem(
 
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
+                colors = CardDefaults.cardColors(containerColor = Branco),
                 modifier = Modifier.fillMaxWidth(),
-                border = BorderStroke(1.dp, CorBordaCard)
+                border = BorderStroke(1.dp, CardBordaCinza)
             ) {
                 Row(
                     modifier = Modifier
@@ -92,9 +95,8 @@ fun AgendaListagem(
 
                     Text(
                         text = "Semana de 16 a 20 de Março de 2026",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = CorTextoPrincipal
+                        style = MaterialTheme.typography.titleMedium,
+                        color = TextoPrincipal
                     )
 
                     IconButton(onClick = { /* Navegar próxima semana */ }) {
@@ -121,9 +123,9 @@ fun AgendaListagem(
                     ) {
                         Text(
                             text = hora,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            color = Color.Gray,
+                            color = TextoSecundario,
                             modifier = Modifier
                                 .width(60.dp)
                                 .padding(top = 12.dp)
@@ -160,14 +162,13 @@ fun AgendaListagem(
         agendamentoSelecionado?.let { agendamento ->
             AlertDialog(
                 onDismissRequest = { agendamentoSelecionado = null },
-                containerColor = Color.White,
+                containerColor = Branco,
                 shape = RoundedCornerShape(20.dp),
                 title = {
                     Text(
                         text = "Consulta Agendada",
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
-                        fontSize = 20.sp
+                        style = MaterialTheme.typography.titleLarge,
+                        color = VerdeClinica
                     )
                 },
                 text = {
@@ -189,7 +190,7 @@ fun AgendaListagem(
                             vm.editar(item)
                         }) {
                             Icon(
-                                painter = painterResource(Res.drawable.edit_square_24px), // Verifique se o XML chama 'edit' ou 'edit_24px'
+                                painter = painterResource(Res.drawable.edit_square_24px),
                                 contentDescription = "Editar",
                                 tint = VerdeClinica,
                                 modifier = Modifier.size(24.dp)
@@ -201,7 +202,7 @@ fun AgendaListagem(
                             vm.apagar(item)
                         }) {
                             Icon(
-                                painter = painterResource(Res.drawable.delete_24px), // Verifique se o XML chama 'delete' ou 'delete_24px'
+                                painter = painterResource(Res.drawable.delete_24px),
                                 contentDescription = "Excluir",
                                 tint = Color(0xFFEF4444),
                                 modifier = Modifier.size(24.dp)
@@ -211,7 +212,11 @@ fun AgendaListagem(
                 },
                 dismissButton = {
                     TextButton(onClick = { agendamentoSelecionado = null }) {
-                        Text("Fechar", color = Color.Gray)
+                        Text(
+                            text = "Fechar",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextoSecundario
+                        )
                     }
                 }
             )
@@ -227,29 +232,29 @@ private fun CardAgendamentoGrade(
     onClick: () -> Unit
 ) {
     val corStatus = when (agendamento?.status?.lowercase()) {
-        "confirmado", "realizado" -> Color(0xFFDCFCE7)
+        "confirmado", "realizado" -> FundoSucesso
         "pendente" -> Color(0xFFFEF3C7)
         "cancelado" -> Color(0xFFFEE2E2)
-        else -> Color(0xFFF3F4F6)
+        else -> Branco
     }
 
     val corTextoStatus = when (agendamento?.status?.lowercase()) {
-        "confirmado", "realizado" -> Color(0xFF166534)
-        "pendente" -> Color(0xFF92400E)
+        "confirmado", "realizado" -> VerdeSucesso
+        "pendente" -> TextoInativo
         "cancelado" -> Color(0xFF991B1B)
-        else -> Color.Gray
+        else -> TextoSecundario
     }
 
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (agendamento != null) corStatus else Color.White
+            containerColor = corStatus
         ),
         modifier = modifier
             .height(72.dp)
             .border(
                 width = 1.dp,
-                color = if (agendamento != null) corTextoStatus.copy(alpha = 0.3f) else CorBordaCard,
+                color = if (agendamento != null) corTextoStatus.copy(alpha = 0.3f) else CardBordaCinza,
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable { onClick() }
@@ -263,15 +268,15 @@ private fun CardAgendamentoGrade(
             if (agendamento != null) {
                 Text(
                     text = agendamento.paciente,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
                     color = corTextoStatus,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = agendamento.psicologo,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = corTextoStatus.copy(alpha = 0.8f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -279,8 +284,8 @@ private fun CardAgendamentoGrade(
             } else {
                 Text(
                     text = "+ Livre",
-                    fontSize = 11.sp,
-                    color = Color.LightGray,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoSecundario,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
@@ -293,14 +298,14 @@ private fun ItemDetalhe(rotulo: String, valor: String) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "$rotulo: ",
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
-            color = VerdeClinica,
-            fontSize = 14.sp
+            color = VerdeClinica
         )
         Text(
             text = valor.ifEmpty { "-" },
-            color = CorTextoPrincipal,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextoPrincipal
         )
     }
 }

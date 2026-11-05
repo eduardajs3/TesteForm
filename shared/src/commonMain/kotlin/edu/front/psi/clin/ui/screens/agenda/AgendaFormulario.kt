@@ -1,14 +1,14 @@
-package edu.front.psi.clin.ui.screen
+package edu.front.psi.clin.ui.screens.agenda
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.components.CampoTextoPadrao
-import edu.front.psi.clin.ui.components.LayoutFormularioBase
-import edu.front.psi.clin.ui.components.CampoDropdownPadrao // <-- Importado do seu componente global
+import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
+import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao // <-- Importado do seu componente global
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 @Composable

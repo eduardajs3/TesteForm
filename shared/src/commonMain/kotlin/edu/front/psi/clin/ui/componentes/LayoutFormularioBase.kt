@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,14 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @Composable
 fun LayoutFormularioBase(
@@ -31,14 +32,13 @@ fun LayoutFormularioBase(
     ) {
         Text(
             text = titulo,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
             color = VerdeClinica
         )
         Text(
             text = subtitulo,
-            fontSize = 14.sp,
-            color = Color.Gray
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextoSecundario
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -49,9 +49,9 @@ fun LayoutFormularioBase(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = mensagemFeedback,
-                color = VerdeClinica,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                fontSize = 14.sp
+                color = VerdeClinica
             )
         }
     }

@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -6,13 +6,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CinzaFundoBotao
+import edu.front.psi.clin.ui.theme.CinzaTextoBotao
+import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @Composable
 fun BotoesAcaoFormulario(
@@ -28,25 +30,32 @@ fun BotoesAcaoFormulario(
         Button(
             onClick = onLimpar,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFF3F4F6),
-                contentColor = Color(0xFF4B5563)
+                containerColor = CinzaFundoBotao,
+                contentColor = CinzaTextoBotao
             ),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.weight(1f)
         ) {
-            Text("Limpar Campos", fontWeight = FontWeight.Medium)
+            Text(
+                text = "Limpar Campos",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         Button(
             onClick = onSalvar,
             colors = ButtonDefaults.buttonColors(
                 containerColor = VerdeClinica,
-                contentColor = Color.White
+                contentColor = Branco
             ),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.weight(1f)
         ) {
-            Text(textoBotaoSalvar, fontWeight = FontWeight.Bold)
+            Text(
+                text = textoBotaoSalvar,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Branco
+            )
         }
     }
 }

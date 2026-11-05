@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -7,10 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.theme.CardFundoCinza
+import edu.front.psi.clin.ui.theme.CardBordaCinza
+import edu.front.psi.clin.ui.theme.TextoPrincipal
 
 @Composable
 fun CardCabecalhoInfo(
@@ -20,8 +20,8 @@ fun CardCabecalhoInfo(
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
-        border = BorderStroke(1.dp, Color(0xFFE5E7EB)),
+        colors = CardDefaults.cardColors(containerColor = CardFundoCinza),
+        border = BorderStroke(1.dp, CardBordaCinza),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier.fillMaxWidth()
     ) {
@@ -33,15 +33,14 @@ fun CardCabecalhoInfo(
         ) {
             Text(
                 text = rotulo,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color(0xFF1F2937)
+                style = MaterialTheme.typography.titleMedium,
+                color = TextoPrincipal
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = valor,
-                fontSize = 16.sp,
-                color = Color(0xFF1F2937)
+                style = MaterialTheme.typography.bodyLarge,
+                color = TextoPrincipal
             )
         }
     }

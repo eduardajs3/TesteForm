@@ -1,4 +1,4 @@
-package edu.front.psi.clin.ui.components
+package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
@@ -8,13 +8,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.theme.FundoSucesso
+import edu.front.psi.clin.ui.theme.VerdeSuave
+import edu.front.psi.clin.ui.theme.VerdeSucesso
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.Res
-import frontpsiclinic.shared.generated.resources.check_circle // Ajuste para o nome exato do seu XML de ícone de sucesso
+import frontpsiclinic.shared.generated.resources.check_circle
 
 @Composable
 fun NotificacaoFlutuante(
@@ -25,7 +25,7 @@ fun NotificacaoFlutuante(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
-        contentAlignment = Alignment.BottomEnd 
+        contentAlignment = Alignment.BottomEnd
     ) {
         AnimatedVisibility(
             visible = !mensagem.isNullOrEmpty(),
@@ -34,9 +34,9 @@ fun NotificacaoFlutuante(
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFF0FDF4),
+                color = FundoSucesso,
                 shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, Color(0xFF86EFAC))
+                border = BorderStroke(1.dp, VerdeSuave)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -44,16 +44,15 @@ fun NotificacaoFlutuante(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.check_circle), 
+                        painter = painterResource(Res.drawable.check_circle),
                         contentDescription = null,
-                        tint = Color(0xFF166534),
+                        tint = VerdeSucesso,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = mensagem ?: "",
-                        color = Color(0xFF166534),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = VerdeSucesso
                     )
                 }
             }
