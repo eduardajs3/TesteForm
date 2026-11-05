@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import kotlinx.coroutines.flow.*
 import edu.front.psi.clin.navigation.ConvenioRotas
 
 class ConvenioViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 0
@@ -57,7 +56,7 @@ class ConvenioViewModel(
         val v5 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -81,23 +80,22 @@ class ConvenioViewModel(
                 }
             }
             mensagem.value = "Convênio salvo com sucesso!"
-            mandarMensagem("Convênio salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Convênio salvo com sucesso!")
             limparCampos()
-          
+         
             backStack.clear()
             backStack.add(
                 ConvenioRotas.Listagem
             )
-
             
         } catch (e: Exception) {
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(convenio: Convenio) {
         _convenios.update { lista -> lista - convenio }
-        mandarMensagem("Convênio apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Convênio apagado com sucesso!")
     }
 
     fun novoConvenio() {

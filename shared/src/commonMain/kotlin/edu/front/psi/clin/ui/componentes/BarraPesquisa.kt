@@ -48,7 +48,7 @@ fun BarraPesquisa(
         },
         leadingIcon = {
             Icon(
-                painter = painterResource(Res.drawable.search_24px), // Certifique-se de que o nome exato do XML corresponde ao ficheiro na pasta drawable
+                painter = painterResource(Res.drawable.search_24px), 
                 contentDescription = "Buscar",
                 tint = cinzaTexto,
                 modifier = Modifier.size(20.dp)

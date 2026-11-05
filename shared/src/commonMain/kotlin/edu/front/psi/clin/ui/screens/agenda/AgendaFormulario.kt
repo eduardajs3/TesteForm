@@ -2,14 +2,13 @@ package edu.front.psi.clin.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.components.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.components.CampoTextoPadrao
 import edu.front.psi.clin.ui.components.LayoutFormularioBase
+import edu.front.psi.clin.ui.components.CampoDropdownPadrao // <-- Importado do seu componente global
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 @Composable
@@ -32,7 +31,7 @@ fun AgendaFormulario(
     val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
     val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
 
-    // Estado da data escolhida (Exemplo: "26/03/2026")
+    // Estado da data escolhida
     var dataSelecionada by remember { mutableStateOf("26/03/2026") }
 
     // 3. Horários, Salas e Psicólogos filtrados dinamicamente com base no dia escolhido
@@ -76,12 +75,12 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.paciente.value = it }
             )
 
-            // Passo 2: Selecionar o Dia do Atendimento (Gera a busca de disponibilidade)
+            // Passo 2: Selecionar o Dia do Atendimento
             CampoTextoPadrao(
                 value = dataSelecionada,
                 onValueChange = { novaData ->
                     dataSelecionada = novaData
-                    horarioSelecionado = "" // Reseta o horário ao mudar de dia
+                    horarioSelecionado = "" 
                     vm.dataHoraInicio.value = ""
                     vm.dataHoraFim.value = ""
                 },
@@ -89,12 +88,11 @@ fun AgendaFormulario(
                 placeholder = "Ex: 26/03/2026"
             )
 
-            // Passo 3: Seleção do Horário Disponível naquele dia
+            // Passo 3: Seleção do Horário Disponível
             CampoDropdownPadrao(
                 label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data" else "Horário Disponível para $dataSelecionada",
                 opcoes = horariosDisponiveisNoDia,
                 valorSelecionado = horarioSelecionado,
-                habilitado = dataSelecionada.isNotEmpty(),
                 onOpcaoSelecionada = { intervalo ->
                     horarioSelecionado = intervalo
                     val partes = intervalo.split(" - ")
@@ -105,21 +103,19 @@ fun AgendaFormulario(
                 }
             )
 
-            // Passo 4: Seleção do Psicólogo disponível no dia
+            // Passo 4: Seleção do Psicólogo
             CampoDropdownPadrao(
                 label = "Psicólogo Disponível",
                 opcoes = psicologosDisponiveisNoDia,
                 valorSelecionado = vm.psicologo.value,
-                habilitado = dataSelecionada.isNotEmpty(),
                 onOpcaoSelecionada = { vm.psicologo.value = it }
             )
 
-            // Passo 5: Seleção da Sala livre no dia
+            // Passo 5: Seleção da Sala
             CampoDropdownPadrao(
                 label = "Sala de Atendimento Livre",
                 opcoes = salasDisponiveisNoDia,
                 valorSelecionado = vm.sala.value,
-                habilitado = dataSelecionada.isNotEmpty(),
                 onOpcaoSelecionada = { vm.sala.value = it }
             )
 
@@ -161,54 +157,6 @@ fun AgendaFormulario(
                 onSalvar = vm::salvar,
                 textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CampoDropdownPadrao(
-    label: String,
-    opcoes: List<String>,
-    valorSelecionado: String,
-    habilitado: Boolean = true,
-    onOpcaoSelecionada: (String) -> Unit
-) {
-    var expandido by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expandido && habilitado,
-        onExpandedChange = { if (habilitado) expandido = !expandido },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = valorSelecionado,
-            onValueChange = {},
-            readOnly = true,
-            enabled = habilitado,
-            label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        if (habilitado) {
-            ExposedDropdownMenu(
-                expanded = expandido,
-                onDismissRequest = { expandido = false }
-            ) {
-                opcoes.forEach { opcao ->
-                    DropdownMenuItem(
-                        text = { Text(opcao) },
-                        onClick = {
-                            onOpcaoSelecionada(opcao)
-                            expandido = false
-                        }
-                    )
-                }
-            }
         }
     }
 }

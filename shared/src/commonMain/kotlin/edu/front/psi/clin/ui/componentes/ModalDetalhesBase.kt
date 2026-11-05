@@ -37,8 +37,7 @@ fun ModalDetalhesBase(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Conteúdo principal injetado (dados do item)
-                conteudo()
+               
 
                 if (acoesExtras != null) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -60,9 +59,7 @@ fun ModalDetalhesBase(
     )
 }
 
-/**
- * Componente reutilizável para exibir linhas de rótulo e valor dentro dos modais de detalhes.
- */
+
 @Composable
 fun ItemDetalhe(
     rotulo: String,

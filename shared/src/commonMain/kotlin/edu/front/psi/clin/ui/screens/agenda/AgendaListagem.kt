@@ -1,18 +1,12 @@
 package edu.front.psi.clin.ui.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke // <-- Import correto da borda
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,8 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.painterResource
+
+import frontpsiclinic.shared.generated.resources.*
+
 import edu.front.psi.clin.Agenda
 import edu.front.psi.clin.VerdeClinica
+import edu.front.psi.clin.ui.components.CabecalhoTela
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 private val CorTextoPrincipal = Color(0xFF1F2937)
@@ -42,7 +41,6 @@ fun AgendaListagem(
     val agendamentos by vm.agendamentosFiltrados.collectAsState()
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
 
-    // Dias da semana fictícios para demonstração do calendário
     val diasDaSemana = listOf(
         DiaSemanaAgenda("Segunda", "16/03"),
         DiaSemanaAgenda("Terça", "17/03"),
@@ -60,49 +58,21 @@ fun AgendaListagem(
             .padding(24.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Cabeçalho da Agenda
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Agenda de Atendimentos",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica
-                    )
-                    Text(
-                        text = "Acompanhe e organize as consultas da semana",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-
-                Button(
-                    onClick = vm::novoAgendamento,
-                    colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Novo Agendamento",
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Novo Agendamento", color = Color.White)
-                }
-            }
+            CabecalhoTela(
+                titulo = "Agenda de Atendimentos",
+                subtitulo = "Acompanhe e organize as consultas da semana",
+                textoBotao = "Novo Agendamento",
+                iconeBotao = painterResource(Res.drawable.add), 
+                onClickBotao = vm::novoAgendamento
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Seletor de Semana
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
                 modifier = Modifier.fillMaxWidth(),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CorBordaCard)
+                border = BorderStroke(1.dp, CorBordaCard)
             ) {
                 Row(
                     modifier = Modifier
@@ -113,9 +83,10 @@ fun AgendaListagem(
                 ) {
                     IconButton(onClick = { /* Navegar semana anterior */ }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            painter = painterResource(Res.drawable.keyboard_arrow_left),
                             contentDescription = "Semana Anterior",
-                            tint = VerdeClinica
+                            tint = VerdeClinica,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -128,9 +99,10 @@ fun AgendaListagem(
 
                     IconButton(onClick = { /* Navegar próxima semana */ }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            painter = painterResource(Res.drawable.keyboard_arrow_right),
                             contentDescription = "Próxima Semana",
-                            tint = VerdeClinica
+                            tint = VerdeClinica,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -138,7 +110,6 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Grade de Agendamentos da Semana
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -148,7 +119,6 @@ fun AgendaListagem(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.Top
                     ) {
-                        // Coluna do Horário
                         Text(
                             text = hora,
                             fontWeight = FontWeight.Bold,
@@ -159,7 +129,6 @@ fun AgendaListagem(
                                 .padding(top = 12.dp)
                         )
 
-                        // Cards dos dias na mesma linha do horário
                         Row(
                             modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -188,7 +157,6 @@ fun AgendaListagem(
             }
         }
 
-        // Modal de Visualização e Ações do Agendamento
         agendamentoSelecionado?.let { agendamento ->
             AlertDialog(
                 onDismissRequest = { agendamentoSelecionado = null },
@@ -220,14 +188,24 @@ fun AgendaListagem(
                             agendamentoSelecionado = null
                             vm.editar(item)
                         }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Editar", tint = VerdeClinica)
+                            Icon(
+                                painter = painterResource(Res.drawable.edit_square_24px), // Verifique se o XML chama 'edit' ou 'edit_24px'
+                                contentDescription = "Editar",
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                         IconButton(onClick = {
                             val item = agendamento
                             agendamentoSelecionado = null
                             vm.apagar(item)
                         }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Excluir", tint = Color(0xFFEF4444))
+                            Icon(
+                                painter = painterResource(Res.drawable.delete_24px), // Verifique se o XML chama 'delete' ou 'delete_24px'
+                                contentDescription = "Excluir",
+                                tint = Color(0xFFEF4444),
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
                 },

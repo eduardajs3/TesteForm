@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +9,7 @@ import edu.front.psi.clin.navigation.ProntuarioRotas
 import kotlinx.coroutines.flow.*
 
 class ProntuarioViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 1
@@ -63,7 +62,7 @@ class ProntuarioViewModel(
         try {
             if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
                 mensagem.value = "Preencha os campos obrigatórios!"
-                mandarMensagem("Preencha os campos obrigatórios!", SnackbarDuration.Short)
+                mandarMensagem("Preencha os campos obrigatórios!")
                 return
             }
 
@@ -94,7 +93,7 @@ class ProntuarioViewModel(
 
             _filtro.value = "" // Limpa o filtro de busca
             mensagem.value = "Prontuário salvo com sucesso!"
-            mandarMensagem("Prontuário salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Prontuário salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -102,13 +101,13 @@ class ProntuarioViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(prontuario: Prontuario) {
         _prontuarios.update { lista -> lista.filterNot { it.id == prontuario.id } }
-        mandarMensagem("Prontuário apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Prontuário apagado com sucesso!")
     }
 
     fun novoProntuario(nomePaciente: String = "") {

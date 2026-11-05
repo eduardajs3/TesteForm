@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +10,7 @@ import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class BloqueioAgendaViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 0
@@ -57,7 +56,7 @@ class BloqueioAgendaViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -81,7 +80,7 @@ class BloqueioAgendaViewModel(
                 }
             }
             mensagem.value = "Bloqueio de agenda salvo com sucesso!"
-            mandarMensagem("Bloqueio de agenda salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Bloqueio de agenda salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -89,13 +88,13 @@ class BloqueioAgendaViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(bloqueio: BloqueioAgenda) {
         _bloqueios.update { lista -> lista - bloqueio }
-        mandarMensagem("Bloqueio apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Bloqueio apagado com sucesso!")
     }
 
     fun novoBloqueio() {

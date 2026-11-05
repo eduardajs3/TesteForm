@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PsicologoViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 2
@@ -83,7 +82,7 @@ class PsicologoViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -110,7 +109,7 @@ class PsicologoViewModel(
                 }
             }
             mensagem.value = "Psicólogo salvo com sucesso!"
-            mandarMensagem("Psicólogo salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Psicólogo salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -118,13 +117,13 @@ class PsicologoViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(psicologo: Psicologo) {
         _psicologos.update { lista -> lista - psicologo }
-        mandarMensagem("Psicólogo apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Psicólogo apagado com sucesso!")
     }
 
     fun novoPsicologo() {

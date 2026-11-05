@@ -23,7 +23,7 @@ fun CampoTextoPadrao(
     obrigatorio: Boolean = false,
     isError: Boolean = false,
     errorMessage: String? = null,
-    apenasNumeros: Boolean = false, // Novo parâmetro
+    apenasNumeros: Boolean = false, 
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {

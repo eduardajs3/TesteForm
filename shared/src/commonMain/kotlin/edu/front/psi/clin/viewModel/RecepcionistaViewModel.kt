@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class RecepcionistaViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 2
@@ -84,7 +83,7 @@ class RecepcionistaViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -111,7 +110,7 @@ class RecepcionistaViewModel(
                 }
             }
             mensagem.value = "Recepcionista salva com sucesso!"
-            mandarMensagem("Recepcionista salva com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Recepcionista salva com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -119,13 +118,13 @@ class RecepcionistaViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(recepcionista: Recepcionista) {
         _recepcionistas.update { lista -> lista - recepcionista }
-        mandarMensagem("Recepcionista apagada com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Recepcionista apagada com sucesso!")
     }
 
     fun novaRecepcionista() {

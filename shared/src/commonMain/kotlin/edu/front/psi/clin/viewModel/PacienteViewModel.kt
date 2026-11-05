@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PacienteViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 2
@@ -69,7 +68,7 @@ class PacienteViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Por favor, corrija os erros no formulário."
-            mandarMensagem("Por favor, corrija os erros no formulário.", SnackbarDuration.Short)
+            mandarMensagem("Por favor, corrija os erros no formulário.")
             return
         }
 
@@ -96,7 +95,7 @@ class PacienteViewModel(
                 }
             }
             mensagem.value = "Paciente salvo com sucesso!"
-            mandarMensagem("Paciente salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Paciente salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -104,13 +103,13 @@ class PacienteViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(paciente: Paciente) {
         _pacientes.update { lista -> lista - paciente }
-        mandarMensagem("Paciente apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Paciente apagado com sucesso!")
     }
 
     fun novoPaciente() {

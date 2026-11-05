@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class FuncionarioViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 2
@@ -56,7 +55,6 @@ class FuncionarioViewModel(
             FuncionarioRotas.Listagem
         )
 
-    // Campos do formulário geridos pelo validador com máscaras e validações integradas
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
@@ -69,7 +67,6 @@ class FuncionarioViewModel(
     val ativo = CampoValidado("true")
     val dataCadastro = CampoValidado()
     
-    // Propriedade de mensagem adicionada para coincidir com o Convênio
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -83,7 +80,7 @@ class FuncionarioViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -109,7 +106,7 @@ class FuncionarioViewModel(
                 }
             }
             mensagem.value = "Funcionário salvo com sucesso!"
-            mandarMensagem("Funcionário salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Funcionário salvo com sucesso!")
             limparCampos()
             backStack.clear()
             backStack.add(
@@ -117,13 +114,13 @@ class FuncionarioViewModel(
             )
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(funcionario: Funcionario) {
         _funcionarios.update { lista -> lista - funcionario }
-        mandarMensagem("Funcionário apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Funcionário apagado com sucesso!")
     }
 
     fun novoFuncionario() {

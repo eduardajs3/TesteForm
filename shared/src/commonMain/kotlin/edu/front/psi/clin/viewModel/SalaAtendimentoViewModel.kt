@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +10,7 @@ import edu.front.psi.clin.ui.components.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class SalaAtendimentoViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 0
@@ -56,7 +55,7 @@ class SalaAtendimentoViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -80,7 +79,7 @@ class SalaAtendimentoViewModel(
                 }
             }
             mensagem.value = "Sala salva com sucesso!"
-            mandarMensagem("Sala salva com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Sala salva com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -88,13 +87,13 @@ class SalaAtendimentoViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(sala: SalaAtendimento) {
         _salas.update { lista -> lista - sala }
-        mandarMensagem("Sala apagada com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Sala apagada com sucesso!")
     }
 
     fun novaSala() {

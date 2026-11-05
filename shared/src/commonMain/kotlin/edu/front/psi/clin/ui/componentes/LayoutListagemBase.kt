@@ -31,7 +31,7 @@ fun <T> LayoutListagemBase(
     onNovoClick: () -> Unit,
     colunas: List<Pair<String, Float>>,
     itens: List<T>,
-    onVisualizar: ((T) -> Unit)? = null, // Callback opcional para o olho
+    onVisualizar: ((T) -> Unit)? = null, 
     onEditar: (T) -> Unit,
     onApagar: (T) -> Unit,
     placeholderPesquisa: String = "Buscar...",
@@ -43,7 +43,6 @@ fun <T> LayoutListagemBase(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // 1. Cabeçalho Padronizado (CabecalhoTela)
         CabecalhoTela(
             titulo = titulo,
             textoBotao = textoBotaoNovo,
@@ -53,7 +52,6 @@ fun <T> LayoutListagemBase(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2. Barra de Pesquisa
         BarraPesquisa(
             text = textoFiltro,
             onTextChange = onFiltroChange,
@@ -62,7 +60,6 @@ fun <T> LayoutListagemBase(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 3. Tabela
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,10 +73,10 @@ fun <T> LayoutListagemBase(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Largura ajustada da coluna de ações conforme a presença do botão visualizar
+              
                 val larguraAcoes = if (onVisualizar != null) 108.dp else 72.dp
 
-                // Cabeçalho da Tabela
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,7 +97,6 @@ fun <T> LayoutListagemBase(
 
                 HorizontalDivider(color = CorLinhaDivisoria, thickness = 1.dp)
 
-                // Verifica se a lista está vazia para exibir a mensagem informativa
                 if (itens.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -117,7 +113,7 @@ fun <T> LayoutListagemBase(
                         )
                     }
                 } else {
-                    // Linhas de dados
+              
                     itens.forEachIndexed { index, item ->
                         Row(
                             modifier = Modifier
@@ -125,10 +121,10 @@ fun <T> LayoutListagemBase(
                                 .padding(vertical = 12.dp, horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Renderização das colunas customizadas
+               
                             linhaContent(item)
 
-                            // Ações (Visualizar + Editar + Excluir) com ícones XML
+
                             Row(
                                 horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically,

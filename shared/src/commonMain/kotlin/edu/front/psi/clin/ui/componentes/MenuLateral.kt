@@ -5,14 +5,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.front.psi.clin.CremeCampo
 import edu.front.psi.clin.VerdeClinica
-import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel // <-- Import do PrincipalViewModel
+import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -43,7 +40,7 @@ data class MenuItemData(
 
 @Composable
 fun MenuLateral(
-    viewModel: PrincipalViewModel, // <-- Recebe o PrincipalViewModel diretamente
+    viewModel: PrincipalViewModel,
     telaAtual: String,
     onNavigate: (String) -> Unit,
     content: @Composable () -> Unit
@@ -97,7 +94,7 @@ fun MenuLateral(
     var mostrarModalSair by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
-        drawerState = viewModel.drawerState, // <-- Usa diretamente o estado do ViewModel
+        drawerState = viewModel.drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = CremeCampo,
@@ -106,17 +103,13 @@ fun MenuLateral(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 ) {
-                    Text(
-                        text = "PsiClin",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica,
-                        modifier = Modifier.padding(vertical = 12.dp)
-                    )
-                    Text(
-                        text = "Gestão de Psicologia",
-                        fontSize = 12.sp,
-                        color = VerdeClinica.copy(alpha = 0.7f)
+                    // Logo substituindo o texto "PsiClin"
+                    Image(
+                        painter = painterResource(Res.drawable.psiclin_logo),
+                        contentDescription = "Logotipo PsiClin",
+                        modifier = Modifier
+                            .height(80.dp)
+                            .padding(vertical = 4.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -135,8 +128,6 @@ fun MenuLateral(
                                     mutableStateOf(item.subItens.any { it.tela == telaAtual })
                                 }
 
-                                // ... dentro do loop dos itens de menu que possuem subItens:
-
                                 NavigationDrawerItem(
                                     label = { Text(item.nome, color = VerdeClinica, fontWeight = FontWeight.Bold) },
                                     selected = false,
@@ -151,7 +142,6 @@ fun MenuLateral(
                                     },
                                     badge = {
                                         Icon(
-                                            // Substituído os ícones padrão do Material por painterResource com o seu XML
                                             painter = painterResource(if (expandido) Res.drawable.keyboard_arrow_up else Res.drawable.keyboard_arrow_down), 
                                             contentDescription = "Expandir/Recolher",
                                             tint = VerdeClinica,
@@ -178,7 +168,7 @@ fun MenuLateral(
                                                 selected = selecionado,
                                                 onClick = {
                                                     onNavigate(subItem.tela)
-                                                    viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
+                                                    viewModel.fecharGaveta()
                                                 },
                                                 icon = {
                                                     Icon(
@@ -205,7 +195,7 @@ fun MenuLateral(
                                     selected = selecionado,
                                     onClick = {
                                         item.tela?.let { onNavigate(it) }
-                                        viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
+                                        viewModel.fecharGaveta()
                                     },
                                     icon = {
                                         Icon(
@@ -230,17 +220,17 @@ fun MenuLateral(
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Botão Sair fixo na parte inferior do menu lateral com ícone nativo
+                    // Botão Sair fixo na parte inferior
                     NavigationDrawerItem(
                         label = { Text("Sair", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold) },
                         selected = false,
                         onClick = {
-                            viewModel.fecharGaveta() // <-- Usa a função limpa do ViewModel
+                            viewModel.fecharGaveta()
                             mostrarModalSair = true
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                painter = painterResource(Res.drawable.logout),
                                 contentDescription = "Sair",
                                 tint = Color(0xFFB91C1C),
                                 modifier = Modifier.size(24.dp)
@@ -258,7 +248,6 @@ fun MenuLateral(
         content = content
     )
 
-    // Utilizando o componente reutilizável AppDeleteModal para confirmar a saída
     if (mostrarModalSair) {
         AppDeleteModal(
             title = "Encerrar Sessão",

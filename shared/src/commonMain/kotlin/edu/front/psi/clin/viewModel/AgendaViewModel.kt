@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +9,7 @@ import edu.front.psi.clin.navigation.AgendaRotas
 import kotlinx.coroutines.flow.*
 
 class AgendaViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 2
@@ -96,7 +95,7 @@ class AgendaViewModel(
                 }
             }
             mensagem.value = "Agendamento salvo com sucesso!"
-            mandarMensagem("Agendamento salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Agendamento salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -104,13 +103,13 @@ class AgendaViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(agendamento: Agenda) {
         _agendamentos.update { lista -> lista - agendamento }
-        mandarMensagem("Agendamento apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Agendamento apagado com sucesso!")
     }
 
     fun novoAgendamento() {

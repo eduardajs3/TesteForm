@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import org.jetbrains.compose.resources.painterResource
 
-// Importe o Res do seu projeto (ajuste o pacote caso necessário, ex: frontpsiclinic...)
 import frontpsiclinic.shared.generated.resources.*
-// Exemplo: import frontpsiclinic.shared.generated.resources.ic_fechar
 
 private val CorTextoTitulo = Color(0xFF1F2937)
 private val CorTextoSubtitulo = Color(0xFF9CA3AF)
@@ -66,17 +64,15 @@ fun AppDeleteModal(
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
-                            // Substitua 'ic_fechar' pelo nome exato do seu arquivo XML na pasta drawable
                             painter = painterResource(Res.drawable.close), 
                             contentDescription = "Fechar modal",
-                            tint = Color.Gray // Se quiser manter a cor original do XML, basta apagar o parâmetro 'tint'
+                            tint = Color.Gray
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Mensagem de confirmação
                 Text(
                     text = message,
                     fontSize = 15.sp,
@@ -85,7 +81,6 @@ fun AppDeleteModal(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Botão Único Vermelho Arredondado (Pill)
                 Button(
                     onClick = onConfirm,
                     modifier = Modifier

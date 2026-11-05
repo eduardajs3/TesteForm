@@ -1,8 +1,9 @@
 package edu.front.psi.clin
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.ui.componentes.MenuLateral
+import edu.front.psi.clin.ui.components.NotificacaoFlutuante // <-- Import do seu novo componente flutuante
 import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
 
 // Imports das telas de Formulário
@@ -52,7 +54,6 @@ import edu.front.psi.clin.ui.screen.TipoAtendimentoListagem
 
 // Imports das ViewModels
 import edu.front.psi.clin.ui.viewmodel.*
-import kotlinx.coroutines.launch
 import edu.front.psi.clin.navigation.ConvenioRotas
 import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.navigation.PagamentoRotas
@@ -76,7 +77,7 @@ val VerdeClinica = Color(0xFF3B5760)
 fun App() {
     val scope = rememberCoroutineScope()
 
-    // 1. ViewModel Principal centralizando a navegação global, gaveta e snackbar
+    // 1. ViewModel Principal centralizando a navegação global, gaveta e notificação
     val principalVm: PrincipalViewModel = viewModel(
         factory = viewModelFactory { initializer { PrincipalViewModel(scope) } }
     )
@@ -84,127 +85,120 @@ fun App() {
     // Estado para guardar o nome do paciente selecionado entre telas
     var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
-    // 2. ViewModels instanciados
+    // 2. ViewModels instanciados (todos utilizando a nova notificação flutuante se necessário)
     val pacienteVm: PacienteViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                PacienteViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                PacienteViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val pagamentoVm: PagamentoViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                PagamentoViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                PagamentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
-    
-    // ConvenioViewModel atualizado recebendo o callback de mensagem global do principalVm
     val convenioVm: ConvenioViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                ConvenioViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                ConvenioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
-    val funcionarioVm: FuncionarioViewModel =
-    viewModel(
+    val funcionarioVm: FuncionarioViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
                 FuncionarioViewModel(
-                    mandarMensagem = { msg, dur ->
-                        principalVm.mostrarMensagem(msg, dur)
-                    }
+                    mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
     )
-
     val horarioVm: HorarioDisponivelViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                HorarioDisponivelViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                HorarioDisponivelViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val salaVm: SalaAtendimentoViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                SalaAtendimentoViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                SalaAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val tipoVm: TipoAtendimentoViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                TipoAtendimentoViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                TipoAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val bloqueioVm: BloqueioAgendaViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                BloqueioAgendaViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                BloqueioAgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val evolucaoVm: EvolucaoClinicaViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                EvolucaoClinicaViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                EvolucaoClinicaViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val prontuarioVm: ProntuarioViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                ProntuarioViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                ProntuarioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val recepcionistaVm: RecepcionistaViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                RecepcionistaViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                RecepcionistaViewModel(mandarMensagem = { msg  -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
-    
     val psicologoVm: PsicologoViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                PsicologoViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                PsicologoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
     val agendaVm: AgendaViewModel = viewModel(
         factory = viewModelFactory { 
             initializer { 
-                AgendaViewModel(mandarMensagem = { msg, dur -> principalVm.mostrarMensagem(msg, dur) }) 
+                AgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
             } 
         }
     )
 
-    val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Dashboard
+    val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Login
 
     // String identificadora da tela atual para o MenuLateral
     val stringTelaAtual = when (rotaAtual) {
-        is Route.Dashboard -> "dashboard"
-        is Route.Paciente -> "paciente"
-        is Route.Pagamento -> "pagamento"
-        is Route.Convenio -> "convenio"
-        is Route.HorarioDisponivel -> "horario"
-        is Route.SalaAtendimento -> "sala"
-        is Route.TipoAtendimento -> "tipo"
-        is Route.BloqueioAgenda -> "bloqueio"
-        is Route.EvolucaoClinica -> "evolucao"
-        is Route.Prontuario -> "prontuario"
-        is Route.Recepcionista -> "recepcionista"
-        is Route.Funcionario -> "funcionario"
-        is Route.Psicologo -> "psicologo"
-        is Route.Agenda -> "agenda"
-        else -> "dashboard"
+        Route.Dashboard -> "dashboard"
+        Route.Paciente -> "paciente"
+        Route.Pagamento -> "pagamento"
+        Route.Convenio -> "convenio"
+        Route.HorarioDisponivel -> "horario"
+        Route.SalaAtendimento -> "sala"
+        Route.TipoAtendimento -> "tipo"
+        Route.BloqueioAgenda -> "bloqueio"
+        Route.EvolucaoClinica -> "evolucao"
+        Route.Prontuario -> "prontuario"
+        Route.Recepcionista -> "recepcionista"
+        Route.Funcionario -> "funcionario"
+        Route.Psicologo -> "psicologo"
+        Route.Agenda -> "agenda"
+        else -> "login"
     }
 
     MaterialTheme(
@@ -213,255 +207,246 @@ fun App() {
             onPrimary = Color.White
         )
     ) {
-        // MenuLateral consumindo diretamente o PrincipalViewModel
-        MenuLateral(
-            viewModel = principalVm,
-            telaAtual = stringTelaAtual,
-            onNavigate = { destino ->
-                val novaRota = when (destino) {
-                    "dashboard" -> Route.Dashboard
-                    "paciente" -> Route.Paciente
-                    "pagamento" -> Route.Pagamento
-                    "convenio" -> Route.Convenio
-                    "horario" -> Route.HorarioDisponivel
-                    "sala" -> Route.SalaAtendimento
-                    "tipo" -> Route.TipoAtendimento
-                    "bloqueio" -> Route.BloqueioAgenda
-                    "funcionario" -> Route.Funcionario
-                    "psicologo" -> Route.Psicologo
-                    "recepcionista" -> Route.Recepcionista
-                    "agenda" -> Route.Agenda
-                    "login" -> Route.Login
-                    else -> Route.Dashboard
-                }
+        // Envolvemos a aplicação num Box para permitir que a NotificacaoFlutuante fique por cima
+        Box(modifier = Modifier.fillMaxSize()) {
+            
+            MenuLateral(
+                viewModel = principalVm,
+                telaAtual = stringTelaAtual,
+                onNavigate = { destino ->
+                    val novaRota = when (destino) {
+                        "dashboard" -> Route.Dashboard
+                        "paciente" -> Route.Paciente
+                        "pagamento" -> Route.Pagamento
+                        "convenio" -> Route.Convenio
+                        "horario" -> Route.HorarioDisponivel
+                        "sala" -> Route.SalaAtendimento
+                        "tipo" -> Route.TipoAtendimento
+                        "bloqueio" -> Route.BloqueioAgenda
+                        "funcionario" -> Route.Funcionario
+                        "psicologo" -> Route.Psicologo
+                        "recepcionista" -> Route.Recepcionista
+                        "agenda" -> Route.Agenda
+                        "login" -> Route.Login
+                        else -> Route.Dashboard
+                    }
 
-                if (novaRota == Route.Login) {
-                    principalVm.backstack.clear()
-                    principalVm.backstack.add(Route.Login)
-                } else {
-                    principalVm.backstack.clear()
-                    principalVm.backstack.add(Route.Dashboard)
-                    if (novaRota != Route.Dashboard) {
-                        principalVm.backstack.add(novaRota)
+                    if (novaRota == Route.Login) {
+                        principalVm.backstack.clear()
+                        principalVm.backstack.add(Route.Login)
+                    } else {
+                        principalVm.backstack.clear()
+                        principalVm.backstack.add(Route.Dashboard)
+                        if (novaRota != Route.Dashboard) {
+                            principalVm.backstack.add(novaRota)
+                        }
                     }
                 }
-            }
-        ) {
-            if (rotaAtual is Route.Login) {
-
+            ) {
+                if (rotaAtual == Route.Login) {
                     LoginScreen(
                         onNavigate = { rota ->
                             principalVm.backstack.clear()
                             principalVm.backstack.add(rota)
                         }
                     )
-
-                } else if (rotaAtual is Route.RecoverPassword) {
-
+                } else if (rotaAtual == Route.RecoverPassword) {
                     RecoverPasswordScreen(
                         onNavigate = { rota ->
                             principalVm.backstack.clear()
                             principalVm.backstack.add(rota)
                         }
                     )
-
                 } else {
-                Scaffold(
-                    snackbarHost = { SnackbarHost(principalVm.snackbarHostState) },
-                    topBar = {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = when (rotaAtual) {
-                                        is Route.Dashboard -> "Dashboard"
-                                        is Route.Paciente -> "Pacientes"
-                                        is Route.Pagamento -> "Pagamentos"
-                                        is Route.Convenio -> "Convênios"
-                                        is Route.HorarioDisponivel -> "Horários Disponíveis"
-                                        is Route.SalaAtendimento -> "Salas de Atendimento"
-                                        is Route.TipoAtendimento -> "Tipos de Atendimento"
-                                        is Route.BloqueioAgenda -> "Bloqueios"
-                                        is Route.EvolucaoClinica -> "Evoluções"
-                                        is Route.Prontuario -> "Prontuários"
-                                        is Route.Recepcionista -> "Recepcionistas"
-                                        is Route.Funcionario -> "Funcionários"
-                                        is Route.Psicologo -> "Psicólogos"
-                                        is Route.Agenda -> "Agendas"
-                                        else -> "PsiClin"
-                                    },
-                                    color = Color.White
-                                )
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { principalVm.abrirGaveta() }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Menu,
-                                        contentDescription = "Abrir Menu Lateral",
-                                        tint = Color.White
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdeClinica)
-                        )
-                    },
-                    containerColor = Branco
-                ) { contentPadding ->
-                    NavDisplay(
-                        backStack = principalVm.backstack,
-                        onBack = {
-                            if (principalVm.backstack.size > 1) {
-                                principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-                            }
-                        },
-                        entryProvider = entryProvider {
-                            entry<Route.Dashboard> {
-                                DashboardTela(contentPadding)
-                            }
-                            entry<Route.Paciente> {
-                                val subRota = pacienteVm.backStack.lastOrNull() ?: PacienteRotas.Listagem
-                                if (subRota is PacienteRotas.Formulario) {
-                                    PacienteFormulario(contentPadding, pacienteVm)
-                                } else {
-                                    PacienteListagem(
-                                        innerPadding = contentPadding,
-                                        vm = pacienteVm,
-                                        onNavegarParaProntuario = { paciente ->
-                                            pacienteSelecionadoNome = paciente.nome
-                                            prontuarioVm.paciente.value = paciente.nome
-                                            prontuarioVm.atualizarFiltro(paciente.nome)
-                                            prontuarioVm.backStack.clear()
-                                            prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
-                                            principalVm.backstack.add(Route.Prontuario)
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        text = when (rotaAtual) {
+                                            Route.Dashboard -> "Dashboard"
+                                            Route.Paciente -> "Pacientes"
+                                            Route.Pagamento -> "Pagamentos"
+                                            Route.Convenio -> "Convênios"
+                                            Route.HorarioDisponivel -> "Horários Disponíveis"
+                                            Route.SalaAtendimento -> "Salas de Atendimento"
+                                            Route.TipoAtendimento -> "Tipos de Atendimento"
+                                            Route.BloqueioAgenda -> "Bloqueios"
+                                            Route.EvolucaoClinica -> "Evoluções"
+                                            Route.Prontuario -> "Prontuários"
+                                            Route.Recepcionista -> "Recepcionistas"
+                                            Route.Funcionario -> "Funcionários"
+                                            Route.Psicologo -> "Psicólogos"
+                                            Route.Agenda -> "Agendas"
+                                            else -> "PsiClin"
                                         },
-                                        onNavegarParaEvolucao = { paciente ->
-                                            pacienteSelecionadoNome = paciente.nome
-                                            evolucaoVm.prontuario.value = paciente.nome
-                                            evolucaoVm.atualizarFiltro(paciente.nome)
-                                            evolucaoVm.backStack.clear()
-                                            evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
-                                            principalVm.backstack.add(Route.EvolucaoClinica)
-                                        }
+                                        color = Color.White
                                     )
+                                },
+                                navigationIcon = {
+                                    IconButton(onClick = { principalVm.abrirGaveta() }) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Menu,
+                                            contentDescription = "Abrir Menu Lateral",
+                                            tint = Color.White
+                                        )
+                                    }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdeClinica)
+                            )
+                        },
+                        containerColor = Branco
+                    ) { contentPadding ->
+                        NavDisplay(
+                            backStack = principalVm.backstack,
+                            onBack = {
+                                if (principalVm.backstack.size > 1) {
+                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                                }
+                            },
+                            entryProvider = entryProvider {
+                                entry<Route.Dashboard> {
+                                    DashboardTela(contentPadding)
+                                }
+                                entry<Route.Paciente> {
+                                    val subRota = pacienteVm.backStack.lastOrNull() ?: PacienteRotas.Listagem
+                                    if (subRota is PacienteRotas.Formulario) {
+                                        PacienteFormulario(contentPadding, pacienteVm)
+                                    } else {
+                                        PacienteListagem(
+                                            innerPadding = contentPadding,
+                                            vm = pacienteVm,
+                                            onNavegarParaProntuario = { paciente ->
+                                                pacienteSelecionadoNome = paciente.nome
+                                                prontuarioVm.paciente.value = paciente.nome
+                                                prontuarioVm.atualizarFiltro(paciente.nome)
+                                                prontuarioVm.backStack.clear()
+                                                prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
+                                                principalVm.backstack.add(Route.Prontuario)
+                                            },
+                                            onNavegarParaEvolucao = { paciente ->
+                                                pacienteSelecionadoNome = paciente.nome
+                                                evolucaoVm.prontuario.value = paciente.nome
+                                                evolucaoVm.atualizarFiltro(paciente.nome)
+                                                evolucaoVm.backStack.clear()
+                                                evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
+                                                principalVm.backstack.add(Route.EvolucaoClinica)
+                                            }
+                                        )
+                                    }
+                                }
+                                entry<Route.Pagamento> {
+                                    val subRota = pagamentoVm.backStack.lastOrNull() ?: PagamentoRotas.Listagem
+                                    if (subRota is PagamentoRotas.Formulario) {
+                                        PagamentoFormulario(contentPadding, pagamentoVm)
+                                    } else {
+                                        PagamentoListagem(contentPadding, pagamentoVm)
+                                    }
+                                }
+                                entry<Route.Convenio> {
+                                    val subRota = convenioVm.backStack.lastOrNull() ?: ConvenioRotas.Listagem
+                                    if (subRota is ConvenioRotas.Formulario) { 
+                                        ConvenioFormulario(contentPadding, convenioVm)
+                                    } else {
+                                        ConvenioListagem(contentPadding, convenioVm)
+                                    }
+                                }
+                                entry<Route.HorarioDisponivel> {
+                                    val subRota = horarioVm.backStack.lastOrNull() ?: HorarioDisponivelRotas.Listagem
+                                    if (subRota is HorarioDisponivelRotas.Formulario) {
+                                        HorarioDisponivelFormulario(contentPadding, horarioVm)
+                                    } else {
+                                        HorarioDisponivelListagem(contentPadding, horarioVm)
+                                    }
+                                }
+                                entry<Route.SalaAtendimento> {
+                                    val subRota = salaVm.backStack.lastOrNull() ?: SalaAtendimentoRotas.Listagem
+                                    if (subRota is SalaAtendimentoRotas.Formulario) {
+                                        SalaAtendimentoFormulario(contentPadding, salaVm)
+                                    } else {
+                                        SalaAtendimentoListagem(contentPadding, salaVm)
+                                    }
+                                }
+                                entry<Route.TipoAtendimento> {
+                                    val subRota = tipoVm.backStack.lastOrNull() ?: TipoAtendimentoRotas.Listagem
+                                    if (subRota is TipoAtendimentoRotas.Formulario) {
+                                        TipoAtendimentoFormulario(contentPadding, tipoVm)
+                                    } else {
+                                        TipoAtendimentoListagem(contentPadding, tipoVm)
+                                    }
+                                }
+                                entry<Route.BloqueioAgenda> {
+                                    val subRota = bloqueioVm.backStack.lastOrNull() ?: BloqueioAgendaRotas.Listagem
+                                    if (subRota is BloqueioAgendaRotas.Formulario) {
+                                        BloqueioAgendaFormulario(contentPadding, bloqueioVm)
+                                    } else {
+                                        BloqueioAgendaListagem(contentPadding, bloqueioVm)
+                                    }
+                                }
+                                entry<Route.EvolucaoClinica> {
+                                    val subRota = evolucaoVm.backStack.lastOrNull() ?: EvolucaoClinicaRotas.Listagem
+                                    if (subRota is EvolucaoClinicaRotas.Formulario) {
+                                        EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
+                                    } else {
+                                        EvolucaoClinicaListagem(
+                                            innerPadding = contentPadding,
+                                            vm = evolucaoVm,
+                                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                                        )
+                                    }
+                                }
+                                entry<Route.Prontuario> {
+                                    val subRota = prontuarioVm.backStack.lastOrNull() ?: ProntuarioRotas.Listagem
+                                    if (subRota is ProntuarioRotas.Formulario) {
+                                        ProntuarioFormulario(contentPadding, prontuarioVm)
+                                    } else {
+                                        ProntuarioListagem(
+                                            innerPadding = contentPadding,
+                                            vm = prontuarioVm,
+                                            nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
+                                        )
+                                    }
+                                }
+                                entry<Route.Recepcionista> {
+                                    val subRota = recepcionistaVm.backStack.lastOrNull() ?: RecepcionistaRotas.Listagem
+                                    if (subRota is RecepcionistaRotas.Formulario) {
+                                        RecepcionistaFormulario(contentPadding, recepcionistaVm)
+                                    } else {
+                                        RecepcionistaListagem(contentPadding, recepcionistaVm)
+                                    }
+                                }
+                                entry<Route.Funcionario> {
+                                    val subRota = funcionarioVm.backStack.lastOrNull() ?: FuncionarioRotas.Listagem
+                                    if (subRota is FuncionarioRotas.Formulario) {
+                                        FuncionarioFormulario(contentPadding, funcionarioVm)
+                                    } else {
+                                        FuncionarioListagem(contentPadding, funcionarioVm)
+                                    }
+                                }
+                                entry<Route.Psicologo> {
+                                    val subRota = psicologoVm.backStack.lastOrNull() ?: PsicologoRotas.Listagem
+                                    if (subRota is PsicologoRotas.Formulario) {
+                                        PsicologoFormulario(contentPadding, psicologoVm)
+                                    } else {
+                                        PsicologoListagem(contentPadding, psicologoVm)
+                                    }
+                                }
+                                entry<Route.Agenda> {
+                                    val subRota = agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem
+                                    if (subRota is AgendaRotas.Formulario) {
+                                        AgendaFormulario(contentPadding, agendaVm)
+                                    } else {
+                                        AgendaListagem(contentPadding, agendaVm)
+                                    }
                                 }
                             }
-                            entry<Route.Pagamento> {
-                                val subRota = pagamentoVm.backStack.lastOrNull() ?: PagamentoRotas.Listagem
-                                if (subRota is PagamentoRotas.Formulario) {
-                                    PagamentoFormulario(contentPadding, pagamentoVm)
-                                } else {
-                                    PagamentoListagem(contentPadding, pagamentoVm)
-                                }
-                            }
-                            
-                            // Módulo de Convênio adaptado para usar o backStack interno do ViewModel
-                            entry<Route.Convenio> {
-                                val subRota =
-                                    convenioVm.backStack.lastOrNull()
-                                        ?: ConvenioRotas.Listagem
-
-                                if (subRota is ConvenioRotas.Formulario) { 
-                                    ConvenioFormulario(contentPadding, convenioVm)
-                                } else {
-                                    ConvenioListagem(contentPadding, convenioVm)
-                                }
-                            }
-
-                            entry<Route.HorarioDisponivel> {
-                                val subRota = horarioVm.backStack.lastOrNull() ?: HorarioDisponivelRotas.Listagem
-                                if (subRota is HorarioDisponivelRotas.Formulario) {
-                                    HorarioDisponivelFormulario(contentPadding, horarioVm)
-                                } else {
-                                    HorarioDisponivelListagem(contentPadding, horarioVm)
-                                }
-                            }
-                            entry<Route.SalaAtendimento> {
-                                val subRota = salaVm.backStack.lastOrNull() ?: SalaAtendimentoRotas.Listagem
-                                if (subRota is SalaAtendimentoRotas.Formulario) {
-                                    SalaAtendimentoFormulario(contentPadding, salaVm)
-                                } else {
-                                    SalaAtendimentoListagem(contentPadding, salaVm)
-                                }
-                            }
-                            entry<Route.TipoAtendimento> {
-                                val subRota = tipoVm.backStack.lastOrNull() ?: TipoAtendimentoRotas.Listagem
-                                if (subRota is TipoAtendimentoRotas.Formulario) {
-                                    TipoAtendimentoFormulario(contentPadding, tipoVm)
-                                } else {
-                                    TipoAtendimentoListagem(contentPadding, tipoVm)
-                                }
-                            }
-                            entry<Route.BloqueioAgenda> {
-                                val subRota = bloqueioVm.backStack.lastOrNull() ?: BloqueioAgendaRotas.Listagem
-                                if (subRota is BloqueioAgendaRotas.Formulario) {
-                                    BloqueioAgendaFormulario(contentPadding, bloqueioVm)
-                                } else {
-                                    BloqueioAgendaListagem(contentPadding, bloqueioVm)
-                                }
-                            }
-                            entry<Route.EvolucaoClinica> {
-                                val subRota =
-                                    evolucaoVm.backStack.lastOrNull()
-                                        ?: EvolucaoClinicaRotas.Listagem
-
-                                if (subRota is EvolucaoClinicaRotas.Formulario) {
-                                    EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
-                                } else {
-                                    EvolucaoClinicaListagem(
-                                        innerPadding = contentPadding,
-                                        vm = evolucaoVm,
-                                        nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
-                                    )
-                                }
-                            }
-                            entry<Route.Prontuario> {
-                                val subRota = prontuarioVm.backStack.lastOrNull() ?: ProntuarioRotas.Listagem
-                                if (subRota is ProntuarioRotas.Formulario) {
-                                    ProntuarioFormulario(contentPadding, prontuarioVm)
-                                } else {
-                                    ProntuarioListagem(
-                                        innerPadding = contentPadding,
-                                        vm = prontuarioVm,
-                                        nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
-                                    )
-                                }
-                            }
-                            entry<Route.Recepcionista> {
-                                val subRota = recepcionistaVm.backStack.lastOrNull() ?: RecepcionistaRotas.Listagem
-                                if (subRota is RecepcionistaRotas.Formulario) {
-                                    RecepcionistaFormulario(contentPadding, recepcionistaVm)
-                                } else {
-                                    RecepcionistaListagem(contentPadding, recepcionistaVm)
-                                }
-                            }
-                            entry<Route.Funcionario> {
-                                val subRota = funcionarioVm.backStack.lastOrNull() ?: FuncionarioRotas.Listagem
-
-                                if (subRota is FuncionarioRotas.Formulario) {
-                                    FuncionarioFormulario(contentPadding, funcionarioVm)
-                                } else {
-                                    FuncionarioListagem(contentPadding, funcionarioVm)
-                                }
-                            }
-                            entry<Route.Psicologo> {
-                                val subRota = psicologoVm.backStack.lastOrNull() ?: PsicologoRotas.Listagem
-                                if (subRota is PsicologoRotas.Formulario) {
-                                    PsicologoFormulario(contentPadding, psicologoVm)
-                                } else {
-                                    PsicologoListagem(contentPadding, psicologoVm)
-                                }
-                            }
-                            entry<Route.Agenda> {
-                                val subRota = agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem
-                                if (subRota is AgendaRotas.Formulario) {
-                                    AgendaFormulario(contentPadding, agendaVm)
-                                } else {
-                                    AgendaListagem(contentPadding, agendaVm)
-                                }
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
             }
+
+            // Exibe o balão de notificação no canto inferior direito de qualquer tela
+            NotificacaoFlutuante(mensagem = principalVm.mensagemNotificacao)
         }
     }
 }

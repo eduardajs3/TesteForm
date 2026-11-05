@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class PagamentoViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 0
@@ -39,7 +38,6 @@ class PagamentoViewModel(
 
     val id = mutableStateOf("")
     
-    // Campos geridos pelo validador (valores com máscara de moeda aplicada automaticamente)
     val paciente = CampoValidado()
     val convenio = CampoValidado()
     val valorTotal = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
@@ -62,12 +60,11 @@ class PagamentoViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
         try {
-            // Função auxiliar para converter o formato monetário "R$ 1.234,56" de volta para Double
             fun converterMoedaParaDouble(valorStr: String): Double {
                 val apenasDigitos = valorStr.filter { it.isDigit() }
                 if (apenasDigitos.isEmpty()) return 0.0
@@ -97,7 +94,7 @@ class PagamentoViewModel(
                 }
             }
             mensagem.value = "Pagamento salvo com sucesso!"
-            mandarMensagem("Pagamento salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Pagamento salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -105,13 +102,13 @@ class PagamentoViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(pagamento: Pagamento) {
         _pagamentos.update { lista -> lista - pagamento }
-        mandarMensagem("Pagamento apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Pagamento apagado com sucesso!")
     }
 
     fun novoPagamento() {
@@ -129,7 +126,6 @@ class PagamentoViewModel(
         paciente.definir(pagamento.paciente)
         convenio.definir(pagamento.convenio)
         
-        // Atribui diretamente convertendo o valor numérico para string
         valorTotal.definir(pagamento.valorTotal.toString())
         valorConvenio.definir(pagamento.valorConvenio.toString())
         valorPaciente.definir(pagamento.valorPaciente.toString())

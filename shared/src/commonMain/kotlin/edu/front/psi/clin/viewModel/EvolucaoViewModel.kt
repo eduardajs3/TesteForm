@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +9,7 @@ import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import kotlinx.coroutines.flow.*
 
 class EvolucaoClinicaViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 1
@@ -66,7 +65,7 @@ class EvolucaoClinicaViewModel(
         try {
             if (descricao.value.isBlank()) {
                 mensagem.value = "A descrição da evolução é obrigatória!"
-                mandarMensagem("A descrição da evolução é obrigatória!", SnackbarDuration.Short)
+                mandarMensagem("A descrição da evolução é obrigatória!")
                 return
             }
 
@@ -98,7 +97,7 @@ class EvolucaoClinicaViewModel(
 
             _filtro.value = "" // Limpa busca para o novo item aparecer
             mensagem.value = "Evolução clínica salva com sucesso!"
-            mandarMensagem("Evolução clínica salva com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Evolução clínica salva com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -106,13 +105,13 @@ class EvolucaoClinicaViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(evolucao: EvolucaoClinica) {
         _evolucoes.update { lista -> lista.filterNot { it.id == evolucao.id } }
-        mandarMensagem("Evolução clínica apagada com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Evolução clínica apagada com sucesso!")
     }
 
     fun novaEvolucao(nomePaciente: String = "") {

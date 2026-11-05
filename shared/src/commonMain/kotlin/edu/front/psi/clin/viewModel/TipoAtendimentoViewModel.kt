@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,7 @@ import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 
 class TipoAtendimentoViewModel(
-    private val mandarMensagem: (String, SnackbarDuration) -> Unit
+    private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
     private var idCounter: Int = 0
@@ -39,7 +38,6 @@ class TipoAtendimentoViewModel(
 
     val id = mutableStateOf("")
     
-    // Campos do formulário geridos pelo validador (duração com máscara de hora)
     val nome = CampoValidado()
     val descricao = CampoValidado()
     val duracao = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
@@ -48,7 +46,6 @@ class TipoAtendimentoViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = duracao.validar()
@@ -57,7 +54,7 @@ class TipoAtendimentoViewModel(
 
         if (!(v1 && v2 && v3 && v4 && v5)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
-            mandarMensagem("Preencha todos os campos obrigatórios.", SnackbarDuration.Short)
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -81,7 +78,7 @@ class TipoAtendimentoViewModel(
                 }
             }
             mensagem.value = "Tipo de atendimento salvo com sucesso!"
-            mandarMensagem("Tipo de atendimento salvo com sucesso!", SnackbarDuration.Short)
+            mandarMensagem("Tipo de atendimento salvo com sucesso!")
             limparCampos()
             
             backStack.clear()
@@ -89,13 +86,13 @@ class TipoAtendimentoViewModel(
 
         } catch (e: Exception) {
             mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}", SnackbarDuration.Long)
+            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(tipo: TipoAtendimento) {
         _tiposAtendimento.update { lista -> lista - tipo }
-        mandarMensagem("Tipo de atendimento apagado com sucesso!", SnackbarDuration.Short)
+        mandarMensagem("Tipo de atendimento apagado com sucesso!")
     }
 
     fun novoTipo() {
