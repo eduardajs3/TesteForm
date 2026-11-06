@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.Recepcionista
+import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -25,10 +24,8 @@ fun RecepcionistaListagem(
     val filtro = vm.filtro.collectAsState()
     val recepcionistaSelecionada = remember { mutableStateOf<Recepcionista?>(null) }
     
-    // Estado para controlar qual recepcionista vai abrir o modal de exclusão
     val recepcionistaParaExcluir = remember { mutableStateOf<Recepcionista?>(null) }
 
-    // Mapeamento das colunas da tabela com suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Nome" to 1.5f,
         "CPF" to 1.2f,
@@ -56,8 +53,7 @@ fun RecepcionistaListagem(
             CelulaTabelaTexto(
                 text = recepcionista.nome,
                 weight = 1.5f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = recepcionista.cpf,
@@ -72,7 +68,6 @@ fun RecepcionistaListagem(
                 weight = 1.1f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -81,7 +76,6 @@ fun RecepcionistaListagem(
             }
         }
 
-        // Modal Reutilizável de Detalhes da Recepcionista
         recepcionistaSelecionada.value?.let { recepcionista ->
             val isAtivo = recepcionista.ativo
             ModalDetalhesBase(
@@ -97,13 +91,11 @@ fun RecepcionistaListagem(
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         recepcionistaParaExcluir.value?.let { recepcionista ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

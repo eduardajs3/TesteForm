@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.painterResource
 
 import frontpsiclinic.shared.generated.resources.*
 
-import edu.front.psi.clin.Agenda
+import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.CardBordaCinza

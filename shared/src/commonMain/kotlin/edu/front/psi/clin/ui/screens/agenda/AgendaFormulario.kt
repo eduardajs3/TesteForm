@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
-import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao // <-- Importado do seu componente global
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 @Composable
@@ -18,7 +18,6 @@ fun AgendaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // 1. Lista global de pacientes cadastrados na clínica
     val listaPacientes = listOf(
         "Maria Clara da Silva",
         "João Pedro Santos",
@@ -26,15 +25,12 @@ fun AgendaFormulario(
         "Lucas Oliveira"
     )
 
-    // 2. Opções genéricas
     val listaTiposAtendimento = listOf("Consulta Individual", "Terapia de Casal", "Avaliação Psicológica", "Anamnese")
     val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
     val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
 
-    // Estado da data escolhida
     var dataSelecionada by remember { mutableStateOf("26/03/2026") }
 
-    // 3. Horários, Salas e Psicólogos filtrados dinamicamente com base no dia escolhido
     val horariosDisponiveisNoDia = remember(dataSelecionada) {
         if (dataSelecionada.isNotEmpty()) {
             listOf("08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00")
@@ -67,7 +63,6 @@ fun AgendaFormulario(
             subtitulo = if (isEdicao) "Altere os dados do agendamento selecionado." else "Escolha a data para carregar os horários e recursos disponíveis.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            // Passo 1: Selecionar o Paciente
             CampoDropdownPadrao(
                 label = "Paciente",
                 opcoes = listaPacientes,
@@ -75,7 +70,6 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.paciente.value = it }
             )
 
-            // Passo 2: Selecionar o Dia do Atendimento
             CampoTextoPadrao(
                 value = dataSelecionada,
                 onValueChange = { novaData ->
@@ -88,7 +82,6 @@ fun AgendaFormulario(
                 placeholder = "Ex: 26/03/2026"
             )
 
-            // Passo 3: Seleção do Horário Disponível
             CampoDropdownPadrao(
                 label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data" else "Horário Disponível para $dataSelecionada",
                 opcoes = horariosDisponiveisNoDia,
@@ -103,7 +96,6 @@ fun AgendaFormulario(
                 }
             )
 
-            // Passo 4: Seleção do Psicólogo
             CampoDropdownPadrao(
                 label = "Psicólogo Disponível",
                 opcoes = psicologosDisponiveisNoDia,
@@ -111,7 +103,6 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.psicologo.value = it }
             )
 
-            // Passo 5: Seleção da Sala
             CampoDropdownPadrao(
                 label = "Sala de Atendimento Livre",
                 opcoes = salasDisponiveisNoDia,
@@ -119,7 +110,6 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.sala.value = it }
             )
 
-            // Passo 6: Tipo de Atendimento e Convênio
             CampoDropdownPadrao(
                 label = "Tipo de Atendimento",
                 opcoes = listaTiposAtendimento,
@@ -134,7 +124,6 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.convenio.value = it }
             )
 
-            // Passo 7: Status do Agendamento
             CampoDropdownPadrao(
                 label = "Status da Agenda",
                 opcoes = listaStatusAgenda,

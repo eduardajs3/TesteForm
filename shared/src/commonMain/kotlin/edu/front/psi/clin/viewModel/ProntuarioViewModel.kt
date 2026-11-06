@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
-import edu.front.psi.clin.Prontuario
+import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import kotlinx.coroutines.flow.*
 

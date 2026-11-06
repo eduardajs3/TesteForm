@@ -61,23 +61,3 @@ fun ModalDetalhesBase(
         }
     )
 }
-
-@Composable
-fun ItemDetalhe(
-    rotulo: String,
-    valor: String,
-    corTextoValor: Color = TextoPrincipal
-) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$rotulo: ",
-            style = MaterialTheme.typography.bodyMedium,
-            color = VerdeClinica
-        )
-        Text(
-            text = valor.ifEmpty { "-" },
-            style = MaterialTheme.typography.bodyMedium,
-            color = corTextoValor
-        )
-    }
-}

@@ -19,7 +19,6 @@ fun RecepcionistaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Declaração limpa das opções e conversão de status no topo
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -38,7 +37,6 @@ fun RecepcionistaFormulario(
                 errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
-            // CPF com máscara automática (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.cpf.valor.value,
                 onValueChange = { vm.cpf.definir(it) },
@@ -48,7 +46,6 @@ fun RecepcionistaFormulario(
                 errorMessage = if (vm.cpf.temErro.value) "Campo obrigatório" else null
             )
 
-            // E-mail com suporte a validação dinâmica de formato
             CampoTextoPadrao(
                 value = vm.email.valor.value,
                 onValueChange = { vm.email.definir(it) },
@@ -58,7 +55,6 @@ fun RecepcionistaFormulario(
                 errorMessage = if (vm.email.temErro.value) vm.email.mensagemErro.value else null
             )
 
-            // Telefone com máscara automática (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.telefone.valor.value,
                 onValueChange = { vm.telefone.definir(it) },
@@ -77,7 +73,6 @@ fun RecepcionistaFormulario(
                 errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
             )
 
-            // Dropdown padronizado para o Status
             CampoDropdownPadrao(
                 label = "Status",
                 valorSelecionado = statusExibicao,

@@ -1,5 +1,4 @@
-package edu.front.psi.clin
-
+package edu.front.psi.clin.model
 data class Recepcionista(
     val id: Int,
     val nome: String,

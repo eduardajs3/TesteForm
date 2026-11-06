@@ -1,4 +1,4 @@
-package edu.front.psi.clin
+package edu.front.psi.clin.model
 
 data class TipoAtendimento(
     val id: Int,

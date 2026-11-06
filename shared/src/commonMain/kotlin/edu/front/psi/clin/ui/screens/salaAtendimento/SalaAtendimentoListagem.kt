@@ -5,10 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.SalaAtendimento
+import edu.front.psi.clin.model.SalaAtendimento
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -26,10 +24,8 @@ fun SalaAtendimentoListagem(
     val filtro = vm.filtro.collectAsState()
     val salaSelecionada = remember { mutableStateOf<SalaAtendimento?>(null) }
     
-    // Estado para controlar qual sala vai abrir o modal de exclusão
     val salaParaExcluir = remember { mutableStateOf<SalaAtendimento?>(null) }
 
-    // Mapeamento das colunas da tabela e suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Nome da Sala" to 1.5f,
         "Capacidade" to 0.9f,
@@ -56,8 +52,7 @@ fun SalaAtendimentoListagem(
             CelulaTabelaTexto(
                 text = sala.nome,
                 weight = 1.5f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = "${sala.capacidade} pessoas",
@@ -68,7 +63,6 @@ fun SalaAtendimentoListagem(
                 weight = 1.6f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -77,7 +71,6 @@ fun SalaAtendimentoListagem(
             }
         }
 
-        // Modal Reutilizável de Detalhes da Sala de Atendimento
         salaSelecionada.value?.let { sala ->
             val isAtivo = sala.ativo
             ModalDetalhesBase(
@@ -91,13 +84,11 @@ fun SalaAtendimentoListagem(
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         salaParaExcluir.value?.let { sala ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

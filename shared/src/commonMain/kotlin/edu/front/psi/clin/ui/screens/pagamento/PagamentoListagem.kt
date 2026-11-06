@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.Pagamento
+import edu.front.psi.clin.model.Pagamento
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -24,11 +23,9 @@ fun PagamentoListagem(
     val lista = vm.pagamentosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
 
-    // Estados para controlar o pagamento selecionado para detalhes (botão do olho) e exclusão
     val pagamentoSelecionado = remember { mutableStateOf<Pagamento?>(null) }
     val pagamentoParaExcluir = remember { mutableStateOf<Pagamento?>(null) }
 
-    // Configuração das colunas e seus pesos de largura
     val colunas = listOf(
         "Paciente" to 1.5f,
         "Valor Total" to 1.1f,
@@ -57,8 +54,7 @@ fun PagamentoListagem(
             CelulaTabelaTexto(
                 text = pagamento.paciente,
                 weight = 1.5f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = "R$ ${pagamento.valorTotal}",
@@ -69,7 +65,6 @@ fun PagamentoListagem(
                 weight = 1.1f
             )
 
-            // Utilizando o componente reutilizável BadgeStatus para o estado financeiro
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
                     texto = if (isPago) "Pago" else "Pendente",
@@ -78,7 +73,6 @@ fun PagamentoListagem(
             }
         }
 
-        // Modal de Detalhes (ativado pelo botão do olho)
         pagamentoSelecionado.value?.let { pagamento ->
             val isPago = pagamento.status
             ModalDetalhesBase(
@@ -95,13 +89,11 @@ fun PagamentoListagem(
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isPago) "Pago" else "Pendente",
-                        corTextoValor = if (isPago) Color(0xFF2E5927) else Color(0xFF92400E)
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         pagamentoParaExcluir.value?.let { pagamento ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

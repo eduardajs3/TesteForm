@@ -19,9 +19,8 @@ fun PagamentoFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Declaração limpa das opções e conversão de status no topo
-    val statusOpcoes = listOf("Ativo", "Inativo")
-    val statusExibicao = if (vm.status.valor.value == "true" || vm.status.valor.value.isEmpty()) "Ativo" else "Inativo"
+    val statusOpcoes = listOf("Pago", "Pendente")
+    val statusExibicao = if (vm.status.valor.value == "true" || vm.status.valor.value.isEmpty()) "Pago" else "Pendente"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -47,7 +46,6 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.convenio.temErro.value) "Campo obrigatório" else null
             )
 
-            // Valor total com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorTotal.valor.value,
                 onValueChange = { vm.valorTotal.definir(it) },
@@ -57,7 +55,6 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.valorTotal.temErro.value) "Campo obrigatório" else null
             )
 
-            // Valor do convênio com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorConvenio.valor.value,
                 onValueChange = { vm.valorConvenio.definir(it) },
@@ -67,7 +64,6 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.valorConvenio.temErro.value) "Campo obrigatório" else null
             )
 
-            // Valor do paciente com máscara de moeda
             CampoTextoPadrao(
                 value = vm.valorPaciente.valor.value,
                 onValueChange = { vm.valorPaciente.definir(it) },
@@ -95,13 +91,12 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.dataPagamento.temErro.value) "Campo obrigatório" else null
             )
 
-            // Dropdown padronizado para o Status do pagamento
             CampoDropdownPadrao(
                 label = "Status do pagamento",
                 valorSelecionado = statusExibicao,
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    val valorBoolean = (selecao == "Ativo").toString()
+                    val valorBoolean = (selecao == "Pago").toString()
                     vm.status.definir(valorBoolean)
                 },
                 isError = vm.status.temErro.value,

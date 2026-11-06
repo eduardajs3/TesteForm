@@ -18,7 +18,6 @@ fun HorarioDisponivelFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Listas e variáveis auxiliares declaradas de forma limpa no início
     val diasDaSemana = listOf(
         "Segunda-feira",
         "Terça-feira",
@@ -96,7 +95,7 @@ fun HorarioDisponivelFormulario(
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
-
+            
             BotoesAcaoFormulario(
                 onLimpar = vm::limparCampos,
                 onSalvar = vm::salvar,

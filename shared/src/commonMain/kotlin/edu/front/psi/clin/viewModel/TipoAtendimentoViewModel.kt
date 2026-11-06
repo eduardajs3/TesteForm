@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
-import edu.front.psi.clin.TipoAtendimento
+import edu.front.psi.clin.model.TipoAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils

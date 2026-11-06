@@ -1,10 +1,7 @@
 package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,22 +68,15 @@ fun AppDeleteModal(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
+                BotaoPadrao(
+                    texto = confirmText,
                     onClick = onConfirm,
+                    containerColor = BotaoExcluir,
+                    contentColor = Branco,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BotaoExcluir
-                    ),
-                    shape = CircleShape
-                ) {
-                    Text(
-                        text = confirmText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Branco
-                    )
-                }
+                        .height(48.dp)
+                )
             }
         }
     }

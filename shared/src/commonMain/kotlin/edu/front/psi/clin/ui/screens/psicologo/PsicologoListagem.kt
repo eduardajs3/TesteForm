@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.Psicologo
+import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -25,10 +24,8 @@ fun PsicologoListagem(
     val filtro = vm.filtro.collectAsState()
     val psicologoSelecionado = remember { mutableStateOf<Psicologo?>(null) }
     
-    // Estado para controlar qual psicólogo vai abrir o modal de exclusão
     val psicologoParaExcluir = remember { mutableStateOf<Psicologo?>(null) }
 
-    // Mapeamento das colunas da tabela (incluindo Status)
     val colunas = listOf(
         "Nome" to 1.5f,
         "CRP" to 1.1f,
@@ -56,8 +53,7 @@ fun PsicologoListagem(
             CelulaTabelaTexto(
                 text = psicologo.nome,
                 weight = 1.5f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = psicologo.crp,
@@ -72,7 +68,6 @@ fun PsicologoListagem(
                 weight = 1.4f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -81,7 +76,6 @@ fun PsicologoListagem(
             }
         }
 
-        // Modal Reutilizável de Detalhes do Psicólogo
         psicologoSelecionado.value?.let { psicologo ->
             val isAtivo = psicologo.ativo
             ModalDetalhesBase(
@@ -97,13 +91,11 @@ fun PsicologoListagem(
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         psicologoParaExcluir.value?.let { psicologo ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

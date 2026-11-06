@@ -1,7 +1,6 @@
 package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,7 +25,9 @@ fun CabecalhoTela(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
                 text = titulo,
                 style = MaterialTheme.typography.titleLarge,
@@ -42,23 +43,15 @@ fun CabecalhoTela(
             }
         }
 
-        Button(
+        Spacer(modifier = Modifier.width(16.dp))
+
+        BotaoPadrao(
+            texto = textoBotao,
             onClick = onClickBotao,
-            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Icon(
-                painter = iconeBotao,
-                contentDescription = null,
-                tint = Branco,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = textoBotao,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Branco
-            )
-        }
+            icone = iconeBotao,
+            containerColor = VerdeClinica,
+            contentColor = Branco,
+            modifier = Modifier.wrapContentWidth()
+        )
     }
 }

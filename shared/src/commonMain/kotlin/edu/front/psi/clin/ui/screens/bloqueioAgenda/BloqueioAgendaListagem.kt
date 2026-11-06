@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.BloqueioAgenda
+import edu.front.psi.clin.model.BloqueioAgenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -15,8 +14,6 @@ import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
-
-private val CorTextoLinha = Color(0xFF1F2937)
 
 @Composable
 fun BloqueioAgendaListagem(
@@ -26,11 +23,9 @@ fun BloqueioAgendaListagem(
     val lista = vm.bloqueiosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
     
-    // Estados para controlar o item selecionado para detalhes (botão do olho) e exclusão
     val itemSelecionado = remember { mutableStateOf<BloqueioAgenda?>(null) }
     val itemParaExcluir = remember { mutableStateOf<BloqueioAgenda?>(null) }
 
-    // Definindo as colunas da tabela (Psicólogo, Início, Fim e Status)
     val colunas = listOf(
         "Psicólogo(a)" to 1.8f,
         "Início" to 1.3f,
@@ -59,8 +54,7 @@ fun BloqueioAgendaListagem(
             CelulaTabelaTexto(
                 text = bloqueio.psicologo,
                 weight = 1.8f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = bloqueio.dataHoraInicio,
@@ -71,7 +65,6 @@ fun BloqueioAgendaListagem(
                 weight = 1.3f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -80,7 +73,6 @@ fun BloqueioAgendaListagem(
             }
         }
 
-        // Modal de Detalhes (ativado pelo botão do olho)
         itemSelecionado.value?.let { bloqueio ->
             val isAtivo = bloqueio.ativo
             ModalDetalhesBase(
@@ -92,14 +84,12 @@ fun BloqueioAgendaListagem(
                     ItemDetalhe(rotulo = "Data e hora de fim", valor = bloqueio.dataHoraFim)
                     ItemDetalhe(
                         rotulo = "Status",
-                        valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                        valor = if (isAtivo) "Ativo" else "Inativo"
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         itemParaExcluir.value?.let { item ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.TipoAtendimento
+import edu.front.psi.clin.model.TipoAtendimento
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
@@ -25,10 +24,8 @@ fun TipoAtendimentoListagem(
     val filtro = vm.filtro.collectAsState()
     val tipoSelecionado = remember { mutableStateOf<TipoAtendimento?>(null) }
     
-    // Estado para controlar qual tipo de atendimento vai abrir o modal de exclusão
     val tipoParaExcluir = remember { mutableStateOf<TipoAtendimento?>(null) }
 
-    // Mapeamento das colunas da tabela e suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Tipo de Atendimento" to 1.5f,
         "Duração" to 1.0f,
@@ -55,8 +52,7 @@ fun TipoAtendimentoListagem(
             CelulaTabelaTexto(
                 text = tipo.nome,
                 weight = 1.5f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = "${tipo.duracao} min",
@@ -67,7 +63,6 @@ fun TipoAtendimentoListagem(
                 weight = 1.7f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -76,7 +71,6 @@ fun TipoAtendimentoListagem(
             }
         }
 
-        // Modal Reutilizável de Detalhes do Tipo de Atendimento
         tipoSelecionado.value?.let { tipo ->
             val isAtivo = tipo.ativo
             ModalDetalhesBase(
@@ -90,13 +84,12 @@ fun TipoAtendimentoListagem(
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                        
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         tipoParaExcluir.value?.let { tipo ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

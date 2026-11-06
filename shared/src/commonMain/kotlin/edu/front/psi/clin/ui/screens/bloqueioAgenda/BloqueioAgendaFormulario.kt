@@ -18,7 +18,6 @@ fun BloqueioAgendaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Declaração limpa das opções e conversão de status no topo
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -60,7 +59,6 @@ fun BloqueioAgendaFormulario(
                 errorMessage = if (vm.motivo.temErro.value) "Campo obrigatório" else null
             )
 
-            // Dropdown padronizado para o Status
             CampoDropdownPadrao(
                 label = "Status",
                 valorSelecionado = statusExibicao,

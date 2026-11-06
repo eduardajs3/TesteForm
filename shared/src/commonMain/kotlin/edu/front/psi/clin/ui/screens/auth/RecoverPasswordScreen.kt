@@ -2,7 +2,6 @@ package com.psiclin.front.ui.screenss.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.ui.componentes.AuthLayout
 import edu.front.psi.clin.ui.componentes.AuthTextField
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
@@ -96,25 +96,17 @@ fun RecoverPasswordScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
+        BotaoPadrao(
+            texto = "Redefinir Senha",
             onClick = {
                 onNavigate(Route.Login)
             },
+            containerColor = VerdeClinica,
+            contentColor = Branco,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = VerdeClinica
-            )
-        ) {
-            Text(
-                text = "Redefinir Senha",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = Branco
-            )
-        }
+                .height(56.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

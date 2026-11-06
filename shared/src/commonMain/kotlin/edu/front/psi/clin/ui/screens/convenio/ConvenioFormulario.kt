@@ -18,7 +18,6 @@ fun ConvenioFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Declaração limpa das opções e conversão de status no topo
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -37,7 +36,6 @@ fun ConvenioFormulario(
                 errorMessage = if (vm.nome.temErro.value) "Campo obrigatório" else null
             )
 
-            // CNPJ com máscara automática tratada no ViewModel (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.cnpj.valor.value,
                 onValueChange = { vm.cnpj.definir(it) },
@@ -47,7 +45,6 @@ fun ConvenioFormulario(
                 errorMessage = if (vm.cnpj.temErro.value) "Campo obrigatório" else null
             )
 
-            // Telefone com máscara automática tratada no ViewModel (sem apenasNumeros)
             CampoTextoPadrao(
                 value = vm.telefone.valor.value,
                 onValueChange = { vm.telefone.definir(it) },
@@ -67,7 +64,6 @@ fun ConvenioFormulario(
                 errorMessage = if (vm.percentualCobertura.temErro.value) "Campo obrigatório" else null
             )
 
-            // Dropdown padronizado para o Status
             CampoDropdownPadrao(
                 label = "Status",
                 valorSelecionado = statusExibicao,

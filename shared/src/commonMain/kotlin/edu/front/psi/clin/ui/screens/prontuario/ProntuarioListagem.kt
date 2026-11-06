@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.Prontuario
+import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.theme.TextoPrincipal

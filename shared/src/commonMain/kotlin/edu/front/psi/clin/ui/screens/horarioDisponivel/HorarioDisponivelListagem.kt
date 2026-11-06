@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import edu.front.psi.clin.HorarioDisponivel
+import edu.front.psi.clin.model.HorarioDisponivel
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -24,11 +23,9 @@ fun HorarioDisponivelListagem(
     val lista = vm.horariosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
 
-    // Estados para controlar o modal de detalhes (botão do olho) e o modal de exclusão
     val horarioSelecionado = remember { mutableStateOf<HorarioDisponivel?>(null) }
     val horarioParaExcluir = remember { mutableStateOf<HorarioDisponivel?>(null) }
 
-    // Configuração das colunas da tabela com suas proporções de largura (incluindo Status)
     val colunas = listOf(
         "Psicólogo(a)" to 1.4f,
         "Dia da Semana" to 1.1f,
@@ -56,8 +53,7 @@ fun HorarioDisponivelListagem(
             CelulaTabelaTexto(
                 text = horario.psicologo,
                 weight = 1.4f,
-                isBold = true,
-                fontSize = 14
+                isBold = true
             )
             CelulaTabelaTexto(
                 text = horario.diaSemana,
@@ -72,7 +68,6 @@ fun HorarioDisponivelListagem(
                 weight = 1.3f
             )
             
-            // Célula de Status com badge visual na tabela
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -81,7 +76,6 @@ fun HorarioDisponivelListagem(
             }
         }
 
-        // Modal de Detalhes (ativado pelo botão do olho)
         horarioSelecionado.value?.let { horario ->
             val isAtivo = horario.ativo
             ModalDetalhesBase(
@@ -95,14 +89,12 @@ fun HorarioDisponivelListagem(
                     ItemDetalhe(rotulo = "Descrição", valor = horario.descricao)
                     ItemDetalhe(
                         rotulo = "Status",
-                        valor = if (isAtivo) "Ativo" else "Inativo",
-                        corTextoValor = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+                        valor = if (isAtivo) "Ativo" else "Inativo"
                     )
                 }
             )
         }
 
-        // Modal de Exclusão Reutilizável
         horarioParaExcluir.value?.let { horario ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",

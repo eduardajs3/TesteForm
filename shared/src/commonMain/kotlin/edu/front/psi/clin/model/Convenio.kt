@@ -1,5 +1,4 @@
-package edu.front.psi.clin
-
+package edu.front.psi.clin.model
 data class Convenio(
     val id: Int,
     val nome: String,

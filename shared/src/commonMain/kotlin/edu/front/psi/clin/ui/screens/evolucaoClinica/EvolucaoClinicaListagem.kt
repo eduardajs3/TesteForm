@@ -7,18 +7,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import edu.front.psi.clin.EvolucaoClinica
+import edu.front.psi.clin.model.EvolucaoClinica
 import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
-
-private val CorTextoPrincipal = Color(0xFF1F2937)
 
 @Composable
 fun EvolucaoClinicaListagem(
@@ -42,7 +39,6 @@ fun EvolucaoClinicaListagem(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Cabeçalho da Tela padronizado
             CabecalhoTela(
                 titulo = "Evolução Clínica",
                 textoBotao = "Nova Evolução",
@@ -52,7 +48,6 @@ fun EvolucaoClinicaListagem(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Card do Paciente no Topo padronizado
             CardCabecalhoInfo(
                 rotulo = "Paciente",
                 valor = nomePaciente
@@ -60,7 +55,6 @@ fun EvolucaoClinicaListagem(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Lista de Cards de Evoluções Clínicas
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -88,9 +82,9 @@ fun EvolucaoClinicaListagem(
                         ) {
                             Text(
                                 text = "Situação: ",
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = CorTextoPrincipal
+                                color = TextoPrincipal
                             )
 
                             BadgeStatus(
@@ -103,7 +97,6 @@ fun EvolucaoClinicaListagem(
             }
         }
 
-        // Modal de Exclusão
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de Evolução Clínica",

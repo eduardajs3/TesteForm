@@ -1,29 +1,22 @@
 package edu.front.psi.clin.ui.screens.paciente
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.Paciente
+import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BarraPesquisa
+import edu.front.psi.clin.ui.componentes.CardPaciente
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.theme.Branco
-import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.TextoInativo
-import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
@@ -74,9 +67,10 @@ fun PacienteListagem(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        painter = painterResource(Res.drawable.add),
                         contentDescription = "Novo Paciente",
-                        tint = Branco
+                        tint = Branco,
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -189,8 +183,7 @@ fun PacienteListagem(
                         ItemDetalhe("Observações", paciente.observacoes)
                         ItemDetalhe(
                             rotulo = "Status",
-                            valor = if (paciente.ativo) "Ativo" else "Inativo",
-                            corTextoValor = if (paciente.ativo) VerdeClinica else TextoInativo
+                            valor = if (paciente.ativo) "Ativo" else "Inativo"
                         )
                     }
                 )
@@ -207,92 +200,6 @@ fun PacienteListagem(
                     pacienteParaExcluir = null
                 }
             )
-        }
-    }
-}
-
-@Composable
-private fun CardPaciente(
-    paciente: Paciente,
-    onClick: () -> Unit,
-    onEditarClick: () -> Unit,
-    onExcluirClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Branco),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = paciente.nome,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextoPrincipal
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "CPF: ${paciente.cpf}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSecundario
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val isAtivo = paciente.ativo
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = if (isAtivo) Color(0xFFA2C99B) else Color(0xFFFEF3C7),
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = if (isAtivo) "Ativo" else "Inativo",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isAtivo) VerdeClinica else TextoInativo,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                IconButton(
-                    onClick = onEditarClick,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.edit_square_24px),
-                        contentDescription = "Editar Paciente",
-                        tint = TextoSecundario,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = onExcluirClick,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.delete_24px),
-                        contentDescription = "Excluir Paciente",
-                        tint = TextoErro,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
         }
     }
 }
