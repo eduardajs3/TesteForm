@@ -12,7 +12,7 @@ class AgendaViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 6
+    private var idCounter: Int = 9
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(
         listOf(
@@ -79,6 +79,45 @@ class AgendaViewModel(
                 dataHoraFim = "20/03/2026 09:00",
                 status = "Realizado",
                 observacoes = "Encaminhamento concluído",
+                ativo = true
+            ),
+            Agenda(
+                id = 6,
+                paciente = "João Silva",
+                psicologo = "Dra. Ana Costa",
+                sala = "Sala 02 - Bloco A",
+                tipoAtendimento = "Presencial",
+                convenio = "Unimed",
+                dataHoraInicio = "02/11/2026 14:00",
+                dataHoraFim = "02/11/2026 15:00",
+                status = "Confirmado",
+                observacoes = "Acompanhamento mensal",
+                ativo = true
+            ),
+            Agenda(
+                id = 7,
+                paciente = "Maria Clara da Silva",
+                psicologo = "Dr. Roberto Alves",
+                sala = "Sala 01 - Bloco A",
+                tipoAtendimento = "Presencial",
+                convenio = "Bradesco Saúde",
+                dataHoraInicio = "03/11/2026 09:00",
+                dataHoraFim = "03/11/2026 10:00",
+                status = "Confirmado",
+                observacoes = "Sessão semanal",
+                ativo = true
+            ),
+            Agenda(
+                id = 8,
+                paciente = "Lucas Oliveira",
+                psicologo = "Dra. Ana Costa",
+                sala = "Sala 02 - Bloco A",
+                tipoAtendimento = "Online",
+                convenio = "Particular",
+                dataHoraInicio = "06/11/2026 14:00",
+                dataHoraFim = "06/11/2026 15:00",
+                status = "Confirmado",
+                observacoes = "Consulta de hoje",
                 ativo = true
             )
         )

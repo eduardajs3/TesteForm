@@ -30,6 +30,64 @@ data class DiaSemanaAgenda(
     val dataFormatada: String
 )
 
+// Estrutura pura em Kotlin para manipulação de calendário (100% KMP compatível)
+private fun diasNoMes(mes: Int, ano: Int): Int = when (mes) {
+    1, 3, 5, 7, 8, 10, 12 -> 31
+    4, 6, 9, 11 -> 30
+    2 -> if (ano % 4 == 0 && (ano % 100 != 0 || ano % 400 == 0)) 29 else 28
+    else -> 30
+}
+
+private fun diaDaSemanaSakamoto(ano: Int, mes: Int, dia: Int): Int {
+    // 0 = Domingo, 1 = Segunda, 2 = Terça, 3 = Quarta, 4 = Quinta, 5 = Sexta, 6 = Sábado
+    val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
+    var y = ano
+    if (mes < 3) y -= 1
+    return (y + y / 4 - y / 100 + y / 400 + t[mes - 1] + dia) % 7
+}
+
+private data class DataSimples(val dia: Int, val mes: Int, val ano: Int) {
+    fun formatarDiaMes(): String = "${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}"
+
+    fun adicionarDias(qtd: Int): DataSimples {
+        var d = dia + qtd
+        var m = mes
+        var a = ano
+        while (d > diasNoMes(m, a)) {
+            d -= diasNoMes(m, a)
+            m++
+            if (m > 12) {
+                m = 1
+                a++
+            }
+        }
+        while (d < 1) {
+            m--
+            if (m < 1) {
+                m = 12
+                a--
+            }
+            d += diasNoMes(m, a)
+        }
+        return DataSimples(d, m, a)
+    }
+}
+
+private fun obterPrimeiraSegundaDoMes(ano: Int, mes: Int): DataSimples {
+    val dw = diaDaSemanaSakamoto(ano, mes, 1)
+    val diasParaSegunda = when (dw) {
+        1 -> 0
+        0 -> 1
+        else -> 8 - dw
+    }
+    return DataSimples(1 + diasParaSegunda, mes, ano)
+}
+
+private val nomesDosMeses = listOf(
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+)
+
 @Composable
 fun AgendaListagem(
     innerPadding: PaddingValues,
@@ -39,40 +97,30 @@ fun AgendaListagem(
     val psicologoFiltroSelecionado by vm.psicologoFiltro.collectAsState()
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
 
-    // Controle de semanas
-    var semanaOffset by remember { mutableStateOf(0) }
+    // Inicia na semana de 16/03/2026 (Segunda-feira)
+    var segundaAtual by remember { mutableStateOf(DataSimples(16, 3, 2026)) }
+    var menuMesesAberto by remember { mutableStateOf(false) }
 
-    val diasDaSemana = remember(semanaOffset) {
-        when (semanaOffset) {
-            -1 -> listOf(
-                DiaSemanaAgenda("Segunda", "09/03"),
-                DiaSemanaAgenda("Terça", "10/03"),
-                DiaSemanaAgenda("Quarta", "11/03"),
-                DiaSemanaAgenda("Quinta", "12/03"),
-                DiaSemanaAgenda("Sexta", "13/03")
-            )
-            1 -> listOf(
-                DiaSemanaAgenda("Segunda", "23/03"),
-                DiaSemanaAgenda("Terça", "24/03"),
-                DiaSemanaAgenda("Quarta", "25/03"),
-                DiaSemanaAgenda("Quinta", "26/03"),
-                DiaSemanaAgenda("Sexta", "27/03")
-            )
-            else -> listOf(
-                DiaSemanaAgenda("Segunda", "16/03"),
-                DiaSemanaAgenda("Terça", "17/03"),
-                DiaSemanaAgenda("Quarta", "18/03"),
-                DiaSemanaAgenda("Quinta", "19/03"),
-                DiaSemanaAgenda("Sexta", "20/03")
-            )
-        }
+    // Calcula os 5 dias da semana (Segunda a Sexta)
+    val sextaAtual = remember(segundaAtual) { segundaAtual.adicionarDias(4) }
+
+    val diasDaSemana = remember(segundaAtual) {
+        listOf(
+            DiaSemanaAgenda("Segunda", segundaAtual.formatarDiaMes()),
+            DiaSemanaAgenda("Terça", segundaAtual.adicionarDias(1).formatarDiaMes()),
+            DiaSemanaAgenda("Quarta", segundaAtual.adicionarDias(2).formatarDiaMes()),
+            DiaSemanaAgenda("Quinta", segundaAtual.adicionarDias(3).formatarDiaMes()),
+            DiaSemanaAgenda("Sexta", segundaAtual.adicionarDias(4).formatarDiaMes())
+        )
     }
 
-    val tituloSemana = remember(semanaOffset) {
-        when (semanaOffset) {
-            -1 -> "Semana de 09 a 13 de Março de 2026"
-            1 -> "Semana de 23 a 27 de Março de 2026"
-            else -> "Semana de 16 a 20 de Março de 2026"
+    val tituloSemana = remember(segundaAtual, sextaAtual) {
+        val nomeMesInicio = nomesDosMeses[segundaAtual.mes - 1]
+        val nomeMesFim = nomesDosMeses[sextaAtual.mes - 1]
+        if (segundaAtual.mes == sextaAtual.mes) {
+            "Semana de ${segundaAtual.dia.toString().padStart(2, '0')} a ${sextaAtual.dia.toString().padStart(2, '0')} de $nomeMesInicio de ${segundaAtual.ano}"
+        } else {
+            "Semana de ${segundaAtual.dia.toString().padStart(2, '0')} de $nomeMesInicio a ${sextaAtual.dia.toString().padStart(2, '0')} de $nomeMesFim de ${segundaAtual.ano}"
         }
     }
 
@@ -102,21 +150,21 @@ fun AgendaListagem(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Card de Navegação de Semanas
+                // Card de Navegação de Semanas com Seletor de Mês
                 Card(
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(containerColor = Branco),
-                    modifier = Modifier.weight(1.4f),
+                    modifier = Modifier.weight(1.5f),
                     border = BorderStroke(1.dp, CardBordaCinza)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = { semanaOffset-- }) {
+                        IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(-7) }) {
                             Icon(
                                 painter = painterResource(Res.drawable.keyboard_arrow_left),
                                 contentDescription = "Semana Anterior",
@@ -125,14 +173,70 @@ fun AgendaListagem(
                             )
                         }
 
-                        Text(
-                            text = tituloSemana,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = TextoPrincipal
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = tituloSemana,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = TextoPrincipal
+                            )
 
-                        IconButton(onClick = { semanaOffset++ }) {
+                            // Menu Dropdown para Escolher o Mês Diretamente
+                            Box {
+                                OutlinedButton(
+                                    onClick = { menuMesesAberto = true },
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = VerdeClinica
+                                    ),
+                                    border = BorderStroke(1.dp, CardBordaCinza),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text(
+                                        text = nomesDosMeses[segundaAtual.mes - 1],
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = VerdeClinica
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(
+                                        painter = painterResource(Res.drawable.keyboard_arrow_down),
+                                        contentDescription = "Selecionar Mês",
+                                        tint = VerdeClinica,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+
+                                DropdownMenu(
+                                    expanded = menuMesesAberto,
+                                    onDismissRequest = { menuMesesAberto = false },
+                                    containerColor = Branco
+                                ) {
+                                    nomesDosMeses.forEachIndexed { index, mesNome ->
+                                        val isMesAtual = (index + 1) == segundaAtual.mes
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = "$mesNome ${segundaAtual.ano}",
+                                                    fontWeight = if (isMesAtual) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isMesAtual) VerdeClinica else TextoPrincipal
+                                                )
+                                            },
+                                            onClick = {
+                                                menuMesesAberto = false
+                                                segundaAtual = obterPrimeiraSegundaDoMes(segundaAtual.ano, index + 1)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(7) }) {
                             Icon(
                                 painter = painterResource(Res.drawable.keyboard_arrow_right),
                                 contentDescription = "Próxima Semana",
@@ -261,23 +365,19 @@ fun AgendaListagem(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             diasDaSemana.forEach { dia ->
-                                // Busca precisa por data específica E horário
                                 val agendamentoNoHorario = agendamentos.firstOrNull {
                                     it.dataHoraInicio.contains(dia.dataFormatada) && it.dataHoraInicio.contains(hora)
                                 }
 
+                                // Somente as consultas agendadas possuem ação de clique.
+                                // Dias e slots vagos são desabilitados, sem ação de clique.
                                 CardAgendamentoGrade(
                                     dia = dia,
                                     agendamento = agendamentoNoHorario,
                                     modifier = Modifier.weight(1f),
-                                    onClick = {
-                                        if (agendamentoNoHorario != null) {
-                                            agendamentoSelecionado = agendamentoNoHorario
-                                        } else {
-                                            // Pré-preenche o formulário com o dia e o horário clicados!
-                                            vm.novoAgendamentoComDataHora("${dia.dataFormatada}/2026", hora)
-                                        }
-                                    }
+                                    onClick = if (agendamentoNoHorario != null) {
+                                        { agendamentoSelecionado = agendamentoNoHorario }
+                                    } else null
                                 )
                             }
                         }
@@ -286,7 +386,7 @@ fun AgendaListagem(
             }
         }
 
-        // Modal de Detalhes da Consulta
+        // Modal de Detalhes da Consulta Marcada
         agendamentoSelecionado?.let { agendamento ->
             AlertDialog(
                 onDismissRequest = { agendamentoSelecionado = null },
@@ -340,7 +440,7 @@ fun AgendaListagem(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Botão de Confirmar / Alternar Status Rápido
+                        // Botão de Confirmar Presença
                         if (!agendamento.status.equals("Confirmado", ignoreCase = true)) {
                             TextButton(onClick = {
                                 vm.alterarStatus(agendamento, "Confirmado")
@@ -398,13 +498,15 @@ private fun CardAgendamentoGrade(
     dia: DiaSemanaAgenda,
     agendamento: Agenda?,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
+    val isOcupado = agendamento != null
+
     val corStatus = when (agendamento?.status?.lowercase()) {
         "confirmado", "realizado" -> FundoSucesso
         "pendente" -> Color(0xFFFEF3C7)
         "cancelado" -> Color(0xFFFEE2E2)
-        else -> Branco
+        else -> LinhaDivisoria.copy(alpha = 0.4f)
     }
 
     val corTextoStatus = when (agendamento?.status?.lowercase()) {
@@ -421,10 +523,12 @@ private fun CardAgendamentoGrade(
             .height(78.dp)
             .border(
                 width = 1.dp,
-                color = if (agendamento != null) corTextoStatus.copy(alpha = 0.35f) else CardBordaCinza,
+                color = if (isOcupado) corTextoStatus.copy(alpha = 0.35f) else CardBordaCinza.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(12.dp)
             )
-            .clickable { onClick() }
+            .then(
+                if (isOcupado && onClick != null) Modifier.clickable { onClick() } else Modifier
+            )
     ) {
         Column(
             modifier = Modifier
@@ -458,10 +562,11 @@ private fun CardAgendamentoGrade(
                     overflow = TextOverflow.Ellipsis
                 )
             } else {
+                // Slot vago: completamente desabilitado, sem função de clique
                 Text(
-                    text = "+ Livre",
+                    text = "Livre",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario,
+                    color = TextoSecundario.copy(alpha = 0.45f),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
