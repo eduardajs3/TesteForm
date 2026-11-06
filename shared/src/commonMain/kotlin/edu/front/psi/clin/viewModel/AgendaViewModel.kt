@@ -12,7 +12,7 @@ class AgendaViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 2
+    private var idCounter: Int = 6
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(
         listOf(
@@ -20,13 +20,65 @@ class AgendaViewModel(
                 id = 1,
                 paciente = "João Silva",
                 psicologo = "Dra. Ana Costa",
-                sala = "Sala 02",
+                sala = "Sala 02 - Bloco A",
                 tipoAtendimento = "Presencial",
                 convenio = "Unimed",
-                dataHoraInicio = "10/10/2023 14:00",
-                dataHoraFim = "10/10/2023 15:00",
+                dataHoraInicio = "16/03/2026 14:00",
+                dataHoraFim = "16/03/2026 15:00",
                 status = "Confirmado",
                 observacoes = "Primeira consulta",
+                ativo = true
+            ),
+            Agenda(
+                id = 2,
+                paciente = "Maria Clara da Silva",
+                psicologo = "Dr. Roberto Alves",
+                sala = "Sala 01 - Bloco A",
+                tipoAtendimento = "Presencial",
+                convenio = "Bradesco Saúde",
+                dataHoraInicio = "17/03/2026 09:00",
+                dataHoraFim = "17/03/2026 10:00",
+                status = "Confirmado",
+                observacoes = "Retorno quinzenal",
+                ativo = true
+            ),
+            Agenda(
+                id = 3,
+                paciente = "Lucas Oliveira",
+                psicologo = "Dra. Ana Costa",
+                sala = "Sala 02 - Bloco A",
+                tipoAtendimento = "Online",
+                convenio = "Particular",
+                dataHoraInicio = "18/03/2026 10:00",
+                dataHoraFim = "18/03/2026 11:00",
+                status = "Pendente",
+                observacoes = "Avaliação inicial",
+                ativo = true
+            ),
+            Agenda(
+                id = 4,
+                paciente = "Ana Beatriz Lima",
+                psicologo = "Dra. Juliana Costa",
+                sala = "Sala 03 - Bloco B",
+                tipoAtendimento = "Presencial",
+                convenio = "SulAmérica",
+                dataHoraInicio = "19/03/2026 15:00",
+                dataHoraFim = "19/03/2026 16:00",
+                status = "Confirmado",
+                observacoes = "Sessão de terapia",
+                ativo = true
+            ),
+            Agenda(
+                id = 5,
+                paciente = "João Pedro Santos",
+                psicologo = "Dr. Roberto Alves",
+                sala = "Sala 01 - Bloco A",
+                tipoAtendimento = "Presencial",
+                convenio = "Amil",
+                dataHoraInicio = "20/03/2026 08:00",
+                dataHoraFim = "20/03/2026 09:00",
+                status = "Realizado",
+                observacoes = "Encaminhamento concluído",
                 ativo = true
             )
         )
@@ -39,15 +91,21 @@ class AgendaViewModel(
         _filtro.value = novoFiltro
     }
 
-    val agendamentosFiltrados = combine(_agendamentos, _filtro) { agendamentos, filtro ->
-        if (filtro.isEmpty()) {
-            agendamentos
-        } else {
-            agendamentos.filter {
-                it.paciente.contains(filtro, ignoreCase = true) ||
-                it.psicologo.contains(filtro, ignoreCase = true) ||
-                it.status.contains(filtro, ignoreCase = true)
-            }
+    private val _psicologoFiltro = MutableStateFlow("Todos")
+    val psicologoFiltro = _psicologoFiltro.asStateFlow()
+
+    fun filtrarPorPsicologo(psicologo: String) {
+        _psicologoFiltro.value = psicologo
+    }
+
+    val agendamentosFiltrados = combine(_agendamentos, _filtro, _psicologoFiltro) { agendamentos, filtro, psicologo ->
+        agendamentos.filter { item ->
+            val matchTexto = filtro.isEmpty() ||
+                item.paciente.contains(filtro, ignoreCase = true) ||
+                item.status.contains(filtro, ignoreCase = true) ||
+                item.sala.contains(filtro, ignoreCase = true)
+            val matchPsicologo = psicologo == "Todos" || item.psicologo.contains(psicologo, ignoreCase = true)
+            matchTexto && matchPsicologo
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -112,6 +170,15 @@ class AgendaViewModel(
         mandarMensagem("Agendamento apagado com sucesso!")
     }
 
+    fun alterarStatus(agendamento: Agenda, novoStatus: String) {
+        _agendamentos.update { lista ->
+            lista.map { item ->
+                if (item.id == agendamento.id) item.copy(status = novoStatus) else item
+            }
+        }
+        mandarMensagem("Status alterado para $novoStatus!")
+    }
+
     fun novoAgendamento() {
         backStack.clear()
         backStack.add(AgendaRotas.Formulario)
@@ -123,10 +190,27 @@ class AgendaViewModel(
         convenio.value = ""
         dataHoraInicio.value = ""
         dataHoraFim.value = ""
-        status.value = ""
+        status.value = "Confirmado"
         observacoes.value = ""
         ativo.value = "true"
         mensagem.value = ""
+    }
+
+    fun novoAgendamentoComDataHora(data: String, hora: String) {
+        novoAgendamento()
+        val horaFim = when (hora) {
+            "08:00" -> "09:00"
+            "09:00" -> "10:00"
+            "10:00" -> "11:00"
+            "11:00" -> "12:00"
+            "14:00" -> "15:00"
+            "15:00" -> "16:00"
+            "16:00" -> "17:00"
+            "17:00" -> "18:00"
+            else -> hora
+        }
+        dataHoraInicio.value = "$data $hora"
+        dataHoraFim.value = "$data $horaFim"
     }
 
     fun editar(agendamento: Agenda) {

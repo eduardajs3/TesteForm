@@ -29,7 +29,16 @@ fun AgendaFormulario(
     val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
     val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
 
-    var dataSelecionada by remember { mutableStateOf("26/03/2026") }
+    var dataSelecionada by remember(vm.dataHoraInicio.value) {
+        val data = if (vm.dataHoraInicio.value.contains(" ")) {
+            vm.dataHoraInicio.value.split(" ")[0]
+        } else if (vm.dataHoraInicio.value.isNotEmpty()) {
+            vm.dataHoraInicio.value
+        } else {
+            "16/03/2026"
+        }
+        mutableStateOf(data)
+    }
 
     val horariosDisponiveisNoDia = remember(dataSelecionada) {
         if (dataSelecionada.isNotEmpty()) {
@@ -55,7 +64,16 @@ fun AgendaFormulario(
         }
     }
 
-    var horarioSelecionado by remember { mutableStateOf("") }
+    var horarioSelecionado by remember(vm.dataHoraInicio.value) {
+        val horaInicio = if (vm.dataHoraInicio.value.contains(" ")) {
+            vm.dataHoraInicio.value.split(" ")[1]
+        } else ""
+        val encontrado = listOf(
+            "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
+            "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
+        ).firstOrNull { it.startsWith(horaInicio) } ?: ""
+        mutableStateOf(encontrado)
+    }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
