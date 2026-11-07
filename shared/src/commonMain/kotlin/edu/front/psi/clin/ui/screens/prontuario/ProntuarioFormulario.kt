@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 
@@ -19,8 +19,29 @@ fun ProntuarioFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val statusOpcoes = listOf("Ativo", "Inativo")
-    val statusExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
+    val pacienteOpcoes = listOf(
+        "Ana Clara Souza",
+        "Carlos Eduardo Lima",
+        "Mariana Ribeiro",
+        "João Pedro Santos"
+    )
+
+    val statusOpcoes = listOf(
+        "Ativo",
+        "Arquivado",
+        "Encerrado"
+    )
+
+    val pacienteAtual = vm.paciente.value
+    val pacienteExibicao = if (pacienteOpcoes.contains(pacienteAtual)) pacienteAtual else (pacienteOpcoes.firstOrNull() ?: "")
+
+    val statusAtual = vm.status.value
+    val statusExibicao = when {
+        statusOpcoes.contains(statusAtual) -> statusAtual
+        statusAtual.lowercase() == "true" -> "Ativo"
+        statusAtual.lowercase() == "false" -> "Encerrado"
+        else -> "Ativo" 
+    }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -28,10 +49,13 @@ fun ProntuarioFormulario(
             subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            CampoTextoPadrao(
-                value = vm.paciente.value,
-                onValueChange = { vm.paciente.value = it },
-                label = "Paciente"
+            CampoDropdownPadrao(
+                label = "Paciente",
+                valorSelecionado = pacienteExibicao,
+                opcoes = pacienteOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    vm.paciente.value = selecao
+                }
             )
 
             CampoDataPadrao(
@@ -46,31 +70,19 @@ fun ProntuarioFormulario(
                 label = "Queixa principal"
             )
 
-            CampoTextoPadrao(
-                value = vm.status.value,
-                onValueChange = { vm.status.value = it },
-                label = "Status do prontuário"
-            )
-
-
             CampoDropdownPadrao(
-                label = "Status",
+                label = "Status do prontuário",
                 valorSelecionado = statusExibicao,
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    val valorBoolean = (selecao == "Ativo").toString()
-                    vm.ativo.value = valorBoolean
+                    vm.status.value = selecao
                 }
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
         }
     }

@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
 
@@ -17,6 +17,12 @@ fun HorarioDisponivelFormulario(
     vm: HorarioDisponivelViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+
+    val psicologoOpcoes = listOf(
+        "Dra. Ana Silva",
+        "Dr. Carlos Souza",
+        "Dra. Mariana Oliveira"
+    )
 
     val diasDaSemana = listOf(
         "Segunda-feira",
@@ -29,6 +35,10 @@ fun HorarioDisponivelFormulario(
     )
 
     val statusOpcoes = listOf("Ativo", "Inativo")
+
+    val psicologoAtual = vm.psicologo.valor.value
+    val psicologoExibicao = if (psicologoOpcoes.contains(psicologoAtual)) psicologoAtual else (psicologoOpcoes.firstOrNull() ?: "")
+
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -37,11 +47,13 @@ fun HorarioDisponivelFormulario(
             subtitulo = if (isEdicao) "Altere os dados do horário selecionado." else "Preencha os dados do horário disponível.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            CampoTextoPadrao(
-                value = vm.psicologo.valor.value,
-                onValueChange = { vm.psicologo.definir(it) },
+            CampoDropdownPadrao(
                 label = "Nome do psicólogo",
-                obrigatorio = true,
+                valorSelecionado = psicologoExibicao,
+                opcoes = psicologoOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    vm.psicologo.definir(selecao)
+                },
                 isError = vm.psicologo.temErro.value,
                 errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
             )

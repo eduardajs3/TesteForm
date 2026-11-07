@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
 
@@ -19,8 +19,38 @@ fun PagamentoFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val statusOpcoes = listOf("Pago", "Pendente")
-    val statusExibicao = if (vm.status.valor.value == "true" || vm.status.valor.value.isEmpty()) "Pago" else "Pendente"
+    val pacienteOpcoes = listOf(
+        "Ana Clara Souza",
+        "Carlos Eduardo Lima",
+        "Mariana Ribeiro",
+        "João Pedro Santos"
+    )
+    val convenioOpcoes = listOf(
+        "Particular",
+        "Unimed",
+        "Amil",
+        "Bradesco Saúde",
+        "SulAmérica"
+    )
+    val statusOpcoes = listOf(
+        "Pendente",
+        "Pago",
+        "Cancelado"
+    )
+
+    val pacienteAtual = vm.paciente.valor.value
+    val pacienteExibicao = if (pacienteOpcoes.contains(pacienteAtual)) pacienteAtual else (pacienteOpcoes.firstOrNull() ?: "")
+
+    val convenioAtual = vm.convenio.valor.value
+    val convenioExibicao = if (convenioOpcoes.contains(convenioAtual)) convenioAtual else (convenioOpcoes.firstOrNull() ?: "")
+
+    val statusAtual = vm.status.valor.value
+    val statusExibicao = when {
+        statusOpcoes.contains(statusAtual) -> statusAtual
+        statusAtual.lowercase() == "true" -> "Pago"
+        statusAtual.lowercase() == "false" -> "Pendente"
+        else -> "Pendente"
+    }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -28,20 +58,25 @@ fun PagamentoFormulario(
             subtitulo = if (isEdicao) "Altere os dados do pagamento selecionado." else "Preencha os dados do pagamento.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            CampoTextoPadrao(
-                value = vm.paciente.valor.value,
-                onValueChange = { vm.paciente.definir(it) },
+    
+            CampoDropdownPadrao(
                 label = "Nome do paciente",
-                obrigatorio = true,
+                valorSelecionado = pacienteExibicao,
+                opcoes = pacienteOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    vm.paciente.definir(selecao)
+                },
                 isError = vm.paciente.temErro.value,
                 errorMessage = if (vm.paciente.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
-                value = vm.convenio.valor.value,
-                onValueChange = { vm.convenio.definir(it) },
+            CampoDropdownPadrao(
                 label = "Convênio",
-                obrigatorio = true,
+                valorSelecionado = convenioExibicao,
+                opcoes = convenioOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    vm.convenio.definir(selecao)
+                },
                 isError = vm.convenio.temErro.value,
                 errorMessage = if (vm.convenio.temErro.value) "Campo obrigatório" else null
             )
@@ -96,21 +131,16 @@ fun PagamentoFormulario(
                 valorSelecionado = statusExibicao,
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    val valorBoolean = (selecao == "Pago").toString()
-                    vm.status.definir(valorBoolean)
+                    vm.status.definir(selecao)
                 },
                 isError = vm.status.temErro.value,
                 errorMessage = if (vm.status.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
         }
     }

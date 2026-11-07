@@ -6,8 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
+import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
 
@@ -18,7 +19,20 @@ fun BloqueioAgendaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val statusOpcoes = listOf("Ativo", "Inativo")
+    val psicologoOpcoes = listOf(
+        "Dra. Ana Silva",
+        "Dr. Carlos Souza",
+        "Dra. Mariana Oliveira"
+    )
+
+    val statusOpcoes = listOf(
+        "Ativo",
+        "Inativo"
+    )
+
+    val psicologoAtual = vm.psicologo.valor.value
+    val psicologoExibicao = if (psicologoOpcoes.contains(psicologoAtual)) psicologoAtual else (psicologoOpcoes.firstOrNull() ?: "")
+
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -27,15 +41,19 @@ fun BloqueioAgendaFormulario(
             subtitulo = if (isEdicao) "Altere os dados do bloqueio ID: ${vm.id.value}" else "Preencha os dados para criar um novo bloqueio.",
             mensagemFeedback = vm.mensagem.value
         ) {
-            CampoTextoPadrao(
-                value = vm.psicologo.valor.value,
-                onValueChange = { vm.psicologo.definir(it) },
+    
+            CampoDropdownPadrao(
                 label = "Nome do psicólogo",
+                valorSelecionado = psicologoExibicao,
+                opcoes = psicologoOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    vm.psicologo.definir(selecao)
+                },
                 isError = vm.psicologo.temErro.value,
                 errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
+            CampoDataPadrao(
                 value = vm.dataHoraInicio.valor.value,
                 onValueChange = { vm.dataHoraInicio.definir(it) },
                 label = "Data e hora de início",
@@ -43,7 +61,7 @@ fun BloqueioAgendaFormulario(
                 errorMessage = if (vm.dataHoraInicio.temErro.value) "Campo obrigatório" else null
             )
 
-            CampoTextoPadrao(
+            CampoDataPadrao(
                 value = vm.dataHoraFim.valor.value,
                 onValueChange = { vm.dataHoraFim.definir(it) },
                 label = "Data e hora de fim",
@@ -72,13 +90,9 @@ fun BloqueioAgendaFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
         }
     }
