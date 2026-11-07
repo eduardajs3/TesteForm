@@ -2,9 +2,6 @@ package com.psiclin.front.ui.screens.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -21,6 +18,8 @@ import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import org.jetbrains.compose.resources.painterResource
+import frontpsiclinic.shared.generated.resources.*
 
 @Composable
 fun RecoverPasswordScreen(
@@ -30,7 +29,9 @@ fun RecoverPasswordScreen(
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
+
     var senhaVisivel by remember { mutableStateOf(false) }
+    var confirmarSenhaVisivel by remember { mutableStateOf(false) }
 
     AuthLayout {
         Text(
@@ -72,7 +73,19 @@ fun RecoverPasswordScreen(
             onValueChange = { senha = it },
             label = "Nova senha",
             placeholder = "Digite sua nova senha",
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
+                    Icon(
+                        painter = painterResource(
+                            if (senhaVisivel) Res.drawable.visibility else Res.drawable.visibility_off
+                        ),
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha",
+                        tint = VerdeClinica,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -82,13 +95,16 @@ fun RecoverPasswordScreen(
             onValueChange = { confirmarSenha = it },
             label = "Confirmar senha",
             placeholder = "Confirme sua nova senha",
-            visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (confirmarSenhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
+                IconButton(onClick = { confirmarSenhaVisivel = !confirmarSenhaVisivel }) {
                     Icon(
-                        imageVector = if (senhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = null,
-                        tint = VerdeClinica
+                        painter = painterResource(
+                            if (confirmarSenhaVisivel) Res.drawable.visibility else Res.drawable.visibility_off
+                        ),
+                        contentDescription = if (confirmarSenhaVisivel) "Ocultar senha" else "Mostrar senha",
+                        tint = VerdeClinica,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

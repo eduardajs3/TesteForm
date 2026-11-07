@@ -1,6 +1,5 @@
 package edu.front.psi.clin.ui.componentes
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,16 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoErro
-import edu.front.psi.clin.ui.theme.TextoInativo
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
-import edu.front.psi.clin.ui.theme.VerdeClinica
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 
@@ -62,22 +58,10 @@ fun CardPaciente(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val isAtivo = paciente.ativo
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = if (isAtivo) Color(0xFFA2C99B) else Color(0xFFFEF3C7),
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = if (isAtivo) "Ativo" else "Inativo",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isAtivo) VerdeClinica else TextoInativo,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                BadgeStatus(
+                    texto = if (paciente.ativo) "Ativo" else "Inativo",
+                    isAtivo = paciente.ativo
+                )
 
                 IconButton(
                     onClick = onEditarClick,

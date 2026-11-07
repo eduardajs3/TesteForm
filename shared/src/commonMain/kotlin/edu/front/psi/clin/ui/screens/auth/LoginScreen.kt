@@ -2,9 +2,6 @@ package com.psiclin.front.ui.screens.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -21,6 +18,8 @@ import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import org.jetbrains.compose.resources.painterResource
+import frontpsiclinic.shared.generated.resources.*
 
 @Composable
 fun LoginScreen(
@@ -65,9 +64,12 @@ fun LoginScreen(
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = null,
-                        tint = VerdeClinica
+                        painter = painterResource(
+                            if (passwordVisible) Res.drawable.visibility else Res.drawable.visibility_off
+                        ),
+                        contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
+                        tint = VerdeClinica,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

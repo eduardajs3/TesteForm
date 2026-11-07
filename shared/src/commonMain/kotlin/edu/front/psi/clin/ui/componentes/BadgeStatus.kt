@@ -4,13 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.front.psi.clin.ui.theme.VerdeClinica
+import edu.front.psi.clin.ui.theme.TextoInativo
+import edu.front.psi.clin.ui.theme.CinzaFundoBotao
 
 @Composable
 fun BadgeStatus(
@@ -18,8 +21,8 @@ fun BadgeStatus(
     isAtivo: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val corFundo = if (isAtivo) Color(0xFFA2C99B) else Color(0xFFFEF3C7)
-    val corTexto = if (isAtivo) Color(0xFF2E5927) else Color(0xFF92400E)
+    val corFundo = if (isAtivo) VerdeClinica.copy(alpha = 0.15f) else CinzaFundoBotao
+    val corTexto = if (isAtivo) VerdeClinica else TextoInativo
 
     Box(modifier = modifier) {
         Box(
