@@ -74,7 +74,7 @@ fun SalaAtendimentoListagem(
         salaSelecionada.value?.let { sala ->
             val isAtivo = sala.ativo
             ModalDetalhesBase(
-                titulo = sala.nome,
+                titulo = "Detalhes da Sala de atendimento",
                 onDismiss = { salaSelecionada.value = null },
                 conteudo = {
                     ItemDetalhe("Nome da sala", sala.nome)

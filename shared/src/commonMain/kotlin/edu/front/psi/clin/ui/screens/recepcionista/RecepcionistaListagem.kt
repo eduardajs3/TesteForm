@@ -79,7 +79,7 @@ fun RecepcionistaListagem(
         recepcionistaSelecionada.value?.let { recepcionista ->
             val isAtivo = recepcionista.ativo
             ModalDetalhesBase(
-                titulo = recepcionista.nome,
+                titulo = "Detalhes da Recepcionista",
                 onDismiss = { recepcionistaSelecionada.value = null },
                 conteudo = {
                     ItemDetalhe("Nome completo", recepcionista.nome)

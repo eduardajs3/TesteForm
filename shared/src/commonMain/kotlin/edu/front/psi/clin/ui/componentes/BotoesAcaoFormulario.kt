@@ -16,26 +16,28 @@ import edu.front.psi.clin.ui.theme.VerdeClinica
 
 @Composable
 fun BotoesAcaoFormulario(
-    onLimpar: () -> Unit,
+    onLimpar: (() -> Unit)? = null,
     onSalvar: () -> Unit,
     textoBotaoSalvar: String = "Gravar",
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        // Garante que sempre haverá respiro entre o último campo e os botões
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            BotaoPadrao(
-                texto = "Limpar Campos",
-                onClick = onLimpar,
-                containerColor = CinzaFundoBotao,
-                contentColor = CinzaTextoBotao,
-                modifier = Modifier.weight(1f)
-            )
+
+            if (onLimpar != null) {
+                BotaoPadrao(
+                    texto = "Limpar Campos",
+                    onClick = onLimpar,
+                    containerColor = CinzaFundoBotao,
+                    contentColor = CinzaTextoBotao,
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             BotaoPadrao(
                 texto = textoBotaoSalvar,

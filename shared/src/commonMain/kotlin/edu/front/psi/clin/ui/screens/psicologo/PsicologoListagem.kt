@@ -79,7 +79,7 @@ fun PsicologoListagem(
         psicologoSelecionado.value?.let { psicologo ->
             val isAtivo = psicologo.ativo
             ModalDetalhesBase(
-                titulo = psicologo.nome,
+                titulo = "Detalhes do Psicólogo",
                 onDismiss = { psicologoSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe("Nome completo", psicologo.nome)

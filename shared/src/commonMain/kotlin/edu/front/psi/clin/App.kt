@@ -34,8 +34,8 @@ import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoFormulario
 import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoFormulario
 
 // Imports das telas de Listagem e Dashboard
-import com.psiclin.front.ui.screenss.auth.LoginScreen
-import com.psiclin.front.ui.screenss.auth.RecoverPasswordScreen
+import com.psiclin.front.ui.screens.auth.LoginScreen
+import com.psiclin.front.ui.screens.auth.RecoverPasswordScreen
 import edu.front.psi.clin.ui.screens.agenda.AgendaListagem
 import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaListagem
 import edu.front.psi.clin.ui.screens.convenio.ConvenioListagem

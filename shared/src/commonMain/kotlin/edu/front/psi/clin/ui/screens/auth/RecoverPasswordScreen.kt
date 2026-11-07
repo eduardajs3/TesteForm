@@ -1,4 +1,4 @@
-package com.psiclin.front.ui.screenss.auth
+package com.psiclin.front.ui.screens.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

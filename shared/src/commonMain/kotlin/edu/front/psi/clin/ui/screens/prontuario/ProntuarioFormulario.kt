@@ -19,7 +19,6 @@ fun ProntuarioFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Declaração limpa das opções e conversão de status no topo
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -53,7 +52,7 @@ fun ProntuarioFormulario(
                 label = "Status do prontuário"
             )
 
-            // Dropdown padronizado para o Status
+
             CampoDropdownPadrao(
                 label = "Status",
                 valorSelecionado = statusExibicao,
@@ -65,9 +64,13 @@ fun ProntuarioFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = vm::limparCampos,
+                onLimpar = if (!isEdicao) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar =
+                    if (isEdicao)
+                        "Salvar Alterações"
+                    else
+                        "Gravar"
             )
         }
     }

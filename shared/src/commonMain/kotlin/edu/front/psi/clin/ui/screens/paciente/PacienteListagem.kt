@@ -15,6 +15,7 @@ import edu.front.psi.clin.ui.componentes.BarraPesquisa
 import edu.front.psi.clin.ui.componentes.CardPaciente
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoInativo
 import edu.front.psi.clin.ui.theme.TextoSecundario
@@ -43,43 +44,13 @@ fun PacienteListagem(
             .padding(24.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Pacientes",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = VerdeClinica
-                    )
-                    Text(
-                        text = "Gerencie os pacientes cadastrados na clínica",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextoSecundario
-                    )
-                }
-
-                Button(
-                    onClick = vm::novoPaciente,
-                    colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.add),
-                        contentDescription = "Novo Paciente",
-                        tint = Branco,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Novo Paciente",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Branco
-                    )
-                }
-            }
+            CabecalhoTela(
+                titulo = "Pacientes",
+                subtitulo = "Gerencie os pacientes cadastrados na clínica",
+                textoBotao = "Novo Paciente",
+                iconeBotao = painterResource(Res.drawable.add),
+                onClickBotao = vm::novoPaciente
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 

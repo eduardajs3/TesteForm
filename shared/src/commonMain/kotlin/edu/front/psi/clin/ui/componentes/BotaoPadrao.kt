@@ -32,7 +32,7 @@ fun BotaoPadrao(
             disabledContainerColor = containerColor.copy(alpha = 0.5f),
             disabledContentColor = contentColor.copy(alpha = 0.5f)
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(24.dp),
         modifier = modifier.height(48.dp)
     ) {
         if (icone != null) {

@@ -74,7 +74,7 @@ fun TipoAtendimentoListagem(
         tipoSelecionado.value?.let { tipo ->
             val isAtivo = tipo.ativo
             ModalDetalhesBase(
-                titulo = tipo.nome,
+                titulo = "Detalhes do Tipo de Atendimento",
                 onDismiss = { tipoSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe("Nome do atendimento", tipo.nome)

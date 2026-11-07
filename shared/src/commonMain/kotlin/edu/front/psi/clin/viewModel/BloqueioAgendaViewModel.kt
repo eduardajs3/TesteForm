@@ -10,7 +10,7 @@ import edu.front.psi.clin.ui.componentes.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class BloqueioAgendaViewModel(
-    private val mandarMensagem: (String) -> Unit
+    private val mandarMensagem: (String) -> Unit,
 ) : ViewModel() {
 
     private var idCounter: Int = 0

@@ -78,9 +78,13 @@ fun SalaAtendimentoFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = vm::limparCampos,
+                onLimpar = if (!isEdicao) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar =
+                    if (isEdicao)
+                        "Salvar Alterações"
+                    else
+                        "Gravar"
             )
         }
     }

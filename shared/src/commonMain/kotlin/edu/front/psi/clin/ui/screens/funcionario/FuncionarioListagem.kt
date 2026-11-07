@@ -81,7 +81,7 @@ fun FuncionarioListagem(
         funcionarioSelecionado.value?.let { funcionario ->
             val isAtivo = funcionario.ativo
             ModalDetalhesBase(
-                titulo = funcionario.nome,
+                titulo = "Detalhes do Funcionário",
                 onDismiss = { funcionarioSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe(rotulo = "Nome completo", valor = funcionario.nome)

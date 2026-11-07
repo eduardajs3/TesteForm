@@ -74,7 +74,7 @@ fun ConvenioListagem(
         convenioSelecionado.value?.let { convenio ->
             val isAtivo = convenio.ativo
             ModalDetalhesBase(
-                titulo = convenio.nome,
+                titulo = "Detalhes do Convênio",
                 onDismiss = { convenioSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe(rotulo = "Nome do convênio", valor = convenio.nome)
