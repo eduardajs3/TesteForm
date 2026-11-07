@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -26,8 +27,8 @@ fun LoginScreen(
     onNavigate: (Route) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var senha by remember { mutableStateOf("") }
+    var senhaVisivel by remember { mutableStateOf(false) }
 
     AuthLayout {
         Text(
@@ -56,18 +57,18 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         AuthTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = senha,
+            onValueChange = { senha = it },
             label = "Senha",
             placeholder = "Digite sua senha",
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
                     Icon(
                         painter = painterResource(
-                            if (passwordVisible) Res.drawable.visibility else Res.drawable.visibility_off
+                            if (senhaVisivel) Res.drawable.visibility else Res.drawable.visibility_off
                         ),
-                        contentDescription = if (passwordVisible) "Ocultar senha" else "Mostrar senha",
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha",
                         tint = VerdeClinica,
                         modifier = Modifier.size(20.dp)
                     )
@@ -84,7 +85,7 @@ fun LoginScreen(
             Text(
                 text = "Esqueci a senha",
                 modifier = Modifier.clickable {
-                    onNavigate(Route.RecoverPassword)
+                    onNavigate(Route.RecuperarSenha)
                 },
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
@@ -105,5 +106,28 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .height(56.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Não tem uma conta? ",
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoSecundario
+            )
+            Text(
+                text = "Cadastre-se",
+                modifier = Modifier.clickable {
+                    onNavigate(Route.Cadastro)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = VerdeClinica
+            )
+        }
     }
 }

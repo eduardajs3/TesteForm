@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,20 +23,20 @@ import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
 @Composable
-fun RecoverPasswordScreen(
+fun RegistroScreen(
     onNavigate: (Route) -> Unit
 ) {
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
-
+    
     var senhaVisivel by remember { mutableStateOf(false) }
     var confirmarSenhaVisivel by remember { mutableStateOf(false) }
 
     AuthLayout {
         Text(
-            text = "Recuperar senha",
+            text = "Crie sua conta",
             style = MaterialTheme.typography.titleLarge,
             color = TextoPrincipal
         )
@@ -43,7 +44,7 @@ fun RecoverPasswordScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Informe seus dados e defina sua nova senha",
+            text = "Preencha os campos abaixo para se registrar",
             style = MaterialTheme.typography.bodyMedium,
             color = TextoSecundario
         )
@@ -54,7 +55,7 @@ fun RecoverPasswordScreen(
             value = nome,
             onValueChange = { nome = it },
             label = "Nome completo",
-            placeholder = "Digite seu nome completo"
+            placeholder = "Digite seu nome"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,8 +72,8 @@ fun RecoverPasswordScreen(
         AuthTextField(
             value = senha,
             onValueChange = { senha = it },
-            label = "Nova senha",
-            placeholder = "Digite sua nova senha",
+            label = "Senha",
+            placeholder = "Digite sua senha",
             visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
@@ -94,7 +95,7 @@ fun RecoverPasswordScreen(
             value = confirmarSenha,
             onValueChange = { confirmarSenha = it },
             label = "Confirmar senha",
-            placeholder = "Confirme sua nova senha",
+            placeholder = "Confirme sua senha",
             visualTransformation = if (confirmarSenhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { confirmarSenhaVisivel = !confirmarSenhaVisivel }) {
@@ -110,10 +111,10 @@ fun RecoverPasswordScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         BotaoPadrao(
-            texto = "Redefinir Senha",
+            texto = "Registrar",
             onClick = {
                 onNavigate(Route.Login)
             },
@@ -128,21 +129,22 @@ fun RecoverPasswordScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Lembrou a senha? ",
+                text = "Já tem uma conta? ",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextoSecundario
             )
             Text(
-                text = "Entrar na conta",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica,
+                text = "Faça login",
                 modifier = Modifier.clickable {
                     onNavigate(Route.Login)
-                }
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = VerdeClinica
             )
         }
     }

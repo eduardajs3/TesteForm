@@ -10,6 +10,9 @@ sealed interface Route : NavKey {
     data object Login : Route
 
     @Serializable
+    data object Cadastro : Route 
+
+    @Serializable
     data object Dashboard : Route
 
     @Serializable
@@ -50,5 +53,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Agenda : Route
-    @Serializable data object RecoverPassword : Route
+
+    @Serializable
+    data object RecuperarSenha : Route
 }
