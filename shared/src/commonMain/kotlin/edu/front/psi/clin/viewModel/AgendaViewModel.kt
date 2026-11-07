@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.navigation.AgendaRotas
+import edu.front.psi.clin.ui.componentes.CampoValidado
 import kotlinx.coroutines.flow.*
 
 class AgendaViewModel(
@@ -152,34 +153,46 @@ class AgendaViewModel(
         AgendaRotas.Listagem
     )
 
-    // Campos do formulário
+    // Campos do formulário com validação integrada
     val id = mutableStateOf("")
-    val paciente = mutableStateOf("")
-    val psicologo = mutableStateOf("")
-    val sala = mutableStateOf("")
-    val tipoAtendimento = mutableStateOf("")
-    val convenio = mutableStateOf("")
-    val dataHoraInicio = mutableStateOf("")
-    val dataHoraFim = mutableStateOf("")
-    val status = mutableStateOf("")
-    val observacoes = mutableStateOf("")
-    val ativo = mutableStateOf("true")
+    val paciente = CampoValidado()
+    val psicologo = CampoValidado()
+    val sala = CampoValidado()
+    val tipoAtendimento = CampoValidado()
+    val convenio = CampoValidado()
+    val dataHoraInicio = CampoValidado()
+    val dataHoraFim = CampoValidado()
+    val status = CampoValidado("Confirmado")
+    val observacoes = CampoValidado()
+    val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        val v1 = paciente.validar()
+        val v2 = psicologo.validar()
+        val v3 = sala.validar()
+        val v4 = tipoAtendimento.validar()
+        val v5 = dataHoraInicio.validar()
+
+        if (!(v1 && v2 && v3 && v4 && v5)) {
+            mensagem.value = "Por favor, preencha todos os campos obrigatórios."
+            mandarMensagem("Por favor, preencha todos os campos obrigatórios.")
+            return
+        }
+
         try {
             val agendamento = Agenda(
                 id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                paciente = paciente.value,
-                psicologo = psicologo.value,
-                sala = sala.value,
-                tipoAtendimento = tipoAtendimento.value,
-                convenio = convenio.value,
-                dataHoraInicio = dataHoraInicio.value,
-                dataHoraFim = dataHoraFim.value,
-                status = status.value,
-                observacoes = observacoes.value,
-                ativo = ativo.value.toBooleanStrictOrNull() ?: true
+                paciente = paciente.valor.value,
+                psicologo = psicologo.valor.value,
+                sala = sala.valor.value,
+                tipoAtendimento = tipoAtendimento.valor.value,
+                convenio = convenio.valor.value,
+                dataHoraInicio = dataHoraInicio.valor.value,
+                dataHoraFim = dataHoraFim.valor.value,
+                status = status.valor.value.ifEmpty { "Confirmado" },
+                observacoes = observacoes.valor.value,
+                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
             )
 
             if (id.value.isEmpty()) {
@@ -222,16 +235,16 @@ class AgendaViewModel(
         backStack.clear()
         backStack.add(AgendaRotas.Formulario)
         id.value = ""
-        paciente.value = ""
-        psicologo.value = ""
-        sala.value = ""
-        tipoAtendimento.value = ""
-        convenio.value = ""
-        dataHoraInicio.value = ""
-        dataHoraFim.value = ""
-        status.value = "Confirmado"
-        observacoes.value = ""
-        ativo.value = "true"
+        paciente.limpar()
+        psicologo.limpar()
+        sala.limpar()
+        tipoAtendimento.limpar()
+        convenio.limpar()
+        dataHoraInicio.limpar()
+        dataHoraFim.limpar()
+        status.definir("Confirmado")
+        observacoes.limpar()
+        ativo.definir("true")
         mensagem.value = ""
     }
 
@@ -248,38 +261,38 @@ class AgendaViewModel(
             "17:00" -> "18:00"
             else -> hora
         }
-        dataHoraInicio.value = "$data $hora"
-        dataHoraFim.value = "$data $horaFim"
+        dataHoraInicio.definir("$data $hora")
+        dataHoraFim.definir("$data $horaFim")
     }
 
     fun editar(agendamento: Agenda) {
         backStack.clear()
         backStack.add(AgendaRotas.Formulario)
         id.value = agendamento.id.toString()
-        paciente.value = agendamento.paciente
-        psicologo.value = agendamento.psicologo
-        sala.value = agendamento.sala
-        tipoAtendimento.value = agendamento.tipoAtendimento
-        convenio.value = agendamento.convenio
-        dataHoraInicio.value = agendamento.dataHoraInicio
-        dataHoraFim.value = agendamento.dataHoraFim
-        status.value = agendamento.status
-        observacoes.value = agendamento.observacoes
-        ativo.value = agendamento.ativo.toString()
+        paciente.definir(agendamento.paciente)
+        psicologo.definir(agendamento.psicologo)
+        sala.definir(agendamento.sala)
+        tipoAtendimento.definir(agendamento.tipoAtendimento)
+        convenio.definir(agendamento.convenio)
+        dataHoraInicio.definir(agendamento.dataHoraInicio)
+        dataHoraFim.definir(agendamento.dataHoraFim)
+        status.definir(agendamento.status)
+        observacoes.definir(agendamento.observacoes)
+        ativo.definir(agendamento.ativo.toString())
         mensagem.value = ""
     }
 
     fun limparCampos() {
-        paciente.value = ""
-        psicologo.value = ""
-        sala.value = ""
-        tipoAtendimento.value = ""
-        convenio.value = ""
-        dataHoraInicio.value = ""
-        dataHoraFim.value = ""
-        status.value = ""
-        observacoes.value = ""
-        ativo.value = "true"
+        paciente.limpar()
+        psicologo.limpar()
+        sala.limpar()
+        tipoAtendimento.limpar()
+        convenio.limpar()
+        dataHoraInicio.limpar()
+        dataHoraFim.limpar()
+        status.definir("Confirmado")
+        observacoes.limpar()
+        ativo.definir("true")
         mensagem.value = "Campos limpos."
     }
 }

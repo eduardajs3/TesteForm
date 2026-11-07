@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
+import edu.front.psi.clin.ui.componentes.CampoDataPadrao
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
-import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 @Composable
@@ -29,11 +30,11 @@ fun AgendaFormulario(
     val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
     val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
 
-    var dataSelecionada by remember(vm.dataHoraInicio.value) {
-        val data = if (vm.dataHoraInicio.value.contains(" ")) {
-            vm.dataHoraInicio.value.split(" ")[0]
-        } else if (vm.dataHoraInicio.value.isNotEmpty()) {
-            vm.dataHoraInicio.value
+    var dataSelecionada by remember(vm.dataHoraInicio.valor.value) {
+        val data = if (vm.dataHoraInicio.valor.value.contains(" ")) {
+            vm.dataHoraInicio.valor.value.split(" ")[0]
+        } else if (vm.dataHoraInicio.valor.value.isNotEmpty()) {
+            vm.dataHoraInicio.valor.value
         } else {
             "16/03/2026"
         }
@@ -64,9 +65,9 @@ fun AgendaFormulario(
         }
     }
 
-    var horarioSelecionado by remember(vm.dataHoraInicio.value) {
-        val horaInicio = if (vm.dataHoraInicio.value.contains(" ")) {
-            vm.dataHoraInicio.value.split(" ")[1]
+    var horarioSelecionado by remember(vm.dataHoraInicio.valor.value) {
+        val horaInicio = if (vm.dataHoraInicio.valor.value.contains(" ")) {
+            vm.dataHoraInicio.valor.value.split(" ")[1]
         } else ""
         val encontrado = listOf(
             "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
@@ -82,76 +83,88 @@ fun AgendaFormulario(
             mensagemFeedback = vm.mensagem.value
         ) {
             CampoDropdownPadrao(
-                label = "Paciente",
+                label = "Paciente *",
                 opcoes = listaPacientes,
-                valorSelecionado = vm.paciente.value,
-                onOpcaoSelecionada = { vm.paciente.value = it }
+                valorSelecionado = vm.paciente.valor.value,
+                onOpcaoSelecionada = { vm.paciente.definir(it) },
+                isError = vm.paciente.temErro.value,
+                errorMessage = if (vm.paciente.temErro.value) vm.paciente.mensagemErro.value else null
             )
 
-            CampoTextoPadrao(
+            CampoDataPadrao(
                 value = dataSelecionada,
                 onValueChange = { novaData ->
                     dataSelecionada = novaData
                     horarioSelecionado = "" 
-                    vm.dataHoraInicio.value = ""
-                    vm.dataHoraFim.value = ""
+                    vm.dataHoraInicio.definir("")
+                    vm.dataHoraFim.definir("")
                 },
                 label = "Data do Atendimento",
-                placeholder = "Ex: 26/03/2026"
+                obrigatorio = true,
+                isError = vm.dataHoraInicio.temErro.value,
+                errorMessage = if (vm.dataHoraInicio.temErro.value) vm.dataHoraInicio.mensagemErro.value else null
             )
 
             CampoDropdownPadrao(
-                label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data" else "Horário Disponível para $dataSelecionada",
+                label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data *" else "Horário Disponível para $dataSelecionada *",
                 opcoes = horariosDisponiveisNoDia,
                 valorSelecionado = horarioSelecionado,
                 onOpcaoSelecionada = { intervalo ->
                     horarioSelecionado = intervalo
                     val partes = intervalo.split(" - ")
                     if (partes.size == 2) {
-                        vm.dataHoraInicio.value = "$dataSelecionada ${partes[0]}"
-                        vm.dataHoraFim.value = "$dataSelecionada ${partes[1]}"
+                        vm.dataHoraInicio.definir("$dataSelecionada ${partes[0]}")
+                        vm.dataHoraFim.definir("$dataSelecionada ${partes[1]}")
                     }
-                }
+                },
+                isError = vm.dataHoraInicio.temErro.value,
+                errorMessage = if (vm.dataHoraInicio.temErro.value) vm.dataHoraInicio.mensagemErro.value else null
             )
 
             CampoDropdownPadrao(
-                label = "Psicólogo Disponível",
+                label = "Psicólogo Disponível *",
                 opcoes = psicologosDisponiveisNoDia,
-                valorSelecionado = vm.psicologo.value,
-                onOpcaoSelecionada = { vm.psicologo.value = it }
+                valorSelecionado = vm.psicologo.valor.value,
+                onOpcaoSelecionada = { vm.psicologo.definir(it) },
+                isError = vm.psicologo.temErro.value,
+                errorMessage = if (vm.psicologo.temErro.value) vm.psicologo.mensagemErro.value else null
             )
 
             CampoDropdownPadrao(
-                label = "Sala de Atendimento Livre",
+                label = "Sala de Atendimento Livre *",
                 opcoes = salasDisponiveisNoDia,
-                valorSelecionado = vm.sala.value,
-                onOpcaoSelecionada = { vm.sala.value = it }
+                valorSelecionado = vm.sala.valor.value,
+                onOpcaoSelecionada = { vm.sala.definir(it) },
+                isError = vm.sala.temErro.value,
+                errorMessage = if (vm.sala.temErro.value) vm.sala.mensagemErro.value else null
             )
 
             CampoDropdownPadrao(
-                label = "Tipo de Atendimento",
+                label = "Tipo de Atendimento *",
                 opcoes = listaTiposAtendimento,
-                valorSelecionado = vm.tipoAtendimento.value,
-                onOpcaoSelecionada = { vm.tipoAtendimento.value = it }
+                valorSelecionado = vm.tipoAtendimento.valor.value,
+                onOpcaoSelecionada = { vm.tipoAtendimento.definir(it) },
+                isError = vm.tipoAtendimento.temErro.value,
+                errorMessage = if (vm.tipoAtendimento.temErro.value) vm.tipoAtendimento.mensagemErro.value else null
             )
 
             CampoDropdownPadrao(
                 label = "Convênio",
                 opcoes = listaConvenios,
-                valorSelecionado = vm.convenio.value,
-                onOpcaoSelecionada = { vm.convenio.value = it }
+                valorSelecionado = vm.convenio.valor.value,
+                onOpcaoSelecionada = { vm.convenio.definir(it) }
             )
 
             CampoDropdownPadrao(
                 label = "Status da Agenda",
                 opcoes = listaStatusAgenda,
-                valorSelecionado = vm.status.value,
-                onOpcaoSelecionada = { vm.status.value = it }
+                valorSelecionado = vm.status.valor.value,
+                onOpcaoSelecionada = { vm.status.definir(it) }
             )
 
             CampoTextoPadrao(
-                value = vm.observacoes.value,
-                onValueChange = { vm.observacoes.value = it },
+                value = vm.observacoes.valor.value,
+                onValueChange = { vm.observacoes.definir(it) },
                 label = "Observações"
             )
 
