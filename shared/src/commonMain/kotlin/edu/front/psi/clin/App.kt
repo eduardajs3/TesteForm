@@ -172,6 +172,13 @@ fun App() {
             } 
         }
     )
+    val dashboardVm: DashboardViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                DashboardViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
+        }
+    )
 
     val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Login
 
@@ -324,7 +331,17 @@ fun App() {
                                         )
                                     }
                                     entry<Route.Dashboard> {
-                                        DashboardTela(contentPadding)
+                                        DashboardTela(
+                                            innerPadding = contentPadding,
+                                            vm = dashboardVm,
+                                            onNavegar = { rota ->
+                                                principalVm.backstack.clear()
+                                                principalVm.backstack.add(Route.Dashboard)
+                                                if (rota != Route.Dashboard) {
+                                                    principalVm.backstack.add(rota)
+                                                }
+                                            }
+                                        )
                                     }
                                     entry<Route.Paciente> {
                                         val subRota = pacienteVm.backStack.lastOrNull() ?: PacienteRotas.Listagem
