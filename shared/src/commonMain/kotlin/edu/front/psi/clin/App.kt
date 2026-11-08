@@ -335,6 +335,9 @@ fun App() {
                                             innerPadding = contentPadding,
                                             vm = dashboardVm,
                                             onNavegar = { rota ->
+                                                if (rota == Route.Paciente) {
+                                                    pacienteVm.novoPaciente()
+                                                }
                                                 principalVm.backstack.clear()
                                                 principalVm.backstack.add(Route.Dashboard)
                                                 if (rota != Route.Dashboard) {

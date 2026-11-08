@@ -99,24 +99,22 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- 2. GRID DE CARDS DE MÉTRICAS (2x2) ---
-        if (metricas.size >= 4) {
+        // --- 2. GRID DE CARDS DE MÉTRICAS ---
+        val linhasMetricas = metricas.chunked(2)
+        linhasMetricas.forEachIndexed { index, linha ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CardMetrica(item = metricas[0], modifier = Modifier.weight(1f))
-                CardMetrica(item = metricas[1], modifier = Modifier.weight(1f))
+                linha.forEach { metrica ->
+                    CardMetrica(item = metrica, modifier = Modifier.weight(1f))
+                }
+                if (linha.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                CardMetrica(item = metricas[2], modifier = Modifier.weight(1f))
-                CardMetrica(item = metricas[3], modifier = Modifier.weight(1f))
+            if (index < linhasMetricas.lastIndex) {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
 
@@ -156,13 +154,6 @@ fun DashboardTela(
                 onClick = { onNavegar(Route.Paciente) }
             )
             CardAtalho(
-                titulo = "Evoluções",
-                subtitulo = "Registros de atendimento",
-                iconeRes = Res.drawable.assignment_24px,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavegar(Route.EvolucaoClinica) }
-            )
-            CardAtalho(
                 titulo = "Financeiro",
                 subtitulo = "Pagamentos e recibos",
                 iconeRes = Res.drawable.description_24px,
@@ -198,7 +189,7 @@ fun DashboardTela(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                listOf("Todas", "Confirmadas", "Pendentes").forEach { filtro ->
+                listOf("Todas", "Agendado", "Confirmado", "Cancelado", "Faltou").forEach { filtro ->
                     val selecionado = filtroStatus == filtro
                     Surface(
                         shape = RoundedCornerShape(20.dp),
@@ -448,7 +439,7 @@ private fun CardConsultaHoje(
                         )
                         BadgeStatus(
                             texto = consulta.status,
-                            isAtivo = consulta.isConfirmada
+                            isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
@@ -460,24 +451,25 @@ private fun CardConsultaHoje(
                 }
             }
 
-            // Ação de confirmar / alterar status
-            OutlinedButton(
-                onClick = onAlternarConfirmacao,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(
-                    1.dp,
-                    if (consulta.isConfirmada) CardBordaCinza else VerdeClinica
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = if (consulta.isConfirmada) TextoSecundario else VerdeClinica
-                ),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = if (consulta.isConfirmada) "Desmarcar" else "Confirmar",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold
-                )
+            if (consulta.status == "Agendado" || consulta.status == "Confirmado") {
+                OutlinedButton(
+                    onClick = onAlternarConfirmacao,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (consulta.status == "Confirmado") CardBordaCinza else VerdeClinica
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = if (consulta.status == "Confirmado") TextoSecundario else VerdeClinica
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = if (consulta.status == "Confirmado") "Desmarcar" else "Confirmar",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }

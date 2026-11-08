@@ -22,8 +22,7 @@ data class ConsultaHojeItem(
     val sala: String,
     val horario: String,
     val tipo: String,
-    val status: String,
-    val isConfirmada: Boolean
+    val status: String
 )
 
 class DashboardViewModel(
@@ -56,14 +55,6 @@ class DashboardViewModel(
                 subtitulo = "Sala 02 disponível agora",
                 iconeRes = Res.drawable.door_open,
                 variacaoPositiva = true
-            ),
-            MetricaCardItem(
-                id = "evolucoes",
-                titulo = "Evoluções Pendentes",
-                valor = "2",
-                subtitulo = "Aguardando preenchimento",
-                iconeRes = Res.drawable.assignment_24px,
-                variacaoPositiva = false
             )
         )
     )
@@ -80,8 +71,7 @@ class DashboardViewModel(
                 sala = "Sala 02 - Bloco A",
                 horario = "09:00 - 10:00",
                 tipo = "Presencial",
-                status = "Confirmada",
-                isConfirmada = true
+                status = "Confirmado"
             ),
             ConsultaHojeItem(
                 id = 2,
@@ -90,8 +80,7 @@ class DashboardViewModel(
                 sala = "Sala 01 - Bloco A",
                 horario = "10:30 - 11:30",
                 tipo = "Presencial",
-                status = "Pendente",
-                isConfirmada = false
+                status = "Agendado"
             ),
             ConsultaHojeItem(
                 id = 3,
@@ -100,8 +89,7 @@ class DashboardViewModel(
                 sala = "Atendimento Remoto",
                 horario = "14:00 - 15:00",
                 tipo = "Online",
-                status = "Confirmada",
-                isConfirmada = true
+                status = "Cancelado"
             ),
             ConsultaHojeItem(
                 id = 4,
@@ -110,8 +98,7 @@ class DashboardViewModel(
                 sala = "Sala 03 - Bloco B",
                 horario = "15:30 - 16:30",
                 tipo = "Presencial",
-                status = "Pendente",
-                isConfirmada = false
+                status = "Faltou"
             ),
             ConsultaHojeItem(
                 id = 5,
@@ -120,8 +107,7 @@ class DashboardViewModel(
                 sala = "Sala 01 - Bloco A",
                 horario = "17:00 - 18:00",
                 tipo = "Presencial",
-                status = "Confirmada",
-                isConfirmada = true
+                status = "Confirmado"
             )
         )
     )
@@ -136,11 +122,7 @@ class DashboardViewModel(
 
     // 5. combine() + filter() + stateIn() com SharingStarted.WhileSubscribed(5_000)
     val consultasFiltradas: StateFlow<List<ConsultaHojeItem>> = combine(_consultas, _filtroStatus) { consultas, filtro ->
-        when (filtro) {
-            "Confirmadas" -> consultas.filter { it.isConfirmada }
-            "Pendentes" -> consultas.filter { !it.isConfirmada }
-            else -> consultas
-        }
+        if (filtro == "Todas") consultas else consultas.filter { it.status == filtro }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -151,16 +133,13 @@ class DashboardViewModel(
     fun alternarConfirmacao(consultaId: Int) {
         _consultas.update { lista ->
             lista.map { consulta ->
-                if (consulta.id == consultaId) {
-                    val novoStatus = !consulta.isConfirmada
+                if (consulta.id == consultaId && consulta.status in listOf("Agendado", "Confirmado")) {
+                    val novoStatus = if (consulta.status == "Agendado") "Confirmado" else "Agendado"
                     mandarMensagem(
-                        if (novoStatus) "Presença de ${consulta.paciente} confirmada!"
-                        else "Presença de ${consulta.paciente} alterada para Pendente."
+                        if (novoStatus == "Confirmado") "Consulta de ${consulta.paciente} confirmada!"
+                        else "Status da consulta de ${consulta.paciente} alterado para Agendado."
                     )
-                    consulta.copy(
-                        isConfirmada = novoStatus,
-                        status = if (novoStatus) "Confirmada" else "Pendente"
-                    )
+                    consulta.copy(status = novoStatus)
                 } else {
                     consulta
                 }
@@ -168,4 +147,3 @@ class DashboardViewModel(
         }
     }
 }
-
