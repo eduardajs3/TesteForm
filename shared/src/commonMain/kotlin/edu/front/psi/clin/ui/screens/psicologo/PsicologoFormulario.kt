@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.PsicologoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -25,7 +26,11 @@ fun PsicologoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Psicólogo" else "Cadastro de Psicólogo",
             subtitulo = if (isEdicao) "Altere os dados do psicólogo selecionado." else "Preencha os dados do psicólogo.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(PsicologoRotas.Listagem)
+            }
         ) {
             CampoTextoPadrao(
                 value = vm.nome.valor.value,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -47,7 +48,11 @@ fun ProntuarioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Prontuário" else "Cadastro de Prontuário",
             subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(ProntuarioRotas.Listagem)
+            }
         ) {
             CampoDropdownPadrao(
                 label = "Paciente",

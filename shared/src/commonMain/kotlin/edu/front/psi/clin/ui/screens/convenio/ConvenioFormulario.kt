@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.ConvenioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -25,7 +26,11 @@ fun ConvenioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Convênio" else "Cadastro de Convênio",
             subtitulo = if (isEdicao) "Altere os dados do convênio selecionado." else "Preencha os dados do convênio.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(ConvenioRotas.Listagem)
+            }
         ) {
             CampoTextoPadrao(
                 value = vm.nome.valor.value,

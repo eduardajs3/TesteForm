@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
@@ -45,7 +46,11 @@ fun HorarioDisponivelFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Horário Disponível" else "Cadastro de Horário Disponível",
             subtitulo = if (isEdicao) "Altere os dados do horário selecionado." else "Preencha os dados do horário disponível.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(HorarioDisponivelRotas.Listagem)
+            }
         ) {
             CampoDropdownPadrao(
                 label = "Nome do psicólogo",

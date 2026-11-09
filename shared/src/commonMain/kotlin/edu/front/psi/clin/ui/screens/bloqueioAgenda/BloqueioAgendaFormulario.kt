@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -39,7 +40,11 @@ fun BloqueioAgendaFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Bloqueio" else "Cadastro de Bloqueio de Agenda",
             subtitulo = if (isEdicao) "Altere os dados do bloqueio ID: ${vm.id.value}" else "Preencha os dados para criar um novo bloqueio.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(BloqueioAgendaRotas.Listagem)
+            }
         ) {
     
             CampoDropdownPadrao(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
@@ -26,7 +27,11 @@ fun TipoAtendimentoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Tipo de Atendimento" else "Cadastro de Tipo de Atendimento",
             subtitulo = if (isEdicao) "Altere os dados do tipo de atendimento selecionado." else "Preencha os dados do tipo de atendimento.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(TipoAtendimentoRotas.Listagem)
+            }
         ) {
             CampoTextoPadrao(
                 value = vm.nome.valor.value,

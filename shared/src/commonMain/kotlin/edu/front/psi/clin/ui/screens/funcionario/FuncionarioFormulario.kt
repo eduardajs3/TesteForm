@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
@@ -26,7 +27,11 @@ fun FuncionarioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Funcionário" else "Cadastro de Funcionário",
             subtitulo = if (isEdicao) "Altere os dados do funcionário selecionado." else "Preencha os dados do funcionário.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(FuncionarioRotas.Listagem)
+            }
         ) {
             CampoTextoPadrao(
                 value = vm.nome.valor.value,

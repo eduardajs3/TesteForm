@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -44,7 +45,11 @@ fun EvolucaoClinicaFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Evolução Clínica" else "Cadastro de Evolução Clínica",
             subtitulo = if (isEdicao) "Altere os dados do registro de evolução selecionado." else "Preencha os dados da evolução clínica.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(EvolucaoClinicaRotas.Listagem)
+            }
         ) {
             CampoDropdownPadrao(
                 label = "Prontuário",

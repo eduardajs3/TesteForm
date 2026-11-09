@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -56,7 +57,11 @@ fun PagamentoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Pagamento" else "Cadastro de Pagamento",
             subtitulo = if (isEdicao) "Altere os dados do pagamento selecionado." else "Preencha os dados do pagamento.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(PagamentoRotas.Listagem)
+            }
         ) {
     
             CampoDropdownPadrao(
