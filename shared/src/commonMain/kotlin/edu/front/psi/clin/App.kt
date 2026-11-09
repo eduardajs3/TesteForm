@@ -337,12 +337,21 @@ fun App() {
                                             onNavegar = { rota ->
                                                 if (rota == Route.Paciente) {
                                                     pacienteVm.novoPaciente()
+                                                } else if (rota == Route.Agenda) {
+                                                    agendaVm.backStack.clear()
+                                                    agendaVm.backStack.add(AgendaRotas.Listagem)
                                                 }
                                                 principalVm.backstack.clear()
                                                 principalVm.backstack.add(Route.Dashboard)
                                                 if (rota != Route.Dashboard) {
                                                     principalVm.backstack.add(rota)
                                                 }
+                                            },
+                                            onAgendarConsulta = {
+                                                agendaVm.novoAgendamento()
+                                                principalVm.backstack.clear()
+                                                principalVm.backstack.add(Route.Dashboard)
+                                                principalVm.backstack.add(Route.Agenda)
                                             }
                                         )
                                     }

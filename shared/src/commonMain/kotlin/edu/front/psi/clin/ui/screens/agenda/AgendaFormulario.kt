@@ -91,6 +91,31 @@ fun AgendaFormulario(
                 errorMessage = if (vm.paciente.temErro.value) vm.paciente.mensagemErro.value else null
             )
 
+            CampoDropdownPadrao(
+                label = "Psicólogo *",
+                opcoes = psicologosDisponiveisNoDia,
+                valorSelecionado = vm.psicologo.valor.value,
+                onOpcaoSelecionada = { vm.psicologo.definir(it) },
+                isError = vm.psicologo.temErro.value,
+                errorMessage = if (vm.psicologo.temErro.value) vm.psicologo.mensagemErro.value else null
+            )
+
+            CampoDropdownPadrao(
+                label = "Tipo de Atendimento *",
+                opcoes = listaTiposAtendimento,
+                valorSelecionado = vm.tipoAtendimento.valor.value,
+                onOpcaoSelecionada = { vm.tipoAtendimento.definir(it) },
+                isError = vm.tipoAtendimento.temErro.value,
+                errorMessage = if (vm.tipoAtendimento.temErro.value) vm.tipoAtendimento.mensagemErro.value else null
+            )
+
+            CampoDropdownPadrao(
+                label = "Convênio",
+                opcoes = listaConvenios,
+                valorSelecionado = vm.convenio.valor.value,
+                onOpcaoSelecionada = { vm.convenio.definir(it) }
+            )
+
             CampoDataPadrao(
                 value = dataSelecionada,
                 onValueChange = { novaData ->
@@ -122,37 +147,12 @@ fun AgendaFormulario(
             )
 
             CampoDropdownPadrao(
-                label = "Psicólogo Disponível *",
-                opcoes = psicologosDisponiveisNoDia,
-                valorSelecionado = vm.psicologo.valor.value,
-                onOpcaoSelecionada = { vm.psicologo.definir(it) },
-                isError = vm.psicologo.temErro.value,
-                errorMessage = if (vm.psicologo.temErro.value) vm.psicologo.mensagemErro.value else null
-            )
-
-            CampoDropdownPadrao(
                 label = "Sala de Atendimento Livre *",
                 opcoes = salasDisponiveisNoDia,
                 valorSelecionado = vm.sala.valor.value,
                 onOpcaoSelecionada = { vm.sala.definir(it) },
                 isError = vm.sala.temErro.value,
                 errorMessage = if (vm.sala.temErro.value) vm.sala.mensagemErro.value else null
-            )
-
-            CampoDropdownPadrao(
-                label = "Tipo de Atendimento *",
-                opcoes = listaTiposAtendimento,
-                valorSelecionado = vm.tipoAtendimento.valor.value,
-                onOpcaoSelecionada = { vm.tipoAtendimento.definir(it) },
-                isError = vm.tipoAtendimento.temErro.value,
-                errorMessage = if (vm.tipoAtendimento.temErro.value) vm.tipoAtendimento.mensagemErro.value else null
-            )
-
-            CampoDropdownPadrao(
-                label = "Convênio",
-                opcoes = listaConvenios,
-                valorSelecionado = vm.convenio.valor.value,
-                onOpcaoSelecionada = { vm.convenio.definir(it) }
             )
 
             CampoDropdownPadrao(

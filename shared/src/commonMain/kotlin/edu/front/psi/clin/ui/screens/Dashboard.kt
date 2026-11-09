@@ -33,9 +33,10 @@ import org.jetbrains.compose.resources.painterResource
 fun DashboardTela(
     innerPadding: PaddingValues,
     vm: DashboardViewModel,
-    onNavegar: (Route) -> Unit = {}
+    onNavegar: (Route) -> Unit = {},
+    onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) }
 ) {
-    // Coleta reativa dos estados expostos pela ViewModel (StateFlow -> Compose State)
+    // // Recebe os dados da ViewModel e atualiza a tela quando eles mudam
     val metricas by vm.metricas.collectAsState()
     val consultas by vm.consultasFiltradas.collectAsState()
     val filtroStatus by vm.filtroStatus.collectAsState()
@@ -70,7 +71,7 @@ fun DashboardTela(
                 )
             }
 
-            // Tag elegante de data / status
+            // Tag de data / status
             Surface(
                 shape = RoundedCornerShape(50.dp),
                 color = VerdeClinica.copy(alpha = 0.08f),
@@ -120,7 +121,7 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- 3. AÇÕES RÁPIDAS (ATALHOS OPERACIONAIS) ---
+        // --- 3. AÇÕES RÁPIDAS  ---
         Text(
             text = "Ações Rápidas",
             style = MaterialTheme.typography.titleMedium,
@@ -141,10 +142,10 @@ fun DashboardTela(
         ) {
             CardAtalho(
                 titulo = "Agendar Consulta",
-                subtitulo = "Visualizar grade semanal",
+                subtitulo = "Preencher dados da consulta",
                 iconeRes = Res.drawable.calendar_month,
                 modifier = Modifier.weight(1f),
-                onClick = { onNavegar(Route.Agenda) }
+                onClick = onAgendarConsulta
             )
             CardAtalho(
                 titulo = "Novo Paciente",
@@ -189,7 +190,7 @@ fun DashboardTela(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                listOf("Todas", "Agendado", "Confirmado", "Cancelado", "Faltou").forEach { filtro ->
+                listOf("Todas", "Agendado", "Confirmado").forEach { filtro ->
                     val selecionado = filtroStatus == filtro
                     Surface(
                         shape = RoundedCornerShape(20.dp),
@@ -255,7 +256,7 @@ fun DashboardTela(
                 consultas.forEach { consulta ->
                     CardConsultaHoje(
                         consulta = consulta,
-                        onAlternarConfirmacao = { vm.alternarConfirmacao(consulta.id) }
+                        onConfirmar = { vm.confirmarConsulta(consulta.id) }
                     )
                 }
             }
@@ -389,7 +390,7 @@ private fun CardAtalho(
 @Composable
 private fun CardConsultaHoje(
     consulta: ConsultaHojeItem,
-    onAlternarConfirmacao: () -> Unit
+    onConfirmar: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -451,21 +452,18 @@ private fun CardConsultaHoje(
                 }
             }
 
-            if (consulta.status == "Agendado" || consulta.status == "Confirmado") {
+            if (consulta.status == "Agendado") {
                 OutlinedButton(
-                    onClick = onAlternarConfirmacao,
+                    onClick = onConfirmar,
                     shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (consulta.status == "Confirmado") CardBordaCinza else VerdeClinica
-                    ),
+                    border = BorderStroke(1.dp, VerdeClinica),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = if (consulta.status == "Confirmado") TextoSecundario else VerdeClinica
+                        contentColor = VerdeClinica
                     ),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = if (consulta.status == "Confirmado") "Desmarcar" else "Confirmar",
+                        text = "Confirmar",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold
                     )

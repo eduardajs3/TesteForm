@@ -122,7 +122,8 @@ class DashboardViewModel(
 
     // 5. combine() + filter() + stateIn() com SharingStarted.WhileSubscribed(5_000)
     val consultasFiltradas: StateFlow<List<ConsultaHojeItem>> = combine(_consultas, _filtroStatus) { consultas, filtro ->
-        if (filtro == "Todas") consultas else consultas.filter { it.status == filtro }
+        val consultasAtivas = consultas.filter { it.status in listOf("Agendado", "Confirmado") }
+        if (filtro == "Todas") consultasAtivas else consultasAtivas.filter { it.status == filtro }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -130,16 +131,12 @@ class DashboardViewModel(
     )
 
     // 6. Ação reativa para confirmar presença
-    fun alternarConfirmacao(consultaId: Int) {
+    fun confirmarConsulta(consultaId: Int) {
         _consultas.update { lista ->
             lista.map { consulta ->
-                if (consulta.id == consultaId && consulta.status in listOf("Agendado", "Confirmado")) {
-                    val novoStatus = if (consulta.status == "Agendado") "Confirmado" else "Agendado"
-                    mandarMensagem(
-                        if (novoStatus == "Confirmado") "Consulta de ${consulta.paciente} confirmada!"
-                        else "Status da consulta de ${consulta.paciente} alterado para Agendado."
-                    )
-                    consulta.copy(status = novoStatus)
+                if (consulta.id == consultaId && consulta.status == "Agendado") {
+                    mandarMensagem("Consulta de ${consulta.paciente} confirmada!")
+                    consulta.copy(status = "Confirmado")
                 } else {
                     consulta
                 }
