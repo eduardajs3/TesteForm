@@ -4,21 +4,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.SalaAtendimentoAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.SalaAtendimento
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class SalaAtendimentoViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 0
+    private val httpClient = httpClientManager()
+    private val salaApi = SalaAtendimentoAPI(httpClient)
 
     private val _salas = MutableStateFlow<List<SalaAtendimento>>(listOf())
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                _salas.value = salaApi.carregar()
+                println("Salas carregadas no init: ${_salas.value}")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar salas do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -36,7 +51,6 @@ class SalaAtendimentoViewModel(
         SalaAtendimentoRotas.Listagem
     )
 
-    // Campos do formulário geridos pelo validador
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val descricao = CampoValidado()
@@ -46,7 +60,7 @@ class SalaAtendimentoViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
+     
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
@@ -59,41 +73,52 @@ class SalaAtendimentoViewModel(
             return
         }
 
-        try {
-            val sala = SalaAtendimento(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                descricao = descricao.valor.value,
-                capacidade = capacidade.valor.value.toIntOrNull() ?: 0,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.valor.value
-            )
+        viewModelScope.launch {
+            try {
+                val sala = SalaAtendimento(
+                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    nome = nome.valor.value,
+                    descricao = descricao.valor.value,
+                    capacidade = capacidade.valor.value.toIntOrNull() ?: 0,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    dataCadastro = dataCadastro.valor.value
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _salas.update { lista -> lista + sala.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _salas.update { lista ->
-                    lista.map { s -> if (s.id == idNumber) sala.copy(id = idNumber) else s }
+                if (id.value.isEmpty()) {
+                    salaApi.salvar(sala)
+                } else {
+                    val idNumber = id.value.toLong()
+                    salaApi.atualizar(idNumber, sala)
                 }
-            }
-            mensagem.value = "Sala salva com sucesso!"
-            mandarMensagem("Sala salva com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(SalaAtendimentoRotas.Listagem)
 
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                _salas.value = salaApi.carregar()
+                println("Salas após salvar: ${_salas.value}")
+
+                mensagem.value = "Sala salva com sucesso!"
+                mandarMensagem("Sala salva com sucesso!")
+                limparCampos()
+                
+                backStack.clear()
+                backStack.add(SalaAtendimentoRotas.Listagem)
+
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(sala: SalaAtendimento) {
-        _salas.update { lista -> lista - sala }
-        mandarMensagem("Sala apagada com sucesso!")
+        viewModelScope.launch {
+            try {
+                salaApi.apagar(sala)
+                _salas.value = salaApi.carregar()
+                println("Salas após apagar: ${_salas.value}")
+                mandarMensagem("Sala apagada com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar: ${e.message}")
+            }
+        }
     }
 
     fun novaSala() {

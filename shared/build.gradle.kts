@@ -48,6 +48,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
+            implementation(libs.ktor.client.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -61,12 +62,24 @@ kotlin {
             implementation(libs.bundles.navigation3)
             implementation(libs.kotlinx.serialization.core)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            // Exemplo de como deve estar na linha 65 do shared/build.gradle.kts:
+            implementation("io.ktor:ktor-client-core:3.0.3")
+            implementation("io.ktor:ktor-client-content-negotiation:3.0.3")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+                        
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)
+        }
         jsMain.dependencies {
             implementation(libs.wrappers.browser)
+        }
+        webMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
     }
 }

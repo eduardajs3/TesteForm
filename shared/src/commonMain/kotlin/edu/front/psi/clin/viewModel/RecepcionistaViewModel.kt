@@ -4,36 +4,37 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.RecepcionistaAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class RecepcionistaViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 2
+    private val httpClient = httpClientManager()
+    private val recepcionistaApi = RecepcionistaAPI(httpClient)
 
-    private val _recepcionistas = MutableStateFlow<List<Recepcionista>>(
-        listOf(
-            Recepcionista(
-                id = 1,
-                nome = "Maria Oliveira",
-                cpf = "123.456.789-00",
-                email = "maria@email.com",
-                telefone = "(11) 98888-7777",
-                senha = "123",
-                ativo = true,
-                dataCadastro = "01/02/2024",
-                setor = "Recepção Principal"
-            )
-        )
-    )
-
+    private val _recepcionistas = MutableStateFlow<List<Recepcionista>>(listOf())
+    
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                _recepcionistas.value = recepcionistaApi.carregar()
+                println("Recepcionistas carregadas no init: ${_recepcionistas.value}")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar recepcionistas do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -55,7 +56,6 @@ class RecepcionistaViewModel(
         RecepcionistaRotas.Listagem
     )
 
-    // Campos do formulário geridos pelo validador com máscaras e validações integradas
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
@@ -87,44 +87,57 @@ class RecepcionistaViewModel(
             return
         }
 
-        try {
-            val recepcionista = Recepcionista(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                cpf = cpf.valor.value,
-                email = email.valor.value,
-                telefone = telefone.valor.value,
-                senha = senha.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.valor.value,
-                setor = setor.valor.value
-            )
+        viewModelScope.launch {
+            try {
+                val recepcionista = Recepcionista(
+                    id = null, 
+                    nome = nome.valor.value,
+                    cpf = cpf.valor.value,
+                    email = email.valor.value,
+                    telefone = telefone.valor.value,
+                    senha = senha.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    dataCadastro = null, 
+                    setor = setor.valor.value,
+                    role = "RECEPCIONISTA" 
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _recepcionistas.update { lista -> lista + recepcionista.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _recepcionistas.update { lista ->
-                    lista.map { item -> if (item.id == idNumber) recepcionista.copy(id = idNumber) else item }
+                if (id.value.isEmpty()) {
+                    recepcionistaApi.salvar(recepcionista)
+                } else {
+                    val idNumber = id.value.toLong()
+                    recepcionistaApi.atualizar(idNumber, recepcionista)
                 }
-            }
-            mensagem.value = "Recepcionista salva com sucesso!"
-            mandarMensagem("Recepcionista salva com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(RecepcionistaRotas.Listagem)
 
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                // Recarrega a lista direto da API
+                _recepcionistas.value = recepcionistaApi.carregar()
+                println("Recepcionistas após salvar: ${_recepcionistas.value}")
+
+                mensagem.value = "Recepcionista salva com sucesso!"
+                mandarMensagem("Recepcionista salva com sucesso!")
+                limparCampos()
+                
+                backStack.clear()
+                backStack.add(RecepcionistaRotas.Listagem)
+
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(recepcionista: Recepcionista) {
-        _recepcionistas.update { lista -> lista - recepcionista }
-        mandarMensagem("Recepcionista apagada com sucesso!")
+        viewModelScope.launch {
+            try {
+                recepcionistaApi.apagar(recepcionista)
+                _recepcionistas.value = recepcionistaApi.carregar()
+                println("Recepcionistas após apagar: ${_recepcionistas.value}")
+                mandarMensagem("Recepcionista apagada com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar: ${e.message}")
+            }
+        }
     }
 
     fun novaRecepcionista() {
@@ -143,9 +156,9 @@ class RecepcionistaViewModel(
         cpf.definir(recepcionista.cpf)
         email.definir(recepcionista.email)
         telefone.definir(recepcionista.telefone)
-        senha.definir(recepcionista.senha)
+        senha.definir(recepcionista.senha ?: "") 
         ativo.definir(recepcionista.ativo.toString())
-        dataCadastro.definir(recepcionista.dataCadastro)
+        dataCadastro.definir(recepcionista.dataCadastro ?: "")
         setor.definir(recepcionista.setor)
         mensagem.value = ""
     }

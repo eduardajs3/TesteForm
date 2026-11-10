@@ -4,22 +4,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.ConvenioAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.Convenio
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import edu.front.psi.clin.navigation.ConvenioRotas
 
 class ConvenioViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 0
+    private val httpClient = httpClientManager()
+    private val convenioApi = ConvenioAPI(httpClient)
+
     private val _convenios = MutableStateFlow<List<Convenio>>(listOf())
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
     val mensagem = mutableStateOf("")
+
+    init {
+        viewModelScope.launch {
+            try {
+                _convenios.value = convenioApi.carregar()
+                println("Lista carregada no init: ${_convenios.value}")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar convênios do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -60,51 +76,63 @@ class ConvenioViewModel(
             return
         }
 
-        try {
-            val convenio = Convenio(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                cnpj = cnpj.valor.value,
-                telefone = telefone.valor.value,
-                percentualCobertura = percentualCobertura.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
-            )
+        viewModelScope.launch {
+            try {
+                val percentualDouble = percentualCobertura.valor.value
+                    .replace("%", "")
+                    .replace(",", ".")
+                    .trim()
+                    .toDoubleOrNull() ?: 0.0
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _convenios.update { lista -> lista + convenio.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _convenios.update { lista ->
-                    lista.map { c -> if (c.id == idNumber) convenio.copy(id = idNumber) else c }
+                val convenio = Convenio(
+                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    nome = nome.valor.value,
+                    cnpj = cnpj.valor.value,
+                    telefone = telefone.valor.value,
+                    percentualCobertura = percentualDouble,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                )
+
+                if (id.value.isEmpty()) {
+                    convenioApi.salvar(convenio)
+                } else {
+                    val idNumber = id.value.toLong()
+                    convenioApi.atualizar(idNumber, convenio)
                 }
-            }
-            mensagem.value = "Convênio salvo com sucesso!"
-            mandarMensagem("Convênio salvo com sucesso!")
-            limparCampos()
+                _convenios.value = convenioApi.carregar()
+                println("Lista após salvar: ${_convenios.value}")
+
+                mensagem.value = "Convênio salvo com sucesso!"
+                mandarMensagem("Convênio salvo com sucesso!")
+                limparCampos()
          
-            backStack.clear()
-            backStack.add(
-                ConvenioRotas.Listagem
-            )
-            
-        } catch (e: Exception) {
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                backStack.clear()
+                backStack.add(ConvenioRotas.Listagem)
+                
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(convenio: Convenio) {
-        _convenios.update { lista -> lista - convenio }
-        mandarMensagem("Convênio apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                convenioApi.apagar(convenio)
+                _convenios.value = convenioApi.carregar()
+                println("Lista após apagar: ${_convenios.value}")
+                mandarMensagem("Convênio apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar: ${e.message}")
+            }
+        }
     }
 
     fun novoConvenio() {
         id.value = ""
         limparCampos()
         backStack.clear()
-        backStack.add(
-            ConvenioRotas.Formulario
-        )
+        backStack.add(ConvenioRotas.Formulario)
     }
 
     fun editar(convenio: Convenio) {
@@ -116,9 +144,7 @@ class ConvenioViewModel(
         ativo.definir(convenio.ativo.toString())
         
         backStack.clear()
-        backStack.add(
-            ConvenioRotas.Formulario
-        )
+        backStack.add(ConvenioRotas.Formulario)
     }
 
     fun limparCampos() {

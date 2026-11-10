@@ -1,5 +1,7 @@
 package edu.front.psi.clin.model
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Funcionario(
     val id: Int,
     val nome: String,

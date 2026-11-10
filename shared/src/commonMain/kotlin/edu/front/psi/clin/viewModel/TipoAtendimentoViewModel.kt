@@ -4,21 +4,37 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.TipoAtendimentoAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.TipoAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class TipoAtendimentoViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 0
+    private val httpClient = httpClientManager()
+    private val tipoApi = TipoAtendimentoAPI(httpClient)
+
     private val _tiposAtendimento = MutableStateFlow<List<TipoAtendimento>>(listOf())
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                _tiposAtendimento.value = tipoApi.carregar()
+                println("Tipos de atendimento carregados no init: ${_tiposAtendimento.value}")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar tipos de atendimento do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -58,41 +74,52 @@ class TipoAtendimentoViewModel(
             return
         }
 
-        try {
-            val tipo = TipoAtendimento(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                descricao = descricao.valor.value,
-                duracao = duracao.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.valor.value
-            )
+        viewModelScope.launch {
+            try {
+                val tipo = TipoAtendimento(
+                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    nome = nome.valor.value,
+                    descricao = descricao.valor.value,
+                    duracao = duracao.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    dataCadastro = dataCadastro.valor.value
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _tiposAtendimento.update { lista -> lista + tipo.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _tiposAtendimento.update { lista ->
-                    lista.map { t -> if (t.id == idNumber) tipo.copy(id = idNumber) else t }
+                if (id.value.isEmpty()) {
+                    tipoApi.salvar(tipo)
+                } else {
+                    val idNumber = id.value.toLong()
+                    tipoApi.atualizar(idNumber, tipo)
                 }
-            }
-            mensagem.value = "Tipo de atendimento salvo com sucesso!"
-            mandarMensagem("Tipo de atendimento salvo com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(TipoAtendimentoRotas.Listagem)
 
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                _tiposAtendimento.value = tipoApi.carregar()
+                println("Tipos após salvar: ${_tiposAtendimento.value}")
+
+                mensagem.value = "Tipo de atendimento salvo com sucesso!"
+                mandarMensagem("Tipo de atendimento salvo com sucesso!")
+                limparCampos()
+                
+                backStack.clear()
+                backStack.add(TipoAtendimentoRotas.Listagem)
+
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(tipo: TipoAtendimento) {
-        _tiposAtendimento.update { lista -> lista - tipo }
-        mandarMensagem("Tipo de atendimento apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                tipoApi.apagar(tipo)
+                _tiposAtendimento.value = tipoApi.carregar()
+                println("Tipos após apagar: ${_tiposAtendimento.value}")
+                mandarMensagem("Tipo de atendimento apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar: ${e.message}")
+            }
+        }
     }
 
     fun novoTipo() {

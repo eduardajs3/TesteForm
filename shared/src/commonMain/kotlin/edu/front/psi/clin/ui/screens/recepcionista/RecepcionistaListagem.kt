@@ -87,7 +87,7 @@ fun RecepcionistaListagem(
                     ItemDetalhe("Setor", recepcionista.setor)
                     ItemDetalhe("Telefone", recepcionista.telefone)
                     ItemDetalhe("E-mail", recepcionista.email)
-                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro)
+                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro ?: "") // Tratamento para String?
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",
