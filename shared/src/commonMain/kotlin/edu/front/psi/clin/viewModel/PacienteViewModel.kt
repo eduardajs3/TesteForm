@@ -4,24 +4,37 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.PacienteAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.PacienteRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class PacienteViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 2
-    
-    private val _pacientes = MutableStateFlow<List<Paciente>>(listOf(
-        Paciente(1, "João Silva", "111.222.333-44", "01/01/1990", "joao@email.com", "(11) 99999-9999", "Rua A, 123", "Paciente estável", true)
-    ))
+    private val httpClient = httpClientManager()
+    private val pacienteApi = PacienteAPI(httpClient)
+
+    private val _pacientes = MutableStateFlow<List<Paciente>>(listOf())
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                _pacientes.value = pacienteApi.carregar()
+                println("Pacientes carregados no init: ${_pacientes.value}")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar pacientes do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -38,14 +51,13 @@ class PacienteViewModel(
     val backStack = NavBackStack<PacienteRotas>(
         PacienteRotas.Listagem
     )
-
+     
     // Campos do formulário
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
     val dataNascimento = CampoValidado()
     
-    // E-mail com validação de formato integrada
     val email = CampoValidado(
         validadorExtra = { MaskUtils.validarEmail(it) },
         mensagemErroPersonalizada = "E-mail inválido"
@@ -71,45 +83,61 @@ class PacienteViewModel(
             mandarMensagem("Por favor, corrija os erros no formulário.")
             return
         }
+        val partes = dataNascimento.valor.value.split("/")
 
-        try {
-            val paciente = Paciente(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                cpf = cpf.valor.value,
-                dataNascimento = dataNascimento.valor.value,
-                email = email.valor.value,
-                telefone = telefone.valor.value,
-                endereco = endereco.valor.value,
-                observacoes = observacoes.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
-            )
+        val dataFormatada = if (partes.size == 3) {
+            "${partes[2]}-${partes[1]}-${partes[0]}"
+        } else {
+            dataNascimento.valor.value
+        }
+        viewModelScope.launch {
+            try {
+                val paciente = Paciente(
+                    id = id.value.toIntOrNull(),
+                    nome = nome.valor.value,
+                    cpf = cpf.valor.value,
+                    dataNascimento = dataFormatada,
+                    email = email.valor.value,
+                    telefone = telefone.valor.value,
+                    endereco = endereco.valor.value,
+                    observacoes = observacoes.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _pacientes.update { lista -> lista + paciente.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _pacientes.update { lista ->
-                    lista.map { prj -> if (prj.id == idNumber) paciente.copy(id = idNumber) else prj }
+                if (id.value.isEmpty()) {
+                    pacienteApi.salvar(paciente)
+                } else {
+                    val idNumber = id.value.toLong()
+                    pacienteApi.atualizar(idNumber, paciente)
                 }
-            }
-            mensagem.value = "Paciente salvo com sucesso!"
-            mandarMensagem("Paciente salvo com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(PacienteRotas.Listagem)
 
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                // Recarrega a lista direto da API do backend
+                _pacientes.value = pacienteApi.carregar()
+                
+                mensagem.value = "Paciente salvo com sucesso!"
+                mandarMensagem("Paciente salvo com sucesso!")
+                limparCampos()
+                
+                backStack.clear()
+                backStack.add(PacienteRotas.Listagem)
+
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(paciente: Paciente) {
-        _pacientes.update { lista -> lista - paciente }
-        mandarMensagem("Paciente apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                pacienteApi.apagar(paciente)
+                _pacientes.value = pacienteApi.carregar()
+                mandarMensagem("Paciente apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar: ${e.message}")
+            }
+        }
     }
 
     fun novoPaciente() {
@@ -130,7 +158,9 @@ class PacienteViewModel(
         email.definir(paciente.email)
         telefone.definir(paciente.telefone)
         endereco.definir(paciente.endereco)
-        observacoes.definir(paciente.observacoes)
+        observacoes.definir(
+            paciente.observacoes
+        )
         ativo.definir(paciente.ativo.toString())
         mensagem.value = ""
     }

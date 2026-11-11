@@ -19,33 +19,39 @@ fun HorarioDisponivelFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val psicologoOpcoes = listOf(
-        "Dra. Ana Silva",
-        "Dr. Carlos Souza",
-        "Dra. Mariana Oliveira"
+    // Mapeamento correto dos IDs dos psicólogos cadastrados no backend (ex: ID 2, 3, 4)
+    val psicologosMap = mapOf(
+        "Dra. Ana Silva" to 2L,
+        "Dr. Carlos Souza" to 3L,
+        "Dra. Mariana Oliveira" to 4L
     )
+    val psicologoOpcoes = psicologosMap.keys.toList()
 
-    val diasDaSemana = listOf(
-        "Segunda-feira",
-        "Terça-feira",
-        "Quarta-feira",
-        "Quinta-feira",
-        "Sexta-feira",
-        "Sábado",
-        "Domingo"
+    // Mapeamento correto para os Enums esperados pelo backend Spring Boot
+    val diasDaSemanaMap = mapOf(
+        "Segunda-feira" to "SEGUNDA",
+        "Terça-feira" to "TERCA",
+        "Quarta-feira" to "QUARTA",
+        "Quinta-feira" to "QUINTA",
+        "Sexta-feira" to "SEXTA",
+        "Sábado" to "SABADO",
+        "Domingo" to "DOMINGO"
     )
+    val diasOpcoes = diasDaSemanaMap.keys.toList()
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
-    val psicologoAtual = vm.psicologo.valor.value
-    val psicologoExibicao = if (psicologoOpcoes.contains(psicologoAtual)) psicologoAtual else (psicologoOpcoes.firstOrNull() ?: "")
+    // Descobre o nome do psicólogo com base no ID armazenado no ViewModel
+    val psicologoAtualNome = psicologosMap.entries.firstOrNull { it.value.toString() == vm.psicologo.valor.value }?.key ?: psicologoOpcoes.first()
+    
+    // Descobre o rótulo amigável do dia da semana com base no Enum do ViewModel
+    val diaAtualRotulo = diasDaSemanaMap.entries.firstOrNull { it.value == vm.diaSemana.valor.value }?.key ?: diasOpcoes.first()
 
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Horário Disponível" else "Cadastro de Horário Disponível",
-            subtitulo = if (isEdicao) "Altere os dados do horário selecionado." else "Preencha os dados do horário disponível.",
             mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
@@ -54,10 +60,12 @@ fun HorarioDisponivelFormulario(
         ) {
             CampoDropdownPadrao(
                 label = "Nome do psicólogo",
-                valorSelecionado = psicologoExibicao,
+                valorSelecionado = psicologoAtualNome,
                 opcoes = psicologoOpcoes,
-                onOpcaoSelecionada = { selecao ->
-                    vm.psicologo.definir(selecao)
+                onOpcaoSelecionada = { nomeSelecionado ->
+                    // Salva o ID correspondente no campo do ViewModel
+                    val idPsicologo = psicologosMap[nomeSelecionado] ?: 2L
+                    vm.psicologo.definir(idPsicologo.toString())
                 },
                 isError = vm.psicologo.temErro.value,
                 errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
@@ -65,9 +73,13 @@ fun HorarioDisponivelFormulario(
 
             CampoDropdownPadrao(
                 label = "Dia da semana",
-                valorSelecionado = vm.diaSemana.valor.value,
-                opcoes = diasDaSemana,
-                onOpcaoSelecionada = { vm.diaSemana.definir(it) },
+                valorSelecionado = diaAtualRotulo,
+                opcoes = diasOpcoes,
+                onOpcaoSelecionada = { rotuloSelecionado ->
+                    // Salva o Enum correspondente (ex: "SEGUNDA") no ViewModel
+                    val enumValor = diasDaSemanaMap[rotuloSelecionado] ?: "SEGUNDA"
+                    vm.diaSemana.definir(enumValor)
+                },
                 isError = vm.diaSemana.temErro.value,
                 errorMessage = if (vm.diaSemana.temErro.value) "Campo obrigatório" else null
             )
@@ -112,15 +124,11 @@ fun HorarioDisponivelFormulario(
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
-            
+
             BotoesAcaoFormulario(
                 onLimpar = if (!isEdicao) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )
         }
     }

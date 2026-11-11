@@ -1,9 +1,8 @@
 package edu.front.psi.clin.model
 import kotlinx.serialization.Serializable
-
 @Serializable
 data class Paciente(
-    val id: Int,
+    val id: Int? = null,
     val nome: String,
     val cpf: String,
     val dataNascimento: String,

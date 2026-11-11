@@ -1,4 +1,3 @@
-// shared/src/commonMain/kotlin/edu/front/psi/clin/api/ConvenioAPI.kt
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.Convenio
@@ -10,7 +9,8 @@ import io.ktor.http.contentType
 
 class ConvenioAPI(private val httpClient: HttpClient) {
     private val endPoint = "http://localhost:8080/convenios"
-    private val token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwc2ljbGluLmxvY2FsIiwiaWF0IjoxNzk0MjcxMjE5LCJleHAiOjE3OTQzNTc2MTl9.4iCfRcgUsdG3cUxwWfrEOJJ6Nh7n_7pQEs3_KiE8KVQ"
+    private val token
+        get() = SessionManager.token
 
     suspend fun carregar(): List<Convenio> {
         val lista = httpClient.get(endPoint) {

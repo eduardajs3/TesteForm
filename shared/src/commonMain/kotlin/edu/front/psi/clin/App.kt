@@ -479,11 +479,21 @@ fun App() {
                                         }
                                     }
                                     entry<Route.Agenda> {
-                                        val subRota = agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem
-                                        if (subRota is AgendaRotas.Formulario) {
-                                            AgendaFormulario(contentPadding, agendaVm)
-                                        } else {
-                                            AgendaListagem(contentPadding, agendaVm)
+                                        when (agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem) {
+
+                                            AgendaRotas.Listagem -> {
+                                                AgendaListagem(
+                                                    contentPadding,
+                                                    agendaVm
+                                                )
+                                            }
+
+                                            AgendaRotas.Formulario -> {
+                                                AgendaFormulario(
+                                                    contentPadding,
+                                                    agendaVm
+                                                )
+                                            }
                                         }
                                     }
                                 }

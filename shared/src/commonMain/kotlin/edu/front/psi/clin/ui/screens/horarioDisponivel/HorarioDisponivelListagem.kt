@@ -51,7 +51,7 @@ fun HorarioDisponivelListagem(
             val isAtivo = horario.ativo
 
             CelulaTabelaTexto(
-                text = horario.psicologo,
+                text = horario.psicologo ?: "", // Tratado com string vazia segura
                 weight = 1.4f,
                 isBold = true
             )
@@ -64,7 +64,7 @@ fun HorarioDisponivelListagem(
                 weight = 1.2f
             )
             CelulaTabelaTexto(
-                text = horario.descricao,
+                text = horario.descricao ?: "", // Tratado com string vazia segura
                 weight = 1.3f
             )
             
@@ -82,11 +82,11 @@ fun HorarioDisponivelListagem(
                 titulo = "Detalhes do Horário",
                 onDismiss = { horarioSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = horario.psicologo)
+                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = horario.psicologo ?: "")
                     ItemDetalhe(rotulo = "Dia da semana", valor = horario.diaSemana)
                     ItemDetalhe(rotulo = "Horário de início", valor = horario.horaInicio)
                     ItemDetalhe(rotulo = "Horário de fim", valor = horario.horaFim)
-                    ItemDetalhe(rotulo = "Descrição", valor = horario.descricao)
+                    ItemDetalhe(rotulo = "Descrição", valor = horario.descricao ?: "Nenhuma")
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo"

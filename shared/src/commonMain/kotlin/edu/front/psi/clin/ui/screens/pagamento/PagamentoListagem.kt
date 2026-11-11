@@ -22,6 +22,8 @@ fun PagamentoListagem(
 ) {
     val lista = vm.pagamentosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
+    val pacientesLista = vm.pacientes.collectAsState().value
+    val conveniosLista = vm.convenios.collectAsState().value
 
     val pagamentoSelecionado = remember { mutableStateOf<Pagamento?>(null) }
     val pagamentoParaExcluir = remember { mutableStateOf<Pagamento?>(null) }
@@ -47,12 +49,13 @@ fun PagamentoListagem(
             onApagar = { pagamento ->
                 pagamentoParaExcluir.value = pagamento
             },
-            placeholderPesquisa = "Buscar por paciente, status ou data..."
+            placeholderPesquisa = "Buscar por forma de pagamento ou status..."
         ) { pagamento ->
-            val isPago = pagamento.status
+            val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome ?: "Paciente #${pagamento.pacienteId}"
+            val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
 
             CelulaTabelaTexto(
-                text = pagamento.paciente,
+                text = pacienteNome,
                 weight = 1.5f,
                 isBold = true
             )
@@ -67,20 +70,23 @@ fun PagamentoListagem(
 
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
-                    texto = if (isPago) "Pago" else "Pendente",
+                    texto = if (isPago) "Pago" else pagamento.status,
                     isAtivo = isPago
                 )
             }
         }
 
         pagamentoSelecionado.value?.let { pagamento ->
-            val isPago = pagamento.status
+            val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome ?: "-"
+            val convenioNome = conveniosLista.firstOrNull { it.id?.toLong() == pagamento.convenioId }?.nome ?: "-"
+            val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
+
             ModalDetalhesBase(
                 titulo = "Detalhes do Pagamento",
                 onDismiss = { pagamentoSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Paciente", valor = pagamento.paciente)
-                    ItemDetalhe(rotulo = "Convênio", valor = pagamento.convenio)
+                    ItemDetalhe(rotulo = "Paciente", valor = pacienteNome)
+                    ItemDetalhe(rotulo = "Convênio", valor = convenioNome)
                     ItemDetalhe(rotulo = "Valor total", valor = "R$ ${pagamento.valorTotal}")
                     ItemDetalhe(rotulo = "Valor do convênio", valor = "R$ ${pagamento.valorConvenio}")
                     ItemDetalhe(rotulo = "Valor do paciente", valor = "R$ ${pagamento.valorPaciente}")
@@ -88,7 +94,7 @@ fun PagamentoListagem(
                     ItemDetalhe(rotulo = "Data do pagamento", valor = pagamento.dataPagamento)
                     ItemDetalhe(
                         rotulo = "Status",
-                        valor = if (isPago) "Pago" else "Pendente",
+                        valor = if (isPago) "Pago" else pagamento.status,
                     )
                 }
             )
@@ -97,7 +103,7 @@ fun PagamentoListagem(
         pagamentoParaExcluir.value?.let { pagamento ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir este registo de pagamento? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir este registro de pagamento? Esta ação não pode ser desfeita.",
                 onDismiss = { pagamentoParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(pagamento)

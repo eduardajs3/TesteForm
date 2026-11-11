@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -19,142 +20,124 @@ fun AgendaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val listaPacientes = listOf(
-        "Maria Clara da Silva",
-        "João Pedro Santos",
-        "Ana Beatriz Lima",
-        "Lucas Oliveira"
-    )
+    val pacientesLista = vm.pacientes.collectAsState().value
+    val psicologosLista = vm.psicologos.collectAsState().value
+    val salasLista = vm.salas.collectAsState().value
+    val tiposAtendimentoLista = vm.tiposAtendimento.collectAsState().value
+    val conveniosLista = vm.convenios.collectAsState().value
 
-    val listaTiposAtendimento = listOf("Consulta Individual", "Terapia de Casal", "Avaliação Psicológica", "Anamnese")
-    val listaConvenios = listOf("Particular", "Unimed", "Bradesco Saúde", "Amil", "SulAmérica")
-    val listaStatusAgenda = listOf("Agendado", "Confirmado", "Em Atendimento", "Realizado", "Cancelado")
+    val listaStatusAgenda = listOf("AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU")
 
-    var dataSelecionada by remember(vm.dataHoraInicio.valor.value) {
-        val data = if (vm.dataHoraInicio.valor.value.contains(" ")) {
-            vm.dataHoraInicio.valor.value.split(" ")[0]
-        } else if (vm.dataHoraInicio.valor.value.isNotEmpty()) {
-            vm.dataHoraInicio.valor.value
-        } else {
-            "16/03/2026"
-        }
-        mutableStateOf(data)
-    }
-
-    val horariosDisponiveisNoDia = remember(dataSelecionada) {
-        if (dataSelecionada.isNotEmpty()) {
-            listOf("08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00")
-        } else {
-            emptyList()
-        }
-    }
-
-    val salasDisponiveisNoDia = remember(dataSelecionada) {
-        if (dataSelecionada.isNotEmpty()) {
-            listOf("Sala 01 - Bloco A", "Sala 02 - Bloco A", "Sala 03 - Bloco B")
-        } else {
-            emptyList()
-        }
-    }
-
-    val psicologosDisponiveisNoDia = remember(dataSelecionada) {
-        if (dataSelecionada.isNotEmpty()) {
-            listOf("Dra. Amanda Silva", "Dr. Roberto Alves", "Dra. Juliana Costa")
-        } else {
-            emptyList()
-        }
-    }
-
-    var horarioSelecionado by remember(vm.dataHoraInicio.valor.value) {
-        val horaInicio = if (vm.dataHoraInicio.valor.value.contains(" ")) {
-            vm.dataHoraInicio.valor.value.split(" ")[1]
-        } else ""
-        val encontrado = listOf(
-            "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
-            "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
-        ).firstOrNull { it.startsWith(horaInicio) } ?: ""
-        mutableStateOf(encontrado)
-    }
+    // Nomes selecionados para exibição comparando explicitamente Long com Long?
+    val pacienteAtualNome = pacientesLista.firstOrNull { it.id?.toLong() == vm.pacienteId.value }?.nome ?: ""
+    val psicologoAtualNome = psicologosLista.firstOrNull { it.id?.toLong() == vm.psicologoId.value }?.nome ?: ""
+    val salaAtualNome = salasLista.firstOrNull { it.id?.toLong() == vm.salaId.value }?.nome ?: ""
+    val tipoAtendimentoAtualNome = tiposAtendimentoLista.firstOrNull { it.id?.toLong() == vm.tipoAtendimentoId.value }?.nome ?: ""
+    val convenioAtualNome = conveniosLista.firstOrNull { it.id?.toLong() == vm.convenioId.value }?.nome ?: ""
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Agendamento" else "Cadastro de Agenda",
-            subtitulo = if (isEdicao) "Altere os dados do agendamento selecionado." else "Escolha a data para carregar os horários e recursos disponíveis.",
-            mensagemFeedback = vm.mensagem.value
+            mensagemFeedback = vm.mensagem.value,
+            onVoltar = {
+                vm.backStack.clear()
+                vm.backStack.add(AgendaRotas.Listagem)
+            }
         ) {
+            // Dropdown de Paciente
             CampoDropdownPadrao(
                 label = "Paciente *",
-                opcoes = listaPacientes,
-                valorSelecionado = vm.paciente.valor.value,
-                onOpcaoSelecionada = { vm.paciente.definir(it) },
-                isError = vm.paciente.temErro.value,
-                errorMessage = if (vm.paciente.temErro.value) vm.paciente.mensagemErro.value else null
+                opcoes = pacientesLista.map { it.nome },
+                valorSelecionado = pacienteAtualNome,
+                onOpcaoSelecionada = { nome ->
+                    val pacienteEscolhido = pacientesLista.firstOrNull { it.nome == nome }
+                    vm.pacienteId.value = pacienteEscolhido?.id?.toLong()
+                },
+                isError = vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty(),
+                errorMessage = if (vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
+            // Dropdown de Psicólogo
             CampoDropdownPadrao(
                 label = "Psicólogo *",
-                opcoes = psicologosDisponiveisNoDia,
-                valorSelecionado = vm.psicologo.valor.value,
-                onOpcaoSelecionada = { vm.psicologo.definir(it) },
-                isError = vm.psicologo.temErro.value,
-                errorMessage = if (vm.psicologo.temErro.value) vm.psicologo.mensagemErro.value else null
+                opcoes = psicologosLista.map { it.nome },
+                valorSelecionado = psicologoAtualNome,
+                onOpcaoSelecionada = { nome ->
+                    val psicologoEscolhido = psicologosLista.firstOrNull { it.nome == nome }
+                    vm.psicologoId.value = psicologoEscolhido?.id?.toLong()
+                },
+                isError = vm.psicologoId.value == null && vm.mensagem.value.isNotEmpty(),
+                errorMessage = if (vm.psicologoId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
+            // Dropdown de Tipo de Atendimento
             CampoDropdownPadrao(
                 label = "Tipo de Atendimento *",
-                opcoes = listaTiposAtendimento,
-                valorSelecionado = vm.tipoAtendimento.valor.value,
-                onOpcaoSelecionada = { vm.tipoAtendimento.definir(it) },
-                isError = vm.tipoAtendimento.temErro.value,
-                errorMessage = if (vm.tipoAtendimento.temErro.value) vm.tipoAtendimento.mensagemErro.value else null
+                opcoes = tiposAtendimentoLista.map { it.nome },
+                valorSelecionado = tipoAtendimentoAtualNome,
+                onOpcaoSelecionada = { nome ->
+                    val tipoEscolhido = tiposAtendimentoLista.firstOrNull { it.nome == nome }
+                    vm.tipoAtendimentoId.value = tipoEscolhido?.id?.toLong()
+                },
+                isError = vm.tipoAtendimentoId.value == null && vm.mensagem.value.isNotEmpty(),
+                errorMessage = if (vm.tipoAtendimentoId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
+            // Dropdown de Convênio
             CampoDropdownPadrao(
                 label = "Convênio",
-                opcoes = listaConvenios,
-                valorSelecionado = vm.convenio.valor.value,
-                onOpcaoSelecionada = { vm.convenio.definir(it) }
+                opcoes = conveniosLista.map { it.nome },
+                valorSelecionado = convenioAtualNome,
+                onOpcaoSelecionada = { nome ->
+                    val convenioEscolhido = conveniosLista.firstOrNull { it.nome == nome }
+                    vm.convenioId.value = convenioEscolhido?.id?.toLong()
+                }
             )
 
+            // 1. Campo de Data
             CampoDataPadrao(
-                value = dataSelecionada,
-                onValueChange = { novaData ->
-                    dataSelecionada = novaData
-                    horarioSelecionado = "" 
-                    vm.dataHoraInicio.definir("")
-                    vm.dataHoraFim.definir("")
-                },
-                label = "Data do Atendimento",
+                value = vm.dataAtendimento.valor.value,
+                onValueChange = { vm.dataAtendimento.definir(it) },
+                label = "Data do Atendimento *",
                 obrigatorio = true,
-                isError = vm.dataHoraInicio.temErro.value,
-                errorMessage = if (vm.dataHoraInicio.temErro.value) vm.dataHoraInicio.mensagemErro.value else null
+                isError = vm.dataAtendimento.temErro.value,
+                errorMessage = if (vm.dataAtendimento.temErro.value) "Campo obrigatório" else null
             )
 
+            // 2. Campo de Hora de Início
+            CampoTextoPadrao(
+                value = vm.horaInicio.valor.value,
+                onValueChange = { vm.horaInicio.definir(it) },
+                label = "Hora de Início *",
+                placeholder = "HH:mm (ex.: 09:00)",
+                obrigatorio = true,
+                isError = vm.horaInicio.temErro.value,
+                errorMessage = if (vm.horaInicio.temErro.value) "Campo obrigatório" else null
+            )
+
+            // 3. Campo de Hora de Fim
+            CampoTextoPadrao(
+                value = vm.horaFim.valor.value,
+                onValueChange = { vm.horaFim.definir(it) },
+                label = "Hora de Fim *",
+                placeholder = "HH:mm (ex.: 09:50)",
+                obrigatorio = true,
+                isError = vm.horaFim.temErro.value,
+                errorMessage = if (vm.horaFim.temErro.value) "Campo obrigatório" else null
+            )
+
+            // Dropdown de Salas de Atendimento
             CampoDropdownPadrao(
-                label = if (dataSelecionada.isEmpty()) "Selecione primeiro uma data *" else "Horário Disponível para $dataSelecionada *",
-                opcoes = horariosDisponiveisNoDia,
-                valorSelecionado = horarioSelecionado,
-                onOpcaoSelecionada = { intervalo ->
-                    horarioSelecionado = intervalo
-                    val partes = intervalo.split(" - ")
-                    if (partes.size == 2) {
-                        vm.dataHoraInicio.definir("$dataSelecionada ${partes[0]}")
-                        vm.dataHoraFim.definir("$dataSelecionada ${partes[1]}")
-                    }
-                },
-                isError = vm.dataHoraInicio.temErro.value,
-                errorMessage = if (vm.dataHoraInicio.temErro.value) vm.dataHoraInicio.mensagemErro.value else null
+                label = "Sala de Atendimento",
+                opcoes = salasLista.map { it.nome },
+                valorSelecionado = salaAtualNome,
+                onOpcaoSelecionada = { nome ->
+                    val salaEscolhida = salasLista.firstOrNull { it.nome == nome }
+                    vm.salaId.value = salaEscolhida?.id?.toLong()
+                }
             )
 
-            CampoDropdownPadrao(
-                label = "Sala de Atendimento Livre *",
-                opcoes = salasDisponiveisNoDia,
-                valorSelecionado = vm.sala.valor.value,
-                onOpcaoSelecionada = { vm.sala.definir(it) },
-                isError = vm.sala.temErro.value,
-                errorMessage = if (vm.sala.temErro.value) vm.sala.mensagemErro.value else null
-            )
-
+            // Dropdown de Status da Agenda
             CampoDropdownPadrao(
                 label = "Status da Agenda",
                 opcoes = listaStatusAgenda,
@@ -162,6 +145,7 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.status.definir(it) }
             )
 
+            // Observações
             CampoTextoPadrao(
                 value = vm.observacoes.valor.value,
                 onValueChange = { vm.observacoes.definir(it) },
@@ -169,11 +153,7 @@ fun AgendaFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = {
-                    vm.limparCampos()
-                    dataSelecionada = ""
-                    horarioSelecionado = ""
-                },
+                onLimpar = if (!isEdicao) vm::limparCampos else null,
                 onSalvar = vm::salvar,
                 textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
             )

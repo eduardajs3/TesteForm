@@ -9,7 +9,8 @@ import io.ktor.http.contentType
 
 class TipoAtendimentoAPI(private val httpClient: HttpClient) {
     private val endPoint = "http://localhost:8080/tipos-atendimento" 
-    private val token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwc2ljbGluLmxvY2FsIiwiaWF0IjoxNzk0MjcxMjE5LCJleHAiOjE3OTQzNTc2MTl9.4iCfRcgUsdG3cUxwWfrEOJJ6Nh7n_7pQEs3_KiE8KVQ" // Utilize o token válido/atualizado
+    private val token
+        get() = SessionManager.token
 
     suspend fun carregar(): List<TipoAtendimento> {
         val lista = httpClient.get(endPoint) {

@@ -8,8 +8,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class RecepcionistaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/recepcionistas" // Ajuste conforme o endpoint exato do backend
-    private val token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwc2ljbGluLmxvY2FsIiwiaWF0IjoxNzk0Mjc2NTY1LCJleHAiOjE3OTQzNjI5NjV9.aL-VS30bi4ZPUs74Idz7RTdd7wQYNtMc8vrIioyrbvk" // Token JWT válido/atualizado
+    private val endPoint = "http://localhost:8080/recepcionistas" 
+    private val token
+        get() = SessionManager.token
 
     suspend fun carregar(): List<Recepcionista> {
         val lista = httpClient.get(endPoint) {

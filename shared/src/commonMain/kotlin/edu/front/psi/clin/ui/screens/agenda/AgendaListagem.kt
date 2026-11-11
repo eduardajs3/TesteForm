@@ -27,7 +27,8 @@ import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 data class DiaSemanaAgenda(
     val nomeDia: String,
-    val dataFormatada: String
+    val dataFormatada: String, // Formato "dd/MM"
+    val dataIso: String        // Formato "yyyy-MM-dd"
 )
 
 // Estrutura pura em Kotlin para manipulação de calendário (100% KMP compatível)
@@ -39,7 +40,6 @@ private fun diasNoMes(mes: Int, ano: Int): Int = when (mes) {
 }
 
 private fun diaDaSemanaSakamoto(ano: Int, mes: Int, dia: Int): Int {
-    // 0 = Domingo, 1 = Segunda, 2 = Terça, 3 = Quarta, 4 = Quinta, 5 = Sexta, 6 = Sábado
     val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
     var y = ano
     if (mes < 3) y -= 1
@@ -48,6 +48,8 @@ private fun diaDaSemanaSakamoto(ano: Int, mes: Int, dia: Int): Int {
 
 private data class DataSimples(val dia: Int, val mes: Int, val ano: Int) {
     fun formatarDiaMes(): String = "${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}"
+    
+    fun formatarIso(): String = "$ano-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}"
 
     fun adicionarDias(qtd: Int): DataSimples {
         var d = dia + qtd
@@ -94,23 +96,27 @@ fun AgendaListagem(
     vm: AgendaViewModel
 ) {
     val agendamentos by vm.agendamentosFiltrados.collectAsState()
-    val psicologoFiltroSelecionado by vm.psicologoFiltro.collectAsState()
+    val pacientesLista = vm.pacientes.collectAsState().value
+    val psicologosLista = vm.psicologos.collectAsState().value
+    val salasLista = vm.salas.collectAsState().value
+    val tiposAtendimentoLista = vm.tiposAtendimento.collectAsState().value
+    val conveniosLista = vm.convenios.collectAsState().value
+
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
 
-    // Inicia na semana de 16/03/2026 (Segunda-feira)
-    var segundaAtual by remember { mutableStateOf(DataSimples(16, 3, 2026)) }
+    // Inicia na semana correspondente a novembro de 2026 (onde estão os testes: 16/11/2026)
+    var segundaAtual by remember { mutableStateOf(DataSimples(16, 11, 2026)) }
     var menuMesesAberto by remember { mutableStateOf(false) }
 
-    // Calcula os 5 dias da semana (Segunda a Sexta)
     val sextaAtual = remember(segundaAtual) { segundaAtual.adicionarDias(4) }
 
     val diasDaSemana = remember(segundaAtual) {
         listOf(
-            DiaSemanaAgenda("Segunda", segundaAtual.formatarDiaMes()),
-            DiaSemanaAgenda("Terça", segundaAtual.adicionarDias(1).formatarDiaMes()),
-            DiaSemanaAgenda("Quarta", segundaAtual.adicionarDias(2).formatarDiaMes()),
-            DiaSemanaAgenda("Quinta", segundaAtual.adicionarDias(3).formatarDiaMes()),
-            DiaSemanaAgenda("Sexta", segundaAtual.adicionarDias(4).formatarDiaMes())
+            DiaSemanaAgenda("Segunda", segundaAtual.formatarDiaMes(), segundaAtual.formatarIso()),
+            DiaSemanaAgenda("Terça", segundaAtual.adicionarDias(1).formatarDiaMes(), segundaAtual.adicionarDias(1).formatarIso()),
+            DiaSemanaAgenda("Quarta", segundaAtual.adicionarDias(2).formatarDiaMes(), segundaAtual.adicionarDias(2).formatarIso()),
+            DiaSemanaAgenda("Quinta", segundaAtual.adicionarDias(3).formatarDiaMes(), segundaAtual.adicionarDias(3).formatarIso()),
+            DiaSemanaAgenda("Sexta", segundaAtual.adicionarDias(4).formatarDiaMes(), segundaAtual.adicionarDias(4).formatarIso())
         )
     }
 
@@ -124,7 +130,6 @@ fun AgendaListagem(
         }
     }
 
-    val listaPsicologos = listOf("Todos", "Dra. Ana Costa", "Dr. Roberto Alves", "Dra. Juliana Costa")
     val horariosSessao = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
 
     Box(
@@ -144,13 +149,12 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Barra de Filtros e Navegação da Semana
+            // Barra de Navegação de Semanas
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Card de Navegação de Semanas com Seletor de Mês
                 Card(
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(containerColor = Branco),
@@ -184,7 +188,6 @@ fun AgendaListagem(
                                 color = TextoPrincipal
                             )
 
-                            // Menu Dropdown para Escolher o Mês Diretamente
                             Box {
                                 OutlinedButton(
                                     onClick = { menuMesesAberto = true },
@@ -246,49 +249,6 @@ fun AgendaListagem(
                         }
                     }
                 }
-
-                // Filtro rápido por Psicólogo
-                Card(
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Branco),
-                    modifier = Modifier.weight(1f),
-                    border = BorderStroke(1.dp, CardBordaCinza)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "Psicólogo:",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = VerdeClinica
-                        )
-
-                        listaPsicologos.forEach { psi ->
-                            val selecionado = psi == psicologoFiltroSelecionado
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = if (selecionado) VerdeClinica else LinhaDivisoria,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable { vm.filtrarPorPsicologo(psi) }
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = if (psi == "Todos") "Todos" else psi.split(" ").getOrNull(1) ?: psi,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selecionado) Branco else TextoPrincipal
-                                )
-                            }
-                        }
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -298,7 +258,6 @@ fun AgendaListagem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Espaçamento para alinhar com a coluna de horários (60.dp)
                 Spacer(modifier = Modifier.width(60.dp))
 
                 Row(
@@ -340,7 +299,7 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Grade de Horários e Consultas
+            // Grade de Horários e Consultas com conversão correta de data/hora da API
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -365,15 +324,24 @@ fun AgendaListagem(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             diasDaSemana.forEach { dia ->
-                                val agendamentoNoHorario = agendamentos.firstOrNull {
-                                    it.dataHoraInicio.contains(dia.dataFormatada) && it.dataHoraInicio.contains(hora)
+                                val agendamentoNoHorario = agendamentos.firstOrNull { item ->
+                                    val partesDataHora = item.dataHoraInicio.split("T")
+                                    if (partesDataHora.size != 2) return@firstOrNull false
+                                    val dataIsoItem = partesDataHora[0] // ex: "2026-11-18"
+                                    val horaItem = partesDataHora[1].take(5) // ex: "11:00"
+
+                                    dataIsoItem == dia.dataIso && horaItem == hora
                                 }
 
-                                // Somente as consultas agendadas possuem ação de clique.
-                                // Dias e slots vagos são desabilitados, sem ação de clique.
+                                val nomePaciente = pacientesLista.firstOrNull { it.id?.toLong() == agendamentoNoHorario?.pacienteId }?.nome ?: "Paciente"
+                                val nomePsicologo = psicologosLista.firstOrNull { it.id?.toLong() == agendamentoNoHorario?.psicologoId }?.nome ?: "Psicólogo"
+                                val nomeTipo = tiposAtendimentoLista.firstOrNull { it.id?.toLong() == agendamentoNoHorario?.tipoAtendimentoId }?.nome ?: "Consulta"
+
                                 CardAgendamentoGrade(
-                                    dia = dia,
                                     agendamento = agendamentoNoHorario,
+                                    nomePaciente = nomePaciente,
+                                    nomePsicologo = nomePsicologo,
+                                    nomeTipo = nomeTipo,
                                     modifier = Modifier.weight(1f),
                                     onClick = if (agendamentoNoHorario != null) {
                                         { agendamentoSelecionado = agendamentoNoHorario }
@@ -388,6 +356,12 @@ fun AgendaListagem(
 
         // Modal de Detalhes da Consulta Marcada
         agendamentoSelecionado?.let { agendamento ->
+            val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == agendamento.pacienteId }?.nome ?: "-"
+            val psicologoNome = psicologosLista.firstOrNull { it.id?.toLong() == agendamento.psicologoId }?.nome ?: "-"
+            val salaNome = salasLista.firstOrNull { it.id?.toLong() == agendamento.salaId }?.nome ?: "-"
+            val tipoNome = tiposAtendimentoLista.firstOrNull { it.id?.toLong() == agendamento.tipoAtendimentoId }?.nome ?: "-"
+            val convenioNome = conveniosLista.firstOrNull { it.id?.toLong() == agendamento.convenioId }?.nome ?: "-"
+
             AlertDialog(
                 onDismissRequest = { agendamentoSelecionado = null },
                 containerColor = Branco,
@@ -405,8 +379,7 @@ fun AgendaListagem(
                             color = VerdeClinica
                         )
 
-                        // Badge de Status
-                        val isConfirmado = agendamento.status.equals("Confirmado", ignoreCase = true)
+                        val isConfirmado = agendamento.status.equals("CONFIRMADO", ignoreCase = true)
                         Box(
                             modifier = Modifier
                                 .background(
@@ -426,13 +399,13 @@ fun AgendaListagem(
                 },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ItemDetalhe("Paciente", agendamento.paciente)
-                        ItemDetalhe("Psicólogo", agendamento.psicologo)
+                        ItemDetalhe("Paciente", pacienteNome)
+                        ItemDetalhe("Psicólogo", psicologoNome)
                         ItemDetalhe("Data e Horário", agendamento.dataHoraInicio)
-                        ItemDetalhe("Sala", agendamento.sala)
-                        ItemDetalhe("Tipo de Atendimento", agendamento.tipoAtendimento)
-                        ItemDetalhe("Convênio", agendamento.convenio)
-                        ItemDetalhe("Observações", agendamento.observacoes)
+                        ItemDetalhe("Sala", salaNome)
+                        ItemDetalhe("Tipo de Atendimento", tipoNome)
+                        ItemDetalhe("Convênio", convenioNome)
+                        ItemDetalhe("Observações", agendamento.observacoes ?: "")
                     }
                 },
                 confirmButton = {
@@ -440,17 +413,6 @@ fun AgendaListagem(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Botão de Confirmar Presença
-                        if (!agendamento.status.equals("Confirmado", ignoreCase = true)) {
-                            TextButton(onClick = {
-                                vm.alterarStatus(agendamento, "Confirmado")
-                                agendamentoSelecionado = null
-                            }) {
-                                Text("Confirmar Presença", color = VerdeSucesso, fontWeight = FontWeight.Bold)
-                            }
-                        }
-
-                        // Botão Editar
                         IconButton(onClick = {
                             val item = agendamento
                             agendamentoSelecionado = null
@@ -464,7 +426,6 @@ fun AgendaListagem(
                             )
                         }
 
-                        // Botão Excluir
                         IconButton(onClick = {
                             val item = agendamento
                             agendamentoSelecionado = null
@@ -495,24 +456,24 @@ fun AgendaListagem(
 
 @Composable
 private fun CardAgendamentoGrade(
-    dia: DiaSemanaAgenda,
     agendamento: Agenda?,
+    nomePaciente: String,
+    nomePsicologo: String,
+    nomeTipo: String,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
     val isOcupado = agendamento != null
 
-    val corStatus = when (agendamento?.status?.lowercase()) {
-        "confirmado", "realizado" -> FundoSucesso
-        "pendente" -> Color(0xFFFEF3C7)
-        "cancelado" -> Color(0xFFFEE2E2)
+    val corStatus = when (agendamento?.status?.uppercase()) {
+        "CONFIRMADO", "REALIZADO", "AGENDADO" -> FundoSucesso
+        "CANCELADO", "FALTOU" -> Color(0xFFFEE2E2)
         else -> LinhaDivisoria.copy(alpha = 0.4f)
     }
 
-    val corTextoStatus = when (agendamento?.status?.lowercase()) {
-        "confirmado", "realizado" -> VerdeSucesso
-        "pendente" -> TextoInativo
-        "cancelado" -> Color(0xFF991B1B)
+    val corTextoStatus = when (agendamento?.status?.uppercase()) {
+        "CONFIRMADO", "REALIZADO", "AGENDADO" -> VerdeSucesso
+        "CANCELADO", "FALTOU" -> Color(0xFF991B1B)
         else -> TextoSecundario
     }
 
@@ -538,7 +499,7 @@ private fun CardAgendamentoGrade(
         ) {
             if (agendamento != null) {
                 Text(
-                    text = agendamento.paciente,
+                    text = nomePaciente,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = corTextoStatus,
@@ -547,7 +508,7 @@ private fun CardAgendamentoGrade(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = agendamento.psicologo,
+                    text = nomePsicologo,
                     style = MaterialTheme.typography.bodySmall,
                     color = corTextoStatus.copy(alpha = 0.85f),
                     maxLines = 1,
@@ -555,14 +516,13 @@ private fun CardAgendamentoGrade(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "${agendamento.tipoAtendimento} • ${agendamento.status}",
+                    text = "$nomeTipo • ${agendamento.status}",
                     style = MaterialTheme.typography.labelSmall,
                     color = corTextoStatus.copy(alpha = 0.7f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             } else {
-                // Slot vago: completamente desabilitado, sem função de clique
                 Text(
                     text = "Livre",
                     style = MaterialTheme.typography.bodySmall,

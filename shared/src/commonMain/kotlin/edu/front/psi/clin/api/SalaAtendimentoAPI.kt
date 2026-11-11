@@ -8,9 +8,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class SalaAtendimentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/salas-atendimento" // Ajuste para o endpoint correto do seu backend
-    private val token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwc2ljbGluLmxvY2FsIiwiaWF0IjoxNzk0MjczODI3LCJleHAiOjE3OTQzNjAyMjd9.E6L-d143uQVWg5B41GVkwd93APXYMmQWyOGS3W9_ipE" // Use o seu token ativo
-
+    private val endPoint = "http://localhost:8080/salas-atendimento" 
+    private val token
+        get() = SessionManager.token
     suspend fun carregar(): List<SalaAtendimento> {
         val lista = httpClient.get(endPoint) {
             bearerAuth(token)
