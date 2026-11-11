@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 
 actual fun httpClientManager(): HttpClient {
     return HttpClient(CIO) {
+        expectSuccess = true
 
         install(ContentNegotiation) {
 

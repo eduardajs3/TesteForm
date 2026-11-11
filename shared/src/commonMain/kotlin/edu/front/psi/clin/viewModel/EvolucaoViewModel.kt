@@ -4,32 +4,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.EvolucaoClinicaAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.EvolucaoClinica
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class EvolucaoClinicaViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 1
-
-    private val _evolucoes = MutableStateFlow<List<EvolucaoClinica>>(
-        listOf(
-            EvolucaoClinica(
-                id = 1,
-                prontuario = "Maria Clara da Silva",
-                psicologo = "Dra. Ana Costa",
-                agenda = "Sessão 10/10/2023 - 14:00",
-                dataRegistro = "10/10/2023 15:00",
-                descricao = "Paciente apresentou melhora nos quadros de ansiedade social e relatou melhora na qualidade do sono.",
-                ativo = true
-            )
-        )
-    )
+    private val evolucaoApi = EvolucaoClinicaAPI(httpClientManager())
+    private val _evolucoes = MutableStateFlow<List<EvolucaoClinica>>(emptyList())
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        recarregar()
+    }
+
+    fun recarregar() {
+        viewModelScope.launch {
+            try {
+                _evolucoes.value = evolucaoApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar evoluções do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
@@ -62,56 +66,54 @@ class EvolucaoClinicaViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        try {
-            if (descricao.value.isBlank()) {
-                mensagem.value = "A descrição da evolução é obrigatória!"
-                mandarMensagem("A descrição da evolução é obrigatória!")
-                return
-            }
+        if (descricao.value.isBlank()) {
+            mensagem.value = "A descrição da evolução é obrigatória!"
+            mandarMensagem("A descrição da evolução é obrigatória!")
+            return
+        }
 
-            val ehNovo = id.value.isEmpty()
-            val novoId = if (ehNovo) ++idCounter else id.value.toInt()
+        viewModelScope.launch {
+            try {
+                val evolucaoItem = EvolucaoClinica(
+                    id = id.value.toIntOrNull() ?: 0,
+                    prontuario = prontuario.value.trim().ifEmpty { "Paciente não informado" },
+                    psicologo = psicologo.value.trim().ifEmpty { "Dra. Ana Costa" },
+                    agenda = agenda.value.trim(),
+                    dataRegistro = dataRegistro.value.trim().ifEmpty { "Hoje" },
+                    descricao = descricao.value.trim(),
+                    ativo = ativo.value.trim().lowercase() !in listOf("false", "0", "inativo", "não", "nao")
+                )
 
-            val statusBooleano = when (ativo.value.trim().lowercase()) {
-                "false", "0", "inativo", "não", "nao" -> false
-                else -> true
-            }
-
-            val evolucaoItem = EvolucaoClinica(
-                id = novoId,
-                prontuario = prontuario.value.trim().ifEmpty { "Paciente não informado" },
-                psicologo = psicologo.value.trim().ifEmpty { "Dra. Ana Costa" },
-                agenda = agenda.value.trim(),
-                dataRegistro = dataRegistro.value.trim().ifEmpty { "Hoje" },
-                descricao = descricao.value.trim(),
-                ativo = statusBooleano
-            )
-
-            if (ehNovo) {
-                _evolucoes.update { lista -> lista + evolucaoItem }
-            } else {
-                _evolucoes.update { lista ->
-                    lista.map { item -> if (item.id == novoId) evolucaoItem else item }
+                if (id.value.isEmpty()) {
+                    evolucaoApi.salvar(evolucaoItem)
+                } else {
+                    evolucaoApi.atualizar(id.value.toLong(), evolucaoItem)
                 }
+                _evolucoes.value = evolucaoApi.carregar()
+
+                _filtro.value = ""
+                mensagem.value = "Evolução clínica salva com sucesso!"
+                mandarMensagem("Evolução clínica salva com sucesso!")
+                limparCampos()
+                backStack.clear()
+                backStack.add(EvolucaoClinicaRotas.Listagem)
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
             }
-
-            _filtro.value = "" // Limpa busca para o novo item aparecer
-            mensagem.value = "Evolução clínica salva com sucesso!"
-            mandarMensagem("Evolução clínica salva com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(EvolucaoClinicaRotas.Listagem)
-
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(evolucao: EvolucaoClinica) {
-        _evolucoes.update { lista -> lista.filterNot { it.id == evolucao.id } }
-        mandarMensagem("Evolução clínica apagada com sucesso!")
+        viewModelScope.launch {
+            try {
+                evolucaoApi.apagar(evolucao)
+                _evolucoes.value = evolucaoApi.carregar()
+                mandarMensagem("Evolução clínica apagada com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar evolução: ${e.message}")
+            }
+        }
     }
 
     fun novaEvolucao(nomePaciente: String = "") {

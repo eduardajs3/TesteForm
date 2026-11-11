@@ -4,32 +4,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.FuncionarioAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.Funcionario
 import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class FuncionarioViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 2
-
-    private val _funcionarios = MutableStateFlow<List<Funcionario>>(
-        listOf(
-            Funcionario(
-                id = 1,
-                nome = "Carlos Eduardo",
-                cpf = "321.654.987-00",
-                email = "carlos@email.com",
-                telefone = "(11) 96666-5555",
-                senha = "123",
-                ativo = true,
-                dataCadastro = "15/01/2024"
-            )
-        )
-    )
+    private val funcionarioApi = FuncionarioAPI(httpClientManager())
+    private val _funcionarios = MutableStateFlow<List<Funcionario>>(emptyList())
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
@@ -69,6 +58,20 @@ class FuncionarioViewModel(
     
     val mensagem = mutableStateOf("")
 
+    init {
+        recarregar()
+    }
+
+    fun recarregar() {
+        viewModelScope.launch {
+            try {
+                _funcionarios.value = funcionarioApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar funcionários do servidor: ${e.message}")
+            }
+        }
+    }
+
     fun salvar() {
         val v1 = nome.validar()
         val v2 = cpf.validar()
@@ -84,43 +87,48 @@ class FuncionarioViewModel(
             return
         }
 
-        try {
-            val funcionario = Funcionario(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                nome = nome.valor.value,
-                cpf = cpf.valor.value,
-                email = email.valor.value,
-                telefone = telefone.valor.value,
-                senha = senha.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                dataCadastro = dataCadastro.valor.value
-            )
+        viewModelScope.launch {
+            try {
+                val funcionario = Funcionario(
+                    id = id.value.toIntOrNull() ?: 0,
+                    nome = nome.valor.value,
+                    cpf = cpf.valor.value,
+                    email = email.valor.value,
+                    telefone = telefone.valor.value,
+                    senha = senha.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    dataCadastro = dataCadastro.valor.value
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _funcionarios.update { lista -> lista + funcionario.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _funcionarios.update { lista ->
-                    lista.map { item -> if (item.id == idNumber) funcionario.copy(id = idNumber) else item }
+                if (id.value.isEmpty()) {
+                    funcionarioApi.salvar(funcionario)
+                } else {
+                    funcionarioApi.atualizar(id.value.toLong(), funcionario)
                 }
+                _funcionarios.value = funcionarioApi.carregar()
+
+                mensagem.value = "Funcionário salvo com sucesso!"
+                mandarMensagem("Funcionário salvo com sucesso!")
+                limparCampos()
+                backStack.clear()
+                backStack.add(FuncionarioRotas.Listagem)
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
             }
-            mensagem.value = "Funcionário salvo com sucesso!"
-            mandarMensagem("Funcionário salvo com sucesso!")
-            limparCampos()
-            backStack.clear()
-            backStack.add(
-                FuncionarioRotas.Listagem
-            )
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(funcionario: Funcionario) {
-        _funcionarios.update { lista -> lista - funcionario }
-        mandarMensagem("Funcionário apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                funcionarioApi.apagar(funcionario)
+                _funcionarios.value = funcionarioApi.carregar()
+                mandarMensagem("Funcionário apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar funcionário: ${e.message}")
+            }
+        }
     }
 
     fun novoFuncionario() {

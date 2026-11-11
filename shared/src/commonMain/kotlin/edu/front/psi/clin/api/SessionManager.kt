@@ -1,8 +1,12 @@
 package edu.front.psi.clin.api
 
 object SessionManager {
+    private var token: String? = null
 
-    const val token =
-        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwc2ljbGluLmxvY2FsIiwiaWF0IjoxNzk0MjcxMjE5LCJleHAiOjE3OTQzNTc2MTl9.4iCfRcgUsdG3cUxwWfrEOJJ6Nh7n_7pQEs3_KiE8KVQ"
+    fun configure(token: String?) {
+        this.token = token?.trim()?.takeIf(String::isNotEmpty)
+    }
 
+    fun requireToken(): String =
+        token ?: error("Token ausente. Defina a variavel de ambiente PSICLIN_API_TOKEN.")
 }

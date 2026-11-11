@@ -4,31 +4,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.ProntuarioAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class ProntuarioViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 1
-
-    private val _prontuarios = MutableStateFlow<List<Prontuario>>(
-        listOf(
-            Prontuario(
-                id = 1,
-                paciente = "Maria Clara da Silva",
-                dataAbertura = "10/10/2023",
-                queixaPrincipal = "Ansiedade social e insônia",
-                status = "Em Acompanhamento",
-                ativo = true
-            )
-        )
-    )
+    private val prontuarioApi = ProntuarioAPI(httpClientManager())
+    private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    init {
+        recarregar()
+    }
+
+    fun recarregar() {
+        viewModelScope.launch {
+            try {
+                _prontuarios.value = prontuarioApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar prontuários do servidor: ${e.message}")
+            }
+        }
+    }
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
@@ -59,55 +64,53 @@ class ProntuarioViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        try {
-            if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
-                mensagem.value = "Preencha os campos obrigatórios!"
-                mandarMensagem("Preencha os campos obrigatórios!")
-                return
-            }
+        if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
+            mensagem.value = "Preencha os campos obrigatórios!"
+            mandarMensagem("Preencha os campos obrigatórios!")
+            return
+        }
 
-            val ehNovo = id.value.isEmpty()
-            val novoId = if (ehNovo) ++idCounter else id.value.toInt()
-            
-            val statusBooleano = when (ativo.value.trim().lowercase()) {
-                "false", "0", "inativo", "não", "nao" -> false
-                else -> true
-            }
+        viewModelScope.launch {
+            try {
+                val prontuarioItem = Prontuario(
+                    id = id.value.toIntOrNull() ?: 0,
+                    paciente = paciente.value.trim(),
+                    dataAbertura = dataAbertura.value.trim(),
+                    queixaPrincipal = queixaPrincipal.value.trim(),
+                    status = status.value.trim().ifEmpty { "Em Acompanhamento" },
+                    ativo = ativo.value.trim().lowercase() !in listOf("false", "0", "inativo", "não", "nao")
+                )
 
-            val prontuarioItem = Prontuario(
-                id = novoId,
-                paciente = paciente.value.trim(),
-                dataAbertura = dataAbertura.value.trim(),
-                queixaPrincipal = queixaPrincipal.value.trim(),
-                status = status.value.trim().ifEmpty { "Em Acompanhamento" },
-                ativo = statusBooleano
-            )
-
-            if (ehNovo) {
-                _prontuarios.update { lista -> lista + prontuarioItem }
-            } else {
-                _prontuarios.update { lista ->
-                    lista.map { item -> if (item.id == novoId) prontuarioItem else item }
+                if (id.value.isEmpty()) {
+                    prontuarioApi.salvar(prontuarioItem)
+                } else {
+                    prontuarioApi.atualizar(id.value.toLong(), prontuarioItem)
                 }
+                _prontuarios.value = prontuarioApi.carregar()
+
+                _filtro.value = ""
+                mensagem.value = "Prontuário salvo com sucesso!"
+                mandarMensagem("Prontuário salvo com sucesso!")
+                limparCampos()
+                backStack.clear()
+                backStack.add(ProntuarioRotas.Listagem)
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
             }
-
-            _filtro.value = "" // Limpa o filtro de busca
-            mensagem.value = "Prontuário salvo com sucesso!"
-            mandarMensagem("Prontuário salvo com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(ProntuarioRotas.Listagem)
-
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(prontuario: Prontuario) {
-        _prontuarios.update { lista -> lista.filterNot { it.id == prontuario.id } }
-        mandarMensagem("Prontuário apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                prontuarioApi.apagar(prontuario)
+                _prontuarios.value = prontuarioApi.carregar()
+                mandarMensagem("Prontuário apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar prontuário: ${e.message}")
+            }
+        }
     }
 
     fun novoProntuario(nomePaciente: String = "") {

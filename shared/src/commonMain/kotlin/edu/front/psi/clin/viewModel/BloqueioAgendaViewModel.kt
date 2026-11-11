@@ -4,16 +4,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.BloqueioAgendaAPI
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.model.BloqueioAgenda
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class BloqueioAgendaViewModel(
     private val mandarMensagem: (String) -> Unit,
 ) : ViewModel() {
 
-    private var idCounter: Int = 0
+    private val bloqueioApi = BloqueioAgendaAPI(httpClientManager())
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(listOf())
     
     private val _filtro = MutableStateFlow("")
@@ -46,6 +49,20 @@ class BloqueioAgendaViewModel(
     
     val mensagem = mutableStateOf("")
 
+    init {
+        recarregar()
+    }
+
+    fun recarregar() {
+        viewModelScope.launch {
+            try {
+                _bloqueios.value = bloqueioApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao carregar bloqueios do servidor: ${e.message}")
+            }
+        }
+    }
+
     fun salvar() {
         // Valida todos os campos de uma vez utilizando a função da classe
         val v1 = psicologo.validar()
@@ -60,41 +77,46 @@ class BloqueioAgendaViewModel(
             return
         }
 
-        try {
-            val bloqueio = BloqueioAgenda(
-                id = if (id.value.isEmpty()) 0 else id.value.toInt(),
-                psicologo = psicologo.valor.value,
-                dataHoraInicio = dataHoraInicio.valor.value,
-                dataHoraFim = dataHoraFim.valor.value,
-                motivo = motivo.valor.value,
-                ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
-            )
+        viewModelScope.launch {
+            try {
+                val bloqueio = BloqueioAgenda(
+                    id = id.value.toIntOrNull() ?: 0,
+                    psicologo = psicologo.valor.value,
+                    dataHoraInicio = dataHoraInicio.valor.value,
+                    dataHoraFim = dataHoraFim.valor.value,
+                    motivo = motivo.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                )
 
-            if (id.value.isEmpty()) {
-                idCounter++
-                _bloqueios.update { lista -> lista + bloqueio.copy(id = idCounter) }
-            } else {
-                val idNumber = id.value.toInt()
-                _bloqueios.update { lista ->
-                    lista.map { b -> if (b.id == idNumber) bloqueio.copy(id = idNumber) else b }
+                if (id.value.isEmpty()) {
+                    bloqueioApi.salvar(bloqueio)
+                } else {
+                    bloqueioApi.atualizar(id.value.toLong(), bloqueio)
                 }
-            }
-            mensagem.value = "Bloqueio de agenda salvo com sucesso!"
-            mandarMensagem("Bloqueio de agenda salvo com sucesso!")
-            limparCampos()
-            
-            backStack.clear()
-            backStack.add(BloqueioAgendaRotas.Listagem)
+                _bloqueios.value = bloqueioApi.carregar()
 
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
+                mensagem.value = "Bloqueio de agenda salvo com sucesso!"
+                mandarMensagem("Bloqueio de agenda salvo com sucesso!")
+                limparCampos()
+                backStack.clear()
+                backStack.add(BloqueioAgendaRotas.Listagem)
+            } catch (e: Exception) {
+                mensagem.value = "Erro ao salvar: ${e.message}"
+                mandarMensagem("Erro ao salvar: ${e.message}")
+            }
         }
     }
 
     fun apagar(bloqueio: BloqueioAgenda) {
-        _bloqueios.update { lista -> lista - bloqueio }
-        mandarMensagem("Bloqueio apagado com sucesso!")
+        viewModelScope.launch {
+            try {
+                bloqueioApi.apagar(bloqueio)
+                _bloqueios.value = bloqueioApi.carregar()
+                mandarMensagem("Bloqueio apagado com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao apagar bloqueio: ${e.message}")
+            }
+        }
     }
 
     fun novoBloqueio() {
