@@ -8,19 +8,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.ui.theme.BordaErro
+import edu.front.psi.clin.ui.theme.FundoErro
 import edu.front.psi.clin.ui.theme.FundoSucesso
+import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeSuave
 import edu.front.psi.clin.ui.theme.VerdeSucesso
-import org.jetbrains.compose.resources.painterResource
-import frontpsiclinic.shared.generated.resources.Res
-import frontpsiclinic.shared.generated.resources.check_circle
+import edu.front.psi.clin.utils.MensagemFeedbackUtils
 
 @Composable
 fun NotificacaoFlutuante(
     mensagem: String?,
     modifier: Modifier = Modifier
 ) {
+    val ehErro = mensagem?.let(MensagemFeedbackUtils::ehErro) == true
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -34,25 +38,25 @@ fun NotificacaoFlutuante(
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = FundoSucesso,
+                color = if (ehErro) FundoErro else FundoSucesso,
                 shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, VerdeSuave)
+                border = BorderStroke(1.dp, if (ehErro) BordaErro else VerdeSuave)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.check_circle),
-                        contentDescription = null,
-                        tint = VerdeSucesso,
+                    Text(
+                        text = if (ehErro) "!" else "✓",
+                        fontWeight = FontWeight.Bold,
+                        color = if (ehErro) TextoErro else VerdeSucesso,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = mensagem ?: "",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = VerdeSucesso
+                        color = if (ehErro) TextoErro else VerdeSucesso
                     )
                 }
             }

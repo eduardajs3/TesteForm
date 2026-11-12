@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
@@ -19,33 +20,17 @@ fun HorarioDisponivelFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    // Mapeamento correto dos IDs dos psicólogos cadastrados no backend (ex: ID 2, 3, 4)
-    val psicologosMap = mapOf(
-        "Dra. Ana Silva" to 2L,
-        "Dr. Carlos Souza" to 3L,
-        "Dra. Mariana Oliveira" to 4L
-    )
-    val psicologoOpcoes = psicologosMap.keys.toList()
+    val psicologosLista = vm.psicologos.collectAsState().value
+    val psicologoOpcoes = psicologosLista.map { it.nome }
 
-    // Mapeamento correto para os Enums esperados pelo backend Spring Boot
-    val diasDaSemanaMap = mapOf(
-        "Segunda-feira" to "SEGUNDA",
-        "Terça-feira" to "TERCA",
-        "Quarta-feira" to "QUARTA",
-        "Quinta-feira" to "QUINTA",
-        "Sexta-feira" to "SEXTA",
-        "Sábado" to "SABADO",
-        "Domingo" to "DOMINGO"
-    )
-    val diasOpcoes = diasDaSemanaMap.keys.toList()
+    val diasOpcoes = listOf("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
-    // Descobre o nome do psicólogo com base no ID armazenado no ViewModel
-    val psicologoAtualNome = psicologosMap.entries.firstOrNull { it.value.toString() == vm.psicologo.valor.value }?.key ?: psicologoOpcoes.first()
+    val psicologoAtualObj = psicologosLista.firstOrNull { it.id?.toString() == vm.psicologo.valor.value }
+    val psicologoAtualNome = psicologoAtualObj?.nome ?: (psicologoOpcoes.firstOrNull() ?: "")
     
-    // Descobre o rótulo amigável do dia da semana com base no Enum do ViewModel
-    val diaAtualRotulo = diasDaSemanaMap.entries.firstOrNull { it.value == vm.diaSemana.valor.value }?.key ?: diasOpcoes.first()
+    val diaAtualRotulo = vm.diaSemana.valor.value.ifBlank { diasOpcoes.first() }
 
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -59,27 +44,24 @@ fun HorarioDisponivelFormulario(
             }
         ) {
             CampoDropdownPadrao(
-                label = "Nome do psicólogo",
+                label = "Nome do psicólogo *",
                 valorSelecionado = psicologoAtualNome,
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nomeSelecionado ->
-                    // Salva o ID correspondente no campo do ViewModel
-                    val idPsicologo = psicologosMap[nomeSelecionado] ?: 2L
-                    vm.psicologo.definir(idPsicologo.toString())
+                    val psicologoEscolhido = psicologosLista.firstOrNull { it.nome == nomeSelecionado }
+                    if (psicologoEscolhido?.id != null) {
+                        vm.psicologo.definir(psicologoEscolhido.id.toString())
+                    }
                 },
                 isError = vm.psicologo.temErro.value,
                 errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
-                label = "Dia da semana",
+                label = "Dia da semana *",
                 valorSelecionado = diaAtualRotulo,
                 opcoes = diasOpcoes,
-                onOpcaoSelecionada = { rotuloSelecionado ->
-                    // Salva o Enum correspondente (ex: "SEGUNDA") no ViewModel
-                    val enumValor = diasDaSemanaMap[rotuloSelecionado] ?: "SEGUNDA"
-                    vm.diaSemana.definir(enumValor)
-                },
+                onOpcaoSelecionada = { vm.diaSemana.definir(it) },
                 isError = vm.diaSemana.temErro.value,
                 errorMessage = if (vm.diaSemana.temErro.value) "Campo obrigatório" else null
             )

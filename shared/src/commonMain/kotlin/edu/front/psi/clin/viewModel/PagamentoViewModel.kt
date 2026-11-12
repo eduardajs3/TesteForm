@@ -26,7 +26,7 @@ class PagamentoViewModel(
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
-    // Listas auxiliares para preencher os dropdowns
+
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
 
@@ -58,9 +58,9 @@ class PagamentoViewModel(
         if (filtro.isEmpty()) {
             pagamentos
         } else {
-            pagamentos.filter { 
-                it.formaPagamento.contains(filtro, ignoreCase = true) || 
-                it.status.contains(filtro, ignoreCase = true) 
+            pagamentos.filter {
+                it.formaPagamento.contains(filtro, ignoreCase = true) ||
+                it.status.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -77,7 +77,7 @@ class PagamentoViewModel(
     val valorPaciente = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
     val formaPagamento = CampoValidado()
     val dataPagamento = CampoValidado()
-    val status = CampoValidado("PENDENTE") 
+    val status = CampoValidado("PENDENTE")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -129,8 +129,13 @@ class PagamentoViewModel(
                         pagamentoApi.atualizar(id.value.toLong(), pagamento)
                     }
                     _pagamentos.value = pagamentoApi.carregar()
-                    mensagem.value = "Pagamento salvo com sucesso!"
-                    mandarMensagem("Pagamento salvo com sucesso!")
+                    val mensagemSucesso = if (id.value.isEmpty()) {
+                        "Pagamento salvo com sucesso!"
+                    } else {
+                        "Pagamento atualizado com sucesso!"
+                    }
+                    mensagem.value = mensagemSucesso
+                    mandarMensagem(mensagemSucesso)
                     limparCampos()
 
                     backStack.clear()
@@ -186,12 +191,12 @@ class PagamentoViewModel(
         agendaId.value = pagamento.agendaId
         pacienteId.value = pagamento.pacienteId
         convenioId.value = pagamento.convenioId
-        
+
         valorTotal.definir(pagamento.valorTotal.toString())
         valorConvenio.definir(pagamento.valorConvenio.toString())
         valorPaciente.definir(pagamento.valorPaciente.toString())
         formaPagamento.definir(pagamento.formaPagamento)
-        
+
         try {
             val partes = pagamento.dataPagamento.split("T")[0].split("-")
             if (partes.size == 3) {

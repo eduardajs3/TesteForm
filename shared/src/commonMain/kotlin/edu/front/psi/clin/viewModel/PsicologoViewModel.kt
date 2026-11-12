@@ -21,7 +21,7 @@ class PsicologoViewModel(
     private val psicologoApi = PsicologoAPI(httpClient)
 
     private val _psicologos = MutableStateFlow<List<Psicologo>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
@@ -74,7 +74,7 @@ class PsicologoViewModel(
         val v2 = cpf.validar()
         val v3 = email.validar()
         val v4 = telefone.validar()
-        val v5 = senha.validar()
+        val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = crp.validar()
         val v7 = especialidade.validar()
         val v8 = ativo.validar()
@@ -93,10 +93,13 @@ class PsicologoViewModel(
                     cpf = cpf.valor.value,
                     email = email.valor.value,
                     telefone = telefone.valor.value,
-                    senha = senha.valor.value,
+                    senha = senha.valor.value.takeIf { it.isNotEmpty() },
                     crp = crp.valor.value,
                     especialidade = especialidade.valor.value,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    dataCadastro = _psicologos.value
+                        .firstOrNull { it.id == id.value.toLongOrNull() }
+                        ?.dataCadastro
                 )
 
                 if (id.value.isEmpty()) {
@@ -106,14 +109,19 @@ class PsicologoViewModel(
                     psicologoApi.atualizar(idNumber, psicologo)
                 }
 
-                // Recarrega a lista direto da API
+
                 _psicologos.value = psicologoApi.carregar()
                 println("Psicólogos após salvar: ${_psicologos.value}")
 
-                mensagem.value = "Psicólogo salvo com sucesso!"
-                mandarMensagem("Psicólogo salvo com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Psicólogo salvo com sucesso!"
+                } else {
+                    "Psicólogo atualizado com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
-                
+
                 backStack.clear()
                 backStack.add(PsicologoRotas.Listagem)
 

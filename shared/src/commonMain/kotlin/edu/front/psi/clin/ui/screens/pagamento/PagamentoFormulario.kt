@@ -27,7 +27,7 @@ fun PagamentoFormulario(
     val formaPagamentoOpcoes = listOf("PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO")
     val statusOpcoes = listOf("PENDENTE", "PAGO", "CANCELADO")
 
-    // Nomes selecionados para exibição nos dropdowns com base nos IDs do ViewModel
+
     val pacienteAtualNome = pacientesLista.firstOrNull { it.id?.toLong() == vm.pacienteId.value }?.nome ?: ""
     val convenioAtualNome = conveniosLista.firstOrNull { it.id?.toLong() == vm.convenioId.value }?.nome ?: ""
     val agendaAtualDescricao = agendasLista.firstOrNull { it.id?.toLong() == vm.agendaId.value }?.let { "Agenda #${it.id} - ${it.dataHoraInicio}" } ?: ""
@@ -42,7 +42,7 @@ fun PagamentoFormulario(
                 vm.backStack.add(PagamentoRotas.Listagem)
             }
         ) {
-            // Dropdown de Agenda
+
             CampoDropdownPadrao(
                 label = "Agenda / Consulta *",
                 valorSelecionado = agendaAtualDescricao,
@@ -56,7 +56,7 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.agendaId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Dropdown de Paciente
+
             CampoDropdownPadrao(
                 label = "Paciente *",
                 valorSelecionado = pacienteAtualNome,
@@ -69,7 +69,7 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Dropdown de Convênio
+
             CampoDropdownPadrao(
                 label = "Convênio *",
                 valorSelecionado = convenioAtualNome,
@@ -82,7 +82,7 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.convenioId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Valores
+
             CampoTextoPadrao(
                 value = vm.valorTotal.valor.value,
                 onValueChange = { vm.valorTotal.definir(it) },
@@ -119,7 +119,7 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.formaPagamento.temErro.value) "Campo obrigatório" else null
             )
 
-            // Data do Pagamento
+
             CampoDataPadrao(
                 value = vm.dataPagamento.valor.value,
                 onValueChange = { vm.dataPagamento.definir(it) },
@@ -129,7 +129,7 @@ fun PagamentoFormulario(
                 errorMessage = if (vm.dataPagamento.temErro.value) "Campo obrigatório" else null
             )
 
-            // Status do Pagamento
+
             CampoDropdownPadrao(
                 label = "Status do pagamento",
                 valorSelecionado = vm.status.valor.value,

@@ -1,4 +1,4 @@
-// shared/src/commonMain/kotlin/edu/front/psi/clin/api/AgendaAPI.kt
+
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.Agenda

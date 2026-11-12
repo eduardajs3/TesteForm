@@ -23,7 +23,7 @@ fun RecepcionistaListagem(
     val lista = vm.recepcionistasFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
     val recepcionistaSelecionada = remember { mutableStateOf<Recepcionista?>(null) }
-    
+
     val recepcionistaParaExcluir = remember { mutableStateOf<Recepcionista?>(null) }
 
     val colunas = listOf(
@@ -67,7 +67,7 @@ fun RecepcionistaListagem(
                 text = recepcionista.setor,
                 weight = 1.1f
             )
-            
+
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -87,7 +87,7 @@ fun RecepcionistaListagem(
                     ItemDetalhe("Setor", recepcionista.setor)
                     ItemDetalhe("Telefone", recepcionista.telefone)
                     ItemDetalhe("E-mail", recepcionista.email)
-                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro ?: "") // Tratamento para String?
+                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro ?: "")
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

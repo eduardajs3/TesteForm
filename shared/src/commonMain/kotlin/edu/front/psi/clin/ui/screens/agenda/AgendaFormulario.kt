@@ -28,7 +28,7 @@ fun AgendaFormulario(
 
     val listaStatusAgenda = listOf("AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU")
 
-    // Nomes selecionados para exibição comparando explicitamente Long com Long?
+
     val pacienteAtualNome = pacientesLista.firstOrNull { it.id?.toLong() == vm.pacienteId.value }?.nome ?: ""
     val psicologoAtualNome = psicologosLista.firstOrNull { it.id?.toLong() == vm.psicologoId.value }?.nome ?: ""
     val salaAtualNome = salasLista.firstOrNull { it.id?.toLong() == vm.salaId.value }?.nome ?: ""
@@ -44,7 +44,7 @@ fun AgendaFormulario(
                 vm.backStack.add(AgendaRotas.Listagem)
             }
         ) {
-            // Dropdown de Paciente
+
             CampoDropdownPadrao(
                 label = "Paciente *",
                 opcoes = pacientesLista.map { it.nome },
@@ -57,7 +57,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Dropdown de Psicólogo
+
             CampoDropdownPadrao(
                 label = "Psicólogo *",
                 opcoes = psicologosLista.map { it.nome },
@@ -70,7 +70,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.psicologoId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Dropdown de Tipo de Atendimento
+
             CampoDropdownPadrao(
                 label = "Tipo de Atendimento *",
                 opcoes = tiposAtendimentoLista.map { it.nome },
@@ -83,7 +83,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.tipoAtendimentoId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
             )
 
-            // Dropdown de Convênio
+
             CampoDropdownPadrao(
                 label = "Convênio",
                 opcoes = conveniosLista.map { it.nome },
@@ -94,7 +94,7 @@ fun AgendaFormulario(
                 }
             )
 
-            // 1. Campo de Data
+
             CampoDataPadrao(
                 value = vm.dataAtendimento.valor.value,
                 onValueChange = { vm.dataAtendimento.definir(it) },
@@ -104,7 +104,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.dataAtendimento.temErro.value) "Campo obrigatório" else null
             )
 
-            // 2. Campo de Hora de Início
+
             CampoTextoPadrao(
                 value = vm.horaInicio.valor.value,
                 onValueChange = { vm.horaInicio.definir(it) },
@@ -115,7 +115,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.horaInicio.temErro.value) "Campo obrigatório" else null
             )
 
-            // 3. Campo de Hora de Fim
+
             CampoTextoPadrao(
                 value = vm.horaFim.valor.value,
                 onValueChange = { vm.horaFim.definir(it) },
@@ -126,7 +126,7 @@ fun AgendaFormulario(
                 errorMessage = if (vm.horaFim.temErro.value) "Campo obrigatório" else null
             )
 
-            // Dropdown de Salas de Atendimento
+
             CampoDropdownPadrao(
                 label = "Sala de Atendimento",
                 opcoes = salasLista.map { it.nome },
@@ -137,7 +137,7 @@ fun AgendaFormulario(
                 }
             )
 
-            // Dropdown de Status da Agenda
+
             CampoDropdownPadrao(
                 label = "Status da Agenda",
                 opcoes = listaStatusAgenda,
@@ -145,7 +145,7 @@ fun AgendaFormulario(
                 onOpcaoSelecionada = { vm.status.definir(it) }
             )
 
-            // Observações
+
             CampoTextoPadrao(
                 value = vm.observacoes.valor.value,
                 onValueChange = { vm.observacoes.definir(it) },

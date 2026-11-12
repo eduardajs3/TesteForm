@@ -22,6 +22,7 @@ fun HorarioDisponivelListagem(
 ) {
     val lista = vm.horariosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
+    val psicologos = vm.psicologos.collectAsState().value
 
     val horarioSelecionado = remember { mutableStateOf<HorarioDisponivel?>(null) }
     val horarioParaExcluir = remember { mutableStateOf<HorarioDisponivel?>(null) }
@@ -49,9 +50,12 @@ fun HorarioDisponivelListagem(
             placeholderPesquisa = "Buscar por psicólogo, dia ou horário..."
         ) { horario ->
             val isAtivo = horario.ativo
+            val nomePsicologo = horario.psicologo
+                ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                ?: "Psicólogo #${horario.psicologoId}"
 
             CelulaTabelaTexto(
-                text = horario.psicologo ?: "", // Tratado com string vazia segura
+                text = nomePsicologo,
                 weight = 1.4f,
                 isBold = true
             )
@@ -64,10 +68,10 @@ fun HorarioDisponivelListagem(
                 weight = 1.2f
             )
             CelulaTabelaTexto(
-                text = horario.descricao ?: "", // Tratado com string vazia segura
+                text = horario.descricao ?: "",
                 weight = 1.3f
             )
-            
+
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -78,11 +82,14 @@ fun HorarioDisponivelListagem(
 
         horarioSelecionado.value?.let { horario ->
             val isAtivo = horario.ativo
+            val nomePsicologo = horario.psicologo
+                ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                ?: "Psicólogo #${horario.psicologoId}"
             ModalDetalhesBase(
                 titulo = "Detalhes do Horário",
                 onDismiss = { horarioSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = horario.psicologo ?: "")
+                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = nomePsicologo)
                     ItemDetalhe(rotulo = "Dia da semana", valor = horario.diaSemana)
                     ItemDetalhe(rotulo = "Horário de início", valor = horario.horaInicio)
                     ItemDetalhe(rotulo = "Horário de fim", valor = horario.horaFim)

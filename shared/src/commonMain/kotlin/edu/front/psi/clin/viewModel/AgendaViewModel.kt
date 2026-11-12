@@ -30,7 +30,7 @@ class AgendaViewModel(
 
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     val psicologos = _psicologos.asStateFlow()
-    
+
     private val _salas = MutableStateFlow<List<SalaAtendimento>>(emptyList())
     val salas = _salas.asStateFlow()
 
@@ -86,10 +86,10 @@ class AgendaViewModel(
     val tipoAtendimentoId = mutableStateOf<Long?>(null)
     val convenioId = mutableStateOf<Long?>(null)
 
-    val dataAtendimento = CampoValidado() 
+    val dataAtendimento = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    
+
     val status = CampoValidado("CONFIRMADO")
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
@@ -112,7 +112,7 @@ class AgendaViewModel(
             return
         }
 
-        // RN02: Validação de Data/Hora Final Posterior à Inicial
+
         if (horaFim.valor.value <= horaInicio.valor.value) {
             mensagem.value = "O horário de término deve ser obrigatoriamente posterior ao início."
             mandarMensagem("O horário de término deve ser obrigatoriamente posterior ao início.")
@@ -153,8 +153,13 @@ class AgendaViewModel(
                 }
 
                 _agendamentos.value = agendaApi.carregar()
-                mensagem.value = "Agendamento salvo com sucesso!"
-                mandarMensagem("Agendamento salvo com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Agendamento salvo com sucesso!"
+                } else {
+                    "Agendamento atualizado com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
 
                 backStack.clear()
@@ -246,7 +251,7 @@ class AgendaViewModel(
         salaId.value = agenda.salaId
         tipoAtendimentoId.value = agenda.tipoAtendimentoId
         convenioId.value = agenda.convenioId
-        
+
         try {
             val partesDataHora = agenda.dataHoraInicio.split("T")
             if (partesDataHora.size == 2) {
@@ -261,7 +266,7 @@ class AgendaViewModel(
                 horaFim.definir(partesFim[1].take(5))
             }
         } catch (e: Exception) {
-            // fallback silencioso
+
         }
 
         status.definir(agenda.status)

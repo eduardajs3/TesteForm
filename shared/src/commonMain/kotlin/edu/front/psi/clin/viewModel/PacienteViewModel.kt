@@ -21,7 +21,7 @@ class PacienteViewModel(
     private val pacienteApi = PacienteAPI(httpClient)
 
     private val _pacientes = MutableStateFlow<List<Paciente>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
@@ -51,21 +51,21 @@ class PacienteViewModel(
     val backStack = NavBackStack<PacienteRotas>(
         PacienteRotas.Listagem
     )
-     
-    // Campos do formulário
+
+
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
     val dataNascimento = CampoValidado()
-    
+
     val email = CampoValidado(
         validadorExtra = { MaskUtils.validarEmail(it) },
         mensagemErroPersonalizada = "E-mail inválido"
     )
-    
+
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val endereco = CampoValidado()
-    val observacoes = CampoValidado() // Opcional
+    val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
 
@@ -111,13 +111,18 @@ class PacienteViewModel(
                     pacienteApi.atualizar(idNumber, paciente)
                 }
 
-                // Recarrega a lista direto da API do backend
+
                 _pacientes.value = pacienteApi.carregar()
-                
-                mensagem.value = "Paciente salvo com sucesso!"
-                mandarMensagem("Paciente salvo com sucesso!")
+
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Paciente salvo com sucesso!"
+                } else {
+                    "Paciente atualizado com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
-                
+
                 backStack.clear()
                 backStack.add(PacienteRotas.Listagem)
 

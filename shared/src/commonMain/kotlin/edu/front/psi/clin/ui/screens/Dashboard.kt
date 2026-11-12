@@ -36,7 +36,7 @@ fun DashboardTela(
     onNavegar: (Route) -> Unit = {},
     onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) }
 ) {
-    // // Recebe os dados da ViewModel e atualiza a tela quando eles mudam
+
     val metricas by vm.metricas.collectAsState()
     val consultas by vm.consultasFiltradas.collectAsState()
     val filtroStatus by vm.filtroStatus.collectAsState()
@@ -50,7 +50,7 @@ fun DashboardTela(
             .verticalScroll(scrollState)
             .padding(24.dp)
     ) {
-        // --- 1. CABEÇALHO DO PAINEL GERAL ---
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -71,7 +71,7 @@ fun DashboardTela(
                 )
             }
 
-            // Tag de data / status
+
             Surface(
                 shape = RoundedCornerShape(50.dp),
                 color = VerdeClinica.copy(alpha = 0.08f),
@@ -100,7 +100,7 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- 2. GRID DE CARDS DE MÉTRICAS ---
+
         val linhasMetricas = metricas.chunked(2)
         linhasMetricas.forEachIndexed { index, linha ->
             Row(
@@ -121,7 +121,7 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- 3. AÇÕES RÁPIDAS  ---
+
         Text(
             text = "Ações Rápidas",
             style = MaterialTheme.typography.titleMedium,
@@ -165,7 +165,7 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- 4. SEÇÃO: CONSULTAS DE HOJE ---
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -185,7 +185,7 @@ fun DashboardTela(
                 )
             }
 
-            // Filtros rápidos por status
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -264,7 +264,7 @@ fun DashboardTela(
     }
 }
 
-// --- SUBCOMPONENTES REUTILIZÁVEIS DO DASHBOARD ---
+
 
 @Composable
 private fun CardMetrica(
@@ -411,7 +411,7 @@ private fun CardConsultaHoje(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                // Horário em destaque
+
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = CremeCampo,
@@ -426,7 +426,7 @@ private fun CardConsultaHoje(
                     )
                 }
 
-                // Detalhes do paciente e consulta
+
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

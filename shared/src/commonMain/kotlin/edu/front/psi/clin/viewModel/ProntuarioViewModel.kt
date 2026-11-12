@@ -49,7 +49,7 @@ class ProntuarioViewModel(
         ProntuarioRotas.Listagem
     )
 
-    // Campos do formulário
+
     val id = mutableStateOf("")
     val paciente = mutableStateOf("")
     val dataAbertura = mutableStateOf("")
@@ -68,7 +68,7 @@ class ProntuarioViewModel(
 
             val ehNovo = id.value.isEmpty()
             val novoId = if (ehNovo) ++idCounter else id.value.toInt()
-            
+
             val statusBooleano = when (ativo.value.trim().lowercase()) {
                 "false", "0", "inativo", "não", "nao" -> false
                 else -> true
@@ -91,11 +91,16 @@ class ProntuarioViewModel(
                 }
             }
 
-            _filtro.value = "" // Limpa o filtro de busca
-            mensagem.value = "Prontuário salvo com sucesso!"
-            mandarMensagem("Prontuário salvo com sucesso!")
+            _filtro.value = ""
+            val mensagemSucesso = if (ehNovo) {
+                "Prontuário salvo com sucesso!"
+            } else {
+                "Prontuário atualizado com sucesso!"
+            }
+            mensagem.value = mensagemSucesso
+            mandarMensagem(mensagemSucesso)
             limparCampos()
-            
+
             backStack.clear()
             backStack.add(ProntuarioRotas.Listagem)
 

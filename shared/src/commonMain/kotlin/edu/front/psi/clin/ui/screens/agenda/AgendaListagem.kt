@@ -27,11 +27,11 @@ import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 
 data class DiaSemanaAgenda(
     val nomeDia: String,
-    val dataFormatada: String, // Formato "dd/MM"
-    val dataIso: String        // Formato "yyyy-MM-dd"
+    val dataFormatada: String,
+    val dataIso: String
 )
 
-// Estrutura pura em Kotlin para manipulação de calendário (100% KMP compatível)
+
 private fun diasNoMes(mes: Int, ano: Int): Int = when (mes) {
     1, 3, 5, 7, 8, 10, 12 -> 31
     4, 6, 9, 11 -> 30
@@ -48,7 +48,7 @@ private fun diaDaSemanaSakamoto(ano: Int, mes: Int, dia: Int): Int {
 
 private data class DataSimples(val dia: Int, val mes: Int, val ano: Int) {
     fun formatarDiaMes(): String = "${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}"
-    
+
     fun formatarIso(): String = "$ano-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}"
 
     fun adicionarDias(qtd: Int): DataSimples {
@@ -104,7 +104,7 @@ fun AgendaListagem(
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
 
-    // Inicia na semana correspondente a novembro de 2026 (onde estão os testes: 16/11/2026)
+
     var segundaAtual by remember { mutableStateOf(DataSimples(16, 11, 2026)) }
     var menuMesesAberto by remember { mutableStateOf(false) }
 
@@ -149,7 +149,7 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Barra de Navegação de Semanas
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -253,7 +253,7 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Cabeçalho com os Dias da Semana
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -299,7 +299,7 @@ fun AgendaListagem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Grade de Horários e Consultas com conversão correta de data/hora da API
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -327,8 +327,8 @@ fun AgendaListagem(
                                 val agendamentoNoHorario = agendamentos.firstOrNull { item ->
                                     val partesDataHora = item.dataHoraInicio.split("T")
                                     if (partesDataHora.size != 2) return@firstOrNull false
-                                    val dataIsoItem = partesDataHora[0] // ex: "2026-11-18"
-                                    val horaItem = partesDataHora[1].take(5) // ex: "11:00"
+                                    val dataIsoItem = partesDataHora[0]
+                                    val horaItem = partesDataHora[1].take(5)
 
                                     dataIsoItem == dia.dataIso && horaItem == hora
                                 }
@@ -354,7 +354,7 @@ fun AgendaListagem(
             }
         }
 
-        // Modal de Detalhes da Consulta Marcada
+
         agendamentoSelecionado?.let { agendamento ->
             val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == agendamento.pacienteId }?.nome ?: "-"
             val psicologoNome = psicologosLista.firstOrNull { it.id?.toLong() == agendamento.psicologoId }?.nome ?: "-"

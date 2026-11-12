@@ -33,7 +33,7 @@ import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaFormulario
 import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoFormulario
 import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoFormulario
 
-// Imports das telas de Autenticação, Listagem e Dashboard
+
 import com.psiclin.front.ui.screens.auth.LoginScreen
 import com.psiclin.front.ui.screens.auth.RecuperarSenhaScreen
 import com.psiclin.front.ui.screens.auth.RegistroScreen
@@ -52,7 +52,7 @@ import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaListagem
 import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoListagem
 import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoListagem
 
-// Imports das ViewModels
+
 import edu.front.psi.clin.ui.viewmodel.*
 import edu.front.psi.clin.navigation.ConvenioRotas
 import edu.front.psi.clin.navigation.FuncionarioRotas
@@ -80,24 +80,24 @@ fun App() {
     var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
     val pacienteVm: PacienteViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                PacienteViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                PacienteViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val pagamentoVm: PagamentoViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                PagamentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                PagamentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val convenioVm: ConvenioViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                ConvenioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                ConvenioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val funcionarioVm: FuncionarioViewModel = viewModel(
@@ -110,66 +110,66 @@ fun App() {
         }
     )
     val horarioVm: HorarioDisponivelViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                HorarioDisponivelViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                HorarioDisponivelViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val salaVm: SalaAtendimentoViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                SalaAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                SalaAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val tipoVm: TipoAtendimentoViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                TipoAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                TipoAtendimentoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val bloqueioVm: BloqueioAgendaViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                BloqueioAgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                BloqueioAgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val evolucaoVm: EvolucaoClinicaViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                EvolucaoClinicaViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                EvolucaoClinicaViewModel(mandarMensagem = { msg-> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val prontuarioVm: ProntuarioViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                ProntuarioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                ProntuarioViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val recepcionistaVm: RecepcionistaViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                RecepcionistaViewModel(mandarMensagem = { msg  -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                RecepcionistaViewModel(mandarMensagem = { msg  -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val psicologoVm: PsicologoViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                PsicologoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                PsicologoViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val agendaVm: AgendaViewModel = viewModel(
-        factory = viewModelFactory { 
-            initializer { 
-                AgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }) 
-            } 
+        factory = viewModelFactory {
+            initializer {
+                AgendaViewModel(mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) })
+            }
         }
     )
     val dashboardVm: DashboardViewModel = viewModel(
@@ -235,7 +235,7 @@ fun App() {
                     }
                 }
             ) {
-                // Tratamento das telas de autenticação que não possuem Scaffold com menu lateral
+
                 when (rotaAtual) {
                     Route.Login -> {
                         LoginScreen(
@@ -392,7 +392,7 @@ fun App() {
                                     }
                                     entry<Route.Convenio> {
                                         val subRota = convenioVm.backStack.lastOrNull() ?: ConvenioRotas.Listagem
-                                        if (subRota is ConvenioRotas.Formulario) { 
+                                        if (subRota is ConvenioRotas.Formulario) {
                                             ConvenioFormulario(contentPadding, convenioVm)
                                         } else {
                                             ConvenioListagem(contentPadding, convenioVm)

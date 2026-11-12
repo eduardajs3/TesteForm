@@ -31,7 +31,7 @@ fun PagamentoListagem(
     val colunas = listOf(
         "Paciente" to 1.5f,
         "Valor Total" to 1.1f,
-        "Data" to 1.1f,
+        "Forma Pagto" to 1.1f,
         "Status" to 0.9f
     )
 
@@ -64,13 +64,14 @@ fun PagamentoListagem(
                 weight = 1.1f
             )
             CelulaTabelaTexto(
-                text = pagamento.dataPagamento,
+                text = pagamento.formaPagamento,
                 weight = 1.1f
-            )
+            )   
+            
 
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
-                    texto = if (isPago) "Pago" else pagamento.status,
+                    texto = if (isPago) "PAGO" else pagamento.status,
                     isAtivo = isPago
                 )
             }

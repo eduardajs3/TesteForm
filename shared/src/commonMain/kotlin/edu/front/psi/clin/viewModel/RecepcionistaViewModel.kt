@@ -21,7 +21,7 @@ class RecepcionistaViewModel(
     private val recepcionistaApi = RecepcionistaAPI(httpClient)
 
     private val _recepcionistas = MutableStateFlow<List<Recepcionista>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
@@ -71,12 +71,12 @@ class RecepcionistaViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Validação de todos os campos obrigatórios
+
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()
         val v4 = telefone.validar()
-        val v5 = senha.validar()
+        val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
         val v7 = setor.validar()
 
@@ -89,16 +89,16 @@ class RecepcionistaViewModel(
         viewModelScope.launch {
             try {
                 val recepcionista = Recepcionista(
-                    id = null, 
+                    id = null,
                     nome = nome.valor.value,
                     cpf = cpf.valor.value,
                     email = email.valor.value,
                     telefone = telefone.valor.value,
-                    senha = senha.valor.value,
+                    senha = senha.valor.value.takeIf { it.isNotEmpty() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = null, 
+                    dataCadastro = null,
                     setor = setor.valor.value,
-                    role = "RECEPCIONISTA" 
+                    role = "RECEPCIONISTA"
                 )
 
                 if (id.value.isEmpty()) {
@@ -108,14 +108,19 @@ class RecepcionistaViewModel(
                     recepcionistaApi.atualizar(idNumber, recepcionista)
                 }
 
-                // Recarrega a lista direto da API
+
                 _recepcionistas.value = recepcionistaApi.carregar()
                 println("Recepcionistas após salvar: ${_recepcionistas.value}")
 
-                mensagem.value = "Recepcionista salva com sucesso!"
-                mandarMensagem("Recepcionista salva com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Recepcionista salva com sucesso!"
+                } else {
+                    "Recepcionista atualizada com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
-                
+
                 backStack.clear()
                 backStack.add(RecepcionistaRotas.Listagem)
 
@@ -155,7 +160,7 @@ class RecepcionistaViewModel(
         cpf.definir(recepcionista.cpf)
         email.definir(recepcionista.email)
         telefone.definir(recepcionista.telefone)
-        senha.definir(recepcionista.senha ?: "") 
+        senha.definir(recepcionista.senha ?: "")
         ativo.definir(recepcionista.ativo.toString())
         dataCadastro.definir(recepcionista.dataCadastro ?: "")
         setor.definir(recepcionista.setor)

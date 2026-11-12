@@ -51,7 +51,7 @@ class EvolucaoClinicaViewModel(
         EvolucaoClinicaRotas.Listagem
     )
 
-    // Campos do formulário
+
     val id = mutableStateOf("")
     val prontuario = mutableStateOf("")
     val psicologo = mutableStateOf("")
@@ -95,11 +95,16 @@ class EvolucaoClinicaViewModel(
                 }
             }
 
-            _filtro.value = "" // Limpa busca para o novo item aparecer
-            mensagem.value = "Evolução clínica salva com sucesso!"
-            mandarMensagem("Evolução clínica salva com sucesso!")
+            _filtro.value = ""
+            val mensagemSucesso = if (ehNovo) {
+                "Evolução clínica salva com sucesso!"
+            } else {
+                "Evolução clínica atualizada com sucesso!"
+            }
+            mensagem.value = mensagemSucesso
+            mandarMensagem(mensagemSucesso)
             limparCampos()
-            
+
             backStack.clear()
             backStack.add(EvolucaoClinicaRotas.Listagem)
 

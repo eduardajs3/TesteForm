@@ -20,7 +20,7 @@ fun CabecalhoTela(
     subtitulo: String? = null,
     textoBotao: String,
     iconeBotao: Painter,
-    onVoltar: (() -> Unit)? = null, 
+    onVoltar: (() -> Unit)? = null,
     onClickBotao: () -> Unit
 ) {
     Row(
@@ -35,7 +35,7 @@ fun CabecalhoTela(
             if (onVoltar != null) {
                 IconButton(onClick = onVoltar) {
                     Icon(
-                        painter = painterResource(Res.drawable.arrow_back), // Certifique-se de ter o drawable arrow_back
+                        painter = painterResource(Res.drawable.arrow_back),
                         contentDescription = "Voltar",
                         tint = VerdeClinica,
                         modifier = Modifier.size(24.dp)

@@ -94,8 +94,13 @@ class SalaAtendimentoViewModel(
                 _salas.value = salaApi.carregar()
                 println("Salas após salvar: ${_salas.value}")
 
-                mensagem.value = "Sala salva com sucesso!"
-                mandarMensagem("Sala salva com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Sala salva com sucesso!"
+                } else {
+                    "Sala atualizada com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
                 
                 backStack.clear()

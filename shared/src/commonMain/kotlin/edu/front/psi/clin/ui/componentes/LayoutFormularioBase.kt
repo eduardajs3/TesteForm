@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.TextoSecundario
+import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import edu.front.psi.clin.utils.MensagemFeedbackUtils
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
@@ -19,7 +21,7 @@ fun LayoutFormularioBase(
     titulo: String,
     subtitulo: String = "Preencha os dados abaixo.",
     mensagemFeedback: String = "",
-    onVoltar: (() -> Unit)? = null, 
+    onVoltar: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Column(
@@ -35,7 +37,7 @@ fun LayoutFormularioBase(
             if (onVoltar != null) {
                 IconButton(onClick = onVoltar) {
                     Icon(
-                        painter = painterResource(Res.drawable.arrow_back), // Certifique-se de ter o drawable arrow_back
+                        painter = painterResource(Res.drawable.arrow_back),
                         contentDescription = "Voltar",
                         tint = VerdeClinica,
                         modifier = Modifier.size(24.dp)
@@ -68,7 +70,7 @@ fun LayoutFormularioBase(
                 text = mensagemFeedback,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = VerdeClinica
+                color = if (MensagemFeedbackUtils.ehErro(mensagemFeedback)) TextoErro else VerdeClinica
             )
         }
     }

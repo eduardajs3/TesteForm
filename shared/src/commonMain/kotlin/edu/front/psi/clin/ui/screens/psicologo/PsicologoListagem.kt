@@ -88,6 +88,7 @@ fun PsicologoListagem(
                     ItemDetalhe("Especialidade", psicologo.especialidade)
                     ItemDetalhe("Telefone", psicologo.telefone)
                     ItemDetalhe("E-mail", psicologo.email)
+                    ItemDetalhe("Data de cadastro", psicologo.dataCadastro ?: "")
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

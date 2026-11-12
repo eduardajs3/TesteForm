@@ -13,5 +13,5 @@ data class Recepcionista(
     val ativo: Boolean = true,
     val dataCadastro: String? = null,
     val setor: String,
-    val role: String? = null // Permite que venha nulo sem quebrar a desserialização
+    val role: String? = null
 )

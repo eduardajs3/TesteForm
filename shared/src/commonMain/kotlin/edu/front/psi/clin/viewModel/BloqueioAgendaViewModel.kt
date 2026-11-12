@@ -15,7 +15,7 @@ class BloqueioAgendaViewModel(
 
     private var idCounter: Int = 0
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
@@ -36,18 +36,18 @@ class BloqueioAgendaViewModel(
     )
 
     val id = mutableStateOf("")
-    
-    // Campos geridos pelo validador
+
+
     val psicologo = CampoValidado()
     val dataHoraInicio = CampoValidado()
     val dataHoraFim = CampoValidado()
     val motivo = CampoValidado()
     val ativo = CampoValidado("true")
-    
+
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        // Valida todos os campos de uma vez utilizando a função da classe
+
         val v1 = psicologo.validar()
         val v2 = dataHoraInicio.validar()
         val v3 = dataHoraFim.validar()
@@ -79,10 +79,15 @@ class BloqueioAgendaViewModel(
                     lista.map { b -> if (b.id == idNumber) bloqueio.copy(id = idNumber) else b }
                 }
             }
-            mensagem.value = "Bloqueio de agenda salvo com sucesso!"
-            mandarMensagem("Bloqueio de agenda salvo com sucesso!")
+            val mensagemSucesso = if (id.value.isEmpty()) {
+                "Bloqueio de agenda salvo com sucesso!"
+            } else {
+                "Bloqueio de agenda atualizado com sucesso!"
+            }
+            mensagem.value = mensagemSucesso
+            mandarMensagem(mensagemSucesso)
             limparCampos()
-            
+
             backStack.clear()
             backStack.add(BloqueioAgendaRotas.Listagem)
 

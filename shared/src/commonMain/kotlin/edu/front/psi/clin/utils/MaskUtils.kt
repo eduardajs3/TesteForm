@@ -38,14 +38,14 @@ object MaskUtils {
         return sb.toString()
     }
     fun aplicarMascaraMoeda(valor: String): String {
-        // Extrai apenas os dígitos da string
+
         val apenasDigitos = valor.filter { it.isDigit() }
         if (apenasDigitos.isEmpty()) return ""
 
-        // Converte para Long (evita problemas com zeros à esquerda)
+
         val valorLong = apenasDigitos.toLongOrNull() ?: 0L
 
-        // Formata dividindo por 100 para garantir que as duas últimas casas sejam decimais
+
         return String.format(java.util.Locale("pt", "BR"), "R$ %,.2f", valorLong / 100.0)
     }
     fun validarEmail(email: String): Boolean {
@@ -53,31 +53,31 @@ object MaskUtils {
         val regex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
         return regex.matches(email)
     }
-    // Aplica máscara de Hora: 00:00
+
     fun aplicarMascaraHora(valor: String): String {
         val apenasDigitos = valor.filter { it.isDigit() }.take(4)
         val sb = StringBuilder()
-        
+
         for (i in apenasDigitos.indices) {
             if (i == 2) sb.append(':')
             sb.append(apenasDigitos[i])
         }
         return sb.toString()
     }
-    // Aplica máscara de CRP: 00/00000
+
     fun aplicarMascaraCrp(valor: String): String {
-        val apenasDigitos = valor.filter { it.isDigit() }.take(7) // 2 dígitos da região + até 5 do registro
+        val apenasDigitos = valor.filter { it.isDigit() }.take(7)
         val sb = StringBuilder()
-        
+
         for (i in apenasDigitos.indices) {
             if (i == 2) sb.append('/')
             sb.append(apenasDigitos[i])
         }
         return sb.toString()
     }
-// Aplica máscara de Percentual: ex: 80%
+
     fun aplicarMascaraPercentual(valor: String): String {
-        val apenasDigitos = valor.filter { it.isDigit() }.take(3) // Limita a 100% (3 dígitos)
+        val apenasDigitos = valor.filter { it.isDigit() }.take(3)
         if (apenasDigitos.isEmpty()) return ""
         return "$apenasDigitos%"
     }

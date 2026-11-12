@@ -102,8 +102,13 @@ class ConvenioViewModel(
                 _convenios.value = convenioApi.carregar()
                 println("Lista após salvar: ${_convenios.value}")
 
-                mensagem.value = "Convênio salvo com sucesso!"
-                mandarMensagem("Convênio salvo com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Convênio salvo com sucesso!"
+                } else {
+                    "Convênio atualizado com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
          
                 backStack.clear()
@@ -140,7 +145,7 @@ class ConvenioViewModel(
         nome.definir(convenio.nome)
         cnpj.definir(convenio.cnpj)
         telefone.definir(convenio.telefone)
-        percentualCobertura.definir(convenio.percentualCobertura.toString())
+        percentualCobertura.definir(convenio.percentualCobertura?.toInt()?.toString() ?: "")
         ativo.definir(convenio.ativo.toString())
         
         backStack.clear()

@@ -29,7 +29,7 @@ class DashboardViewModel(
     private val mandarMensagem: (String) -> Unit = {}
 ) : ViewModel() {
 
-    // 1. Estados mutáveis privados (boa prática do ViewModel)
+
     private val _metricas = MutableStateFlow<List<MetricaCardItem>>(
         listOf(
             MetricaCardItem(
@@ -58,10 +58,10 @@ class DashboardViewModel(
             )
         )
     )
-    // 2. StateFlow somente leitura exposto publicamente via asStateFlow()
+
     val metricas: StateFlow<List<MetricaCardItem>> = _metricas.asStateFlow()
 
-    // 3. Consultas agendadas para o dia
+
     private val _consultas = MutableStateFlow<List<ConsultaHojeItem>>(
         listOf(
             ConsultaHojeItem(
@@ -112,7 +112,7 @@ class DashboardViewModel(
         )
     )
 
-    // 4. Filtro por status
+
     private val _filtroStatus = MutableStateFlow("Todas")
     val filtroStatus: StateFlow<String> = _filtroStatus.asStateFlow()
 
@@ -120,7 +120,7 @@ class DashboardViewModel(
         _filtroStatus.value = novoFiltro
     }
 
-    // 5. combine() + filter() + stateIn() com SharingStarted.WhileSubscribed(5_000)
+
     val consultasFiltradas: StateFlow<List<ConsultaHojeItem>> = combine(_consultas, _filtroStatus) { consultas, filtro ->
         val consultasAtivas = consultas.filter { it.status in listOf("Agendado", "Confirmado") }
         if (filtro == "Todas") consultasAtivas else consultasAtivas.filter { it.status == filtro }
@@ -130,7 +130,7 @@ class DashboardViewModel(
         initialValue = emptyList()
     )
 
-    // 6. Ação reativa para confirmar presença
+
     fun confirmarConsulta(consultaId: Int) {
         _consultas.update { lista ->
             lista.map { consulta ->

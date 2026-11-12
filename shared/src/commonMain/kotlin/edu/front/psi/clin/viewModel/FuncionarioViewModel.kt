@@ -74,7 +74,7 @@ class FuncionarioViewModel(
         val v2 = cpf.validar()
         val v3 = email.validar()
         val v4 = telefone.validar()
-        val v5 = senha.validar()
+        val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
         val v7 = dataCadastro.validar()
 
@@ -91,7 +91,12 @@ class FuncionarioViewModel(
                 cpf = cpf.valor.value,
                 email = email.valor.value,
                 telefone = telefone.valor.value,
-                senha = senha.valor.value,
+                senha = if (id.value.isEmpty()) {
+                    senha.valor.value
+                } else {
+                    _funcionarios.value.firstOrNull { it.id.toString() == id.value }?.senha
+                        ?: senha.valor.value
+                },
                 ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
                 dataCadastro = dataCadastro.valor.value
             )
@@ -105,8 +110,13 @@ class FuncionarioViewModel(
                     lista.map { item -> if (item.id == idNumber) funcionario.copy(id = idNumber) else item }
                 }
             }
-            mensagem.value = "Funcionário salvo com sucesso!"
-            mandarMensagem("Funcionário salvo com sucesso!")
+            val mensagemSucesso = if (id.value.isEmpty()) {
+                "Funcionário salvo com sucesso!"
+            } else {
+                "Funcionário atualizado com sucesso!"
+            }
+            mensagem.value = mensagemSucesso
+            mandarMensagem(mensagemSucesso)
             limparCampos()
             backStack.clear()
             backStack.add(
@@ -143,7 +153,7 @@ class FuncionarioViewModel(
         cpf.definir(funcionario.cpf)
         email.definir(funcionario.email)
         telefone.definir(funcionario.telefone)
-        senha.definir(funcionario.senha)
+        senha.definir("")
         ativo.definir(funcionario.ativo.toString())
         dataCadastro.definir(funcionario.dataCadastro)
         mensagem.value = ""

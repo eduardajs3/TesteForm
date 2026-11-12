@@ -16,11 +16,11 @@ import androidx.compose.runtime.mutableStateListOf
 class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
 
     val backstack = mutableStateListOf<Route>(Route.Login)
-    
-    // Estado do menu lateral (Gaveta)
+
+
     val drawerState = DrawerState(DrawerValue.Closed)
 
-    // Novo estado para a NotificacaoFlutuante
+
     var mensagemNotificacao by mutableStateOf<String?>(null)
         private set
 
@@ -36,11 +36,11 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
         }
     }
 
-    // Função substituída para controlar o balão flutuante
+
     fun mostrarNotificacao(msg: String) {
         mensagemNotificacao = msg
         scope.launch {
-            kotlinx.coroutines.delay(3500) // Some sozinha após 3.5 segundos
+            kotlinx.coroutines.delay(3500)
             if (mensagemNotificacao == msg) {
                 mensagemNotificacao = null
             }

@@ -94,8 +94,13 @@ class TipoAtendimentoViewModel(
                 _tiposAtendimento.value = tipoApi.carregar()
                 println("Tipos após salvar: ${_tiposAtendimento.value}")
 
-                mensagem.value = "Tipo de atendimento salvo com sucesso!"
-                mandarMensagem("Tipo de atendimento salvo com sucesso!")
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Tipo de atendimento salvo com sucesso!"
+                } else {
+                    "Tipo de atendimento atualizado com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
                 limparCampos()
                 
                 backStack.clear()

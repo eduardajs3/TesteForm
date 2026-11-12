@@ -11,5 +11,6 @@ data class Psicologo(
     val senha: String? = null,
     val ativo: Boolean,
     val crp: String,
-    val especialidade: String
+    val especialidade: String,
+    val dataCadastro: String? = null
 )
