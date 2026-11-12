@@ -78,10 +78,9 @@ class RecepcionistaViewModel(
         val v4 = telefone.validar()
         val v5 = senha.validar()
         val v6 = ativo.validar()
-        val v7 = dataCadastro.validar()
-        val v8 = setor.validar()
+        val v7 = setor.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return

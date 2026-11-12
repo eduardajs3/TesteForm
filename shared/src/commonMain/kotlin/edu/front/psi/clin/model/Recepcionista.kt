@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Recepcionista(
-    val id: Int? = null,
+    val id: Long? = null,
     val nome: String,
     val cpf: String,
     val email: String,

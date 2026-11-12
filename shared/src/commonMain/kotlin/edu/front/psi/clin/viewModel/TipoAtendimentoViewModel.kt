@@ -66,9 +66,8 @@ class TipoAtendimentoViewModel(
         val v2 = descricao.validar()
         val v3 = duracao.validar()
         val v4 = ativo.validar()
-        val v5 = dataCadastro.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5)) {
+        if (!(v1 && v2 && v3 && v4 )) {
             mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
@@ -77,7 +76,7 @@ class TipoAtendimentoViewModel(
         viewModelScope.launch {
             try {
                 val tipo = TipoAtendimento(
-                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    id = id.value.toLongOrNull(),
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     duracao = duracao.valor.value,

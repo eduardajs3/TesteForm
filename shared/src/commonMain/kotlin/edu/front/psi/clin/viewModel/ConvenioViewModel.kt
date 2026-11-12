@@ -85,7 +85,7 @@ class ConvenioViewModel(
                     .toDoubleOrNull() ?: 0.0
 
                 val convenio = Convenio(
-                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    id = id.value.toLongOrNull(),
                     nome = nome.valor.value,
                     cnpj = cnpj.valor.value,
                     telefone = telefone.valor.value,

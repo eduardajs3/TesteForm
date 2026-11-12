@@ -3,10 +3,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Convenio(
-    val id: Int,
+    val id: Long? = null,
     val nome: String,
     val cnpj: String,
     val telefone: String,
-    val percentualCobertura: Double,
+    val percentualCobertura: Double? = null,
     val ativo: Boolean
 )

@@ -93,7 +93,7 @@ class PacienteViewModel(
         viewModelScope.launch {
             try {
                 val paciente = Paciente(
-                    id = id.value.toIntOrNull(),
+                    id = id.value.toLongOrNull(),
                     nome = nome.valor.value,
                     cpf = cpf.valor.value,
                     dataNascimento = dataFormatada,

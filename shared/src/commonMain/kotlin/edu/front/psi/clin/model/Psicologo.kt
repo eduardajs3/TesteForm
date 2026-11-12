@@ -3,7 +3,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Psicologo(
-    val id: Int,
+    val id: Long? = null,
     val nome: String,
     val cpf: String,
     val email: String,

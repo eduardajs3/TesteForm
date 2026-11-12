@@ -76,7 +76,7 @@ class SalaAtendimentoViewModel(
         viewModelScope.launch {
             try {
                 val sala = SalaAtendimento(
-                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    id = id.value.toLongOrNull(),
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     capacidade = capacidade.valor.value.toIntOrNull() ?: 0,

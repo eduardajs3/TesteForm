@@ -1,4 +1,3 @@
-// shared/src/commonMain/kotlin/edu/front/psi/clin/model/Agenda.kt
 package edu.front.psi.clin.model
 
 import kotlinx.serialization.Serializable

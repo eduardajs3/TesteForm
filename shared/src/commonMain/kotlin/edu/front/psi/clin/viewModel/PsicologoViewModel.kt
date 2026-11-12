@@ -88,7 +88,7 @@ class PsicologoViewModel(
         viewModelScope.launch {
             try {
                 val psicologo = Psicologo(
-                    id = if (id.value.isEmpty()) 0 else id.value.toInt(),
+                    id = id.value.toLongOrNull(),
                     nome = nome.valor.value,
                     cpf = cpf.valor.value,
                     email = email.valor.value,

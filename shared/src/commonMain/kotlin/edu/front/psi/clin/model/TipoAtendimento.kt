@@ -3,7 +3,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TipoAtendimento(
-    val id: Int,
+    val id: Long? = null,
     val nome: String,
     val descricao: String,
     val duracao: String,
