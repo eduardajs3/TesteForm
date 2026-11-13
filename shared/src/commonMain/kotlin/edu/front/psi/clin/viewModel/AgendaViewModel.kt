@@ -20,6 +20,10 @@ class AgendaViewModel(
     private val agendaApi = AgendaAPI(httpClient)
     private val pacienteApi = PacienteAPI(httpClient)
     private val psicologoApi = PsicologoAPI(httpClient)
+    private val salaApi = SalaAtendimentoAPI(httpClient)
+    private val tipoAtendimentoApi = TipoAtendimentoAPI(httpClient)
+    private val convenioAPI = ConvenioAPI(httpClient)
+
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(emptyList())
     private val _filtro = MutableStateFlow("")
@@ -51,9 +55,9 @@ class AgendaViewModel(
                 _agendamentos.value = agendaApi.carregar()
                 _pacientes.value = pacienteApi.carregar()
                 _psicologos.value = psicologoApi.carregar()
-                _salas.value = SalaAtendimentoAPI(httpClient).carregar()
-                _tiposAtendimento.value = TipoAtendimentoAPI(httpClient).carregar()
-                _convenios.value = ConvenioAPI(httpClient).carregar()
+                _salas.value = salaApi.carregar()
+                _tiposAtendimento.value = tipoAtendimentoApi.carregar()
+                _convenios.value = convenioAPI.carregar()
             } catch (e: Exception) {
                 mandarMensagem("Erro ao carregar dados do servidor: ${e.message}")
             }
