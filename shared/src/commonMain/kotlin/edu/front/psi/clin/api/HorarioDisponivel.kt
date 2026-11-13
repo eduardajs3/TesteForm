@@ -9,7 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class HorarioDisponivelAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/horarios-disponiveis"
+    private val endPoint = "https://psiclin-backend.onrender.com/horarios-disponiveis"
     private val token
         get() = SessionManager.token
 

@@ -9,7 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class PagamentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/pagamentos"
+    private val endPoint = "https://psiclin-backend.onrender.com/pagamentos"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Pagamento> {
