@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class TipoAtendimentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/tipos-atendimento" 
+    private val endPoint = "https://psiclin-backend.onrender.com/tipos-atendimento"
     private val token
         get() = SessionManager.token
 

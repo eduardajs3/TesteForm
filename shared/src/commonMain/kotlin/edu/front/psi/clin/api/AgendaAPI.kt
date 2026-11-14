@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class AgendaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "http://localhost:8080/agendas"
+    private val endPoint = "https://psiclin-backend.onrender.com/agendas"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Agenda> {

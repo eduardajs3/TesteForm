@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.Copy
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -50,5 +51,23 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val variantName = variant.name
+        val capitalizedVariantName = variantName.replaceFirstChar { it.uppercase() }
+        val copyApkTask = tasks.register<Copy>("copy${capitalizedVariantName}Apk") {
+            from(layout.buildDirectory.dir("outputs/apk/$variantName")) {
+                include("androidApp-$variantName*.apk")
+            }
+            into(layout.buildDirectory.dir("outputs/PsiClin"))
+            rename { "PsiClin.apk" }
+        }
+
+        tasks.matching { it.name == "assemble$capitalizedVariantName" }.configureEach {
+            finalizedBy(copyApkTask)
+        }
     }
 }
