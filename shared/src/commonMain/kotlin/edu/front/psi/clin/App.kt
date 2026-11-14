@@ -183,6 +183,77 @@ fun App() {
 
     val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Login
 
+    val voltarParaListagemInterna: () -> Boolean = {
+        when (rotaAtual) {
+            Route.Paciente -> if (pacienteVm.backStack.lastOrNull() == PacienteRotas.Formulario) {
+                pacienteVm.backStack.clear()
+                pacienteVm.backStack.add(PacienteRotas.Listagem)
+                true
+            } else false
+            Route.Pagamento -> if (pagamentoVm.backStack.lastOrNull() == PagamentoRotas.Formulario) {
+                pagamentoVm.backStack.clear()
+                pagamentoVm.backStack.add(PagamentoRotas.Listagem)
+                true
+            } else false
+            Route.Convenio -> if (convenioVm.backStack.lastOrNull() == ConvenioRotas.Formulario) {
+                convenioVm.backStack.clear()
+                convenioVm.backStack.add(ConvenioRotas.Listagem)
+                true
+            } else false
+            Route.HorarioDisponivel -> if (horarioVm.backStack.lastOrNull() == HorarioDisponivelRotas.Formulario) {
+                horarioVm.backStack.clear()
+                horarioVm.backStack.add(HorarioDisponivelRotas.Listagem)
+                true
+            } else false
+            Route.SalaAtendimento -> if (salaVm.backStack.lastOrNull() == SalaAtendimentoRotas.Formulario) {
+                salaVm.backStack.clear()
+                salaVm.backStack.add(SalaAtendimentoRotas.Listagem)
+                true
+            } else false
+            Route.TipoAtendimento -> if (tipoVm.backStack.lastOrNull() == TipoAtendimentoRotas.Formulario) {
+                tipoVm.backStack.clear()
+                tipoVm.backStack.add(TipoAtendimentoRotas.Listagem)
+                true
+            } else false
+            Route.BloqueioAgenda -> if (bloqueioVm.backStack.lastOrNull() == BloqueioAgendaRotas.Formulario) {
+                bloqueioVm.backStack.clear()
+                bloqueioVm.backStack.add(BloqueioAgendaRotas.Listagem)
+                true
+            } else false
+            Route.EvolucaoClinica -> if (evolucaoVm.backStack.lastOrNull() == EvolucaoClinicaRotas.Formulario) {
+                evolucaoVm.backStack.clear()
+                evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
+                true
+            } else false
+            Route.Prontuario -> if (prontuarioVm.backStack.lastOrNull() == ProntuarioRotas.Formulario) {
+                prontuarioVm.backStack.clear()
+                prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
+                true
+            } else false
+            Route.Recepcionista -> if (recepcionistaVm.backStack.lastOrNull() == RecepcionistaRotas.Formulario) {
+                recepcionistaVm.backStack.clear()
+                recepcionistaVm.backStack.add(RecepcionistaRotas.Listagem)
+                true
+            } else false
+            Route.Funcionario -> if (funcionarioVm.backStack.lastOrNull() == FuncionarioRotas.Formulario) {
+                funcionarioVm.backStack.clear()
+                funcionarioVm.backStack.add(FuncionarioRotas.Listagem)
+                true
+            } else false
+            Route.Psicologo -> if (psicologoVm.backStack.lastOrNull() == PsicologoRotas.Formulario) {
+                psicologoVm.backStack.clear()
+                psicologoVm.backStack.add(PsicologoRotas.Listagem)
+                true
+            } else false
+            Route.Agenda -> if (agendaVm.backStack.lastOrNull() == AgendaRotas.Formulario) {
+                agendaVm.backStack.clear()
+                agendaVm.backStack.add(AgendaRotas.Listagem)
+                true
+            } else false
+            else -> false
+        }
+    }
+
     val stringTelaAtual = when (rotaAtual) {
         Route.Dashboard -> "dashboard"
         Route.Paciente -> "paciente"
@@ -206,7 +277,7 @@ fun App() {
         NavDisplay(
             backStack = principalVm.backstack,
             onBack = {
-                if (principalVm.backstack.size > 1) {
+                if (!voltarParaListagemInterna() && principalVm.backstack.size > 1) {
                     principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
                 }
             },
@@ -222,17 +293,15 @@ fun App() {
                                 agendaVm.backStack.clear()
                                 agendaVm.backStack.add(AgendaRotas.Listagem)
                             }
-                            principalVm.backstack.clear()
-                            principalVm.backstack.add(Route.Dashboard)
-                            if (rota != Route.Dashboard) {
+                            if (principalVm.backstack.lastOrNull() != rota) {
                                 principalVm.backstack.add(rota)
                             }
                         },
                         onAgendarConsulta = {
                             agendaVm.novoAgendamento()
-                            principalVm.backstack.clear()
-                            principalVm.backstack.add(Route.Dashboard)
-                            principalVm.backstack.add(Route.Agenda)
+                            if (principalVm.backstack.lastOrNull() != Route.Agenda) {
+                                principalVm.backstack.add(Route.Agenda)
+                            }
                         }
                     )
                 }
@@ -426,12 +495,8 @@ fun App() {
                             if (novaRota == Route.Login) {
                                 principalVm.backstack.clear()
                                 principalVm.backstack.add(Route.Login)
-                            } else {
-                                principalVm.backstack.clear()
-                                principalVm.backstack.add(Route.Dashboard)
-                                if (novaRota != Route.Dashboard) {
-                                    principalVm.backstack.add(novaRota)
-                                }
+                            } else if (principalVm.backstack.lastOrNull() != novaRota) {
+                                principalVm.backstack.add(novaRota)
                             }
                         }
                     ) {
