@@ -57,6 +57,7 @@ fun TipoAtendimentoFormulario(
                 label = "Duração",
                 placeholder = "HH:mm (ex.: 00:50)",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.duracao.temErro.value,
                 errorMessage = if (vm.duracao.temErro.value) "Campo obrigatório" else null
             )

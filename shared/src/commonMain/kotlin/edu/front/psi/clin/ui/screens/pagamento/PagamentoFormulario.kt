@@ -88,6 +88,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorTotal.definir(it) },
                 label = "Valor total",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorTotal.temErro.value,
                 errorMessage = if (vm.valorTotal.temErro.value) "Campo obrigatório" else null
             )
@@ -97,6 +98,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorConvenio.definir(it) },
                 label = "Valor do convênio",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorConvenio.temErro.value,
                 errorMessage = if (vm.valorConvenio.temErro.value) "Campo obrigatório" else null
             )
@@ -106,6 +108,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorPaciente.definir(it) },
                 label = "Valor do paciente",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorPaciente.temErro.value,
                 errorMessage = if (vm.valorPaciente.temErro.value) "Campo obrigatório" else null
             )
