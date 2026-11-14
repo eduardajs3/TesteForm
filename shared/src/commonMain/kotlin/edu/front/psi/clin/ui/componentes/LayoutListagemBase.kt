@@ -31,134 +31,157 @@ fun <T> LayoutListagemBase(
     onEditar: (T) -> Unit,
     onApagar: (T) -> Unit,
     placeholderPesquisa: String = "Buscar...",
+    textoCompacto: (T) -> String,
     linhaContent: @Composable RowScope.(T) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        CabecalhoTela(
-            titulo = titulo,
-            textoBotao = textoBotaoNovo,
-            iconeBotao = painterResource(Res.drawable.add),
-            onClickBotao = onNovoClick
-        )
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val telaPequena = maxWidth < 600.dp
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        BarraPesquisa(
-            text = textoFiltro,
-            onTextChange = onFiltroChange,
-            placeholderText = placeholderPesquisa
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .animateContentSize(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Branco),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CardBordaCinza)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
-            Column(
+            CabecalhoTela(
+                titulo = titulo,
+                textoBotao = textoBotaoNovo,
+                iconeBotao = painterResource(Res.drawable.add),
+                onClickBotao = onNovoClick
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BarraPesquisa(
+                text = textoFiltro,
+                onTextChange = onFiltroChange,
+                placeholderText = placeholderPesquisa
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .animateContentSize(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Branco),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardBordaCinza)
             ) {
-                val larguraAcoes = if (onVisualizar != null) 108.dp else 72.dp
-
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(16.dp)
                 ) {
-                    colunas.forEach { (nome, peso) ->
-                        Text(
-                            text = nome,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextoSecundario,
-                            modifier = Modifier.weight(peso)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(larguraAcoes))
-                }
+                    val larguraAcoes = if (onVisualizar != null) 108.dp else 72.dp
 
-                HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
-
-                if (itens.isEmpty()) {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 32.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Não há registros cadastrados.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextoSecundario,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                        if (telaPequena) {
+                            Text(
+                                text = colunas.firstOrNull()?.first.orEmpty(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextoSecundario,
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            colunas.forEach { (nome, peso) ->
+                                Text(
+                                    text = nome,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = TextoSecundario,
+                                    modifier = Modifier.weight(peso)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(larguraAcoes))
                     }
-                } else {
-                    itens.forEachIndexed { index, item ->
-                        Row(
+
+                    HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
+
+                    if (itens.isEmpty()) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            linhaContent(item)
-
+                            Text(
+                                text = "Não há registros cadastrados.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextoSecundario,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    } else {
+                        itens.forEachIndexed { index, item ->
                             Row(
-                                horizontalArrangement = Arrangement.End,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.width(larguraAcoes)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (onVisualizar != null) {
+                                if (telaPequena) {
+                                    Text(
+                                        text = textoCompacto(item),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                } else {
+                                    linhaContent(item)
+                                }
+
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.width(larguraAcoes)
+                                ) {
+                                    if (onVisualizar != null) {
+                                        IconButton(
+                                            onClick = { onVisualizar(item) },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.visibility),
+                                                contentDescription = "Visualizar",
+                                                tint = TextoSecundario,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
                                     IconButton(
-                                        onClick = { onVisualizar(item) },
+                                        onClick = { onEditar(item) },
                                         modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
-                                            painter = painterResource(Res.drawable.visibility),
-                                            contentDescription = "Visualizar",
+                                            painter = painterResource(Res.drawable.edit_square_24px),
+                                            contentDescription = "Editar",
                                             tint = TextoSecundario,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
-                                }
-                                IconButton(
-                                    onClick = { onEditar(item) },
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.edit_square_24px),
-                                        contentDescription = "Editar",
-                                        tint = TextoSecundario,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                IconButton(
-                                    onClick = { onApagar(item) },
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.delete_24px),
-                                        contentDescription = "Remover",
-                                        tint = TextoErro,
-                                        modifier = Modifier.size(20.dp)
-                                    )
+                                    IconButton(
+                                        onClick = { onApagar(item) },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.delete_24px),
+                                            contentDescription = "Remover",
+                                            tint = TextoErro,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        if (index < itens.size - 1) {
-                            HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
+                            if (index < itens.size - 1) {
+                                HorizontalDivider(color = LinhaDivisoria, thickness = 1.dp)
+                            }
                         }
                     }
                 }

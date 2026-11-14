@@ -46,7 +46,8 @@ fun PsicologoListagem(
             onVisualizar = { psicologo -> psicologoSelecionado.value = psicologo },
             onEditar = vm::editar,
             onApagar = { psicologo -> psicologoParaExcluir.value = psicologo },
-            placeholderPesquisa = "Buscar por nome, CRP ou especialidade..."
+            placeholderPesquisa = "Buscar por nome, CRP ou especialidade...",
+            textoCompacto = { psicologo -> psicologo.nome }
         ) { psicologo ->
             val isAtivo = psicologo.ativo
 
@@ -67,7 +68,6 @@ fun PsicologoListagem(
                 text = psicologo.especialidade,
                 weight = 1.4f
             )
-            
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",

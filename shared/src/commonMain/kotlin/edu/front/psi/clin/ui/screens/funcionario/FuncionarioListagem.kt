@@ -48,6 +48,7 @@ fun FuncionarioListagem(
             onApagar = { funcionario ->
                 funcionarioParaExcluir.value = funcionario
             },
+            textoCompacto = { funcionario -> funcionario.nome },
             placeholderPesquisa = "Buscar por nome, CPF ou e-mail..."
         ) { funcionario ->
             val isAtivo = funcionario.ativo

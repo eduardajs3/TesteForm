@@ -45,6 +45,7 @@ fun SalaAtendimentoListagem(
             onVisualizar = { sala -> salaSelecionada.value = sala },
             onEditar = vm::editar,
             onApagar = { sala -> salaParaExcluir.value = sala },
+            textoCompacto = { sala -> sala.nome },
             placeholderPesquisa = "Buscar por nome ou descrição..."
         ) { sala ->
             val isAtivo = sala.ativo

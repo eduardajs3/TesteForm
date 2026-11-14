@@ -23,53 +23,108 @@ fun CabecalhoTela(
     onVoltar: (() -> Unit)? = null,
     onClickBotao: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (onVoltar != null) {
-                IconButton(onClick = onVoltar) {
-                    Icon(
-                        painter = painterResource(Res.drawable.arrow_back),
-                        contentDescription = "Voltar",
-                        tint = VerdeClinica,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-            }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        if (maxWidth < 600.dp) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (onVoltar != null) {
+                        IconButton(onClick = onVoltar) {
+                            Icon(
+                                painter = painterResource(Res.drawable.arrow_back),
+                                contentDescription = "Voltar",
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
 
-            Column {
-                Text(
-                    text = titulo,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = TextoPrincipal
-                )
-                if (!subtitulo.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = subtitulo,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextoSecundario
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = titulo,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = TextoPrincipal
+                        )
+                        if (!subtitulo.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = subtitulo,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextoSecundario
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    BotaoPadrao(
+                        texto = textoBotao,
+                        onClick = onClickBotao,
+                        icone = iconeBotao,
+                        containerColor = VerdeClinica,
+                        contentColor = Branco,
+                        modifier = Modifier.wrapContentWidth()
                     )
                 }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (onVoltar != null) {
+                        IconButton(onClick = onVoltar) {
+                            Icon(
+                                painter = painterResource(Res.drawable.arrow_back),
+                                contentDescription = "Voltar",
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                    Column {
+                        Text(
+                            text = titulo,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = TextoPrincipal
+                        )
+                        if (!subtitulo.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = subtitulo,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextoSecundario
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                BotaoPadrao(
+                    texto = textoBotao,
+                    onClick = onClickBotao,
+                    icone = iconeBotao,
+                    containerColor = VerdeClinica,
+                    contentColor = Branco,
+                    modifier = Modifier.wrapContentWidth()
+                )
             }
         }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        BotaoPadrao(
-            texto = textoBotao,
-            onClick = onClickBotao,
-            icone = iconeBotao,
-            containerColor = VerdeClinica,
-            contentColor = Branco,
-            modifier = Modifier.wrapContentWidth()
-        )
     }
 }

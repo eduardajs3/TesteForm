@@ -47,6 +47,11 @@ fun HorarioDisponivelListagem(
             onVisualizar = { horario -> horarioSelecionado.value = horario },
             onEditar = vm::editar,
             onApagar = { horario -> horarioParaExcluir.value = horario },
+            textoCompacto = { horario ->
+                horario.psicologo
+                    ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                    ?: "Psicólogo #${horario.psicologoId}"
+            },
             placeholderPesquisa = "Buscar por psicólogo, dia ou horário..."
         ) { horario ->
             val isAtivo = horario.ativo

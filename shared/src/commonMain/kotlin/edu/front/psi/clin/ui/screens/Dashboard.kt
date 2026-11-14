@@ -3,6 +3,7 @@ package edu.front.psi.clin.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,193 +44,328 @@ fun DashboardTela(
 
     val scrollState = rememberScrollState()
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .verticalScroll(scrollState)
-            .padding(24.dp)
     ) {
+        val telaPequena = maxWidth < 600.dp
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(if (telaPequena) 16.dp else 24.dp)
         ) {
-            Column {
-                Text(
-                    text = "Painel Geral",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextoPrincipal
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Visão geral e indicadores em tempo real da PsiClin",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSecundario
-                )
-            }
-
-
-            Surface(
-                shape = RoundedCornerShape(50.dp),
-                color = VerdeClinica.copy(alpha = 0.08f),
-                border = BorderStroke(1.dp, VerdeClinica.copy(alpha = 0.2f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.calendar_month),
-                        contentDescription = null,
-                        tint = VerdeClinica,
-                        modifier = Modifier.size(18.dp)
-                    )
+            if (telaPequena) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Hoje • Atendimento Clínico",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = VerdeClinica
+                        text = "Painel Geral",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextoPrincipal
                     )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-
-        val linhasMetricas = metricas.chunked(2)
-        linhasMetricas.forEachIndexed { index, linha ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                linha.forEach { metrica ->
-                    CardMetrica(item = metrica, modifier = Modifier.weight(1f))
-                }
-                if (linha.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-            if (index < linhasMetricas.lastIndex) {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-
-        Text(
-            text = "Ações Rápidas",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = TextoPrincipal
-        )
-        Text(
-            text = "Acesse com um clique os principais módulos do sistema",
-            style = MaterialTheme.typography.bodySmall,
-            color = TextoSecundario
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            CardAtalho(
-                titulo = "Agendar Consulta",
-                subtitulo = "Preencher dados da consulta",
-                iconeRes = Res.drawable.calendar_month,
-                modifier = Modifier.weight(1f),
-                onClick = onAgendarConsulta
-            )
-            CardAtalho(
-                titulo = "Novo Paciente",
-                subtitulo = "Cadastrar ou consultar",
-                iconeRes = Res.drawable.group_24px,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavegar(Route.Paciente) }
-            )
-            CardAtalho(
-                titulo = "Financeiro",
-                subtitulo = "Pagamentos e recibos",
-                iconeRes = Res.drawable.description_24px,
-                modifier = Modifier.weight(1f),
-                onClick = { onNavegar(Route.Pagamento) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "Próximas Consultas de Hoje",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextoPrincipal
-                )
-                Text(
-                    text = "${consultas.size} atendimento(s) listado(s)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario
-                )
-            }
-
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                listOf("Todas", "Agendado", "Confirmado").forEach { filtro ->
-                    val selecionado = filtroStatus == filtro
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Visão geral e indicadores em tempo real da PsiClin",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextoSecundario
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                     Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (selecionado) VerdeClinica else CremeCampo,
-                        border = BorderStroke(1.dp, if (selecionado) VerdeClinica else CardBordaCinza),
-                        modifier = Modifier.clickable { vm.selecionarFiltroStatus(filtro) }
+                        shape = RoundedCornerShape(50.dp),
+                        color = VerdeClinica.copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, VerdeClinica.copy(alpha = 0.2f))
                     ) {
-                        Text(
-                            text = filtro,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selecionado) Branco else TextoPrincipal
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.calendar_month),
+                                contentDescription = null,
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "Hoje • Atendimento Clínico",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = VerdeClinica
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                TextButton(
-                    onClick = { onNavegar(Route.Agenda) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Ver Agenda Completa",
-                        color = VerdeClinica,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.bodySmall
+                    Column {
+                        Text(
+                            text = "Painel Geral",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = TextoPrincipal
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Visão geral e indicadores em tempo real da PsiClin",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextoSecundario
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(50.dp),
+                        color = VerdeClinica.copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, VerdeClinica.copy(alpha = 0.2f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.calendar_month),
+                                contentDescription = null,
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = "Hoje • Atendimento Clínico",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = VerdeClinica
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+
+            val linhasMetricas = metricas.chunked(if (telaPequena) 1 else 2)
+            linhasMetricas.forEachIndexed { index, linha ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    linha.forEach { metrica ->
+                        CardMetrica(item = metrica, modifier = Modifier.weight(1f))
+                    }
+                    if (!telaPequena && linha.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                if (index < linhasMetricas.lastIndex) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+
+            Text(
+                text = "Ações Rápidas",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = TextoPrincipal
+            )
+            Text(
+                text = "Acesse com um clique os principais módulos do sistema",
+                style = MaterialTheme.typography.bodySmall,
+                color = TextoSecundario
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (telaPequena) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CardAtalho(
+                        titulo = "Agendar Consulta",
+                        subtitulo = "Preencher dados da consulta",
+                        iconeRes = Res.drawable.calendar_month,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onAgendarConsulta
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painter = painterResource(Res.drawable.keyboard_arrow_right),
-                        contentDescription = null,
-                        tint = VerdeClinica,
-                        modifier = Modifier.size(16.dp)
+                    CardAtalho(
+                        titulo = "Novo Paciente",
+                        subtitulo = "Cadastrar ou consultar",
+                        iconeRes = Res.drawable.group_24px,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onNavegar(Route.Paciente) }
+                    )
+                    CardAtalho(
+                        titulo = "Financeiro",
+                        subtitulo = "Pagamentos e recibos",
+                        iconeRes = Res.drawable.description_24px,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onNavegar(Route.Pagamento) }
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    CardAtalho(
+                        titulo = "Agendar Consulta",
+                        subtitulo = "Preencher dados da consulta",
+                        iconeRes = Res.drawable.calendar_month,
+                        modifier = Modifier.weight(1f),
+                        onClick = onAgendarConsulta
+                    )
+                    CardAtalho(
+                        titulo = "Novo Paciente",
+                        subtitulo = "Cadastrar ou consultar",
+                        iconeRes = Res.drawable.group_24px,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavegar(Route.Paciente) }
+                    )
+                    CardAtalho(
+                        titulo = "Financeiro",
+                        subtitulo = "Pagamentos e recibos",
+                        iconeRes = Res.drawable.description_24px,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavegar(Route.Pagamento) }
                     )
                 }
             }
-        }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            if (telaPequena) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        Text(
+                            text = "Próximas Consultas de Hoje",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = TextoPrincipal
+                        )
+                        Text(
+                            text = "${consultas.size} atendimento(s) listado(s)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextoSecundario
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        listOf("Todas", "Agendado", "Confirmado").forEach { filtro ->
+                            val selecionado = filtroStatus == filtro
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (selecionado) VerdeClinica else CremeCampo,
+                                border = BorderStroke(1.dp, if (selecionado) VerdeClinica else CardBordaCinza),
+                                modifier = Modifier.clickable { vm.selecionarFiltroStatus(filtro) }
+                            ) {
+                                Text(
+                                    text = filtro,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (selecionado) Branco else TextoPrincipal
+                                )
+                            }
+                        }
+
+                        TextButton(
+                            onClick = { onNavegar(Route.Agenda) },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "Ver Agenda Completa",
+                                color = VerdeClinica,
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                contentDescription = null,
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Próximas Consultas de Hoje",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = TextoPrincipal
+                        )
+                        Text(
+                            text = "${consultas.size} atendimento(s) listado(s)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextoSecundario
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        listOf("Todas", "Agendado", "Confirmado").forEach { filtro ->
+                            val selecionado = filtroStatus == filtro
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (selecionado) VerdeClinica else CremeCampo,
+                                border = BorderStroke(1.dp, if (selecionado) VerdeClinica else CardBordaCinza),
+                                modifier = Modifier.clickable { vm.selecionarFiltroStatus(filtro) }
+                            ) {
+                                Text(
+                                    text = filtro,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (selecionado) Branco else TextoPrincipal
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        TextButton(
+                            onClick = { onNavegar(Route.Agenda) },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "Ver Agenda Completa",
+                                color = VerdeClinica,
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                contentDescription = null,
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -262,6 +398,7 @@ fun DashboardTela(
             }
         }
     }
+}
 }
 
 
@@ -392,81 +529,150 @@ private fun CardConsultaHoje(
     consulta: ConsultaHojeItem,
     onConfirmar: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardFundoCinza),
-        border = BorderStroke(1.dp, CardBordaCinza),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val telaPequena = maxWidth < 600.dp
+
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = CardFundoCinza),
+            border = BorderStroke(1.dp, CardBordaCinza),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = CremeCampo,
-                    border = BorderStroke(1.dp, CardBordaCinza)
+            if (telaPequena) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = consulta.horario,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = VerdeClinica
-                    )
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = CremeCampo,
+                            border = BorderStroke(1.dp, CardBordaCinza)
+                        ) {
+                            Text(
+                                text = consulta.horario,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = VerdeClinica
+                            )
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = consulta.paciente,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = TextoPrincipal
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            BadgeStatus(
+                                texto = consulta.status,
+                                isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${consulta.psicologo} • ${consulta.sala} • ${consulta.tipo}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextoSecundario
+                            )
+                        }
+                    }
+
+                    if (consulta.status == "Agendado") {
+                        OutlinedButton(
+                            onClick = onConfirmar,
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, VerdeClinica),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = VerdeClinica
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(
+                                text = "Confirmar",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
                 }
-
-
-                Column {
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(
-                            text = consulta.paciente,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = TextoPrincipal
-                        )
-                        BadgeStatus(
-                            texto = consulta.status,
-                            isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "${consulta.psicologo} • ${consulta.sala} • ${consulta.tipo}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextoSecundario
-                    )
-                }
-            }
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = CremeCampo,
+                            border = BorderStroke(1.dp, CardBordaCinza)
+                        ) {
+                            Text(
+                                text = consulta.horario,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = VerdeClinica
+                            )
+                        }
 
-            if (consulta.status == "Agendado") {
-                OutlinedButton(
-                    onClick = onConfirmar,
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, VerdeClinica),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = VerdeClinica
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "Confirmar",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = consulta.paciente,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextoPrincipal
+                                )
+                                BadgeStatus(
+                                    texto = consulta.status,
+                                    isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${consulta.psicologo} • ${consulta.sala} • ${consulta.tipo}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextoSecundario
+                            )
+                        }
+                    }
+
+                    if (consulta.status == "Agendado") {
+                        OutlinedButton(
+                            onClick = onConfirmar,
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, VerdeClinica),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = VerdeClinica
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Confirmar",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
                 }
             }
         }

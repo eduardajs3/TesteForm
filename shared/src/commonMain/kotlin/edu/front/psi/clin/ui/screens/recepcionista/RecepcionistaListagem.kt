@@ -46,6 +46,7 @@ fun RecepcionistaListagem(
             onVisualizar = { recepcionista -> recepcionistaSelecionada.value = recepcionista },
             onEditar = vm::editar,
             onApagar = { recepcionista -> recepcionistaParaExcluir.value = recepcionista },
+            textoCompacto = { recepcionista -> recepcionista.nome },
             placeholderPesquisa = "Buscar por nome, CPF ou setor..."
         ) { recepcionista ->
             val isAtivo = recepcionista.ativo

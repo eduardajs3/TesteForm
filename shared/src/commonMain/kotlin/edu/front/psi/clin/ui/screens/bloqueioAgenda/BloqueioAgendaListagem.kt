@@ -47,6 +47,7 @@ fun BloqueioAgendaListagem(
             onApagar = { item -> 
                 itemParaExcluir.value = item 
             },
+            textoCompacto = { bloqueio -> bloqueio.psicologo },
             placeholderPesquisa = "Buscar por psicólogo..."
         ) { bloqueio ->
             val isAtivo = bloqueio.ativo

@@ -45,6 +45,7 @@ fun TipoAtendimentoListagem(
             onVisualizar = { tipo -> tipoSelecionado.value = tipo },
             onEditar = vm::editar,
             onApagar = { tipo -> tipoParaExcluir.value = tipo },
+            textoCompacto = { tipo -> tipo.nome },
             placeholderPesquisa = "Buscar por tipo, duração ou descrição..."
         ) { tipo ->
             val isAtivo = tipo.ativo

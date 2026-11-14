@@ -49,6 +49,10 @@ fun PagamentoListagem(
             onApagar = { pagamento ->
                 pagamentoParaExcluir.value = pagamento
             },
+            textoCompacto = { pagamento ->
+                pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome
+                    ?: "Paciente #${pagamento.pacienteId}"
+            },
             placeholderPesquisa = "Buscar por forma de pagamento ou status..."
         ) { pagamento ->
             val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome ?: "Paciente #${pagamento.pacienteId}"
