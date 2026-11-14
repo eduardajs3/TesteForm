@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.bundles.navigation3)
             implementation(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.datetime)
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
 
             implementation("io.ktor:ktor-client-core:3.0.3")

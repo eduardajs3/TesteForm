@@ -5,12 +5,13 @@ import edu.front.psi.clin.model.Agenda
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class AgendaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "https://psiclin-backend.onrender.com/agendas"
+    private val endPoint = "/agendas"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Agenda> {
@@ -22,18 +23,12 @@ class AgendaAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun salvar(agenda: Agenda) {
-
-        println("TOKEN: ${SessionManager.token}")
-        println("AGENDA ENVIADA: $agenda")
-
         val response = httpClient.post(endPoint) {
-            header("Authorization", "Bearer ${SessionManager.token}")
+            bearerAuth(token)
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-
-        println("Status do Salvar Agenda: ${response.status}")
-        println("Resposta Detalhada: ${response.bodyAsText()}")
+        validarResposta(response, "Salvar agendamento")
     }
 
     suspend fun atualizar(id: Long, agenda: Agenda) {
@@ -42,13 +37,20 @@ class AgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-        println("Status do Atualizar Agenda: ${response.status}")
+        validarResposta(response, "Atualizar agendamento")
     }
 
     suspend fun apagar(agenda: Agenda) {
         val response = httpClient.delete("$endPoint/${agenda.id}") {
             bearerAuth(token)
         }
-        println("Status do Apagar Agenda: ${response.status}")
+        validarResposta(response, "Excluir agendamento")
+    }
+
+    private suspend fun validarResposta(response: HttpResponse, operacao: String) {
+        if (response.status.value !in 200..299) {
+            val detalhe = response.bodyAsText()
+            throw IllegalStateException("$operacao falhou (${response.status}): $detalhe")
+        }
     }
 }

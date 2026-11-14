@@ -48,26 +48,26 @@ fun FuncionarioListagem(
             onApagar = { funcionario ->
                 funcionarioParaExcluir.value = funcionario
             },
-            textoCompacto = { funcionario -> funcionario.nome },
+            textoCompacto = { funcionario -> funcionario.nome.orEmpty() },
             placeholderPesquisa = "Buscar por nome, CPF ou e-mail..."
         ) { funcionario ->
-            val isAtivo = funcionario.ativo
+            val isAtivo = funcionario.ativo == true
 
             CelulaTabelaTexto(
-                text = funcionario.nome,
+                text = funcionario.nome.orEmpty(),
                 weight = 1.5f,
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = funcionario.cpf,
+                text = funcionario.cpf.orEmpty(),
                 weight = 1.2f
             )
             CelulaTabelaTexto(
-                text = funcionario.telefone,
+                text = funcionario.telefone.orEmpty(),
                 weight = 1.1f
             )
             CelulaTabelaTexto(
-                text = funcionario.email,
+                text = funcionario.email.orEmpty(),
                 weight = 1.6f
             )
             
@@ -80,16 +80,16 @@ fun FuncionarioListagem(
         }
 
         funcionarioSelecionado.value?.let { funcionario ->
-            val isAtivo = funcionario.ativo
+            val isAtivo = funcionario.ativo == true
             ModalDetalhesBase(
                 titulo = "Detalhes do Funcionário",
                 onDismiss = { funcionarioSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Nome completo", valor = funcionario.nome)
-                    ItemDetalhe(rotulo = "CPF", valor = funcionario.cpf)
-                    ItemDetalhe(rotulo = "E-mail", valor = funcionario.email)
-                    ItemDetalhe(rotulo = "Telefone", valor = funcionario.telefone)
-                    ItemDetalhe(rotulo = "Data de cadastro", valor = funcionario.dataCadastro)
+                    ItemDetalhe(rotulo = "Nome completo", valor = funcionario.nome.orEmpty())
+                    ItemDetalhe(rotulo = "CPF", valor = funcionario.cpf.orEmpty())
+                    ItemDetalhe(rotulo = "E-mail", valor = funcionario.email.orEmpty())
+                    ItemDetalhe(rotulo = "Telefone", valor = funcionario.telefone.orEmpty())
+                    ItemDetalhe(rotulo = "Data de cadastro", valor = funcionario.dataCadastro ?: "")
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo"

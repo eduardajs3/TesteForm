@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
-import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.FuncionarioViewModel
@@ -71,16 +70,14 @@ fun FuncionarioFormulario(
                 errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )
 
-            if (!isEdicao) {
-                CampoTextoPadrao(
-                    value = vm.senha.valor.value,
-                    onValueChange = { vm.senha.definir(it) },
-                    label = "Senha",
-                    obrigatorio = true,
-                    isError = vm.senha.temErro.value,
-                    errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
-                )
-            }
+            CampoTextoPadrao(
+                value = vm.senha.valor.value,
+                onValueChange = { vm.senha.definir(it) },
+                label = if (isEdicao) "Nova senha" else "Senha",
+                obrigatorio = true,
+                isError = vm.senha.temErro.value,
+                errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
+            )
 
             CampoDropdownPadrao(
                 label = "Status",
@@ -92,15 +89,6 @@ fun FuncionarioFormulario(
                 },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
-            )
-
-            CampoDataPadrao(
-                value = vm.dataCadastro.valor.value,
-                onValueChange = { vm.dataCadastro.definir(it) },
-                label = "Data de cadastro",
-                obrigatorio = true,
-                isError = vm.dataCadastro.temErro.value,
-                errorMessage = if (vm.dataCadastro.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

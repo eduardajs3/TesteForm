@@ -11,6 +11,17 @@ import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+
+data class HorarioAgendamento(
+    val inicio: String,
+    val fim: String
+)
 
 class AgendaViewModel(
     private val mandarMensagem: (String) -> Unit
@@ -23,9 +34,10 @@ class AgendaViewModel(
     private val salaApi = SalaAtendimentoAPI(httpClient)
     private val tipoAtendimentoApi = TipoAtendimentoAPI(httpClient)
     private val convenioAPI = ConvenioAPI(httpClient)
-
+    private val horarioDisponivelApi = HorarioDisponivelAPI(httpClient)
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(emptyList())
+    val agendamentos = _agendamentos.asStateFlow()
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
@@ -43,12 +55,26 @@ class AgendaViewModel(
 
     private val _convenios = MutableStateFlow<List<Convenio>>(emptyList())
     val convenios = _convenios.asStateFlow()
+    private val _horariosDisponiveis = MutableStateFlow<List<HorarioDisponivel>>(emptyList())
+    val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
 
     fun filtrarPorPsicologo(nome: String) {
         _psicologoFiltro.value = nome
     }
+
+    fun atualizarDisponibilidade() {
+        viewModelScope.launch {
+            try {
+                _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _agendamentos.value = agendaApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem("Erro ao atualizar a disponibilidade: ${e.message}")
+            }
+        }
+    }
+
     init {
         viewModelScope.launch {
             try {
@@ -58,6 +84,7 @@ class AgendaViewModel(
                 _salas.value = salaApi.carregar()
                 _tiposAtendimento.value = tipoAtendimentoApi.carregar()
                 _convenios.value = convenioAPI.carregar()
+                _horariosDisponiveis.value = horarioDisponivelApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem("Erro ao carregar dados do servidor: ${e.message}")
             }
@@ -94,19 +121,109 @@ class AgendaViewModel(
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
 
-    val status = CampoValidado("CONFIRMADO")
+    val status = CampoValidado("AGENDADO")
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
     val mensagem = mutableStateOf("")
+
+    fun diasDisponiveis(psicologoId: Long, tipoAtendimentoId: Long): List<LocalDate> {
+        val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        return (0..60)
+            .map { hoje.plus(it, DateTimeUnit.DAY) }
+            .filter { data -> buscarHorariosDisponiveis(data, psicologoId, tipoAtendimentoId).isNotEmpty() }
+    }
+
+    fun buscarHorariosDisponiveis(
+        data: LocalDate,
+        psicologoId: Long,
+        tipoAtendimentoId: Long
+    ): List<HorarioAgendamento> {
+        val diaSemana = when (data.dayOfWeek.ordinal + 1) {
+            1 -> "SEGUNDA"
+            2 -> "TERCA"
+            3 -> "QUARTA"
+            4 -> "QUINTA"
+            5 -> "SEXTA"
+            6 -> "SABADO"
+            else -> "DOMINGO"
+        }
+        val duracao = _tiposAtendimento.value
+            .firstOrNull { it.id == tipoAtendimentoId }
+            ?.duracao
+            ?.let(::duracaoEmMinutos)
+            ?: return emptyList()
+        if (duracao <= 0) return emptyList()
+
+        val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val minutosAgora = agora.hour * 60 + agora.minute
+
+        return _horariosDisponiveis.value
+            .asSequence()
+            .filter {
+                it.ativo &&
+                    it.psicologoId == psicologoId &&
+                    it.diaSemana.equals(diaSemana, ignoreCase = true)
+            }
+            .flatMap { horario ->
+                val inicioFaixa = horaEmMinutos(horario.horaInicio) ?: return@flatMap emptySequence()
+                val fimFaixa = horaEmMinutos(horario.horaFim) ?: return@flatMap emptySequence()
+                if (fimFaixa <= inicioFaixa) return@flatMap emptySequence()
+
+                generateSequence(inicioFaixa) { inicio ->
+                    (inicio + duracao).takeIf { fim -> fim <= fimFaixa }?.let { inicio + duracao }
+                }
+                    .takeWhile { it + duracao <= fimFaixa }
+                    .filter { inicio ->
+                        val fim = inicio + duracao
+                        (data > agora.date || data == agora.date && inicio > minutosAgora) &&
+                            !temConflitoComAgendamento(
+                                agendamentos = _agendamentos.value,
+                                data = data,
+                                inicio = inicio,
+                                fim = fim,
+                                psicologoId = psicologoId
+                            )
+                    }
+                    .map { inicio ->
+                        HorarioAgendamento(
+                            inicio = formatarHora(inicio),
+                            fim = formatarHora(inicio + duracao)
+                        )
+                    }
+            }
+            .distinctBy { it.inicio }
+            .sortedBy { it.inicio }
+            .toList()
+    }
+
+    fun salasDisponiveis(data: LocalDate, horario: HorarioAgendamento): List<SalaAtendimento> {
+        val inicio = horaEmMinutos(horario.inicio) ?: return emptyList()
+        val fim = horaEmMinutos(horario.fim) ?: return emptyList()
+        return _salas.value.filter { sala ->
+            sala.ativo && !temConflitoComAgendamento(
+                agendamentos = _agendamentos.value,
+                data = data,
+                inicio = inicio,
+                fim = fim,
+                salaId = sala.id
+            )
+        }
+    }
 
     fun salvar() {
         val vData = dataAtendimento.validar()
         val vInicio = horaInicio.validar()
         val vFim = horaFim.validar()
 
-        if (pacienteId.value == null || psicologoId.value == null || tipoAtendimentoId.value == null) {
-            mensagem.value = "Selecione Paciente, Psicólogo e Tipo de Atendimento."
-            mandarMensagem("Selecione Paciente, Psicólogo e Tipo de Atendimento.")
+        if (
+            pacienteId.value == null ||
+            psicologoId.value == null ||
+            tipoAtendimentoId.value == null ||
+            convenioId.value == null ||
+            salaId.value == null
+        ) {
+            mensagem.value = "Selecione paciente, psicólogo, atendimento, convênio e sala."
+            mandarMensagem(mensagem.value)
             return
         }
 
@@ -117,15 +234,69 @@ class AgendaViewModel(
         }
 
 
-        if (horaFim.valor.value <= horaInicio.valor.value) {
-            mensagem.value = "O horário de término deve ser obrigatoriamente posterior ao início."
-            mandarMensagem("O horário de término deve ser obrigatoriamente posterior ao início.")
+        val data = dataAtendimento.valor.value.toLocalDateOrNull()
+        val inicioMinutos = horaEmMinutos(horaInicio.valor.value)
+        val fimMinutos = horaEmMinutos(horaFim.valor.value)
+        val tipoAtendimento = _tiposAtendimento.value.firstOrNull { it.id == tipoAtendimentoId.value }
+        val duracao = tipoAtendimento?.duracao?.let(::duracaoEmMinutos)
+        val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+        if (data == null || inicioMinutos == null || fimMinutos == null || duracao == null) {
+            mensagem.value = "Data, horários ou duração do atendimento inválidos."
+            mandarMensagem(mensagem.value)
+            return
+        }
+        if (data < hoje) {
+            mensagem.value = "Não é possível agendar em uma data passada."
+            mandarMensagem(mensagem.value)
+            return
+        }
+        val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        if (data == hoje && inicioMinutos <= agora.hour * 60 + agora.minute) {
+            mensagem.value = "Não é possível agendar em um horário que já passou."
+            mandarMensagem(mensagem.value)
+            return
+        }
+        if (fimMinutos <= inicioMinutos || fimMinutos - inicioMinutos != duracao) {
+            mensagem.value = "O horário deve respeitar a duração do tipo de atendimento."
+            mandarMensagem(mensagem.value)
+            return
+        }
+        if (id.value.isEmpty() && status.valor.value !in setOf("AGENDADO", "CONFIRMADO")) {
+            mensagem.value = "Para novos agendamentos, selecione Agendado ou Confirmado."
+            mandarMensagem(mensagem.value)
             return
         }
 
         viewModelScope.launch {
             try {
-                val dataFormatada = converterDataParaIso(dataAtendimento.valor.value)
+                val agendamentosAtualizados = agendaApi.carregar()
+                _agendamentos.value = agendamentosAtualizados
+                _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _salas.value = salaApi.carregar()
+
+                val horariosValidos = buscarHorariosDisponiveis(
+                    data,
+                    psicologoId.value!!,
+                    tipoAtendimentoId.value!!
+                )
+                if (horariosValidos.none { it.inicio == horaInicio.valor.value && it.fim == horaFim.valor.value }) {
+                    mensagem.value = "Esse horário não está mais disponível para o psicólogo."
+                    mandarMensagem(mensagem.value)
+                    return@launch
+                }
+
+                val salasValidas = salasDisponiveis(
+                    data,
+                    HorarioAgendamento(horaInicio.valor.value, horaFim.valor.value)
+                )
+                if (salasValidas.none { it.id == salaId.value }) {
+                    mensagem.value = "A sala selecionada não está mais disponível nesse horário."
+                    mandarMensagem(mensagem.value)
+                    return@launch
+                }
+
+                val dataFormatada = data.toString()
                 val inicioFormatado = "${dataFormatada}T${horaInicio.valor.value}:00"
                 val fimFormatado = "${dataFormatada}T${horaFim.valor.value}:00"
 
@@ -147,7 +318,8 @@ class AgendaViewModel(
                     dataHoraInicio = inicioFormatado,
                     dataHoraFim = fimFormatado,
                     status = status.valor.value,
-                    observacoes = observacoes.valor.value.ifEmpty { null }
+                    observacoes = observacoes.valor.value.ifEmpty { null },
+                    ativo = ativo.valor.value.toBoolean()
                 )
 
                 if (id.value.isEmpty()) {
@@ -198,17 +370,65 @@ class AgendaViewModel(
         }
     }
 
-    private fun converterDataParaIso(dataStr: String): String {
-        return try {
-            if (dataStr.contains("/")) {
-                val partes = dataStr.split("/")
-                if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}" else dataStr
-            } else {
-                dataStr
-            }
-        } catch (e: Exception) {
-            dataStr
+    private fun temConflitoComAgendamento(
+        agendamentos: List<Agenda>,
+        data: LocalDate,
+        inicio: Int,
+        fim: Int,
+        psicologoId: Long? = null,
+        salaId: Long? = null
+    ): Boolean = agendamentos.any { agendamento ->
+        val statusAtual = agendamento.status.uppercase()
+        val ocupaHorario = agendamento.ativo && statusAtual !in setOf("CANCELADO", "CANCELED")
+        val mesmoRecurso = when {
+            psicologoId != null -> agendamento.psicologoId == psicologoId
+            salaId != null -> agendamento.salaId == salaId
+            else -> false
         }
+        val inicioExistente = horaEmMinutos(agendamento.dataHoraInicio.substringAfter('T', "").take(5))
+        val fimExistente = horaEmMinutos(agendamento.dataHoraFim.substringAfter('T', "").take(5))
+
+        agendamento.id?.toString() != id.value &&
+            ocupaHorario &&
+            mesmoRecurso &&
+            agendamento.dataHoraInicio.substringBefore('T') == data.toString() &&
+            inicioExistente != null &&
+            fimExistente != null &&
+            inicio < fimExistente &&
+            fim > inicioExistente
+    }
+
+    private fun horaEmMinutos(valor: String): Int? {
+        val partes = valor.take(5).split(":")
+        if (partes.size != 2) return null
+        val hora = partes[0].toIntOrNull() ?: return null
+        val minuto = partes[1].toIntOrNull() ?: return null
+        if (hora !in 0..23 || minuto !in 0..59) return null
+        return hora * 60 + minuto
+    }
+
+    private fun duracaoEmMinutos(valor: String): Int? {
+        val partes = valor.split(":")
+        if (partes.size != 2) return valor.toIntOrNull()
+        val hora = partes[0].toIntOrNull() ?: return null
+        val minuto = partes[1].take(2).toIntOrNull() ?: return null
+        if (hora < 0 || minuto !in 0..59) return null
+        return hora * 60 + minuto
+    }
+
+    private fun formatarHora(minutos: Int): String =
+        "${(minutos / 60).toString().padStart(2, '0')}:${(minutos % 60).toString().padStart(2, '0')}"
+
+    private fun String.toLocalDateOrNull(): LocalDate? {
+        val partes = if (contains('/')) split('/') else split('-')
+        if (partes.size != 3) return null
+        return runCatching {
+            if (contains('/')) {
+                LocalDate(partes[2].toInt(), partes[1].toInt(), partes[0].toInt())
+            } else {
+                LocalDate(partes[0].toInt(), partes[1].toInt(), partes[2].toInt())
+            }
+        }.getOrNull()
     }
 
     fun limparCampos() {
@@ -220,7 +440,9 @@ class AgendaViewModel(
         dataAtendimento.limpar()
         horaInicio.limpar()
         horaFim.limpar()
-        status.definir("CONFIRMADO")
+        if (id.value.isEmpty()) {
+            status.definir("AGENDADO")
+        }
         observacoes.limpar()
         ativo.definir("true")
         mensagem.value = "Campos limpos."
@@ -256,21 +478,17 @@ class AgendaViewModel(
         tipoAtendimentoId.value = agenda.tipoAtendimentoId
         convenioId.value = agenda.convenioId
 
-        try {
-            val partesDataHora = agenda.dataHoraInicio.split("T")
-            if (partesDataHora.size == 2) {
-                val partesData = partesDataHora[0].split("-")
-                if (partesData.size == 3) {
-                    dataAtendimento.definir("${partesData[2]}/${partesData[1]}/${partesData[0]}")
-                }
-                horaInicio.definir(partesDataHora[1].take(5))
+        val partesDataHora = agenda.dataHoraInicio.split("T")
+        if (partesDataHora.size == 2) {
+            val partesData = partesDataHora[0].split("-")
+            if (partesData.size == 3) {
+                dataAtendimento.definir("${partesData[2]}/${partesData[1]}/${partesData[0]}")
             }
-            val partesFim = agenda.dataHoraFim.split("T")
-            if (partesFim.size == 2) {
-                horaFim.definir(partesFim[1].take(5))
-            }
-        } catch (e: Exception) {
-
+            horaInicio.definir(partesDataHora[1].take(5))
+        }
+        val partesFim = agenda.dataHoraFim.split("T")
+        if (partesFim.size == 2) {
+            horaFim.definir(partesFim[1].take(5))
         }
 
         status.definir(agenda.status)

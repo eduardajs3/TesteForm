@@ -133,7 +133,19 @@ fun AgendaListagem(
         }
     }
 
-    val horariosSessao = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
+    val horariosBase = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
+    val datasDaSemana = diasDaSemana.map { it.dataIso }.toSet()
+    val horariosSessao = remember(agendamentos, diasDaSemana) {
+        (
+            horariosBase + agendamentos.mapNotNull { agendamento ->
+                val partes = agendamento.dataHoraInicio.split('T', limit = 2)
+                val hora = partes.getOrNull(1)?.take(5)
+                hora?.takeIf {
+                    partes[0] in datasDaSemana && it.matches(Regex("\\d{2}:\\d{2}"))
+                }
+            }
+        ).distinct().sorted()
+    }
 
     BoxWithConstraints(
         modifier = Modifier
