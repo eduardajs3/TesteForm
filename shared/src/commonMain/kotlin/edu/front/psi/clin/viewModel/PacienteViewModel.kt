@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.PacienteAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.PacienteRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -31,7 +32,7 @@ class PacienteViewModel(
                 _pacientes.value = pacienteApi.carregar()
                 println("Pacientes carregados no init: ${_pacientes.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar pacientes do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pacientes do servidor"))
             }
         }
     }
@@ -127,8 +128,9 @@ class PacienteViewModel(
                 backStack.add(PacienteRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -140,7 +142,7 @@ class PacienteViewModel(
                 _pacientes.value = pacienteApi.carregar()
                 mandarMensagem("Paciente apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

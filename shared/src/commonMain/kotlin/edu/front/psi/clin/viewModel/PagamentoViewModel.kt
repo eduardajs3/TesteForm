@@ -45,7 +45,7 @@ class PagamentoViewModel(
                 _agendas.value = agendaApi.carregar()
                 println("Dados de Pagamento e dependências carregados com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar pagamentos: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pagamentos"))
             }
         }
     }
@@ -141,8 +141,9 @@ class PagamentoViewModel(
                     backStack.clear()
                     backStack.add(PagamentoRotas.Listagem)
                 } catch (e: Exception) {
-                    mensagem.value = "Erro ao salvar: ${e.message}"
-                    mandarMensagem("Erro ao salvar: ${e.message}")
+                    val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                    mensagem.value = mensagemErro
+                    mandarMensagem(mensagemErro)
                 }
             }
         } catch (e: Exception) {
@@ -171,7 +172,7 @@ class PagamentoViewModel(
                 _pagamentos.value = pagamentoApi.carregar()
                 mandarMensagem("Pagamento apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

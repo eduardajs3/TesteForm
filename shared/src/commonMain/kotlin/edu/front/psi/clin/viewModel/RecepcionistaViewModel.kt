@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.RecepcionistaAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -31,7 +32,7 @@ class RecepcionistaViewModel(
                 _recepcionistas.value = recepcionistaApi.carregar()
                 println("Recepcionistas carregadas no init: ${_recepcionistas.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar recepcionistas do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar recepcionistas do servidor"))
             }
         }
     }
@@ -125,8 +126,9 @@ class RecepcionistaViewModel(
                 backStack.add(RecepcionistaRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -139,7 +141,7 @@ class RecepcionistaViewModel(
                 println("Recepcionistas após apagar: ${_recepcionistas.value}")
                 mandarMensagem("Recepcionista apagada com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

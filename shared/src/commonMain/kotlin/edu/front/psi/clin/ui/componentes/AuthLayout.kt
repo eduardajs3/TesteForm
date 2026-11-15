@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import edu.front.psi.clin.ui.theme.Branco
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.Res
+import frontpsiclinic.shared.generated.resources.fundoAndroid
 import frontpsiclinic.shared.generated.resources.fundo_login
 
 @Composable
@@ -24,7 +25,9 @@ fun AuthLayout(
         val telaPequena = maxWidth < 600.dp
 
         Image(
-            painter = painterResource(Res.drawable.fundo_login),
+            painter = painterResource(
+                if (telaPequena) Res.drawable.fundoAndroid else Res.drawable.fundo_login
+            ),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop

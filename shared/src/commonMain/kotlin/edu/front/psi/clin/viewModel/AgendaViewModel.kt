@@ -70,7 +70,7 @@ class AgendaViewModel(
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
                 _agendamentos.value = agendaApi.carregar()
             } catch (e: Exception) {
-                mandarMensagem("Erro ao atualizar a disponibilidade: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao atualizar a disponibilidade"))
             }
         }
     }
@@ -86,7 +86,7 @@ class AgendaViewModel(
                 _convenios.value = convenioAPI.carregar()
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar dados do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados do servidor"))
             }
         }
     }
@@ -342,8 +342,9 @@ class AgendaViewModel(
                 backStack.add(AgendaRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -365,7 +366,7 @@ class AgendaViewModel(
                 _agendamentos.value = agendaApi.carregar()
 
             } catch (e: Exception) {
-                mandarMensagem("Erro ao alterar status: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao alterar status"))
             }
         }
     }
@@ -455,7 +456,7 @@ class AgendaViewModel(
                 _agendamentos.value = agendaApi.carregar()
                 mandarMensagem("Agendamento apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

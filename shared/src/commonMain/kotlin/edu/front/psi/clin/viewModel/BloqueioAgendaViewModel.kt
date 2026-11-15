@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.BloqueioAgendaAPI
 import edu.front.psi.clin.api.PsicologoAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.BloqueioAgenda
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
@@ -36,7 +37,7 @@ class BloqueioAgendaViewModel(
                 _bloqueios.value = bloqueioApi.carregar()
                 _psicologos.value = psicologoApi.carregar()
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar bloqueios de agenda: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar bloqueios de agenda"))
             }
         }
     }
@@ -138,8 +139,9 @@ class BloqueioAgendaViewModel(
                 backStack.clear()
                 backStack.add(BloqueioAgendaRotas.Listagem)
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem(mensagem.value)
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -151,7 +153,7 @@ class BloqueioAgendaViewModel(
                 _bloqueios.value = bloqueioApi.carregar()
                 mandarMensagem("Bloqueio apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

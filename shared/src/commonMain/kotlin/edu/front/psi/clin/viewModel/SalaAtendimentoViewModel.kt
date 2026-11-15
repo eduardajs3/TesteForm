@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.SalaAtendimentoAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.SalaAtendimento
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -30,7 +31,7 @@ class SalaAtendimentoViewModel(
                 _salas.value = salaApi.carregar()
                 println("Salas carregadas no init: ${_salas.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar salas do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar salas do servidor"))
             }
         }
     }
@@ -107,8 +108,9 @@ class SalaAtendimentoViewModel(
                 backStack.add(SalaAtendimentoRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -121,7 +123,7 @@ class SalaAtendimentoViewModel(
                 println("Salas após apagar: ${_salas.value}")
                 mandarMensagem("Sala apagada com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

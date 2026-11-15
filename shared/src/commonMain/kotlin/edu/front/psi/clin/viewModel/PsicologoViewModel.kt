@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.PsicologoAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.PsicologoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -31,7 +32,7 @@ class PsicologoViewModel(
                 _psicologos.value = psicologoApi.carregar()
                 println("Psicólogos carregados no init: ${_psicologos.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar psicólogos do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar psicólogos do servidor"))
             }
         }
     }
@@ -126,8 +127,9 @@ class PsicologoViewModel(
                 backStack.add(PsicologoRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -140,7 +142,7 @@ class PsicologoViewModel(
                 println("Psicólogos após apagar: ${_psicologos.value}")
                 mandarMensagem("Psicólogo apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }
