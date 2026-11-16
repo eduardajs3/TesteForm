@@ -14,6 +14,8 @@ import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
@@ -72,11 +74,11 @@ fun EvolucaoClinicaListagem(
                             ?: agendamento.paciente
                     } ?: "Paciente"
                     val agendaDescricao = agenda?.let {
-                        "$pacienteNome - ${it.dataHoraInicio}"
+                        "$pacienteNome - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}"
                     } ?: "Agenda #${item.agendaId}"
 
                     CardExpansivelBase(
-                        tituloTopo = item.dataRegistro,
+                        tituloTopo = formatarDataIsoParaBrasileira(item.dataRegistro),
                         tituloPrincipal = item.descricao.orEmpty(),
                         isExpandido = isExpansivel,
                         onClickToggle = {
@@ -113,7 +115,7 @@ fun EvolucaoClinicaListagem(
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de Evolução Clínica",
-                message = "Tem certeza que deseja excluir o registro de ${item.dataRegistro}?",
+                message = "Tem certeza que deseja excluir o registro de ${formatarDataIsoParaBrasileira(item.dataRegistro)}?",
                 onDismiss = { itemParaExcluir = null },
                 onConfirm = {
                     vm.apagar(item)

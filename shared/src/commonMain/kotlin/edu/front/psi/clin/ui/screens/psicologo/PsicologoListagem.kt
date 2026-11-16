@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun PsicologoListagem(
@@ -88,7 +89,10 @@ fun PsicologoListagem(
                     ItemDetalhe("Especialidade", psicologo.especialidade)
                     ItemDetalhe("Telefone", psicologo.telefone)
                     ItemDetalhe("E-mail", psicologo.email)
-                    ItemDetalhe("Data de cadastro", psicologo.dataCadastro ?: "")
+                    ItemDetalhe(
+                        "Data de cadastro",
+                        formatarDataIsoParaBrasileira(psicologo.dataCadastro.orEmpty())
+                    )
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

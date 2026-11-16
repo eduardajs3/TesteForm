@@ -11,6 +11,7 @@ import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -176,7 +177,7 @@ class RecepcionistaViewModel(
         telefone.definir(recepcionista.telefone)
         senha.definir(recepcionista.senha ?: "")
         ativo.definir(recepcionista.ativo.toString())
-        dataCadastro.definir(recepcionista.dataCadastro ?: "")
+        dataCadastro.definir(formatarDataIsoParaBrasileira(recepcionista.dataCadastro.orEmpty()))
         setor.definir(recepcionista.setor)
         mensagem.value = ""
     }

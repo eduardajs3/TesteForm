@@ -17,6 +17,8 @@ import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -227,7 +229,7 @@ class EvolucaoClinicaViewModel(
         } else {
             psicologoId.value = evolucao.psicologoId
         }
-        dataRegistro.value = formatarDataParaFormulario(evolucao.dataRegistro)
+        dataRegistro.value = formatarDataIsoParaBrasileira(evolucao.dataRegistro)
         descricao.value = evolucao.descricao.orEmpty()
         ativo.value = evolucao.ativo.toString()
         mensagem.value = ""
@@ -259,16 +261,7 @@ class EvolucaoClinicaViewModel(
         val paciente = _pacientes.value.firstOrNull { it.id == agenda.pacienteId }?.nome
             ?: agenda.paciente
             ?: "Paciente"
-        return "$paciente - ${agenda.dataHoraInicio}"
-    }
-
-    private fun formatarDataParaFormulario(data: String): String {
-        val partes = data.substringBefore('T').split("-")
-        return if (partes.size == 3) {
-            "${partes[2]}/${partes[1]}/${partes[0]}"
-        } else {
-            data
-        }
+        return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
     }
 
 }

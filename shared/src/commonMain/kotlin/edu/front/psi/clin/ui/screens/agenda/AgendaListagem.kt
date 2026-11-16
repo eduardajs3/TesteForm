@@ -26,6 +26,7 @@ import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 data class DiaSemanaAgenda(
     val nomeDia: String,
@@ -476,7 +477,10 @@ fun AgendaListagem(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ItemDetalhe("Paciente", pacienteNome)
                         ItemDetalhe("Psicólogo", psicologoNome)
-                        ItemDetalhe("Data e Horário", agendamento.dataHoraInicio)
+                        ItemDetalhe(
+                            "Data e Horário",
+                            formatarDataHoraIsoParaBrasileira(agendamento.dataHoraInicio)
+                        )
                         ItemDetalhe("Sala", salaNome)
                         ItemDetalhe("Tipo de Atendimento", tipoNome)
                         ItemDetalhe("Convênio", convenioNome)

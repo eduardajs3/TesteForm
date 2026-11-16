@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun BloqueioAgendaListagem(
@@ -58,11 +59,11 @@ fun BloqueioAgendaListagem(
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = bloqueio.dataHoraInicio.orEmpty(),
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty()),
                 weight = 1.3f
             )
             CelulaTabelaTexto(
-                text = bloqueio.dataHoraFim.orEmpty(),
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty()),
                 weight = 1.3f
             )
             
@@ -81,8 +82,14 @@ fun BloqueioAgendaListagem(
                 onDismiss = { itemSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe(rotulo = "Psicólogo(a)", valor = vm.nomePsicologo(bloqueio.psicologoId))
-                    ItemDetalhe(rotulo = "Data e hora de início", valor = bloqueio.dataHoraInicio.orEmpty())
-                    ItemDetalhe(rotulo = "Data e hora de fim", valor = bloqueio.dataHoraFim.orEmpty())
+                    ItemDetalhe(
+                        rotulo = "Data e hora de início",
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty())
+                    )
+                    ItemDetalhe(
+                        rotulo = "Data e hora de fim",
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty())
+                    )
                     ItemDetalhe(rotulo = "Motivo", valor = bloqueio.motivo)
                     ItemDetalhe(
                         rotulo = "Status",

@@ -13,6 +13,7 @@ import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun EvolucaoClinicaFormulario(
@@ -47,7 +48,7 @@ fun EvolucaoClinicaFormulario(
             val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
                 ?: agenda.paciente
                 ?: "Paciente"
-            id to "$paciente - ${agenda.dataHoraInicio} (#$id)"
+            id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
         }
     }
 

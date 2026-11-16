@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun SalaAtendimentoListagem(
@@ -81,7 +82,7 @@ fun SalaAtendimentoListagem(
                     ItemDetalhe("Nome da sala", sala.nome)
                     ItemDetalhe("Capacidade", "${sala.capacidade} pessoas")
                     ItemDetalhe("Descrição", sala.descricao)
-                    ItemDetalhe("Data de cadastro", sala.dataCadastro)
+                    ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(sala.dataCadastro))
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

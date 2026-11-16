@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.FuncionarioViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun FuncionarioListagem(
@@ -89,7 +90,10 @@ fun FuncionarioListagem(
                     ItemDetalhe(rotulo = "CPF", valor = funcionario.cpf.orEmpty())
                     ItemDetalhe(rotulo = "E-mail", valor = funcionario.email.orEmpty())
                     ItemDetalhe(rotulo = "Telefone", valor = funcionario.telefone.orEmpty())
-                    ItemDetalhe(rotulo = "Data de cadastro", valor = funcionario.dataCadastro ?: "")
+                    ItemDetalhe(
+                        rotulo = "Data de cadastro",
+                        valor = formatarDataIsoParaBrasileira(funcionario.dataCadastro.orEmpty())
+                    )
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo"

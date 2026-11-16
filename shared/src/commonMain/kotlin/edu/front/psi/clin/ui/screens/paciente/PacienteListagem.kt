@@ -21,6 +21,7 @@ import edu.front.psi.clin.ui.theme.TextoInativo
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 
@@ -147,7 +148,10 @@ fun PacienteListagem(
                     conteudo = {
                         ItemDetalhe("Nome", paciente.nome)
                         ItemDetalhe("CPF", paciente.cpf)
-                        ItemDetalhe("Data de nascimento", paciente.dataNascimento)
+                        ItemDetalhe(
+                            "Data de nascimento",
+                            formatarDataIsoParaBrasileira(paciente.dataNascimento)
+                        )
                         ItemDetalhe("E-mail", paciente.email)
                         ItemDetalhe("Telefone", paciente.telefone)
                         ItemDetalhe("Endereço", paciente.endereco)

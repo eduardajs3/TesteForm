@@ -11,6 +11,8 @@ import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.PacienteRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -84,13 +86,7 @@ class PacienteViewModel(
             mandarMensagem("Por favor, corrija os erros no formulário.")
             return
         }
-        val partes = dataNascimento.valor.value.split("/")
-
-        val dataFormatada = if (partes.size == 3) {
-            "${partes[2]}-${partes[1]}-${partes[0]}"
-        } else {
-            dataNascimento.valor.value
-        }
+        val dataFormatada = formatarDataBrasileiraParaIso(dataNascimento.valor.value)
         viewModelScope.launch {
             try {
                 val paciente = Paciente(
@@ -161,7 +157,7 @@ class PacienteViewModel(
         id.value = paciente.id.toString()
         nome.definir(paciente.nome)
         cpf.definir(paciente.cpf)
-        dataNascimento.definir(paciente.dataNascimento)
+        dataNascimento.definir(formatarDataIsoParaBrasileira(paciente.dataNascimento))
         email.definir(paciente.email)
         telefone.definir(paciente.telefone)
         endereco.definir(paciente.endereco)

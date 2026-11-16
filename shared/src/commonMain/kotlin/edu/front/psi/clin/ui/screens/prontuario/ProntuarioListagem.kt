@@ -13,6 +13,7 @@ import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
@@ -61,9 +62,12 @@ fun ProntuarioListagem(
             ) {
                 items(listaOrdenada) { item ->
                     val isExpansivel = itemExpandidoId == item.id
+                    val dataAbertura = item.dataAbertura
+                        ?.let(::formatarDataIsoParaBrasileira)
+                        .orEmpty()
 
                     CardExpansivelBase(
-                        tituloTopo = item.dataAbertura.orEmpty(),
+                        tituloTopo = dataAbertura,
                         tituloPrincipal = item.queixaPrincipal,
                         isExpandido = isExpansivel,
                         onClickToggle = {
@@ -99,7 +103,7 @@ fun ProntuarioListagem(
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de prontuário",
-                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura}?",
+                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura?.let(::formatarDataIsoParaBrasileira)}?",
                 onDismiss = { itemParaExcluir = null },
                 onConfirm = {
                     vm.apagar(item)

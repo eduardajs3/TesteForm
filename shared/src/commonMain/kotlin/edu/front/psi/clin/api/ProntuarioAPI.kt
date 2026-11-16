@@ -1,6 +1,7 @@
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.Prontuario
+import edu.front.psi.clin.utils.formatarDataBrasileiraOuIsoParaDataHoraIso
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
@@ -58,20 +59,13 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
     private fun Prontuario.toRequest() = ProntuarioRequest(
         id = id,
         pacienteId = requireNotNull(pacienteId) { "Selecione um paciente para o prontuário." },
-        dataAbertura = dataAbertura?.let(::formatarDataAbertura),
+        dataAbertura = dataAbertura?.let {
+            formatarDataBrasileiraOuIsoParaDataHoraIso(
+                it,
+                "Data de abertura do prontuário inválida."
+            )
+        },
         queixaPrincipal = queixaPrincipal,
         status = status?.uppercase() ?: "ATIVO"
     )
-
-    private fun formatarDataAbertura(data: String): String {
-        return when {
-            data.matches(Regex("\\d{2}/\\d{2}/\\d{4}")) -> {
-                val (dia, mes, ano) = data.split("/")
-                "$ano-$mes-${dia}T00:00:00"
-            }
-            data.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> "${data}T00:00:00"
-            data.matches(Regex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,9})?)?")) -> data
-            else -> throw IllegalArgumentException("Data de abertura do prontuário inválida.")
-        }
-    }
 }

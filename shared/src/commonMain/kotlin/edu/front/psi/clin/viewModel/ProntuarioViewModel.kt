@@ -11,6 +11,7 @@ import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.ProntuarioRotas
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -164,7 +165,7 @@ class ProntuarioViewModel(
         backStack.add(ProntuarioRotas.Formulario)
         id.value = prontuario.id?.toString() ?: ""
         paciente.value = _pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome.orEmpty()
-        dataAbertura.value = prontuario.dataAbertura?.let(::formatarDataParaFormulario).orEmpty()
+        dataAbertura.value = prontuario.dataAbertura?.let(::formatarDataIsoParaBrasileira).orEmpty()
         queixaPrincipal.value = prontuario.queixaPrincipal
         status.value = when (prontuario.status?.uppercase()) {
             "ARQUIVADO" -> "Arquivado"
@@ -173,15 +174,6 @@ class ProntuarioViewModel(
         }
         ativo.value = prontuario.ativo.toString()
         mensagem.value = ""
-    }
-
-    private fun formatarDataParaFormulario(data: String): String {
-        val partes = data.substringBefore('T').split("-")
-        return if (partes.size == 3) {
-            "${partes[2]}/${partes[1]}/${partes[0]}"
-        } else {
-            data
-        }
     }
 
     fun limparCampos() {

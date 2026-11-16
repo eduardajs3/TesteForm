@@ -9,6 +9,7 @@ import edu.front.psi.clin.model.*
 import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -482,9 +483,8 @@ class AgendaViewModel(
 
         val partesDataHora = agenda.dataHoraInicio.split("T")
         if (partesDataHora.size == 2) {
-            val partesData = partesDataHora[0].split("-")
-            if (partesData.size == 3) {
-                dataAtendimento.definir("${partesData[2]}/${partesData[1]}/${partesData[0]}")
+            if (partesDataHora[0].split("-").size == 3) {
+                dataAtendimento.definir(formatarDataIsoParaBrasileira(partesDataHora[0]))
             }
             horaInicio.definir(partesDataHora[1].take(5))
         }

@@ -1,6 +1,7 @@
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.EvolucaoClinica
+import edu.front.psi.clin.utils.formatarDataBrasileiraOuIsoParaDataHoraIso
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
@@ -51,7 +52,10 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
         prontuarioId = prontuarioId,
         psicologoId = psicologoId,
         agendaId = agendaId,
-        dataRegistro = formatarDataRegistro(dataRegistro),
+        dataRegistro = formatarDataBrasileiraOuIsoParaDataHoraIso(
+            dataRegistro,
+            "Data de registro da evolução clínica inválida."
+        ),
         descricao = descricao
     )
 
@@ -63,15 +67,4 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
         response.lancarErroSeNecessario()
     }
 
-    private fun formatarDataRegistro(data: String): String {
-        return when {
-            data.matches(Regex("\\d{2}/\\d{2}/\\d{4}")) -> {
-                val (dia, mes, ano) = data.split("/")
-                "$ano-$mes-${dia}T00:00:00"
-            }
-            data.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> "${data}T00:00:00"
-            data.matches(Regex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,9})?)?")) -> data
-            else -> throw IllegalArgumentException("Data de registro da evolução clínica inválida.")
-        }
-    }
 }

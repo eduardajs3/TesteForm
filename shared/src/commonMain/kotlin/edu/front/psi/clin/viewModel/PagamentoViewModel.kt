@@ -9,6 +9,7 @@ import edu.front.psi.clin.model.*
 import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -188,16 +189,7 @@ class PagamentoViewModel(
         valorPaciente.definir(pagamento.valorPaciente.toString())
         formaPagamento.definir(pagamento.formaPagamento)
 
-        try {
-            val partes = pagamento.dataPagamento.split("T")[0].split("-")
-            if (partes.size == 3) {
-                dataPagamento.definir("${partes[2]}/${partes[1]}/${partes[0]}")
-            } else {
-                dataPagamento.definir(pagamento.dataPagamento)
-            }
-        } catch (e: Exception) {
-            dataPagamento.definir(pagamento.dataPagamento)
-        }
+        dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
         status.definir(pagamento.status)
         mensagem.value = ""

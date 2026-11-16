@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun PagamentoListagem(
@@ -96,7 +97,10 @@ fun PagamentoListagem(
                     ItemDetalhe(rotulo = "Valor do convênio", valor = "R$ ${pagamento.valorConvenio}")
                     ItemDetalhe(rotulo = "Valor do paciente", valor = "R$ ${pagamento.valorPaciente}")
                     ItemDetalhe(rotulo = "Forma de pagamento", valor = pagamento.formaPagamento)
-                    ItemDetalhe(rotulo = "Data do pagamento", valor = pagamento.dataPagamento)
+                    ItemDetalhe(
+                        rotulo = "Data do pagamento",
+                        valor = formatarDataIsoParaBrasileira(pagamento.dataPagamento)
+                    )
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isPago) "Pago" else pagamento.status,

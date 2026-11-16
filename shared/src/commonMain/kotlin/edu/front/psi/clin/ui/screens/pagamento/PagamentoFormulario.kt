@@ -12,6 +12,7 @@ import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun PagamentoFormulario(
@@ -37,7 +38,9 @@ fun PagamentoFormulario(
 
     val pacienteAtualNome = pacientesLista.firstOrNull { it.id?.toLong() == vm.pacienteId.value }?.nome ?: ""
     val convenioAtualNome = conveniosLista.firstOrNull { it.id?.toLong() == vm.convenioId.value }?.nome ?: ""
-    val agendaAtualDescricao = agendasLista.firstOrNull { it.id?.toLong() == vm.agendaId.value }?.let { "Agenda #${it.id} - ${it.dataHoraInicio}" } ?: ""
+    val agendaAtualDescricao = agendasLista.firstOrNull { it.id?.toLong() == vm.agendaId.value }
+        ?.let { "Agenda #${it.id} - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}" }
+        ?: ""
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -53,7 +56,9 @@ fun PagamentoFormulario(
             CampoDropdownPadrao(
                 label = "Agenda / Consulta *",
                 valorSelecionado = agendaAtualDescricao,
-                opcoes = agendasParaSelecionar.map { "Agenda #${it.id} - ${it.dataHoraInicio}" },
+                opcoes = agendasParaSelecionar.map {
+                    "Agenda #${it.id} - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}"
+                },
                 onOpcaoSelecionada = { selecao ->
                     val idStr = selecao.substringAfter("#").substringBefore(" -")
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
