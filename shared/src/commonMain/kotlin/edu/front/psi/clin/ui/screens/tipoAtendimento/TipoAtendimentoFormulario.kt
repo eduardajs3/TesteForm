@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
-import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
@@ -57,6 +56,7 @@ fun TipoAtendimentoFormulario(
                 label = "Duração",
                 placeholder = "HH:mm (ex.: 00:50)",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.duracao.temErro.value,
                 errorMessage = if (vm.duracao.temErro.value) "Campo obrigatório" else null
             )
@@ -71,15 +71,6 @@ fun TipoAtendimentoFormulario(
                 },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
-            )
-
-            CampoDataPadrao(
-                value = vm.dataCadastro.valor.value,
-                onValueChange = { vm.dataCadastro.definir(it) },
-                label = "Data de cadastro",
-                obrigatorio = true,
-                isError = vm.dataCadastro.temErro.value,
-                errorMessage = if (vm.dataCadastro.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

@@ -46,6 +46,7 @@ fun ConvenioFormulario(
                 onValueChange = { vm.cnpj.definir(it) },
                 label = "CNPJ",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.cnpj.temErro.value,
                 errorMessage = if (vm.cnpj.temErro.value) "Campo obrigatório" else null
             )
@@ -55,6 +56,7 @@ fun ConvenioFormulario(
                 onValueChange = { vm.telefone.definir(it) },
                 label = "Telefone",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.telefone.temErro.value,
                 errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )

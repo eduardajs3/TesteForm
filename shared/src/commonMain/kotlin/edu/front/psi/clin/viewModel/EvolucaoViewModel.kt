@@ -4,29 +4,65 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.AgendaAPI
+import edu.front.psi.clin.api.EvolucaoClinicaAPI
+import edu.front.psi.clin.api.PacienteAPI
+import edu.front.psi.clin.api.ProntuarioAPI
+import edu.front.psi.clin.api.PsicologoAPI
+import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
+import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.model.EvolucaoClinica
+import edu.front.psi.clin.model.Paciente
+import edu.front.psi.clin.model.Prontuario
+import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class EvolucaoClinicaViewModel(
     private val mandarMensagem: (String) -> Unit
 ) : ViewModel() {
 
-    private var idCounter: Int = 1
+    private val httpClient = httpClientManager()
+    private val evolucaoApi = EvolucaoClinicaAPI(httpClient)
+    private val pacienteApi = PacienteAPI(httpClient)
+    private val prontuarioApi = ProntuarioAPI(httpClient)
+    private val psicologoApi = PsicologoAPI(httpClient)
+    private val agendaApi = AgendaAPI(httpClient)
 
-    private val _evolucoes = MutableStateFlow<List<EvolucaoClinica>>(
-        listOf(
-            EvolucaoClinica(
-                id = 1,
-                prontuario = "Maria Clara da Silva",
-                psicologo = "Dra. Ana Costa",
-                agenda = "Sessão 10/10/2023 - 14:00",
-                dataRegistro = "10/10/2023 15:00",
-                descricao = "Paciente apresentou melhora nos quadros de ansiedade social e relatou melhora na qualidade do sono.",
-                ativo = true
-            )
-        )
-    )
+    private val _evolucoes = MutableStateFlow<List<EvolucaoClinica>>(emptyList())
+    private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
+    private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
+    private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
+    private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
+    val pacientes = _pacientes.asStateFlow()
+    val prontuarios = _prontuarios.asStateFlow()
+    val psicologos = _psicologos.asStateFlow()
+    val agendas = _agendas.asStateFlow()
+
+    init {
+        carregarDados(evolucaoApi::carregar) { _evolucoes.value = it }
+        carregarDados(pacienteApi::carregar) { _pacientes.value = it }
+        carregarDados(prontuarioApi::carregar) { _prontuarios.value = it }
+        carregarDados(psicologoApi::carregar) { _psicologos.value = it }
+        carregarDados(agendaApi::carregar) { _agendas.value = it }
+    }
+
+    private fun <T> carregarDados(
+        carregar: suspend () -> List<T>,
+        atualizar: (List<T>) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                atualizar(carregar())
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados da evolução clínica"))
+            }
+        }
+    }
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
@@ -35,14 +71,20 @@ class EvolucaoClinicaViewModel(
         _filtro.value = novoFiltro.trim()
     }
 
-    val evolucoesFiltradas = combine(_evolucoes, _filtro) { evolucoes, filtro ->
+    val evolucoesFiltradas = combine(_evolucoes, _filtro, _prontuarios, _pacientes) {
+            evolucoes, filtro, prontuarios, pacientes ->
         if (filtro.isEmpty()) {
             evolucoes
         } else {
             evolucoes.filter {
-                it.prontuario.contains(filtro, ignoreCase = true) ||
-                it.psicologo.contains(filtro, ignoreCase = true) ||
-                it.descricao.contains(filtro, ignoreCase = true)
+                val prontuario = prontuarios.firstOrNull { prontuario -> prontuario.id == it.prontuarioId }
+                val nomePaciente = pacientes.firstOrNull { paciente ->
+                    paciente.id == prontuario?.pacienteId
+                }?.nome.orEmpty()
+                nomePaciente.contains(filtro, ignoreCase = true) ||
+                    it.prontuarioId.toString().contains(filtro, ignoreCase = true) ||
+                    it.psicologoId.toString().contains(filtro, ignoreCase = true) ||
+                    it.descricao?.contains(filtro, ignoreCase = true) == true
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -53,70 +95,81 @@ class EvolucaoClinicaViewModel(
 
 
     val id = mutableStateOf("")
-    val prontuario = mutableStateOf("")
-    val psicologo = mutableStateOf("")
-    val agenda = mutableStateOf("")
+    val prontuarioId = mutableStateOf<Long?>(null)
+    val psicologoId = mutableStateOf<Long?>(null)
+    val agendaId = mutableStateOf<Long?>(null)
     val dataRegistro = mutableStateOf("")
     val descricao = mutableStateOf("")
     val ativo = mutableStateOf("true")
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-        try {
-            if (descricao.value.isBlank()) {
-                mensagem.value = "A descrição da evolução é obrigatória!"
-                mandarMensagem("A descrição da evolução é obrigatória!")
-                return
-            }
+        if (prontuarioId.value == null || psicologoId.value == null || agendaId.value == null ||
+            dataRegistro.value.isBlank() || descricao.value.isBlank()
+        ) {
+            val aviso = "Preencha os campos obrigatórios."
+            mensagem.value = aviso
+            mandarMensagem(aviso)
+            return
+        }
 
-            val ehNovo = id.value.isEmpty()
-            val novoId = if (ehNovo) ++idCounter else id.value.toInt()
+        val idAtual = id.value.toLongOrNull()
+        if (id.value.isNotEmpty() && idAtual == null) {
+            val aviso = "Identificador da evolução clínica inválido."
+            mensagem.value = aviso
+            mandarMensagem(aviso)
+            return
+        }
 
-            val statusBooleano = when (ativo.value.trim().lowercase()) {
-                "false", "0", "inativo", "não", "nao" -> false
-                else -> true
-            }
+        val ehNovo = idAtual == null
+        val evolucao = EvolucaoClinica(
+            id = idAtual,
+            prontuarioId = prontuarioId.value!!,
+            psicologoId = psicologoId.value!!,
+            agendaId = agendaId.value!!,
+            dataRegistro = dataRegistro.value.trim(),
+            descricao = descricao.value.trim(),
+            ativo = ativo.value.toBooleanStrictOrNull() ?: true
+        )
 
-            val evolucaoItem = EvolucaoClinica(
-                id = novoId,
-                prontuario = prontuario.value.trim().ifEmpty { "Paciente não informado" },
-                psicologo = psicologo.value.trim().ifEmpty { "Dra. Ana Costa" },
-                agenda = agenda.value.trim(),
-                dataRegistro = dataRegistro.value.trim().ifEmpty { "Hoje" },
-                descricao = descricao.value.trim(),
-                ativo = statusBooleano
-            )
-
-            if (ehNovo) {
-                _evolucoes.update { lista -> lista + evolucaoItem }
-            } else {
-                _evolucoes.update { lista ->
-                    lista.map { item -> if (item.id == novoId) evolucaoItem else item }
+        viewModelScope.launch {
+            try {
+                if (idAtual == null) {
+                    evolucaoApi.salvar(evolucao)
+                } else {
+                    evolucaoApi.atualizar(idAtual, evolucao)
                 }
+                _evolucoes.value = evolucaoApi.carregar()
+                _filtro.value = ""
+
+                val mensagemSucesso = if (ehNovo) {
+                    "Evolução clínica salva com sucesso!"
+                } else {
+                    "Evolução clínica atualizada com sucesso!"
+                }
+                mensagem.value = mensagemSucesso
+                mandarMensagem(mensagemSucesso)
+                limparCampos()
+                backStack.clear()
+                backStack.add(EvolucaoClinicaRotas.Listagem)
+            } catch (e: Exception) {
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar evolução clínica")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
-
-            _filtro.value = ""
-            val mensagemSucesso = if (ehNovo) {
-                "Evolução clínica salva com sucesso!"
-            } else {
-                "Evolução clínica atualizada com sucesso!"
-            }
-            mensagem.value = mensagemSucesso
-            mandarMensagem(mensagemSucesso)
-            limparCampos()
-
-            backStack.clear()
-            backStack.add(EvolucaoClinicaRotas.Listagem)
-
-        } catch (e: Exception) {
-            mensagem.value = "Erro ao salvar: ${e.message}"
-            mandarMensagem("Erro ao salvar: ${e.message}")
         }
     }
 
     fun apagar(evolucao: EvolucaoClinica) {
-        _evolucoes.update { lista -> lista.filterNot { it.id == evolucao.id } }
-        mandarMensagem("Evolução clínica apagada com sucesso!")
+        viewModelScope.launch {
+            try {
+                evolucaoApi.apagar(evolucao)
+                _evolucoes.value = evolucaoApi.carregar()
+                mandarMensagem("Evolução clínica apagada com sucesso!")
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar evolução clínica"))
+            }
+        }
     }
 
     fun novaEvolucao(nomePaciente: String = "") {
@@ -124,31 +177,91 @@ class EvolucaoClinicaViewModel(
         backStack.add(EvolucaoClinicaRotas.Formulario)
         limparCampos()
         if (nomePaciente.isNotEmpty()) {
-            prontuario.value = nomePaciente
+            selecionarPaciente(nomePaciente)
         }
+    }
+
+    fun selecionarPaciente(nomePaciente: String) {
+        val pacienteId = _pacientes.value.firstOrNull { it.nome == nomePaciente }?.id
+        val prontuario = _prontuarios.value.firstOrNull {
+            it.pacienteId == pacienteId
+        }
+        if (prontuario != null) {
+            selecionarProntuario(prontuario)
+        } else {
+            prontuarioId.value = null
+            agendaId.value = null
+            psicologoId.value = null
+        }
+    }
+
+    fun selecionarAgenda(agenda: Agenda) {
+        agendaId.value = agenda.id
+        psicologoId.value = agenda.psicologoId
+
+        val prontuariosDoPaciente = _prontuarios.value.filter {
+            it.pacienteId == agenda.pacienteId
+        }
+        val prontuarioAtual = prontuarioId.value?.takeIf { id ->
+            prontuariosDoPaciente.any { it.id == id }
+        }
+        prontuarioId.value = prontuarioAtual ?: prontuariosDoPaciente.singleOrNull()?.id
+    }
+
+    fun selecionarProntuario(prontuario: Prontuario) {
+        prontuarioId.value = prontuario.id
+        val agendaAtual = _agendas.value.firstOrNull {
+            it.id == agendaId.value && it.pacienteId == prontuario.pacienteId
+        }
+        agendaId.value = agendaAtual?.id
+        psicologoId.value = agendaAtual?.psicologoId
     }
 
     fun editar(evolucao: EvolucaoClinica) {
         backStack.clear()
         backStack.add(EvolucaoClinicaRotas.Formulario)
         id.value = evolucao.id.toString()
-        prontuario.value = evolucao.prontuario
-        psicologo.value = evolucao.psicologo
-        agenda.value = evolucao.agenda
-        dataRegistro.value = evolucao.dataRegistro
-        descricao.value = evolucao.descricao
+        prontuarioId.value = evolucao.prontuarioId
+        agendaId.value = evolucao.agendaId
+        val agenda = _agendas.value.firstOrNull { it.id == evolucao.agendaId }
+        if (agenda != null) {
+            selecionarAgenda(agenda)
+        } else {
+            psicologoId.value = evolucao.psicologoId
+        }
+        dataRegistro.value = formatarDataIsoParaBrasileira(evolucao.dataRegistro)
+        descricao.value = evolucao.descricao.orEmpty()
         ativo.value = evolucao.ativo.toString()
         mensagem.value = ""
     }
 
     fun limparCampos() {
         id.value = ""
-        prontuario.value = ""
-        psicologo.value = ""
-        agenda.value = ""
+        prontuarioId.value = null
+        psicologoId.value = null
+        agendaId.value = null
         dataRegistro.value = ""
         descricao.value = ""
         ativo.value = "true"
         mensagem.value = "Campos limpos."
     }
+
+    fun nomeProntuario(id: Long): String {
+        val prontuario = _prontuarios.value.firstOrNull { it.id == id } ?: return "Prontuário #$id"
+        val nomePaciente = _pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome
+            ?: "Paciente"
+        return "$nomePaciente - ${prontuario.queixaPrincipal} (#$id)"
+    }
+
+    fun nomePsicologo(id: Long): String =
+        _psicologos.value.firstOrNull { it.id == id }?.nome ?: "Psicólogo #$id"
+
+    fun nomeAgenda(id: Long): String {
+        val agenda = _agendas.value.firstOrNull { it.id == id } ?: return "Agenda #$id"
+        val paciente = _pacientes.value.firstOrNull { it.id == agenda.pacienteId }?.nome
+            ?: agenda.paciente
+            ?: "Paciente"
+        return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
+    }
+
 }

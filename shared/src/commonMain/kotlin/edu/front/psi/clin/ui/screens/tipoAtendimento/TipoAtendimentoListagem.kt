@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun TipoAtendimentoListagem(
@@ -45,6 +46,7 @@ fun TipoAtendimentoListagem(
             onVisualizar = { tipo -> tipoSelecionado.value = tipo },
             onEditar = vm::editar,
             onApagar = { tipo -> tipoParaExcluir.value = tipo },
+            textoCompacto = { tipo -> tipo.nome },
             placeholderPesquisa = "Buscar por tipo, duração ou descrição..."
         ) { tipo ->
             val isAtivo = tipo.ativo
@@ -80,7 +82,7 @@ fun TipoAtendimentoListagem(
                     ItemDetalhe("Nome do atendimento", tipo.nome)
                     ItemDetalhe("Duração", "${tipo.duracao} minutos")
                     ItemDetalhe("Descrição", tipo.descricao)
-                    ItemDetalhe("Data de cadastro", tipo.dataCadastro)
+                    ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(tipo.dataCadastro))
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

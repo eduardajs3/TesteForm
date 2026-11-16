@@ -4,9 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +26,7 @@ import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 data class DiaSemanaAgenda(
     val nomeDia: String,
@@ -107,6 +110,7 @@ fun AgendaListagem(
 
     var segundaAtual by remember { mutableStateOf(DataSimples(16, 11, 2026)) }
     var menuMesesAberto by remember { mutableStateOf(false) }
+    var diaSelecionadoIndex by remember { mutableIntStateOf(0) }
 
     val sextaAtual = remember(segundaAtual) { segundaAtual.adicionarDias(4) }
 
@@ -130,14 +134,37 @@ fun AgendaListagem(
         }
     }
 
-    val horariosSessao = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
+    val horariosBase = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
+    val datasDaSemana = diasDaSemana.map { it.dataIso }.toSet()
+    val horariosSessao = remember(agendamentos, diasDaSemana) {
+        (
+            horariosBase + agendamentos.mapNotNull { agendamento ->
+                val partes = agendamento.dataHoraInicio.split('T', limit = 2)
+                val hora = partes.getOrNull(1)?.take(5)
+                hora?.takeIf {
+                    partes[0] in datasDaSemana && it.matches(Regex("\\d{2}:\\d{2}"))
+                }
+            }
+        ).distinct().sorted()
+    }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(24.dp)
     ) {
+        val telaPequena = maxWidth < 600.dp
+        val diasExibidos = if (telaPequena) {
+            listOf(diasDaSemana[diaSelecionadoIndex])
+        } else {
+            diasDaSemana
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(if (telaPequena) 12.dp else 24.dp)
+        ) {
         Column(modifier = Modifier.fillMaxSize()) {
             CabecalhoTela(
                 titulo = "Agenda de Atendimentos",
@@ -161,91 +188,101 @@ fun AgendaListagem(
                     modifier = Modifier.weight(1.5f),
                     border = BorderStroke(1.dp, CardBordaCinza)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(-7) }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.keyboard_arrow_left),
-                                contentDescription = "Semana Anterior",
-                                tint = VerdeClinica,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    if (telaPequena) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = tituloSemana,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = TextoPrincipal
-                            )
-
-                            Box {
-                                OutlinedButton(
-                                    onClick = { menuMesesAberto = true },
-                                    shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = VerdeClinica
-                                    ),
-                                    border = BorderStroke(1.dp, CardBordaCinza),
-                                    modifier = Modifier.height(32.dp)
-                                ) {
-                                    Text(
-                                        text = nomesDosMeses[segundaAtual.mes - 1],
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = VerdeClinica
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(-7) }) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.keyboard_arrow_down),
-                                        contentDescription = "Selecionar Mês",
+                                        painter = painterResource(Res.drawable.keyboard_arrow_left),
+                                        contentDescription = "Semana Anterior",
                                         tint = VerdeClinica,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
-
-                                DropdownMenu(
-                                    expanded = menuMesesAberto,
-                                    onDismissRequest = { menuMesesAberto = false },
-                                    containerColor = Branco
-                                ) {
-                                    nomesDosMeses.forEachIndexed { index, mesNome ->
-                                        val isMesAtual = (index + 1) == segundaAtual.mes
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = "$mesNome ${segundaAtual.ano}",
-                                                    fontWeight = if (isMesAtual) FontWeight.Bold else FontWeight.Normal,
-                                                    color = if (isMesAtual) VerdeClinica else TextoPrincipal
-                                                )
-                                            },
-                                            onClick = {
-                                                menuMesesAberto = false
-                                                segundaAtual = obterPrimeiraSegundaDoMes(segundaAtual.ano, index + 1)
-                                            }
-                                        )
-                                    }
+                                Text(
+                                    text = tituloSemana,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextoPrincipal,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(7) }) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                        contentDescription = "Próxima Semana",
+                                        tint = VerdeClinica,
+                                        modifier = Modifier.size(24.dp)
+                                    )
                                 }
                             }
-                        }
-
-                        IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(7) }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.keyboard_arrow_right),
-                                contentDescription = "Próxima Semana",
-                                tint = VerdeClinica,
-                                modifier = Modifier.size(24.dp)
+                            SeletorMesAgenda(
+                                mesAtual = segundaAtual.mes,
+                                anoAtual = segundaAtual.ano,
+                                menuAberto = menuMesesAberto,
+                                onAbrirMenu = { menuMesesAberto = true },
+                                onFecharMenu = { menuMesesAberto = false },
+                                onSelecionarMes = { mes ->
+                                    segundaAtual = obterPrimeiraSegundaDoMes(segundaAtual.ano, mes)
+                                }
                             )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(-7) }) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.keyboard_arrow_left),
+                                    contentDescription = "Semana Anterior",
+                                    tint = VerdeClinica,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = tituloSemana,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextoPrincipal
+                                )
+
+                                SeletorMesAgenda(
+                                    mesAtual = segundaAtual.mes,
+                                    anoAtual = segundaAtual.ano,
+                                    menuAberto = menuMesesAberto,
+                                    onAbrirMenu = { menuMesesAberto = true },
+                                    onFecharMenu = { menuMesesAberto = false },
+                                    onSelecionarMes = { mes ->
+                                        segundaAtual = obterPrimeiraSegundaDoMes(segundaAtual.ano, mes)
+                                    }
+                                )
+                            }
+
+                            IconButton(onClick = { segundaAtual = segundaAtual.adicionarDias(7) }) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.keyboard_arrow_right),
+                                    contentDescription = "Próxima Semana",
+                                    tint = VerdeClinica,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -254,43 +291,82 @@ fun AgendaListagem(
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(60.dp))
-
+            if (telaPequena) {
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    diasDaSemana.forEach { dia ->
+                    diasDaSemana.forEachIndexed { index, dia ->
+                        val selecionado = index == diaSelecionadoIndex
                         Card(
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Branco),
-                            border = BorderStroke(1.dp, CardBordaCinza),
-                            modifier = Modifier.weight(1f)
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (selecionado) VerdeClinica else Branco
+                            ),
+                            border = BorderStroke(1.dp, if (selecionado) VerdeClinica else CardBordaCinza),
+                            modifier = Modifier.clickable { diaSelecionadoIndex = index }
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                                modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     text = dia.nomeDia,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextoPrincipal,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    color = if (selecionado) Branco else TextoPrincipal
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = dia.dataFormatada,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = TextoSecundario
+                                    color = if (selecionado) Branco else TextoSecundario
                                 )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.width(60.dp))
+
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        diasDaSemana.forEach { dia ->
+                            Card(
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Branco),
+                                border = BorderStroke(1.dp, CardBordaCinza),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 10.dp, horizontal = 4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = dia.nomeDia,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextoPrincipal,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = dia.dataFormatada,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextoSecundario
+                                    )
+                                }
                             }
                         }
                     }
@@ -323,7 +399,7 @@ fun AgendaListagem(
                             modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            diasDaSemana.forEach { dia ->
+                            diasExibidos.forEach { dia ->
                                 val agendamentoNoHorario = agendamentos.firstOrNull { item ->
                                     val partesDataHora = item.dataHoraInicio.split("T")
                                     if (partesDataHora.size != 2) return@firstOrNull false
@@ -401,7 +477,10 @@ fun AgendaListagem(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ItemDetalhe("Paciente", pacienteNome)
                         ItemDetalhe("Psicólogo", psicologoNome)
-                        ItemDetalhe("Data e Horário", agendamento.dataHoraInicio)
+                        ItemDetalhe(
+                            "Data e Horário",
+                            formatarDataHoraIsoParaBrasileira(agendamento.dataHoraInicio)
+                        )
                         ItemDetalhe("Sala", salaNome)
                         ItemDetalhe("Tipo de Atendimento", tipoNome)
                         ItemDetalhe("Convênio", convenioNome)
@@ -450,6 +529,65 @@ fun AgendaListagem(
                     }
                 }
             )
+        }
+    }
+}
+}
+
+@Composable
+private fun SeletorMesAgenda(
+    mesAtual: Int,
+    anoAtual: Int,
+    menuAberto: Boolean,
+    onAbrirMenu: () -> Unit,
+    onFecharMenu: () -> Unit,
+    onSelecionarMes: (Int) -> Unit
+) {
+    Box {
+        OutlinedButton(
+            onClick = onAbrirMenu,
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = VerdeClinica),
+            border = BorderStroke(1.dp, CardBordaCinza),
+            modifier = Modifier.height(32.dp)
+        ) {
+            Text(
+                text = nomesDosMeses[mesAtual - 1],
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = VerdeClinica
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.keyboard_arrow_down),
+                contentDescription = "Selecionar Mês",
+                tint = VerdeClinica,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        DropdownMenu(
+            expanded = menuAberto,
+            onDismissRequest = onFecharMenu,
+            containerColor = Branco
+        ) {
+            nomesDosMeses.forEachIndexed { index, mesNome ->
+                val isMesAtual = index + 1 == mesAtual
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "$mesNome $anoAtual",
+                            fontWeight = if (isMesAtual) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isMesAtual) VerdeClinica else TextoPrincipal
+                        )
+                    },
+                    onClick = {
+                        onFecharMenu()
+                        onSelecionarMes(index + 1)
+                    }
+                )
+            }
         }
     }
 }

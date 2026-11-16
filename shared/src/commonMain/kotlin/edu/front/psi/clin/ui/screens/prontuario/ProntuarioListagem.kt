@@ -13,6 +13,7 @@ import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
@@ -26,7 +27,7 @@ fun ProntuarioListagem(
     val listaProntuarios by vm.prontuariosFiltrados.collectAsState()
     val listaOrdenada = remember(listaProntuarios) { listaProntuarios.sortedByDescending { it.id } }
 
-    var itemExpandidoId by remember { mutableStateOf<Int?>(null) }
+    var itemExpandidoId by remember { mutableStateOf<Long?>(null) }
     var itemParaExcluir by remember { mutableStateOf<Prontuario?>(null) }
 
     Box(
@@ -61,9 +62,12 @@ fun ProntuarioListagem(
             ) {
                 items(listaOrdenada) { item ->
                     val isExpansivel = itemExpandidoId == item.id
+                    val dataAbertura = item.dataAbertura
+                        ?.let(::formatarDataIsoParaBrasileira)
+                        .orEmpty()
 
                     CardExpansivelBase(
-                        tituloTopo = item.dataAbertura,
+                        tituloTopo = dataAbertura,
                         tituloPrincipal = item.queixaPrincipal,
                         isExpandido = isExpansivel,
                         onClickToggle = {
@@ -72,7 +76,7 @@ fun ProntuarioListagem(
                         onEditarClick = { vm.editar(item) },
                         onExcluirClick = { itemParaExcluir = item }
                     ) {
-                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status)
+                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status.orEmpty())
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -99,7 +103,7 @@ fun ProntuarioListagem(
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de prontuário",
-                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura}?",
+                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura?.let(::formatarDataIsoParaBrasileira)}?",
                 onDismiss = { itemParaExcluir = null },
                 onConfirm = {
                     vm.apagar(item)

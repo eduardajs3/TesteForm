@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.RecepcionistaViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun RecepcionistaListagem(
@@ -46,6 +47,7 @@ fun RecepcionistaListagem(
             onVisualizar = { recepcionista -> recepcionistaSelecionada.value = recepcionista },
             onEditar = vm::editar,
             onApagar = { recepcionista -> recepcionistaParaExcluir.value = recepcionista },
+            textoCompacto = { recepcionista -> recepcionista.nome },
             placeholderPesquisa = "Buscar por nome, CPF ou setor..."
         ) { recepcionista ->
             val isAtivo = recepcionista.ativo
@@ -87,7 +89,10 @@ fun RecepcionistaListagem(
                     ItemDetalhe("Setor", recepcionista.setor)
                     ItemDetalhe("Telefone", recepcionista.telefone)
                     ItemDetalhe("E-mail", recepcionista.email)
-                    ItemDetalhe("Data de cadastro", recepcionista.dataCadastro ?: "")
+                    ItemDetalhe(
+                        "Data de cadastro",
+                        formatarDataIsoParaBrasileira(recepcionista.dataCadastro.orEmpty())
+                    )
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

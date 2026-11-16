@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.ConvenioAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Convenio
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
@@ -32,7 +33,7 @@ class ConvenioViewModel(
                 _convenios.value = convenioApi.carregar()
                 println("Lista carregada no init: ${_convenios.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar convênios do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar convênios do servidor"))
             }
         }
     }
@@ -115,7 +116,7 @@ class ConvenioViewModel(
                 backStack.add(ConvenioRotas.Listagem)
                 
             } catch (e: Exception) {
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             }
         }
     }
@@ -128,7 +129,7 @@ class ConvenioViewModel(
                 println("Lista após apagar: ${_convenios.value}")
                 mandarMensagem("Convênio apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

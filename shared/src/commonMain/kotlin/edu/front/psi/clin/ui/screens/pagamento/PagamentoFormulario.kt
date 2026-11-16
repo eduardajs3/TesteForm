@@ -12,6 +12,7 @@ import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun PagamentoFormulario(
@@ -23,6 +24,13 @@ fun PagamentoFormulario(
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
     val agendasLista = vm.agendas.collectAsState().value
+    val agendasSemPagamento = vm.agendasSemPagamento.collectAsState().value
+    val agendaAtual = agendasLista.firstOrNull { it.id == vm.agendaId.value }
+    val agendasParaSelecionar = if (isEdicao && agendaAtual != null) {
+        (agendasSemPagamento + agendaAtual).distinctBy { it.id }
+    } else {
+        agendasSemPagamento
+    }
 
     val formaPagamentoOpcoes = listOf("PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO")
     val statusOpcoes = listOf("PENDENTE", "PAGO", "CANCELADO")
@@ -30,7 +38,9 @@ fun PagamentoFormulario(
 
     val pacienteAtualNome = pacientesLista.firstOrNull { it.id?.toLong() == vm.pacienteId.value }?.nome ?: ""
     val convenioAtualNome = conveniosLista.firstOrNull { it.id?.toLong() == vm.convenioId.value }?.nome ?: ""
-    val agendaAtualDescricao = agendasLista.firstOrNull { it.id?.toLong() == vm.agendaId.value }?.let { "Agenda #${it.id} - ${it.dataHoraInicio}" } ?: ""
+    val agendaAtualDescricao = agendasLista.firstOrNull { it.id?.toLong() == vm.agendaId.value }
+        ?.let { "Agenda #${it.id} - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}" }
+        ?: ""
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -46,11 +56,14 @@ fun PagamentoFormulario(
             CampoDropdownPadrao(
                 label = "Agenda / Consulta *",
                 valorSelecionado = agendaAtualDescricao,
-                opcoes = agendasLista.map { "Agenda #${it.id} - ${it.dataHoraInicio}" },
+                opcoes = agendasParaSelecionar.map {
+                    "Agenda #${it.id} - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}"
+                },
                 onOpcaoSelecionada = { selecao ->
                     val idStr = selecao.substringAfter("#").substringBefore(" -")
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
                     vm.agendaId.value = agendaEscolhida?.id?.toLong()
+                    vm.pacienteId.value = agendaEscolhida?.pacienteId
                 },
                 isError = vm.agendaId.value == null && vm.mensagem.value.isNotEmpty(),
                 errorMessage = if (vm.agendaId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
@@ -88,6 +101,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorTotal.definir(it) },
                 label = "Valor total",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorTotal.temErro.value,
                 errorMessage = if (vm.valorTotal.temErro.value) "Campo obrigatório" else null
             )
@@ -97,6 +111,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorConvenio.definir(it) },
                 label = "Valor do convênio",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorConvenio.temErro.value,
                 errorMessage = if (vm.valorConvenio.temErro.value) "Campo obrigatório" else null
             )
@@ -106,6 +121,7 @@ fun PagamentoFormulario(
                 onValueChange = { vm.valorPaciente.definir(it) },
                 label = "Valor do paciente",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.valorPaciente.temErro.value,
                 errorMessage = if (vm.valorPaciente.temErro.value) "Campo obrigatório" else null
             )

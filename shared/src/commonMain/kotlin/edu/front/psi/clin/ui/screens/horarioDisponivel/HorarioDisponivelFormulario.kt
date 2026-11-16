@@ -72,6 +72,7 @@ fun HorarioDisponivelFormulario(
                 label = "Hora de início",
                 placeholder = "HH:mm (ex.: 08:00)",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.horaInicio.temErro.value,
                 errorMessage = if (vm.horaInicio.temErro.value) "Campo obrigatório" else null
             )
@@ -82,6 +83,7 @@ fun HorarioDisponivelFormulario(
                 label = "Hora de fim",
                 placeholder = "HH:mm (ex.: 09:00)",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.horaFim.temErro.value,
                 errorMessage = if (vm.horaFim.temErro.value) "Campo obrigatório" else null
             )

@@ -14,6 +14,8 @@ import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
 
@@ -25,8 +27,11 @@ fun EvolucaoClinicaListagem(
 ) {
     val listaEvolucoes by vm.evolucoesFiltradas.collectAsState()
     val listaOrdenada = remember(listaEvolucoes) { listaEvolucoes.sortedByDescending { it.id } }
+    val psicologos = vm.psicologos.collectAsState().value
+    val agendas = vm.agendas.collectAsState().value
+    val pacientes = vm.pacientes.collectAsState().value
 
-    var itemExpandidoId by remember { mutableStateOf<Int?>(null) }
+    var itemExpandidoId by remember { mutableStateOf<Long?>(null) }
     var itemParaExcluir by remember { mutableStateOf<EvolucaoClinica?>(null) }
 
     Box(
@@ -61,10 +66,20 @@ fun EvolucaoClinicaListagem(
             ) {
                 items(listaOrdenada) { item ->
                     val isExpansivel = itemExpandidoId == item.id
+                    val psicologoNome = psicologos.firstOrNull { it.id == item.psicologoId }?.nome
+                        ?: "Psicólogo #${item.psicologoId}"
+                    val agenda = agendas.firstOrNull { it.id == item.agendaId }
+                    val pacienteNome = agenda?.let { agendamento ->
+                        pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome
+                            ?: agendamento.paciente
+                    } ?: "Paciente"
+                    val agendaDescricao = agenda?.let {
+                        "$pacienteNome - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}"
+                    } ?: "Agenda #${item.agendaId}"
 
                     CardExpansivelBase(
-                        tituloTopo = item.dataRegistro,
-                        tituloPrincipal = item.descricao,
+                        tituloTopo = formatarDataIsoParaBrasileira(item.dataRegistro),
+                        tituloPrincipal = item.descricao.orEmpty(),
                         isExpandido = isExpansivel,
                         onClickToggle = {
                             itemExpandidoId = if (isExpansivel) null else item.id
@@ -72,8 +87,8 @@ fun EvolucaoClinicaListagem(
                         onEditarClick = { vm.editar(item) },
                         onExcluirClick = { itemParaExcluir = item }
                     ) {
-                        LinhaDetalheCard(rotulo = "Psicólogo(a): ", valor = item.psicologo)
-                        LinhaDetalheCard(rotulo = "Sessão / Agenda: ", valor = item.agenda)
+                        LinhaDetalheCard(rotulo = "Psicólogo(a): ", valor = psicologoNome)
+                        LinhaDetalheCard(rotulo = "Sessão / Agenda: ", valor = agendaDescricao)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -100,7 +115,7 @@ fun EvolucaoClinicaListagem(
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de Evolução Clínica",
-                message = "Tem certeza que deseja excluir o registro de ${item.dataRegistro}?",
+                message = "Tem certeza que deseja excluir o registro de ${formatarDataIsoParaBrasileira(item.dataRegistro)}?",
                 onDismiss = { itemParaExcluir = null },
                 onConfirm = {
                     vm.apagar(item)

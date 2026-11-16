@@ -22,7 +22,7 @@ class AgendaAPI(private val httpClient: HttpClient) {
 
     suspend fun salvar(agenda: Agenda) {
         val response = httpClient.post(endPoint) {
-            header("Authorization", "Bearer ${SessionManager.token}")
+            bearerAuth(token)
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
@@ -36,13 +36,20 @@ class AgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-        println("Status do Atualizar Agenda: ${response.status}")
+        validarResposta(response, "Atualizar agendamento")
     }
 
     suspend fun apagar(agenda: Agenda) {
         val response = httpClient.delete("$endPoint/${agenda.id}") {
             bearerAuth(token)
         }
-        println("Status do Apagar Agenda: ${response.status}")
+        validarResposta(response, "Excluir agendamento")
+    }
+
+    private suspend fun validarResposta(response: HttpResponse, operacao: String) {
+        if (response.status.value !in 200..299) {
+            val detalhe = response.bodyAsText()
+            throw IllegalStateException("$operacao falhou (${response.status}): $detalhe")
+        }
     }
 }

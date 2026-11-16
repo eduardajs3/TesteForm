@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.SalaAtendimentoAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.SalaAtendimento
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -30,7 +31,7 @@ class SalaAtendimentoViewModel(
                 _salas.value = salaApi.carregar()
                 println("Salas carregadas no init: ${_salas.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar salas do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar salas do servidor"))
             }
         }
     }
@@ -56,7 +57,6 @@ class SalaAtendimentoViewModel(
     val descricao = CampoValidado()
     val capacidade = CampoValidado()
     val ativo = CampoValidado("true")
-    val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -65,9 +65,8 @@ class SalaAtendimentoViewModel(
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
         val v4 = ativo.validar()
-        val v5 = dataCadastro.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5)) {
+        if (!(v1 && v2 && v3 && v4)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
@@ -80,8 +79,7 @@ class SalaAtendimentoViewModel(
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     capacidade = capacidade.valor.value.toIntOrNull() ?: 0,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = dataCadastro.valor.value
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
@@ -107,8 +105,9 @@ class SalaAtendimentoViewModel(
                 backStack.add(SalaAtendimentoRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -121,7 +120,7 @@ class SalaAtendimentoViewModel(
                 println("Salas após apagar: ${_salas.value}")
                 mandarMensagem("Sala apagada com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }
@@ -142,7 +141,6 @@ class SalaAtendimentoViewModel(
         descricao.definir(sala.descricao)
         capacidade.definir(sala.capacidade.toString())
         ativo.definir(sala.ativo.toString())
-        dataCadastro.definir(sala.dataCadastro)
         mensagem.value = ""
     }
 
@@ -151,7 +149,6 @@ class SalaAtendimentoViewModel(
         descricao.limpar()
         capacidade.limpar()
         ativo.definir("true")
-        dataCadastro.limpar()
         mensagem.value = "Campos limpos."
     }
 }

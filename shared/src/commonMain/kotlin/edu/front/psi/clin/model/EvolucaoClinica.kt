@@ -3,11 +3,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class EvolucaoClinica(
-    val id: Int,
-    val prontuario: String,
-    val psicologo: String,
-    val agenda: String,
+    val id: Long? = null,
+    val prontuarioId: Long,
+    val psicologoId: Long,
+    val agendaId: Long,
     val dataRegistro: String,
-    val descricao: String,
-    val ativo: Boolean
+    val descricao: String? = null,
+    val ativo: Boolean = true
 )

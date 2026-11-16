@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.HorarioDisponivelAPI
 import edu.front.psi.clin.api.PsicologoAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.HorarioDisponivel
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
@@ -37,7 +38,7 @@ class HorarioDisponivelViewModel(
                 _psicologos.value = psicologoApi.carregar()
                 println("Horários disponíveis carregados no init: ${_horarios.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar horários disponíveis do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
             }
         }
     }
@@ -126,8 +127,9 @@ class HorarioDisponivelViewModel(
                 backStack.add(HorarioDisponivelRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -140,7 +142,7 @@ class HorarioDisponivelViewModel(
                 println("Horários após apagar: ${_horarios.value}")
                 mandarMensagem("Horário apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }

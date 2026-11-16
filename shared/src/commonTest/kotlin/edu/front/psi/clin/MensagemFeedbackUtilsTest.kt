@@ -14,6 +14,8 @@ class MensagemFeedbackUtilsTest {
         assertTrue(MensagemFeedbackUtils.ehErro("Por favor, corrija os erros no formulário."))
         assertTrue(MensagemFeedbackUtils.ehErro("O horário de término deve ser posterior ao início."))
         assertTrue(MensagemFeedbackUtils.ehErro("A descrição da evolução é obrigatória!"))
+        assertTrue(MensagemFeedbackUtils.ehErro("O psicólogo já possui um agendamento neste horário"))
+        assertTrue(MensagemFeedbackUtils.ehErro("Não foi possível concluir a solicitação. Tente novamente."))
     }
 
     @Test
@@ -21,5 +23,6 @@ class MensagemFeedbackUtilsTest {
         assertFalse(MensagemFeedbackUtils.ehErro("Pagamento atualizado com sucesso!"))
         assertFalse(MensagemFeedbackUtils.ehErro("Consulta confirmada!"))
         assertFalse(MensagemFeedbackUtils.ehErro("Campos limpos."))
+        assertFalse(MensagemFeedbackUtils.ehErro("Paciente salvo com sucesso!"))
     }
 }

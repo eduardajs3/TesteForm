@@ -46,6 +46,7 @@ fun PsicologoFormulario(
                 onValueChange = { vm.cpf.definir(it) },
                 label = "CPF",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.cpf.temErro.value,
                 errorMessage = if (vm.cpf.temErro.value) "Campo obrigatório" else null
             )
@@ -64,20 +65,19 @@ fun PsicologoFormulario(
                 onValueChange = { vm.telefone.definir(it) },
                 label = "Telefone",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.telefone.temErro.value,
                 errorMessage = if (vm.telefone.temErro.value) "Campo obrigatório" else null
             )
 
-            if (!isEdicao) {
-                CampoTextoPadrao(
-                    value = vm.senha.valor.value,
-                    onValueChange = { vm.senha.definir(it) },
-                    label = "Senha",
-                    obrigatorio = true,
-                    isError = vm.senha.temErro.value,
-                    errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
-                )
-            }
+            CampoTextoPadrao(
+                value = vm.senha.valor.value,
+                onValueChange = { vm.senha.definir(it) },
+                label = if (isEdicao) "Nova senha (opcional)" else "Senha",
+                obrigatorio = !isEdicao,
+                isError = !isEdicao && vm.senha.temErro.value,
+                errorMessage = if (!isEdicao && vm.senha.temErro.value) "Campo obrigatório" else null
+            )
 
             CampoTextoPadrao(
                 value = vm.crp.valor.value,
@@ -85,6 +85,7 @@ fun PsicologoFormulario(
                 label = "CRP",
                 placeholder = "00/00000",
                 obrigatorio = true,
+                apenasNumeros = true,
                 isError = vm.crp.temErro.value,
                 errorMessage = if (vm.crp.temErro.value) "Campo obrigatório" else null
             )

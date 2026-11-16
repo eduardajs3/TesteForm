@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
@@ -12,6 +13,7 @@ import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun EvolucaoClinicaFormulario(
@@ -20,24 +22,47 @@ fun EvolucaoClinicaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
 
-    val prontuarioOpcoes = listOf(
-        "Prontuário #01 - Ana Clara",
-        "Prontuário #02 - Carlos Eduardo",
-        "Prontuário #03 - Mariana Ribeiro"
-    )
-    val psicologoOpcoes = listOf(
-        "Dra. Ana Silva",
-        "Dr. Carlos Souza",
-        "Dra. Mariana Oliveira"
-    )
+    val pacientes = vm.pacientes.collectAsState().value
+    val prontuarios = vm.prontuarios.collectAsState().value
+    val psicologos = vm.psicologos.collectAsState().value
+    val agendas = vm.agendas.collectAsState().value
+    val prontuarioAtual = prontuarios.firstOrNull { it.id == vm.prontuarioId.value }
+    val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
+        agendas.filter { it.pacienteId == prontuario.pacienteId }
+    }.orEmpty()
+    val agendaAtual = agendasDoPaciente.firstOrNull { it.id == vm.agendaId.value }
+    val prontuarioOpcoes = prontuarios.mapNotNull { prontuario ->
+        prontuario.id?.let { id ->
+            val paciente = pacientes.firstOrNull { it.id == prontuario.pacienteId }?.nome
+                ?: "Paciente #${prontuario.pacienteId}"
+            id to "$paciente - ${prontuario.queixaPrincipal} (#$id)"
+        }
+    }
+    val psicologoOpcoes = psicologos.filter {
+        agendaAtual != null && it.id == agendaAtual.psicologoId
+    }.mapNotNull { psicologo ->
+        psicologo.id?.let { it to "${psicologo.nome} (#$it)" }
+    }
+    val agendaOpcoes = agendasDoPaciente.mapNotNull { agenda ->
+        agenda.id?.let { id ->
+            val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
+                ?: agenda.paciente
+                ?: "Paciente"
+            id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
+        }
+    }
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
-    val prontuarioAtual = vm.prontuario.value
-    val prontuarioExibicao = if (prontuarioOpcoes.contains(prontuarioAtual)) prontuarioAtual else (prontuarioOpcoes.firstOrNull() ?: "")
-
-    val psicologoAtual = vm.psicologo.value
-    val psicologoExibicao = if (psicologoOpcoes.contains(psicologoAtual)) psicologoAtual else (psicologoOpcoes.firstOrNull() ?: "")
+    val prontuarioExibicao = prontuarioOpcoes.firstOrNull {
+        it.first == vm.prontuarioId.value
+    }?.second.orEmpty()
+    val psicologoExibicao = psicologoOpcoes.firstOrNull {
+        it.first == vm.psicologoId.value
+    }?.second.orEmpty()
+    val agendaExibicao = agendaOpcoes.firstOrNull {
+        it.first == vm.agendaId.value
+    }?.second.orEmpty()
 
     val statusExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -54,25 +79,36 @@ fun EvolucaoClinicaFormulario(
             CampoDropdownPadrao(
                 label = "Prontuário",
                 valorSelecionado = prontuarioExibicao,
-                opcoes = prontuarioOpcoes,
+                opcoes = prontuarioOpcoes.map { it.second },
                 onOpcaoSelecionada = { selecao ->
-                    vm.prontuario.value = selecao
+                    val prontuarioId = prontuarioOpcoes.firstOrNull {
+                        it.second == selecao
+                    }?.first
+                    prontuarios.firstOrNull { it.id == prontuarioId }?.let(vm::selecionarProntuario)
                 }
             )
 
             CampoDropdownPadrao(
-                label = "Psicólogo",
-                valorSelecionado = psicologoExibicao,
-                opcoes = psicologoOpcoes,
+                label = "Agenda",
+                valorSelecionado = agendaExibicao,
+                opcoes = agendaOpcoes.map { it.second },
                 onOpcaoSelecionada = { selecao ->
-                    vm.psicologo.value = selecao
+                    val agendaId = agendaOpcoes.firstOrNull {
+                        it.second == selecao
+                    }?.first
+                    agendasDoPaciente.firstOrNull { it.id == agendaId }?.let(vm::selecionarAgenda)
                 }
             )
 
-            CampoTextoPadrao(
-                value = vm.agenda.value,
-                onValueChange = { vm.agenda.value = it },
-                label = "Agenda"
+            CampoDropdownPadrao(
+                label = "Psicólogo da agenda",
+                valorSelecionado = psicologoExibicao,
+                opcoes = psicologoOpcoes.map { it.second },
+                onOpcaoSelecionada = { selecao ->
+                    vm.psicologoId.value = psicologoOpcoes.firstOrNull {
+                        it.second == selecao
+                    }?.first
+                }
             )
 
             CampoDataPadrao(

@@ -45,6 +45,7 @@ fun ConvenioListagem(
             onVisualizar = { convenio -> convenioSelecionado.value = convenio },
             onEditar = vm::editar,
             onApagar = { convenio -> convenioParaExcluir.value = convenio },
+            textoCompacto = { convenio -> convenio.nome },
             placeholderPesquisa = "Buscar por nome ou CNPJ..."
         ) { convenio ->
             val isAtivo = convenio.ativo

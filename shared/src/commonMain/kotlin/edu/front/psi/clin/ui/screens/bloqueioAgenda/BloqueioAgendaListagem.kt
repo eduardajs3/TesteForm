@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
+import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
 fun BloqueioAgendaListagem(
@@ -47,21 +48,22 @@ fun BloqueioAgendaListagem(
             onApagar = { item -> 
                 itemParaExcluir.value = item 
             },
+            textoCompacto = { bloqueio -> vm.nomePsicologo(bloqueio.psicologoId) },
             placeholderPesquisa = "Buscar por psicólogo..."
         ) { bloqueio ->
             val isAtivo = bloqueio.ativo
 
             CelulaTabelaTexto(
-                text = bloqueio.psicologo,
+                text = vm.nomePsicologo(bloqueio.psicologoId),
                 weight = 1.8f,
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = bloqueio.dataHoraInicio,
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty()),
                 weight = 1.3f
             )
             CelulaTabelaTexto(
-                text = bloqueio.dataHoraFim,
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty()),
                 weight = 1.3f
             )
             
@@ -79,9 +81,16 @@ fun BloqueioAgendaListagem(
                 titulo = "Detalhes do Bloqueio",
                 onDismiss = { itemSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = bloqueio.psicologo)
-                    ItemDetalhe(rotulo = "Data e hora de início", valor = bloqueio.dataHoraInicio)
-                    ItemDetalhe(rotulo = "Data e hora de fim", valor = bloqueio.dataHoraFim)
+                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = vm.nomePsicologo(bloqueio.psicologoId))
+                    ItemDetalhe(
+                        rotulo = "Data e hora de início",
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty())
+                    )
+                    ItemDetalhe(
+                        rotulo = "Data e hora de fim",
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty())
+                    )
+                    ItemDetalhe(rotulo = "Motivo", valor = bloqueio.motivo)
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo"

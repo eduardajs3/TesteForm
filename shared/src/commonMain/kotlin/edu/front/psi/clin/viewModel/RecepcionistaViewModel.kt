@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.RecepcionistaAPI
 import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -31,7 +33,7 @@ class RecepcionistaViewModel(
                 _recepcionistas.value = recepcionistaApi.carregar()
                 println("Recepcionistas carregadas no init: ${_recepcionistas.value}")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar recepcionistas do servidor: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar recepcionistas do servidor"))
             }
         }
     }
@@ -79,6 +81,7 @@ class RecepcionistaViewModel(
         val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
         val v7 = setor.validar()
+        val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -97,8 +100,7 @@ class RecepcionistaViewModel(
                     senha = senha.valor.value.takeIf { it.isNotEmpty() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
                     dataCadastro = null,
-                    setor = setor.valor.value,
-                    role = "RECEPCIONISTA"
+                    setor = setor.valor.value
                 )
 
                 if (id.value.isEmpty()) {
@@ -106,6 +108,18 @@ class RecepcionistaViewModel(
                 } else {
                     val idNumber = id.value.toLong()
                     recepcionistaApi.atualizar(idNumber, recepcionista)
+                    if (senhaNova != null) {
+                        try {
+                            recepcionistaApi.alterarSenha(idNumber, senhaNova)
+                        } catch (e: Exception) {
+                            val mensagemErro = e.mensagemParaUsuario(
+                                "Dados atualizados, mas não foi possível alterar a senha"
+                            )
+                            mensagem.value = mensagemErro
+                            mandarMensagem(mensagemErro)
+                            return@launch
+                        }
+                    }
                 }
 
 
@@ -125,8 +139,9 @@ class RecepcionistaViewModel(
                 backStack.add(RecepcionistaRotas.Listagem)
 
             } catch (e: Exception) {
-                mensagem.value = "Erro ao salvar: ${e.message}"
-                mandarMensagem("Erro ao salvar: ${e.message}")
+                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                mensagem.value = mensagemErro
+                mandarMensagem(mensagemErro)
             }
         }
     }
@@ -139,7 +154,7 @@ class RecepcionistaViewModel(
                 println("Recepcionistas após apagar: ${_recepcionistas.value}")
                 mandarMensagem("Recepcionista apagada com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }
@@ -162,7 +177,7 @@ class RecepcionistaViewModel(
         telefone.definir(recepcionista.telefone)
         senha.definir(recepcionista.senha ?: "")
         ativo.definir(recepcionista.ativo.toString())
-        dataCadastro.definir(recepcionista.dataCadastro ?: "")
+        dataCadastro.definir(formatarDataIsoParaBrasileira(recepcionista.dataCadastro.orEmpty()))
         setor.definir(recepcionista.setor)
         mensagem.value = ""
     }

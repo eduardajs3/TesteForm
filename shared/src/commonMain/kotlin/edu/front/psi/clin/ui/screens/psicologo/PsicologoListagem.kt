@@ -14,6 +14,7 @@ import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun PsicologoListagem(
@@ -46,7 +47,8 @@ fun PsicologoListagem(
             onVisualizar = { psicologo -> psicologoSelecionado.value = psicologo },
             onEditar = vm::editar,
             onApagar = { psicologo -> psicologoParaExcluir.value = psicologo },
-            placeholderPesquisa = "Buscar por nome, CRP ou especialidade..."
+            placeholderPesquisa = "Buscar por nome, CRP ou especialidade...",
+            textoCompacto = { psicologo -> psicologo.nome }
         ) { psicologo ->
             val isAtivo = psicologo.ativo
 
@@ -67,7 +69,6 @@ fun PsicologoListagem(
                 text = psicologo.especialidade,
                 weight = 1.4f
             )
-            
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -88,7 +89,10 @@ fun PsicologoListagem(
                     ItemDetalhe("Especialidade", psicologo.especialidade)
                     ItemDetalhe("Telefone", psicologo.telefone)
                     ItemDetalhe("E-mail", psicologo.email)
-                    ItemDetalhe("Data de cadastro", psicologo.dataCadastro ?: "")
+                    ItemDetalhe(
+                        "Data de cadastro",
+                        formatarDataIsoParaBrasileira(psicologo.dataCadastro.orEmpty())
+                    )
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

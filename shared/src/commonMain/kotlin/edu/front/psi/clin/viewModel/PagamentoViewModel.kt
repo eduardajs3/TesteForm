@@ -9,6 +9,7 @@ import edu.front.psi.clin.model.*
 import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,11 @@ class PagamentoViewModel(
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
     val agendas = _agendas.asStateFlow()
 
+    val agendasSemPagamento = combine(_agendas, _pagamentos) { agendas, pagamentos ->
+        val agendasComPagamento = pagamentos.mapTo(mutableSetOf()) { it.agendaId }
+        agendas.filter { it.id != null && it.id !in agendasComPagamento }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         viewModelScope.launch {
             try {
@@ -45,7 +51,7 @@ class PagamentoViewModel(
                 _agendas.value = agendaApi.carregar()
                 println("Dados de Pagamento e dependências carregados com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao carregar pagamentos: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pagamentos"))
             }
         }
     }
@@ -106,8 +112,6 @@ class PagamentoViewModel(
                 return apenasDigitos.toDouble() / 100.0
             }
 
-            val dataFormatada = converterDataParaIso(dataPagamento.valor.value)
-
             val pagamento = Pagamento(
                 id = if (id.value.isEmpty()) null else id.value.toLong(),
                 agendaId = agendaId.value!!,
@@ -117,7 +121,7 @@ class PagamentoViewModel(
                 valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
                 valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
                 formaPagamento = formaPagamento.valor.value,
-                dataPagamento = dataFormatada,
+                dataPagamento = dataPagamento.valor.value,
                 status = status.valor.value.ifEmpty { "PENDENTE" }
             )
 
@@ -141,26 +145,14 @@ class PagamentoViewModel(
                     backStack.clear()
                     backStack.add(PagamentoRotas.Listagem)
                 } catch (e: Exception) {
-                    mensagem.value = "Erro ao salvar: ${e.message}"
-                    mandarMensagem("Erro ao salvar: ${e.message}")
+                    val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
+                    mensagem.value = mensagemErro
+                    mandarMensagem(mensagemErro)
                 }
             }
         } catch (e: Exception) {
             mensagem.value = "Erro ao processar valores: ${e.message}"
             mandarMensagem("Erro ao processar valores: ${e.message}")
-        }
-    }
-
-    private fun converterDataParaIso(dataStr: String): String {
-        return try {
-            if (dataStr.contains("/")) {
-                val partes = dataStr.split("/")
-                if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}T00:00:00" else dataStr
-            } else {
-                dataStr
-            }
-        } catch (e: Exception) {
-            dataStr
         }
     }
 
@@ -171,7 +163,7 @@ class PagamentoViewModel(
                 _pagamentos.value = pagamentoApi.carregar()
                 mandarMensagem("Pagamento apagado com sucesso!")
             } catch (e: Exception) {
-                mandarMensagem("Erro ao apagar: ${e.message}")
+                mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
             }
         }
     }
@@ -197,16 +189,7 @@ class PagamentoViewModel(
         valorPaciente.definir(pagamento.valorPaciente.toString())
         formaPagamento.definir(pagamento.formaPagamento)
 
-        try {
-            val partes = pagamento.dataPagamento.split("T")[0].split("-")
-            if (partes.size == 3) {
-                dataPagamento.definir("${partes[2]}/${partes[1]}/${partes[0]}")
-            } else {
-                dataPagamento.definir(pagamento.dataPagamento)
-            }
-        } catch (e: Exception) {
-            dataPagamento.definir(pagamento.dataPagamento)
-        }
+        dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
         status.definir(pagamento.status)
         mensagem.value = ""

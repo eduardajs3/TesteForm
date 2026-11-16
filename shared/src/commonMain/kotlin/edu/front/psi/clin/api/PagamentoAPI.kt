@@ -1,6 +1,7 @@
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.Pagamento
+import edu.front.psi.clin.utils.formatarDataBrasileiraOuIsoParaDataHoraIso
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
@@ -24,7 +25,14 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         val response = httpClient.post(endPoint) {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(pagamento)
+            setBody(
+                pagamento.copy(
+                    dataPagamento = formatarDataBrasileiraOuIsoParaDataHoraIso(
+                        pagamento.dataPagamento,
+                        "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
+                    )
+                )
+            )
         }
         println("Status do Salvar Pagamento: ${response.status}")
         println("Resposta Detalhada: ${response.bodyAsText()}")
@@ -34,7 +42,14 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(pagamento)
+            setBody(
+                pagamento.copy(
+                    dataPagamento = formatarDataBrasileiraOuIsoParaDataHoraIso(
+                        pagamento.dataPagamento,
+                        "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
+                    )
+                )
+            )
         }
         println("Status do Atualizar Pagamento: ${response.status}")
     }
@@ -45,4 +60,5 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         }
         println("Status do Apagar Pagamento: ${response.status}")
     }
+
 }
