@@ -36,7 +36,8 @@ class FuncionarioViewModel(
             funcionarios.filter {
                 it.nome.orEmpty().contains(filtro, ignoreCase = true) ||
                 it.cpf.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.email.orEmpty().contains(filtro, ignoreCase = true)
+                it.email.orEmpty().contains(filtro, ignoreCase = true) ||
+                it.role.orEmpty().contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

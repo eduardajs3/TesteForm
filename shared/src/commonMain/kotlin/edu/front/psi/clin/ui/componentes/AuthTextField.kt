@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.CinzaBordaCampo
+import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
@@ -22,7 +23,9 @@ fun AuthTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: @Composable (() -> Unit)? = null
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -43,6 +46,7 @@ fun AuthTextField(
             singleLine = singleLine,
             visualTransformation = visualTransformation,
             trailingIcon = trailingIcon,
+            isError = isError,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             textStyle = MaterialTheme.typography.bodyLarge,
@@ -50,11 +54,22 @@ fun AuthTextField(
                 focusedContainerColor = Branco,
                 unfocusedContainerColor = Branco,
                 focusedBorderColor = VerdeClinica,
-                unfocusedBorderColor = CinzaBordaCampo,
+                unfocusedBorderColor = if (isError) TextoErro else CinzaBordaCampo,
+                errorBorderColor = TextoErro,
                 focusedTextColor = TextoPrincipal,
                 unfocusedTextColor = TextoPrincipal,
-                cursorColor = VerdeClinica
+                cursorColor = VerdeClinica,
+                errorTextColor = TextoPrincipal
             )
         )
+
+        if (isError && !errorMessage.isNullOrEmpty()) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = TextoErro,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
     }
 }

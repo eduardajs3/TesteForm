@@ -23,6 +23,7 @@ fun AuthLayout(
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val telaPequena = maxWidth < 600.dp
+        val precisaRolagem = telaPequena || maxHeight < 900.dp
 
         Image(
             painter = painterResource(
@@ -61,7 +62,7 @@ fun AuthLayout(
                         vertical = if (telaPequena) 24.dp else 36.dp
                     )
                     .then(
-                        if (telaPequena) {
+                        if (precisaRolagem) {
                             Modifier.verticalScroll(rememberScrollState())
                         } else {
                             Modifier

@@ -20,9 +20,15 @@ compose.desktop {
         mainClass = "edu.front.psi.clin.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "edu.front.psi.clin"
+            targetFormats(TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Dmg, TargetFormat.Deb)
+            packageName = "PsiClin"
             packageVersion = "1.0.0"
+            description = "Sistema de gestão da clínica PsiClin desenvolvido pela turma de DSM da fatec ITAQUERA"
+            vendor = "PsiClin"
+
+            windows {
+                shortcut = true
+            }
         }
     }
 }

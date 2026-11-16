@@ -50,7 +50,7 @@ fun FuncionarioListagem(
                 funcionarioParaExcluir.value = funcionario
             },
             textoCompacto = { funcionario -> funcionario.nome.orEmpty() },
-            placeholderPesquisa = "Buscar por nome, CPF ou e-mail..."
+            placeholderPesquisa = "Buscar por nome, CPF, e-mail ou role..."
         ) { funcionario ->
             val isAtivo = funcionario.ativo == true
 
@@ -87,6 +87,7 @@ fun FuncionarioListagem(
                 onDismiss = { funcionarioSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe(rotulo = "Nome completo", valor = funcionario.nome.orEmpty())
+                    ItemDetalhe(rotulo = "Role", valor = funcionario.role ?: "Não informada")
                     ItemDetalhe(rotulo = "CPF", valor = funcionario.cpf.orEmpty())
                     ItemDetalhe(rotulo = "E-mail", valor = funcionario.email.orEmpty())
                     ItemDetalhe(rotulo = "Telefone", valor = funcionario.telefone.orEmpty())

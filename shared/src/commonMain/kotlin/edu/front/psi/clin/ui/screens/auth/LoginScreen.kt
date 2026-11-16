@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -120,27 +119,5 @@ fun LoginScreen(
                 .height(56.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Não tem uma conta? ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextoSecundario
-            )
-            Text(
-                text = "Cadastre-se",
-                modifier = Modifier.clickable {
-                    onNavigate(Route.Cadastro)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica
-            )
-        }
     }
 }

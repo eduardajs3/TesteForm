@@ -27,7 +27,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.psiclin.front.ui.screens.auth.LoginScreen
 import com.psiclin.front.ui.screens.auth.RecuperarSenhaScreen
-import com.psiclin.front.ui.screens.auth.RegistroScreen
 import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.navigation.ConvenioRotas
@@ -92,13 +91,6 @@ fun App() {
 
         PsiClinTheme {
             when (rotaAuth) {
-                Route.Cadastro -> RegistroScreen(
-                    onNavigate = { rota ->
-                        principalVm.backstack.clear()
-                        principalVm.backstack.add(rota)
-                    }
-                )
-
                 Route.RecuperarSenha -> RecuperarSenhaScreen(
                     onNavigate = { rota ->
                         principalVm.backstack.clear()
