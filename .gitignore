@@ -4,6 +4,7 @@
 **/build/
 xcuserdata
 !src/**/build/
+!/buildSrc/src/main/java/edu/front/psi/build/
 local.properties
 .env
 .idea
