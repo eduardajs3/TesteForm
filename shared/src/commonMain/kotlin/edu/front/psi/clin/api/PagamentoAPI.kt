@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class PagamentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "/pagamentos"
+    private val endPoint = "${ApiConfig.BASE_URL}/pagamentos"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Pagamento> {

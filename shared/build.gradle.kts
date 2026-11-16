@@ -1,3 +1,4 @@
+import edu.front.psi.build.GenerateApiConfigTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -7,6 +8,20 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+}
+
+val envFile = rootProject.file(".env")
+val envExampleFile = rootProject.file(".env.example")
+val generatedApiConfigDir = layout.buildDirectory.dir("generated/api-config/commonMain/kotlin")
+
+val generateApiConfig = tasks.register<GenerateApiConfigTask>("generateApiConfig") {
+    configFiles.from(envFile, envExampleFile)
+    outputDirectory.set(generatedApiConfigDir)
+}
+
+kotlin.sourceSets.getByName("commonMain").kotlin.srcDir(generatedApiConfigDir)
+tasks.matching { it.name.startsWith("compile") }.configureEach {
+    dependsOn(generateApiConfig)
 }
 
 kotlin {

@@ -21,7 +21,7 @@ private data class PsicologoAtualizacaoRequest(
 )
 
 class PsicologoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "/psicologos"
+    private val endPoint = "${ApiConfig.BASE_URL}/psicologos"
     private val token
         get() = SessionManager.token
 

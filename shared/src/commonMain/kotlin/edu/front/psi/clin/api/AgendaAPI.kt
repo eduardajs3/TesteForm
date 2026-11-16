@@ -5,13 +5,11 @@ import edu.front.psi.clin.model.Agenda
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class AgendaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "/agendas"
+    private val endPoint = "${ApiConfig.BASE_URL}/agendas"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Agenda> {
@@ -28,7 +26,8 @@ class AgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-        validarResposta(response, "Salvar agendamento")
+
+        println("Status do Salvar Agenda: ${response.status}")
     }
 
     suspend fun atualizar(id: Long, agenda: Agenda) {

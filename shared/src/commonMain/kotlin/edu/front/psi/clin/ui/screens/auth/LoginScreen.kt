@@ -24,7 +24,10 @@ import frontpsiclinic.shared.generated.resources.*
 
 @Composable
 fun LoginScreen(
-    onNavigate: (Route) -> Unit
+    onNavigate: (Route) -> Unit,
+    onLogin: (String, String) -> Unit,
+    isLoading: Boolean,
+    errorMessage: String?
 ) {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
@@ -95,11 +98,21 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
+        errorMessage?.let { erro ->
+            Text(
+                text = erro,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
         BotaoPadrao(
-            texto = "Entrar",
+            texto = if (isLoading) "Entrando..." else "Entrar",
             onClick = {
-                onNavigate(Route.Dashboard)
+                onLogin(email, senha)
             },
+            enabled = !isLoading && email.isNotBlank() && senha.isNotBlank(),
             containerColor = VerdeClinica,
             contentColor = Branco,
             modifier = Modifier

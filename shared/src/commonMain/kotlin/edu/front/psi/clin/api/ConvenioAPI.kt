@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class ConvenioAPI(private val httpClient: HttpClient) {
-    private val endPoint = "/convenios"
+    private val endPoint = "${ApiConfig.BASE_URL}/convenios"
     private val token
         get() = SessionManager.token
 

@@ -20,7 +20,7 @@ private data class RecepcionistaAtualizacaoRequest(
 )
 
 class RecepcionistaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "/recepcionistas"
+    private val endPoint = "${ApiConfig.BASE_URL}/recepcionistas"
     private val token
         get() = SessionManager.token
 
