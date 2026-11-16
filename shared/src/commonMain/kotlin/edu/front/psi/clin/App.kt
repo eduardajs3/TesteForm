@@ -77,6 +77,36 @@ fun App() {
         factory = viewModelFactory { initializer { PrincipalViewModel(scope) } }
     )
 
+    if (!principalVm.autenticado) {
+        val rotaAuth = principalVm.backstack.lastOrNull() ?: Route.Login
+        PsiClinTheme {
+            when (rotaAuth) {
+                Route.Cadastro -> RegistroScreen(
+                    onNavigate = { rota ->
+                        principalVm.backstack.clear()
+                        principalVm.backstack.add(rota)
+                    }
+                )
+                Route.RecuperarSenha -> RecuperarSenhaScreen(
+                    onNavigate = { rota ->
+                        principalVm.backstack.clear()
+                        principalVm.backstack.add(rota)
+                    }
+                )
+                else -> LoginScreen(
+                    onNavigate = { rota ->
+                        principalVm.backstack.clear()
+                        principalVm.backstack.add(rota)
+                    },
+                    onLogin = principalVm::login,
+                    isLoading = principalVm.autenticando,
+                    errorMessage = principalVm.erroLogin
+                )
+            }
+        }
+        return
+    }
+
     var pacienteSelecionadoNome by remember { mutableStateOf("") }
 
     val pacienteVm: PacienteViewModel = viewModel(
@@ -224,8 +254,7 @@ fun App() {
                     }
 
                     if (novaRota == Route.Login) {
-                        principalVm.backstack.clear()
-                        principalVm.backstack.add(Route.Login)
+                        principalVm.logout()
                     } else {
                         principalVm.backstack.clear()
                         principalVm.backstack.add(Route.Dashboard)
@@ -242,7 +271,10 @@ fun App() {
                             onNavigate = { rota ->
                                 principalVm.backstack.clear()
                                 principalVm.backstack.add(rota)
-                            }
+                            },
+                            onLogin = principalVm::login,
+                            isLoading = principalVm.autenticando,
+                            errorMessage = principalVm.erroLogin
                         )
                     }
                     Route.Cadastro -> {
@@ -311,10 +343,15 @@ fun App() {
                                 },
                                 entryProvider = entryProvider {
                                     entry<Route.Login> {
-                                        LoginScreen(onNavigate = { rota ->
-                                            principalVm.backstack.clear()
-                                            principalVm.backstack.add(rota)
-                                        })
+                                        LoginScreen(
+                                            onNavigate = { rota ->
+                                                principalVm.backstack.clear()
+                                                principalVm.backstack.add(rota)
+                                            },
+                                            onLogin = principalVm::login,
+                                            isLoading = principalVm.autenticando,
+                                            errorMessage = principalVm.erroLogin
+                                        )
                                     }
                                     entry<Route.Cadastro> {
                                         RegistroScreen(onNavigate = { rota ->

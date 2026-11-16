@@ -5,12 +5,11 @@ import edu.front.psi.clin.model.Agenda
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class AgendaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "https://psiclin-backend.onrender.com/agendas"
+    private val endPoint = "${ApiConfig.BASE_URL}/agendas"
     private val token get() = SessionManager.token
 
     suspend fun carregar(): List<Agenda> {
@@ -22,10 +21,6 @@ class AgendaAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun salvar(agenda: Agenda) {
-
-        println("TOKEN: ${SessionManager.token}")
-        println("AGENDA ENVIADA: $agenda")
-
         val response = httpClient.post(endPoint) {
             header("Authorization", "Bearer ${SessionManager.token}")
             contentType(ContentType.Application.Json)
@@ -33,7 +28,6 @@ class AgendaAPI(private val httpClient: HttpClient) {
         }
 
         println("Status do Salvar Agenda: ${response.status}")
-        println("Resposta Detalhada: ${response.bodyAsText()}")
     }
 
     suspend fun atualizar(id: Long, agenda: Agenda) {

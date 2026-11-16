@@ -4,12 +4,11 @@ import edu.front.psi.clin.model.Paciente
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class PacienteAPI(private val httpClient: HttpClient) {
-    private val endPoint = "https://psiclin-backend.onrender.com/pacientes"
+    private val endPoint = "${ApiConfig.BASE_URL}/pacientes"
     private val token
         get() = SessionManager.token
     suspend fun carregar(): List<Paciente> {
@@ -22,9 +21,6 @@ class PacienteAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun salvar(paciente: Paciente) {
-
-        println("TOKEN: ${SessionManager.token}")
-        println("PACIENTE ENVIADO: $paciente")
         val response = httpClient.post(endPoint) {
             header("Authorization", "Bearer ${SessionManager.token}")
             contentType(ContentType.Application.Json)
@@ -32,7 +28,6 @@ class PacienteAPI(private val httpClient: HttpClient) {
         }
 
         println("Status do Salvar Paciente: ${response.status}")
-        println("Resposta Detalhada: ${response.bodyAsText()}")
     }
     suspend fun atualizar(id: Long, paciente: Paciente) {
         val response = httpClient.put("$endPoint/$id") {

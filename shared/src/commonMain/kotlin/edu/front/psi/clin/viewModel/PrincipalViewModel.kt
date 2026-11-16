@@ -8,6 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
+import edu.front.psi.clin.api.AuthAPI
+import edu.front.psi.clin.api.SessionManager
+import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.navigation.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -16,6 +19,16 @@ import androidx.compose.runtime.mutableStateListOf
 class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
 
     val backstack = mutableStateListOf<Route>(Route.Login)
+    private val authAPI = AuthAPI(httpClientManager())
+
+    var autenticado by mutableStateOf(false)
+        private set
+
+    var autenticando by mutableStateOf(false)
+        private set
+
+    var erroLogin by mutableStateOf<String?>(null)
+        private set
 
 
     val drawerState = DrawerState(DrawerValue.Closed)
@@ -45,5 +58,34 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
                 mensagemNotificacao = null
             }
         }
+    }
+
+    fun login(email: String, senha: String) {
+        if (autenticando) return
+
+        viewModelScope.launch {
+            autenticando = true
+            erroLogin = null
+            try {
+                val resposta = authAPI.login(email.trim(), senha)
+                SessionManager.iniciarSessao(resposta.accessToken)
+                autenticado = true
+                backstack.clear()
+                backstack.add(Route.Dashboard)
+            } catch (e: Exception) {
+                SessionManager.encerrarSessao()
+                erroLogin = e.message ?: "Não foi possível entrar. Tente novamente."
+            } finally {
+                autenticando = false
+            }
+        }
+    }
+
+    fun logout() {
+        SessionManager.encerrarSessao()
+        autenticado = false
+        erroLogin = null
+        backstack.clear()
+        backstack.add(Route.Login)
     }
 }
