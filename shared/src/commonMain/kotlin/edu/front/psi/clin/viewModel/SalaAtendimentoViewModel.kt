@@ -57,7 +57,6 @@ class SalaAtendimentoViewModel(
     val descricao = CampoValidado()
     val capacidade = CampoValidado()
     val ativo = CampoValidado("true")
-    val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -66,9 +65,8 @@ class SalaAtendimentoViewModel(
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
         val v4 = ativo.validar()
-        val v5 = dataCadastro.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5)) {
+        if (!(v1 && v2 && v3 && v4)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
@@ -81,8 +79,7 @@ class SalaAtendimentoViewModel(
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     capacidade = capacidade.valor.value.toIntOrNull() ?: 0,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = dataCadastro.valor.value
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
@@ -144,7 +141,6 @@ class SalaAtendimentoViewModel(
         descricao.definir(sala.descricao)
         capacidade.definir(sala.capacidade.toString())
         ativo.definir(sala.ativo.toString())
-        dataCadastro.definir(sala.dataCadastro)
         mensagem.value = ""
     }
 
@@ -153,7 +149,6 @@ class SalaAtendimentoViewModel(
         descricao.limpar()
         capacidade.limpar()
         ativo.definir("true")
-        dataCadastro.limpar()
         mensagem.value = "Campos limpos."
     }
 }

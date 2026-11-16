@@ -36,6 +36,11 @@ class PagamentoViewModel(
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
     val agendas = _agendas.asStateFlow()
 
+    val agendasSemPagamento = combine(_agendas, _pagamentos) { agendas, pagamentos ->
+        val agendasComPagamento = pagamentos.mapTo(mutableSetOf()) { it.agendaId }
+        agendas.filter { it.id != null && it.id !in agendasComPagamento }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         viewModelScope.launch {
             try {
@@ -106,8 +111,6 @@ class PagamentoViewModel(
                 return apenasDigitos.toDouble() / 100.0
             }
 
-            val dataFormatada = converterDataParaIso(dataPagamento.valor.value)
-
             val pagamento = Pagamento(
                 id = if (id.value.isEmpty()) null else id.value.toLong(),
                 agendaId = agendaId.value!!,
@@ -117,7 +120,7 @@ class PagamentoViewModel(
                 valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
                 valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
                 formaPagamento = formaPagamento.valor.value,
-                dataPagamento = dataFormatada,
+                dataPagamento = dataPagamento.valor.value,
                 status = status.valor.value.ifEmpty { "PENDENTE" }
             )
 
@@ -149,19 +152,6 @@ class PagamentoViewModel(
         } catch (e: Exception) {
             mensagem.value = "Erro ao processar valores: ${e.message}"
             mandarMensagem("Erro ao processar valores: ${e.message}")
-        }
-    }
-
-    private fun converterDataParaIso(dataStr: String): String {
-        return try {
-            if (dataStr.contains("/")) {
-                val partes = dataStr.split("/")
-                if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}T00:00:00" else dataStr
-            } else {
-                dataStr
-            }
-        } catch (e: Exception) {
-            dataStr
         }
     }
 

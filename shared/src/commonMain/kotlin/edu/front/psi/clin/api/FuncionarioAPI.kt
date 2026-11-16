@@ -8,6 +8,18 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.serialization.Serializable
+
+@Serializable
+private data class FuncionarioAtualizacaoRequest(
+    val id: Long? = null,
+    val nome: String? = null,
+    val cpf: String? = null,
+    val email: String? = null,
+    val telefone: String? = null,
+    val ativo: Boolean? = true,
+    val role: String? = null
+)
 
 class FuncionarioAPI(private val httpClient: HttpClient) {
     private val endPoint = "/funcionarios"
@@ -37,10 +49,29 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(funcionario)
+            setBody(
+                FuncionarioAtualizacaoRequest(
+                    id = funcionario.id,
+                    nome = funcionario.nome,
+                    cpf = funcionario.cpf,
+                    email = funcionario.email,
+                    telefone = funcionario.telefone,
+                    ativo = funcionario.ativo,
+                    role = funcionario.role
+                )
+            )
         }
         validarResposta(response, "Atualizar funcionário")
         println("Status do Atualizar Funcionário: ${response.status}")
+    }
+
+    suspend fun alterarSenha(id: Long, novaSenha: String) {
+        val response = httpClient.patch("$endPoint/$id/senha") {
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(AlterarSenhaRequest(novaSenha))
+        }
+        validarResposta(response, "Alterar senha do funcionário")
     }
 
     suspend fun apagar(funcionario: Funcionario) {

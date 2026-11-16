@@ -8,6 +8,22 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
+internal fun formatarDataPagamentoParaIso(dataStr: String): String {
+    return when {
+        dataStr.matches(Regex("\\d{2}/\\d{2}/\\d{4}")) -> {
+            val (dia, mes, ano) = dataStr.split("/")
+            "$ano-$mes-${dia}T00:00:00"
+        }
+        dataStr.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> "${dataStr}T00:00:00"
+        dataStr.matches(
+            Regex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,9})?)?")
+        ) -> dataStr
+        else -> throw IllegalArgumentException(
+            "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
+        )
+    }
+}
+
 class PagamentoAPI(private val httpClient: HttpClient) {
     private val endPoint = "/pagamentos"
     private val token get() = SessionManager.token
@@ -24,7 +40,7 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         val response = httpClient.post(endPoint) {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(pagamento)
+            setBody(pagamento.copy(dataPagamento = formatarDataPagamentoParaIso(pagamento.dataPagamento)))
         }
         println("Status do Salvar Pagamento: ${response.status}")
         println("Resposta Detalhada: ${response.bodyAsText()}")
@@ -34,7 +50,7 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(pagamento)
+            setBody(pagamento.copy(dataPagamento = formatarDataPagamentoParaIso(pagamento.dataPagamento)))
         }
         println("Status do Atualizar Pagamento: ${response.status}")
     }
@@ -45,4 +61,5 @@ class PagamentoAPI(private val httpClient: HttpClient) {
         }
         println("Status do Apagar Pagamento: ${response.status}")
     }
+
 }

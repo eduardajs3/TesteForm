@@ -40,9 +40,7 @@ fun AgendaFormulario(
     val pacientesDisponiveis = pacientes.filter {
         it.ativo || it.id == vm.pacienteId.value
     }
-    val psicologosDisponiveis = psicologos.filter {
-        it.ativo || it.id == vm.psicologoId.value
-    }
+    val psicologosDisponiveis = psicologos.filter { it.ativo }
     val tiposDisponiveis = tipos.filter {
         it.ativo || it.id == vm.tipoAtendimentoId.value
     }
@@ -53,7 +51,7 @@ fun AgendaFormulario(
     val pacienteSelecionado = pacientesDisponiveis.firstOrNull {
         it.id == vm.pacienteId.value
     }
-    val psicologoSelecionado = psicologosDisponiveis.firstOrNull {
+    val psicologoSelecionado = psicologos.firstOrNull {
         it.id == vm.psicologoId.value
     }
     val tipoSelecionado = tiposDisponiveis.firstOrNull {

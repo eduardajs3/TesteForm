@@ -467,6 +467,7 @@ class AgendaViewModel(
         id.value = ""
         limparCampos()
         mensagem.value = ""
+        atualizarPsicologos()
     }
 
     fun editar(agenda: Agenda) {
@@ -496,5 +497,16 @@ class AgendaViewModel(
         observacoes.definir(agenda.observacoes ?: "")
         ativo.definir(agenda.ativo.toString())
         mensagem.value = ""
+        atualizarPsicologos()
+    }
+
+    private fun atualizarPsicologos() {
+        viewModelScope.launch {
+            try {
+                _psicologos.value = psicologoApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao atualizar psicólogos"))
+            }
+        }
     }
 }

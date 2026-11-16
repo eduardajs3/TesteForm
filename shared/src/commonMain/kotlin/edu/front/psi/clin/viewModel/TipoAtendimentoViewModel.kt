@@ -59,7 +59,6 @@ class TipoAtendimentoViewModel(
     val descricao = CampoValidado()
     val duracao = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val ativo = CampoValidado("true")
-    val dataCadastro = CampoValidado()
     val mensagem = mutableStateOf("")
 
     fun salvar() {
@@ -81,8 +80,7 @@ class TipoAtendimentoViewModel(
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     duracao = duracao.valor.value,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = dataCadastro.valor.value
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
@@ -144,7 +142,6 @@ class TipoAtendimentoViewModel(
         descricao.definir(tipo.descricao)
         duracao.definir(tipo.duracao)
         ativo.definir(tipo.ativo.toString())
-        dataCadastro.definir(tipo.dataCadastro)
         mensagem.value = ""
     }
 
@@ -153,7 +150,6 @@ class TipoAtendimentoViewModel(
         descricao.limpar()
         duracao.limpar()
         ativo.definir("true")
-        dataCadastro.limpar()
         mensagem.value = "Campos limpos."
     }
 }

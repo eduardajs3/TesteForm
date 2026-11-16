@@ -74,8 +74,9 @@ class FuncionarioViewModel(
         val v2 = cpf.validar()
         val v3 = email.validar()
         val v4 = telefone.validar()
-        val v5 = senha.validar()
+        val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
+        val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -91,7 +92,7 @@ class FuncionarioViewModel(
                     cpf = cpf.valor.value,
                     email = email.valor.value,
                     telefone = telefone.valor.value,
-                    senha = senha.valor.value,
+                    senha = senha.valor.value.takeIf { it.isNotBlank() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
                     role = "ADMIN"
                 )
@@ -99,7 +100,20 @@ class FuncionarioViewModel(
                 if (id.value.isEmpty()) {
                     funcionarioApi.salvar(funcionario)
                 } else {
-                    funcionarioApi.atualizar(id.value.toLong(), funcionario)
+                    val idNumber = id.value.toLong()
+                    funcionarioApi.atualizar(idNumber, funcionario)
+                    if (senhaNova != null) {
+                        try {
+                            funcionarioApi.alterarSenha(idNumber, senhaNova)
+                        } catch (e: Exception) {
+                            val mensagemErro = e.mensagemParaUsuario(
+                                "Dados atualizados, mas não foi possível alterar a senha"
+                            )
+                            mensagem.value = mensagemErro
+                            mandarMensagem(mensagemErro)
+                            return@launch
+                        }
+                    }
                 }
 
                 _funcionarios.value = funcionarioApi.carregar()

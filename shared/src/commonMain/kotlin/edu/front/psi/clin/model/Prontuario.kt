@@ -3,10 +3,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Prontuario(
-    val id: Int,
-    val paciente: String,
-    val dataAbertura: String,
-    val queixaPrincipal: String,
-    val status: String,
-    val ativo: Boolean
+    val id: Long? = null,
+    val pacienteId: Long? = null,
+    val dataAbertura: String? = null,
+    val queixaPrincipal: String = "",
+    val status: String? = null,
+    val ativo: Boolean = true
 )

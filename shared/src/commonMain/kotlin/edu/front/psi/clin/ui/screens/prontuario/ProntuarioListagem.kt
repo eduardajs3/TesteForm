@@ -26,7 +26,7 @@ fun ProntuarioListagem(
     val listaProntuarios by vm.prontuariosFiltrados.collectAsState()
     val listaOrdenada = remember(listaProntuarios) { listaProntuarios.sortedByDescending { it.id } }
 
-    var itemExpandidoId by remember { mutableStateOf<Int?>(null) }
+    var itemExpandidoId by remember { mutableStateOf<Long?>(null) }
     var itemParaExcluir by remember { mutableStateOf<Prontuario?>(null) }
 
     Box(
@@ -63,7 +63,7 @@ fun ProntuarioListagem(
                     val isExpansivel = itemExpandidoId == item.id
 
                     CardExpansivelBase(
-                        tituloTopo = item.dataAbertura,
+                        tituloTopo = item.dataAbertura.orEmpty(),
                         tituloPrincipal = item.queixaPrincipal,
                         isExpandido = isExpansivel,
                         onClickToggle = {
@@ -72,7 +72,7 @@ fun ProntuarioListagem(
                         onEditarClick = { vm.editar(item) },
                         onExcluirClick = { itemParaExcluir = item }
                     ) {
-                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status)
+                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status.orEmpty())
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),

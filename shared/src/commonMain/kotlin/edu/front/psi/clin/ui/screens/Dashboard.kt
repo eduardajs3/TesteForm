@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,9 +39,14 @@ fun DashboardTela(
     onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) }
 ) {
 
+    LaunchedEffect(vm) {
+        vm.carregarDados()
+    }
+
     val metricas by vm.metricas.collectAsState()
     val consultas by vm.consultasFiltradas.collectAsState()
     val filtroStatus by vm.filtroStatus.collectAsState()
+    val carregando by vm.carregando.collectAsState()
 
     val scrollState = rememberScrollState()
 
@@ -369,7 +375,32 @@ fun DashboardTela(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        if (consultas.isEmpty()) {
+        if (carregando && metricas.isEmpty()) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardFundoCinza),
+                border = BorderStroke(1.dp, CardBordaCinza),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = VerdeClinica,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Carregando dados do dashboard...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextoSecundario
+                    )
+                }
+            }
+        } else if (consultas.isEmpty()) {
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = CardFundoCinza),

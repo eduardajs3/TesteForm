@@ -323,7 +323,7 @@ fun App() {
                             },
                             onNavegarParaEvolucao = { paciente ->
                                 pacienteSelecionadoNome = paciente.nome
-                                evolucaoVm.prontuario.value = paciente.nome
+                                evolucaoVm.selecionarPaciente(paciente.nome)
                                 evolucaoVm.atualizarFiltro(paciente.nome)
                                 evolucaoVm.backStack.clear()
                                 evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)

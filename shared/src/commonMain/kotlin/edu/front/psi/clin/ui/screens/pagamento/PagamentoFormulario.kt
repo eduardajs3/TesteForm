@@ -23,6 +23,13 @@ fun PagamentoFormulario(
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
     val agendasLista = vm.agendas.collectAsState().value
+    val agendasSemPagamento = vm.agendasSemPagamento.collectAsState().value
+    val agendaAtual = agendasLista.firstOrNull { it.id == vm.agendaId.value }
+    val agendasParaSelecionar = if (isEdicao && agendaAtual != null) {
+        (agendasSemPagamento + agendaAtual).distinctBy { it.id }
+    } else {
+        agendasSemPagamento
+    }
 
     val formaPagamentoOpcoes = listOf("PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO")
     val statusOpcoes = listOf("PENDENTE", "PAGO", "CANCELADO")
@@ -46,11 +53,12 @@ fun PagamentoFormulario(
             CampoDropdownPadrao(
                 label = "Agenda / Consulta *",
                 valorSelecionado = agendaAtualDescricao,
-                opcoes = agendasLista.map { "Agenda #${it.id} - ${it.dataHoraInicio}" },
+                opcoes = agendasParaSelecionar.map { "Agenda #${it.id} - ${it.dataHoraInicio}" },
                 onOpcaoSelecionada = { selecao ->
                     val idStr = selecao.substringAfter("#").substringBefore(" -")
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
                     vm.agendaId.value = agendaEscolhida?.id?.toLong()
+                    vm.pacienteId.value = agendaEscolhida?.pacienteId
                 },
                 isError = vm.agendaId.value == null && vm.mensagem.value.isNotEmpty(),
                 errorMessage = if (vm.agendaId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null

@@ -79,6 +79,7 @@ class PsicologoViewModel(
         val v6 = crp.validar()
         val v7 = especialidade.validar()
         val v8 = ativo.validar()
+        val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -108,6 +109,18 @@ class PsicologoViewModel(
                 } else {
                     val idNumber = id.value.toLong()
                     psicologoApi.atualizar(idNumber, psicologo)
+                    if (senhaNova != null) {
+                        try {
+                            psicologoApi.alterarSenha(idNumber, senhaNova)
+                        } catch (e: Exception) {
+                            val mensagemErro = e.mensagemParaUsuario(
+                                "Dados atualizados, mas não foi possível alterar a senha"
+                            )
+                            mensagem.value = mensagemErro
+                            mandarMensagem(mensagemErro)
+                            return@launch
+                        }
+                    }
                 }
 
 

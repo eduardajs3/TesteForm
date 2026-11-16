@@ -73,10 +73,10 @@ fun FuncionarioFormulario(
             CampoTextoPadrao(
                 value = vm.senha.valor.value,
                 onValueChange = { vm.senha.definir(it) },
-                label = if (isEdicao) "Nova senha" else "Senha",
-                obrigatorio = true,
-                isError = vm.senha.temErro.value,
-                errorMessage = if (vm.senha.temErro.value) "Campo obrigatório" else null
+                label = if (isEdicao) "Nova senha (opcional)" else "Senha",
+                obrigatorio = !isEdicao,
+                isError = !isEdicao && vm.senha.temErro.value,
+                errorMessage = if (!isEdicao && vm.senha.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(

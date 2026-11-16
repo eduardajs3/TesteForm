@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
@@ -19,13 +20,8 @@ fun ProntuarioFormulario(
     vm: ProntuarioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
-
-    val pacienteOpcoes = listOf(
-        "Ana Clara Souza",
-        "Carlos Eduardo Lima",
-        "Mariana Ribeiro",
-        "João Pedro Santos"
-    )
+    val pacientes = vm.pacientes.collectAsState().value
+    val pacienteOpcoes = pacientes.map { it.nome }.distinct()
 
     val statusOpcoes = listOf(
         "Ativo",
@@ -34,14 +30,15 @@ fun ProntuarioFormulario(
     )
 
     val pacienteAtual = vm.paciente.value
-    val pacienteExibicao = if (pacienteOpcoes.contains(pacienteAtual)) pacienteAtual else (pacienteOpcoes.firstOrNull() ?: "")
+    val pacienteExibicao = pacienteAtual
 
     val statusAtual = vm.status.value
     val statusExibicao = when {
         statusOpcoes.contains(statusAtual) -> statusAtual
-        statusAtual.lowercase() == "true" -> "Ativo"
-        statusAtual.lowercase() == "false" -> "Encerrado"
-        else -> "Ativo" 
+        statusAtual.equals("ATIVO", ignoreCase = true) || statusAtual.lowercase() == "true" -> "Ativo"
+        statusAtual.equals("ARQUIVADO", ignoreCase = true) -> "Arquivado"
+        statusAtual.equals("ENCERRADO", ignoreCase = true) || statusAtual.lowercase() == "false" -> "Encerrado"
+        else -> "Ativo"
     }
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -81,6 +78,7 @@ fun ProntuarioFormulario(
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     vm.status.value = selecao
+                    vm.ativo.value = (selecao == "Ativo").toString()
                 }
             )
 
