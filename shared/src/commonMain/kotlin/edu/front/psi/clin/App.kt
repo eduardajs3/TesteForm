@@ -585,6 +585,11 @@ fun App() {
                         EvolucaoClinicaListagem(
                             innerPadding = contentPadding,
                             vm = evolucaoVm,
+                            onVoltar = {
+                                if (principalVm.backstack.size > 1) {
+                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                                }
+                            },
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
@@ -600,6 +605,11 @@ fun App() {
                         ProntuarioListagem(
                             innerPadding = contentPadding,
                             vm = prontuarioVm,
+                            onVoltar = {
+                                if (principalVm.backstack.size > 1) {
+                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                                }
+                            },
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }

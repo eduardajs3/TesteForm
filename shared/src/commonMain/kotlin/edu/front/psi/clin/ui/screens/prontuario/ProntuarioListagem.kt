@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.painterResource
 fun ProntuarioListagem(
     innerPadding: PaddingValues,
     vm: ProntuarioViewModel,
+    onVoltar: () -> Unit,
     nomePaciente: String = vm.paciente.value.ifEmpty { vm.filtro.collectAsState().value.ifEmpty { "Todos os Pacientes" } }
 ) {
     val listaProntuarios by vm.prontuariosFiltrados.collectAsState()
@@ -44,6 +45,7 @@ fun ProntuarioListagem(
                 titulo = "Prontuário",
                 textoBotao = "Novo Prontuário",
                 iconeBotao = painterResource(Res.drawable.add),
+                onVoltar = onVoltar,
                 onClickBotao = { vm.novoProntuario(nomePaciente) }
             )
 

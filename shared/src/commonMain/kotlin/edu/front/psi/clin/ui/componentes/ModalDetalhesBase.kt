@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.Branco
-import edu.front.psi.clin.ui.theme.CardBordaCinza
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import frontpsiclinic.shared.generated.resources.*
@@ -22,7 +21,8 @@ fun ModalDetalhesBase(
     titulo: String,
     onDismiss: () -> Unit,
     conteudo: @Composable ColumnScope.() -> Unit,
-    acoesExtras: @Composable (ColumnScope.() -> Unit)? = null
+    acoesExtras: @Composable (ColumnScope.() -> Unit)? = null,
+    acoesTopo: @Composable (RowScope.() -> Unit)? = null // Novo slot para ícones no cabeçalho
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -38,15 +38,25 @@ fun ModalDetalhesBase(
                     text = titulo,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = VerdeClinica
+                    color = VerdeClinica,
+                    modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        painter = painterResource(Res.drawable.close),
-                        contentDescription = "Fechar",
-                        tint = TextoSecundario,
-                        modifier = Modifier.size(20.dp)
-                    )
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (acoesTopo != null) {
+                        acoesTopo()
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            painter = painterResource(Res.drawable.close),
+                            contentDescription = "Fechar",
+                            tint = TextoSecundario,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         },
@@ -65,6 +75,6 @@ fun ModalDetalhesBase(
                 }
             }
         },
-        confirmButton = {} // Removido o botão "Fechar" padrão do rodapé
+        confirmButton = {}
     )
 }
