@@ -1,5 +1,7 @@
 package edu.front.psi.clin.ui.screens.pagamento
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -19,10 +21,23 @@ fun PagamentoFormulario(
     innerPadding: PaddingValues,
     vm: PagamentoViewModel
 ) {
+    LaunchedEffect(vm) {
+        vm.carregarDadosFormulario()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        vm.carregarDadosFormulario()
+    }
+
     val isEdicao = vm.id.value.isNotEmpty()
 
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
+    val pacientesDisponiveis = pacientesLista.filter {
+        it.ativo || isEdicao && it.id == vm.pacienteId.value
+    }
+    val conveniosDisponiveis = conveniosLista.filter {
+        it.ativo || isEdicao && it.id == vm.convenioId.value
+    }
     val agendasLista = vm.agendas.collectAsState().value
     val agendasSemPagamento = vm.agendasSemPagamento.collectAsState().value
     val agendaAtual = agendasLista.firstOrNull { it.id == vm.agendaId.value }
@@ -73,9 +88,9 @@ fun PagamentoFormulario(
             CampoDropdownPadrao(
                 label = "Paciente *",
                 valorSelecionado = pacienteAtualNome,
-                opcoes = pacientesLista.map { it.nome },
+                opcoes = pacientesDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
-                    val pacienteEscolhido = pacientesLista.firstOrNull { it.nome == nome }
+                    val pacienteEscolhido = pacientesDisponiveis.firstOrNull { it.nome == nome }
                     vm.pacienteId.value = pacienteEscolhido?.id?.toLong()
                 },
                 isError = vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty(),
@@ -86,9 +101,9 @@ fun PagamentoFormulario(
             CampoDropdownPadrao(
                 label = "Convênio *",
                 valorSelecionado = convenioAtualNome,
-                opcoes = conveniosLista.map { it.nome },
+                opcoes = conveniosDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
-                    val convenioEscolhido = conveniosLista.firstOrNull { it.nome == nome }
+                    val convenioEscolhido = conveniosDisponiveis.firstOrNull { it.nome == nome }
                     vm.convenioId.value = convenioEscolhido?.id?.toLong()
                 },
                 isError = vm.convenioId.value == null && vm.mensagem.value.isNotEmpty(),

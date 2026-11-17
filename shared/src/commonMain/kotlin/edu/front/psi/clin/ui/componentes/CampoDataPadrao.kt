@@ -14,12 +14,12 @@ import edu.front.psi.clin.ui.theme.CinzaTextoData
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import frontpsiclinic.shared.generated.resources.*
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 import org.jetbrains.compose.resources.painterResource
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,10 +98,10 @@ fun CampoDataPadrao(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")).apply {
-                                timeZone = TimeZone.getTimeZone("UTC")
-                            }
-                            onValueChange(formatter.format(Date(millis)))
+                            val data = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.UTC)
+                                .date
+                            onValueChange(formatarDataIsoParaBrasileira(data.toString()))
                         }
                         mostrarPicker = false
                     }

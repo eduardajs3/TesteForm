@@ -7,16 +7,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.Serializable
-
-@Serializable
-private data class ProntuarioRequest(
-    val id: Long? = null,
-    val pacienteId: Long,
-    val dataAbertura: String? = null,
-    val queixaPrincipal: String,
-    val status: String
-)
 
 class ProntuarioAPI(private val httpClient: HttpClient) {
     private val endPoint = "/prontuarios"
@@ -34,7 +24,7 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
         val response = httpClient.post(endPoint) {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(prontuario.toRequest())
+            setBody(prontuario.normalizado())
         }
         response.lancarErroSeNecessario()
     }
@@ -43,7 +33,7 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(prontuario.toRequest())
+            setBody(prontuario.normalizado())
         }
         response.lancarErroSeNecessario()
     }
@@ -56,8 +46,7 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
         response.lancarErroSeNecessario()
     }
 
-    private fun Prontuario.toRequest() = ProntuarioRequest(
-        id = id,
+    private fun Prontuario.normalizado() = copy(
         pacienteId = requireNotNull(pacienteId) { "Selecione um paciente para o prontuário." },
         dataAbertura = dataAbertura?.let {
             formatarDataBrasileiraOuIsoParaDataHoraIso(
@@ -69,3 +58,4 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
         status = status?.uppercase() ?: "ATIVO"
     )
 }
+ 

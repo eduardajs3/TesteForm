@@ -1,9 +1,12 @@
 package edu.front.psi.clin.ui.screens.horarioDisponivel
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
@@ -18,10 +21,19 @@ fun HorarioDisponivelFormulario(
     innerPadding: PaddingValues,
     vm: HorarioDisponivelViewModel
 ) {
+    LaunchedEffect(vm) {
+        vm.carregarDadosFormulario()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        vm.carregarDadosFormulario()
+    }
+
     val isEdicao = vm.id.value.isNotEmpty()
 
     val psicologosLista = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologosLista.map { it.nome }
+    val psicologoOpcoes = psicologosLista.filter {
+        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
+    }.map { it.nome }
 
     val diasOpcoes = listOf("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
 

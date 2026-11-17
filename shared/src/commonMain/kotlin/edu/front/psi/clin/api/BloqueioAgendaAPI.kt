@@ -4,8 +4,6 @@ import edu.front.psi.clin.model.BloqueioAgenda
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -25,7 +23,7 @@ class BloqueioAgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(bloqueio)
         }
-        validarResposta(response, "Salvar bloqueio")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, bloqueio: BloqueioAgenda) {
@@ -34,7 +32,7 @@ class BloqueioAgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(bloqueio)
         }
-        validarResposta(response, "Atualizar bloqueio")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(bloqueio: BloqueioAgenda) {
@@ -42,13 +40,6 @@ class BloqueioAgendaAPI(private val httpClient: HttpClient) {
         val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        validarResposta(response, "Excluir bloqueio")
-    }
-
-    private suspend fun validarResposta(response: HttpResponse, operacao: String) {
-        if (response.status.value !in 200..299) {
-            val detalhe = response.bodyAsText()
-            throw IllegalStateException("$operacao falhou (${response.status}): $detalhe")
-        }
+        response.lancarErroSeNecessario()
     }
 }

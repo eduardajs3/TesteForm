@@ -10,6 +10,7 @@ import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -60,6 +61,7 @@ class AgendaViewModel(
     val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
+    private var carregamentoDadosFormulario: Job? = null
 
     fun filtrarPorPsicologo(nome: String) {
         _psicologoFiltro.value = nome
@@ -77,10 +79,24 @@ class AgendaViewModel(
     }
 
     init {
+        carregarDadosFormulario()
+    }
+
+    fun carregarDadosFormulario() {
+        if (carregamentoDadosFormulario?.isActive == true) return
+
         viewModelScope.launch {
             try {
                 _agendamentos.value = agendaApi.carregar()
-                _pacientes.value = pacienteApi.carregar()
+                val pacientesAtualizados = pacienteApi.carregar()
+                _pacientes.value = pacientesAtualizados
+                if (
+                    id.value.isEmpty() &&
+                    pacienteId.value != null &&
+                    pacientesAtualizados.none { it.id == pacienteId.value && it.ativo }
+                ) {
+                    pacienteId.value = null
+                }
                 _psicologos.value = psicologoApi.carregar()
                 _salas.value = salaApi.carregar()
                 _tiposAtendimento.value = tipoAtendimentoApi.carregar()
@@ -88,8 +104,10 @@ class AgendaViewModel(
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados do servidor"))
+            } finally {
+                carregamentoDadosFormulario = null
             }
-        }
+        }.also { carregamentoDadosFormulario = it }
     }
 
     fun atualizarFiltro(novoFiltro: String) {
@@ -468,7 +486,6 @@ class AgendaViewModel(
         id.value = ""
         limparCampos()
         mensagem.value = ""
-        atualizarPsicologos()
     }
 
     fun editar(agenda: Agenda) {
@@ -497,16 +514,5 @@ class AgendaViewModel(
         observacoes.definir(agenda.observacoes ?: "")
         ativo.definir(agenda.ativo.toString())
         mensagem.value = ""
-        atualizarPsicologos()
-    }
-
-    private fun atualizarPsicologos() {
-        viewModelScope.launch {
-            try {
-                _psicologos.value = psicologoApi.carregar()
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao atualizar psicólogos"))
-            }
-        }
     }
 }

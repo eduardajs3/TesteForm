@@ -13,6 +13,7 @@ import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -30,14 +31,36 @@ class BloqueioAgendaViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private var carregamentoDadosFormulario: Job? = null
 
     init {
-        viewModelScope.launch {
+        carregarDadosFormulario()
+    }
+
+    fun carregarDadosFormulario() {
+        if (carregamentoDadosFormulario?.isActive == true) return
+
+        carregamentoDadosFormulario = viewModelScope.launch {
             try {
-                _bloqueios.value = bloqueioApi.carregar()
-                _psicologos.value = psicologoApi.carregar()
+                val bloqueiosAtualizados = bloqueioApi.carregar()
+                val psicologosAtualizados = psicologoApi.carregar()
+
+                _bloqueios.value = bloqueiosAtualizados
+                _psicologos.value = psicologosAtualizados
+                val psicologoSelecionadoId = psicologo.valor.value.toLongOrNull()
+                if (
+                    id.value.isEmpty() &&
+                    psicologoSelecionadoId != null &&
+                    psicologosAtualizados.none {
+                        it.id == psicologoSelecionadoId && it.ativo
+                    }
+                ) {
+                    psicologo.limpar()
+                }
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar bloqueios de agenda"))
+            } finally {
+                carregamentoDadosFormulario = null
             }
         }
     }

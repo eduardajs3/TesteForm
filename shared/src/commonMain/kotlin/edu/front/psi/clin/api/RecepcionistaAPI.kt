@@ -6,21 +6,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.Serializable
-
-@Serializable
-private data class RecepcionistaAtualizacaoRequest(
-    val id: Long? = null,
-    val nome: String,
-    val cpf: String,
-    val email: String,
-    val telefone: String,
-    val ativo: Boolean = true,
-    val setor: String
-)
 
 class RecepcionistaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/recepcionistas"
+    private val endPoint = "/recepcionistas"
     private val token
         get() = SessionManager.token
 
@@ -28,7 +16,7 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
         val lista = httpClient.get(endPoint) {
             bearerAuth(token)
         }.body<List<Recepcionista>>()
-        
+
         println("GET Recepcionistas Carregados: $lista")
         return lista
     }
@@ -46,17 +34,7 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(
-                RecepcionistaAtualizacaoRequest(
-                    id = recepcionista.id,
-                    nome = recepcionista.nome,
-                    cpf = recepcionista.cpf,
-                    email = recepcionista.email,
-                    telefone = recepcionista.telefone,
-                    ativo = recepcionista.ativo,
-                    setor = recepcionista.setor
-                )
-            )
+            setBody(recepcionista)
         }
         println("Status do Atualizar Recepcionista: ${response.status}")
     }
@@ -76,3 +54,4 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
         println("Status do Apagar Recepcionista: ${response.status}")
     }
 }
+ 

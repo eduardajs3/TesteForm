@@ -44,9 +44,16 @@ object MaskUtils {
 
 
         val valorLong = apenasDigitos.toLongOrNull() ?: 0L
+        val reais = valorLong / 100
+        val centavos = (valorLong % 100).toString().padStart(2, '0')
+        val reaisFormatados = reais
+            .toString()
+            .reversed()
+            .chunked(3)
+            .joinToString(".")
+            .reversed()
 
-
-        return String.format(java.util.Locale("pt", "BR"), "R$ %,.2f", valorLong / 100.0)
+        return "R$ $reaisFormatados,$centavos"
     }
     fun validarEmail(email: String): Boolean {
         if (email.isBlank()) return false

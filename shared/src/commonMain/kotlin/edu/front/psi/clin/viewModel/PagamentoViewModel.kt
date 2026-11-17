@@ -10,6 +10,7 @@ import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,7 @@ class PagamentoViewModel(
 
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
     val agendas = _agendas.asStateFlow()
+    private var carregamentoDadosFormulario: Job? = null
 
     val agendasSemPagamento = combine(_agendas, _pagamentos) { agendas, pagamentos ->
         val agendasComPagamento = pagamentos.mapTo(mutableSetOf()) { it.agendaId }
@@ -43,15 +45,60 @@ class PagamentoViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        viewModelScope.launch {
+        carregarDadosFormulario()
+    }
+
+    fun carregarDadosFormulario() {
+        if (carregamentoDadosFormulario?.isActive == true) return
+
+        carregamentoDadosFormulario = viewModelScope.launch {
             try {
-                _pagamentos.value = pagamentoApi.carregar()
-                _pacientes.value = pacienteApi.carregar()
-                _convenios.value = convenioApi.carregar()
-                _agendas.value = agendaApi.carregar()
+                val pagamentosAtualizados = pagamentoApi.carregar()
+                val pacientesAtualizados = pacienteApi.carregar()
+                val conveniosAtualizados = convenioApi.carregar()
+                val agendasAtualizadas = agendaApi.carregar()
+
+                _pagamentos.value = pagamentosAtualizados
+                _pacientes.value = pacientesAtualizados
+                _convenios.value = conveniosAtualizados
+                _agendas.value = agendasAtualizadas
+
+                if (id.value.isEmpty()) {
+                    if (
+                        pacienteId.value != null &&
+                        pacientesAtualizados.none {
+                            it.id == pacienteId.value && it.ativo
+                        }
+                    ) {
+                        pacienteId.value = null
+                    }
+                    if (
+                        convenioId.value != null &&
+                        conveniosAtualizados.none {
+                            it.id == convenioId.value && it.ativo
+                        }
+                    ) {
+                        convenioId.value = null
+                    }
+                    val agendaSelecionadaId = agendaId.value
+                    if (
+                        agendaSelecionadaId != null &&
+                        (
+                            agendasAtualizadas.none {
+                                it.id == agendaSelecionadaId && it.ativo
+                            } ||
+                                pagamentosAtualizados.any { it.agendaId == agendaSelecionadaId }
+                            )
+                    ) {
+                        agendaId.value = null
+                    }
+                }
+
                 println("Dados de Pagamento e dependências carregados com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pagamentos"))
+            } finally {
+                carregamentoDadosFormulario = null
             }
         }
     }

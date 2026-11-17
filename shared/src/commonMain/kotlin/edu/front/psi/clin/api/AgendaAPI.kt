@@ -1,12 +1,9 @@
-
 package edu.front.psi.clin.api
 
 import edu.front.psi.clin.model.Agenda
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -29,6 +26,7 @@ class AgendaAPI(private val httpClient: HttpClient) {
             setBody(agenda)
         }
 
+        response.lancarErroSeNecessario()
         println("Status do Salvar Agenda: ${response.status}")
     }
 
@@ -38,20 +36,13 @@ class AgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-        validarResposta(response, "Atualizar agendamento")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(agenda: Agenda) {
         val response = httpClient.delete("$endPoint/${agenda.id}") {
             bearerAuth(token)
         }
-        validarResposta(response, "Excluir agendamento")
-    }
-
-    private suspend fun validarResposta(response: HttpResponse, operacao: String) {
-        if (response.status.value !in 200..299) {
-            val detalhe = response.bodyAsText()
-            throw IllegalStateException("$operacao falhou (${response.status}): $detalhe")
-        }
+        response.lancarErroSeNecessario()
     }
 }

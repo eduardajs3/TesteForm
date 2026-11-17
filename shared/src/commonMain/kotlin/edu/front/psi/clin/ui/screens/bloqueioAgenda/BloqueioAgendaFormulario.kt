@@ -1,9 +1,12 @@
 package edu.front.psi.clin.ui.screens.bloqueioAgenda
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
@@ -19,9 +22,18 @@ fun BloqueioAgendaFormulario(
     innerPadding: PaddingValues,
     vm: BloqueioAgendaViewModel
 ) {
+    LaunchedEffect(vm) {
+        vm.carregarDadosFormulario()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        vm.carregarDadosFormulario()
+    }
+
     val isEdicao = vm.id.value.isNotEmpty()
     val psicologos = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologos.map { it.nome }
+    val psicologoOpcoes = psicologos.filter {
+        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
+    }.map { it.nome }
     val psicologoSelecionado = psicologos.firstOrNull {
         it.id?.toString() == vm.psicologo.valor.value
     }
