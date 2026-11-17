@@ -229,7 +229,7 @@ class AgendaViewModel(
         }
     }
 
-    fun salvar() {
+    fun salvar(onDisponibilidadeIndisponivel: () -> Unit = {}) {
         val vData = dataAtendimento.validar()
         val vInicio = horaInicio.validar()
         val vFim = horaFim.validar()
@@ -300,8 +300,12 @@ class AgendaViewModel(
                     tipoAtendimentoId.value!!
                 )
                 if (horariosValidos.none { it.inicio == horaInicio.valor.value && it.fim == horaFim.valor.value }) {
-                    mensagem.value = "Esse horário não está mais disponível para o psicólogo."
+                    mensagem.value = "Esse horário não está mais disponível. Selecione outra data ou horário."
                     mandarMensagem(mensagem.value)
+                    horaInicio.limpar()
+                    horaFim.limpar()
+                    salaId.value = null
+                    onDisponibilidadeIndisponivel()
                     return@launch
                 }
 
@@ -310,8 +314,10 @@ class AgendaViewModel(
                     HorarioAgendamento(horaInicio.valor.value, horaFim.valor.value)
                 )
                 if (salasValidas.none { it.id == salaId.value }) {
-                    mensagem.value = "A sala selecionada não está mais disponível nesse horário."
+                    mensagem.value = "A sala selecionada não está mais disponível. Selecione outro horário ou sala."
                     mandarMensagem(mensagem.value)
+                    salaId.value = null
+                    onDisponibilidadeIndisponivel()
                     return@launch
                 }
 

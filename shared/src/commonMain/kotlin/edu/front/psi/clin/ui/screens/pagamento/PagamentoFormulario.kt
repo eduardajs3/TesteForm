@@ -79,6 +79,7 @@ fun PagamentoFormulario(
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
                     vm.agendaId.value = agendaEscolhida?.id?.toLong()
                     vm.pacienteId.value = agendaEscolhida?.pacienteId
+                    vm.convenioId.value = agendaEscolhida?.convenioId
                 },
                 isError = vm.agendaId.value == null && vm.mensagem.value.isNotEmpty(),
                 errorMessage = if (vm.agendaId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null

@@ -1,10 +1,12 @@
 package edu.front.psi.clin.ui.screens.agenda
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,8 +30,11 @@ internal fun EtapaSalaRevisaoAgenda(
     convenioSelecionado: Convenio?,
     dataSelecionada: LocalDate?,
     horarioSelecionado: HorarioAgendamento?,
-    onVoltar: () -> Unit
+    onVoltar: () -> Unit,
+    onAgendar: () -> Unit
 ) {
+    var exibirConfirmacao by remember(vm.id.value) { mutableStateOf(false) }
+
     Card(
         colors = CardDefaults.cardColors(containerColor = Branco),
         border = BorderStroke(1.dp, CardBordaCinza),
@@ -54,6 +59,17 @@ internal fun EtapaSalaRevisaoAgenda(
                         .firstOrNull { it.nome == nome }?.id
                 }
             )
+            if (horarioSelecionado == null || salasDisponiveis.isEmpty()) {
+                Text(
+                    text = if (horarioSelecionado == null) {
+                        "Este horário não está mais disponível. Volte e selecione outro."
+                    } else {
+                        "Não há salas disponíveis neste horário. Volte e selecione outro horário."
+                    },
+                    color = TextoErro,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
 
             CampoDropdownPadrao(
                 label = "Status",
@@ -110,12 +126,79 @@ internal fun EtapaSalaRevisaoAgenda(
             Text("Voltar")
         }
         Button(
-            onClick = vm::salvar,
+            onClick = {
+                if (
+                    horarioSelecionado == null ||
+                    salasDisponiveis.none { it.id == vm.salaId.value }
+                ) {
+                    vm.mensagem.value = if (horarioSelecionado == null) {
+                        "Este horário não está mais disponível. Selecione outro."
+                    } else {
+                        "Não há sala disponível neste horário. Selecione outro horário."
+                    }
+                } else {
+                    vm.mensagem.value = ""
+                    exibirConfirmacao = true
+                }
+            },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica)
         ) {
             Text(if (isEdicao) "Confirmar alterações" else "Confirmar agendamento")
         }
+    }
+
+    if (exibirConfirmacao) {
+        AlertDialog(
+            onDismissRequest = { exibirConfirmacao = false },
+            title = { Text(if (isEdicao) "Confirmar alterações" else "Confirmar agendamento") },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Confira os detalhes antes de confirmar:")
+                    HorizontalDivider()
+                    ResumoAgendamento("Paciente", pacienteSelecionado?.nome)
+                    ResumoAgendamento("Psicólogo", psicologoSelecionado?.nome)
+                    ResumoAgendamento("Atendimento", tipoSelecionado?.nome)
+                    ResumoAgendamento("Convênio", convenioSelecionado?.nome)
+                    ResumoAgendamento(
+                        "Data",
+                        dataSelecionada?.let {
+                            "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
+                        }
+                    )
+                    ResumoAgendamento(
+                        "Horário",
+                        horarioSelecionado?.let { "${it.inicio}–${it.fim}" }
+                    )
+                    ResumoAgendamento("Sala", salaSelecionada?.nome)
+                    ResumoAgendamento("Status", vm.status.valor.value)
+                    ResumoAgendamento(
+                        "Observações",
+                        vm.observacoes.valor.value.ifEmpty { null }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        exibirConfirmacao = false
+                        onAgendar()
+                    }
+                ) {
+                    Text(if (isEdicao) "Salvar alterações" else "Agendar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { exibirConfirmacao = false }) {
+                    Text("Revisar")
+                }
+            }
+        )
     }
 }
 

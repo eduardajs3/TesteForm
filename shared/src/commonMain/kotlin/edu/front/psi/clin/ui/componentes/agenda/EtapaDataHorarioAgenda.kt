@@ -50,14 +50,14 @@ internal fun EtapaDataHorarioAgenda(
 
             if (horariosCadastrados.isEmpty()) {
                 Text(
-                    text = "Não há horários semanais cadastrados para consultar.",
+                    text = "Não há horários semanais cadastrados. Selecione outro psicólogo ou atendimento.",
                     color = TextoErro,
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else if (datasDisponiveis.isEmpty()) {
                 Text(
-                    text = "Não há datas com horários disponíveis nos próximos 60 dias.",
-                    color = TextoSecundario,
+                    text = "Não há datas disponíveis nos próximos 60 dias. Selecione outro psicólogo ou atendimento.",
+                    color = TextoErro,
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
@@ -120,8 +120,8 @@ internal fun EtapaDataHorarioAgenda(
                 )
                 if (horariosDisponiveis.isEmpty()) {
                     Text(
-                        text = "Não há horários livres para esta data.",
-                        color = TextoSecundario,
+                        text = "Não há horários livres para esta data. Selecione outra data.",
+                        color = TextoErro,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 } else {

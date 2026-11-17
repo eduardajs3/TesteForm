@@ -166,9 +166,13 @@ fun AgendaFormulario(
                     onVoltar = { etapa = 1 },
                     onEscolherSala = {
                         if (horarioSelecionado == null) {
-                            vm.mensagem.value = "Selecione uma data e um horário disponível."
+                            vm.mensagem.value = if (dataSelecionada != null && horariosDisponiveis.isEmpty()) {
+                                "Não há horários disponíveis nesta data. Selecione outra data."
+                            } else {
+                                "Selecione uma data e um horário disponível."
+                            }
                         } else if (salasDisponiveis.isEmpty()) {
-                            vm.mensagem.value = "Não há salas disponíveis para este horário."
+                            vm.mensagem.value = "Não há salas disponíveis neste horário. Selecione outro horário."
                         } else {
                             vm.mensagem.value = ""
                             etapa = 3
@@ -187,7 +191,12 @@ fun AgendaFormulario(
                     convenioSelecionado = convenioSelecionado,
                     dataSelecionada = dataSelecionada,
                     horarioSelecionado = horarioSelecionado,
-                    onVoltar = { etapa = 2 }
+                    onVoltar = { etapa = 2 },
+                    onAgendar = {
+                        vm.salvar {
+                            etapa = 2
+                        }
+                    }
                 )
             }
         }
