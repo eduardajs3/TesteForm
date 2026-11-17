@@ -26,7 +26,6 @@ fun SalaAtendimentoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Sala de Atendimento" else "Cadastro de Sala de Atendimento",
             subtitulo = if (isEdicao) "Altere os dados da sala selecionada." else "Preencha os dados da sala de atendimento.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(SalaAtendimentoRotas.Listagem)

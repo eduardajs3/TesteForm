@@ -151,36 +151,55 @@ internal fun AgendaGradeSemanal(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     diasExibidos.forEach { dia ->
-                        val agendamentoNoHorario = agendamentos.firstOrNull { item ->
+                        // Filtra TODOS os agendamentos que caem neste mesmo dia e horário
+                        val agendamentosNoHorario = agendamentos.filter { item ->
                             val partesDataHora = item.dataHoraInicio.split("T")
-                            if (partesDataHora.size != 2) return@firstOrNull false
+                            if (partesDataHora.size != 2) return@filter false
                             val dataIsoItem = partesDataHora[0]
                             val horaItem = partesDataHora[1].take(5)
 
                             dataIsoItem == dia.dataIso && horaItem == hora
                         }
 
-                        // Removidos os .toLong() redundantes nas linhas 164, 167 e 170
-                        val nomePaciente = pacientes.firstOrNull {
-                            it.id == agendamentoNoHorario?.pacienteId
-                        }?.nome ?: "Paciente"
-                        val nomePsicologo = psicologos.firstOrNull {
-                            it.id == agendamentoNoHorario?.psicologoId
-                        }?.nome ?: "Psicólogo"
-                        val nomeTipo = tiposAtendimento.firstOrNull {
-                            it.id == agendamentoNoHorario?.tipoAtendimentoId
-                        }?.nome ?: "Consulta"
-
-                        CardAgendamentoGrade(
-                            agendamento = agendamentoNoHorario,
-                            nomePaciente = nomePaciente,
-                            nomePsicologo = nomePsicologo,
-                            nomeTipo = nomeTipo,
+                        // Cada coluna do dia agora exibe uma lista vertical de cards (ou slot livre se estiver vazia)
+                        Column(
                             modifier = Modifier.weight(1f),
-                            onClick = agendamentoNoHorario?.let {
-                                { onSelecionarAgendamento(it) }
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (agendamentosNoHorario.isEmpty()) {
+                                // Se não houver nenhum, mostra o card de "Livre" padrão
+                                CardAgendamentoGrade(
+                                    agendamento = null,
+                                    nomePaciente = "",
+                                    nomePsicologo = "",
+                                    nomeTipo = "",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = null
+                                )
+                            } else {
+                                // Se houver um ou mais, renderiza um card para cada agendamento simultâneo
+                                agendamentosNoHorario.forEach { agendamento ->
+                                    val nomePaciente = pacientes.firstOrNull {
+                                        it.id == agendamento.pacienteId
+                                    }?.nome ?: "Paciente"
+                                    val nomePsicologo = psicologos.firstOrNull {
+                                        it.id == agendamento.psicologoId
+                                    }?.nome ?: "Psicólogo"
+                                    val nomeTipo = tiposAtendimento.firstOrNull {
+                                        it.id == agendamento.tipoAtendimentoId
+                                    }?.nome ?: "Consulta"
+
+                                    CardAgendamentoGrade(
+                                        agendamento = agendamento,
+                                        nomePaciente = nomePaciente,
+                                        nomePsicologo = nomePsicologo,
+                                        nomeTipo = nomeTipo,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = { onSelecionarAgendamento(agendamento) }
+                                    )
+                                }
                             }
-                        )
+                        }
                     }
                 }
             }

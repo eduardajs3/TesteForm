@@ -10,6 +10,7 @@ import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeClinica
@@ -40,15 +41,15 @@ fun AgendaListagem(
     val convenios = vm.convenios.collectAsState().value
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
-    var exibirModalExclusao by remember { mutableStateOf(false) } // Estado para controlar o modal de exclusão
+    var exibirModalExclusao by remember { mutableStateOf(false) }
     var segundaAtual by remember { mutableStateOf(DataSimples(16, 11, 2026)) }
     var menuMesesAberto by remember { mutableStateOf(false) }
     var diaSelecionadoIndex by remember { mutableIntStateOf(0) }
 
-    val sextaAtual = remember(segundaAtual) { segundaAtual.adicionarDias(4) }
+    val domingoAtual = remember(segundaAtual) { segundaAtual.adicionarDias(6) }
     val diasDaSemana = remember(segundaAtual) { criarDiasDaSemana(segundaAtual) }
-    val tituloSemana = remember(segundaAtual, sextaAtual) {
-        tituloSemanaAgenda(segundaAtual, sextaAtual)
+    val tituloSemana = remember(segundaAtual, domingoAtual) {
+        tituloSemanaAgenda(segundaAtual, domingoAtual)
     }
     val horariosSessao = remember(agendamentos, diasDaSemana) {
         val datasDaSemana = diasDaSemana.map { it.dataIso }.toSet()
@@ -62,7 +63,7 @@ fun AgendaListagem(
             }
         ).distinct().sorted()
     }
-
+    
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -100,6 +101,51 @@ fun AgendaListagem(
                     }
                 )
 
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Filtros organizados lado a lado (Row)
+                if (telaPequena) {
+                    // Em telas pequenas, mantemos empilhado para não espremer
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        CampoDropdownPadrao(
+                            label = "Psicólogo",
+                            valorSelecionado = vm.psicologoFiltro.collectAsState().value,
+                            opcoes = listOf("Todos") + psicologos.map { it.nome },
+                            onOpcaoSelecionada = { nome -> vm.filtrarPorPsicologo(nome) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CampoDropdownPadrao(
+                            label = "Status",
+                            valorSelecionado = vm.statusFiltro.collectAsState().value,
+                            opcoes = listOf("Todos", "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU"),
+                            onOpcaoSelecionada = { status -> vm.filtrarPorStatus(status) }
+                        )
+                    }
+                } else {
+                    // Em telas maiores, ficam perfeitamente lado a lado dividindo o espaço
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            CampoDropdownPadrao(
+                                label = "Psicólogo",
+                                valorSelecionado = vm.psicologoFiltro.collectAsState().value,
+                                opcoes = listOf("Todos") + psicologos.map { it.nome },
+                                onOpcaoSelecionada = { nome -> vm.filtrarPorPsicologo(nome) }
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            CampoDropdownPadrao(
+                                label = "Status",
+                                valorSelecionado = vm.statusFiltro.collectAsState().value,
+                                opcoes = listOf("Todos", "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU"),
+                                onOpcaoSelecionada = { status -> vm.filtrarPorStatus(status) }
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 AgendaGradeSemanal(
@@ -117,7 +163,6 @@ fun AgendaListagem(
             }
         }
 
-        // Modal de Detalhes
         agendamentoSelecionado?.let { agendamento ->
             val pacienteNome = pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome ?: "-"
             val psicologoNome = psicologos.firstOrNull { it.id == agendamento.psicologoId }?.nome ?: "-"
@@ -135,8 +180,16 @@ fun AgendaListagem(
                     ItemDetalhe(rotulo = "Tipo de Atendimento", valor = tipoNome)
                     ItemDetalhe(rotulo = "Convênio", valor = convenioNome)
                     ItemDetalhe(
-                        rotulo = "Data e Horário",
+                        rotulo = "Data",
                         valor = formatarDataHoraIsoParaBrasileira(agendamento.dataHoraInicio)
+                            .substringBefore(" ")
+                    )
+
+                    ItemDetalhe(
+                        rotulo = "Horário",
+                        valor = "${agendamento.dataHoraInicio.substringAfter("T").take(5)} às ${
+                            agendamento.dataHoraFim.substringAfter("T").take(5)
+                        }"
                     )
                     ItemDetalhe(rotulo = "Status", valor = agendamento.status)
                     ItemDetalhe(rotulo = "Observações", valor = agendamento.observacoes?.ifEmpty { null })
@@ -144,7 +197,6 @@ fun AgendaListagem(
                 acoesTopo = {
                     IconButton(
                         onClick = {
-                            // Ativa o modal de confirmação de exclusão
                             exibirModalExclusao = true
                         },
                         modifier = Modifier.size(32.dp)
@@ -175,7 +227,6 @@ fun AgendaListagem(
             )
         }
 
-        // Modal de Confirmação de Exclusão (AppDeleteModal)
         if (exibirModalExclusao && agendamentoSelecionado != null) {
             AppDeleteModal(
                 title = "Excluir agendamento",

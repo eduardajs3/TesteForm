@@ -24,27 +24,43 @@ fun CardAgendamentoGrade(
     onClick: (() -> Unit)? = null
 ) {
     val isOcupado = agendamento != null
+    val status = agendamento?.status?.uppercase() ?: ""
 
-    val corStatus = when (agendamento?.status?.uppercase()) {
-        "CONFIRMADO", "REALIZADO", "AGENDADO" -> FundoSucesso
-        "CANCELADO", "FALTOU" -> FundoStatusNegativo
-        else -> LinhaDivisoria.copy(alpha = 0.4f)
+    // Cores de fundo bem distintas para cada status
+    val corFundo = when (status) {
+        "CONFIRMADO" -> FundoStatusConfirmado  // Verde suave
+        "REALIZADO" -> FundoStatusRealizado   // Azul suave
+        "AGENDADO" -> FundoStatusAgendado     // Amarelo/Laranja suave (Pendente)
+        "CANCELADO", "FALTOU" -> FundoStatusNegativo // Vermelho suave
+        else -> Branco // Para o slot "Livre"
     }
 
-    val corTextoStatus = when (agendamento?.status?.uppercase()) {
-        "CONFIRMADO", "REALIZADO", "AGENDADO" -> VerdeSucesso
+    // Cores de texto correspondentes
+    val corTexto = when (status) {
+        "CONFIRMADO" -> TextoStatusConfirmado
+        "REALIZADO" -> TextoStatusRealizado
+        "AGENDADO" -> TextoStatusAgendado
         "CANCELADO", "FALTOU" -> TextoStatusNegativo
-        else -> TextoSecundario
+        else -> TextoSecundario.copy(alpha = 0.45f)
+    }
+
+    // Cores de borda correspondentes
+    val corBorda = when (status) {
+        "CONFIRMADO" -> BordaStatusConfirmado
+        "REALIZADO" -> BordaStatusRealizado
+        "AGENDADO" -> BordaStatusAgendado
+        "CANCELADO", "FALTOU" -> TextoStatusNegativo.copy(alpha = 0.5f)
+        else -> CardBordaCinza.copy(alpha = 0.5f)
     }
 
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = corStatus),
+        colors = CardDefaults.cardColors(containerColor = corFundo),
         modifier = modifier
             .height(78.dp)
             .border(
                 width = 1.dp,
-                color = if (isOcupado) corTextoStatus.copy(alpha = 0.35f) else CardBordaCinza.copy(alpha = 0.5f),
+                color = corBorda,
                 shape = RoundedCornerShape(12.dp)
             )
             .then(
@@ -62,7 +78,7 @@ fun CardAgendamentoGrade(
                     text = nomePaciente,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    color = corTextoStatus,
+                    color = corTexto,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -70,7 +86,7 @@ fun CardAgendamentoGrade(
                 Text(
                     text = nomePsicologo,
                     style = MaterialTheme.typography.bodySmall,
-                    color = corTextoStatus.copy(alpha = 0.85f),
+                    color = corTexto.copy(alpha = 0.85f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -78,7 +94,7 @@ fun CardAgendamentoGrade(
                 Text(
                     text = "$nomeTipo • ${agendamento.status}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = corTextoStatus.copy(alpha = 0.7f),
+                    color = corTexto.copy(alpha = 0.7f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -86,7 +102,7 @@ fun CardAgendamentoGrade(
                 Text(
                     text = "Livre",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextoSecundario.copy(alpha = 0.45f),
+                    color = corTexto,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }

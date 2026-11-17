@@ -64,9 +64,19 @@ val nomesDosMeses = listOf(
 )
 
 fun criarDiasDaSemana(segunda: DataSimples): List<DiaSemanaAgenda> {
-    val nomesDosDias = listOf("Seg", "Ter", "Qua", "Qui", "Sex")
+    val nomesDosDias = listOf(
+        "Seg",
+        "Ter",
+        "Qua",
+        "Qui",
+        "Sex",
+        "Sáb",
+        "Dom"
+    )
+
     return nomesDosDias.mapIndexed { indice, nome ->
         val data = segunda.adicionarDias(indice)
+
         DiaSemanaAgenda(
             nomeDia = nome,
             dataFormatada = data.formatarDiaMes(),
@@ -74,7 +84,6 @@ fun criarDiasDaSemana(segunda: DataSimples): List<DiaSemanaAgenda> {
         )
     }
 }
-
 fun tituloSemanaAgenda(inicio: DataSimples, fim: DataSimples): String {
     val nomeMesInicio = nomesDosMeses[inicio.mes - 1]
     val nomeMesFim = nomesDosMeses[fim.mes - 1]

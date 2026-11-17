@@ -27,6 +27,7 @@ class TipoAtendimentoViewModel(
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    
     var salvando by mutableStateOf(false)
         private set
 
@@ -58,22 +59,20 @@ class TipoAtendimentoViewModel(
     )
 
     val id = mutableStateOf("")
-    
     val nome = CampoValidado()
     val descricao = CampoValidado()
     val duracao = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
         if (salvando) return
+        
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = duracao.validar()
         val v4 = ativo.validar()
 
-        if (!(v1 && v2 && v3 && v4 )) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
+        if (!(v1 && v2 && v3 && v4)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -104,7 +103,7 @@ class TipoAtendimentoViewModel(
                 } else {
                     "Tipo de atendimento atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 
@@ -112,11 +111,8 @@ class TipoAtendimentoViewModel(
                 backStack.add(TipoAtendimentoRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
-            }finally {
-                
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
                 salvando = false
             }
         }
@@ -140,7 +136,6 @@ class TipoAtendimentoViewModel(
         backStack.add(TipoAtendimentoRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(tipo: TipoAtendimento) {
@@ -151,7 +146,6 @@ class TipoAtendimentoViewModel(
         descricao.definir(tipo.descricao)
         duracao.definir(tipo.duracao)
         ativo.definir(tipo.ativo.toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -159,6 +153,5 @@ class TipoAtendimentoViewModel(
         descricao.limpar()
         duracao.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

@@ -27,9 +27,7 @@ class ConvenioViewModel(
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    val mensagem = mutableStateOf("")
-
-    // Estado para controlar se uma operação de salvamento está em andamento
+    
     var salvando by mutableStateOf(false)
         private set
 
@@ -72,7 +70,6 @@ class ConvenioViewModel(
     val ativo = CampoValidado("true")
 
     fun salvar() {
-        // Se já estiver salvando, ignora cliques adicionais (previne duplicidade)
         if (salvando) return
 
         val v1 = nome.validar()
@@ -118,7 +115,7 @@ class ConvenioViewModel(
                 } else {
                     "Convênio atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+            
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
          
@@ -128,7 +125,6 @@ class ConvenioViewModel(
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
-                // Garante que o estado de salvamento é liberado mesmo se ocorrer erro
                 salvando = false
             }
         }

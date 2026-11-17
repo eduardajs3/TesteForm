@@ -26,7 +26,6 @@ fun TipoAtendimentoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Tipo de Atendimento" else "Cadastro de Tipo de Atendimento",
             subtitulo = if (isEdicao) "Altere os dados do tipo de atendimento selecionado." else "Preencha os dados do tipo de atendimento.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(TipoAtendimentoRotas.Listagem)

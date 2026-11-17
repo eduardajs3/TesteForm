@@ -62,7 +62,12 @@ class AgendaViewModel(
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
+    private val _statusFiltro = MutableStateFlow("Todos")
+    val statusFiltro = _statusFiltro.asStateFlow()
 
+    fun filtrarPorStatus(status: String) {
+        _statusFiltro.value = status
+    }
     fun filtrarPorPsicologo(nome: String) {
         _psicologoFiltro.value = nome
     }
@@ -114,17 +119,38 @@ class AgendaViewModel(
         _filtro.value = novoFiltro
     }
 
-    val agendamentosFiltrados = combine(_agendamentos, _filtro) { agendamentos, filtro ->
-        if (filtro.isEmpty()) {
-            agendamentos
-        } else {
-            agendamentos.filter { item ->
-                item.observacoes?.contains(filtro, ignoreCase = true) == true ||
-                item.status.contains(filtro, ignoreCase = true)
-            }
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val agendamentosFiltrados = combine(
+        _agendamentos,
+        _filtro,
+        _psicologoFiltro,
+        _statusFiltro
+    ) { agendamentos, filtro, psicologoFiltro, statusFiltro ->
 
+        agendamentos.filter { item ->
+
+            val filtroTexto =
+                filtro.isBlank() ||
+                item.observacoes?.contains(filtro, true) == true ||
+                item.status.contains(filtro, true)
+
+            val filtroPsicologo =
+                psicologoFiltro == "Todos" ||
+                _psicologos.value.firstOrNull {
+                    it.nome == psicologoFiltro
+                }?.id == item.psicologoId
+
+            val filtroStatus =
+                statusFiltro == "Todos" ||
+                item.status.equals(statusFiltro, true)
+
+            filtroTexto && filtroPsicologo && filtroStatus
+        }
+
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
     val backStack = NavBackStack<AgendaRotas>(
     AgendaRotas.Listagem
 )
