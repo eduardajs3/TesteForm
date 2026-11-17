@@ -97,7 +97,7 @@ internal fun EtapaDataHorarioAgenda(
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            text = "${data.day.toString().padStart(2, '0')}/${data.month.toString().padStart(2, '0')}",
+                                            text = "${data.day.toString().padStart(2, '0')}/${data.monthNumber.toString().padStart(2, '0')}",
                                             color = if (selecionada) Branco else TextoSecundario,
                                             style = MaterialTheme.typography.labelSmall
                                         )
@@ -166,12 +166,6 @@ internal fun EtapaDataHorarioAgenda(
                     }
                 }
             }
-
-            Text(
-                text = "Os bloqueios de agenda não são verificados porque não há uma fonte persistida disponível no app.",
-                color = TextoSecundario,
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 
