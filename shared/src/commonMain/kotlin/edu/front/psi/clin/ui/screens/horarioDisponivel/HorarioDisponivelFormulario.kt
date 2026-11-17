@@ -29,7 +29,7 @@ fun HorarioDisponivelFormulario(
     }
 
     val isEdicao = vm.id.value.isNotEmpty()
-
+    val salvando = vm.salvando
     val psicologosLista = vm.psicologos.collectAsState().value
     val psicologoOpcoes = psicologosLista.filter {
         it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
@@ -122,9 +122,13 @@ fun HorarioDisponivelFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

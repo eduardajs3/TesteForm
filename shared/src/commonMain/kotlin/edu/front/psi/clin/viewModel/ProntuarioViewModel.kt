@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -26,6 +28,8 @@ class ProntuarioViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -93,6 +97,7 @@ class ProntuarioViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
             mensagem.value = "Preencha os campos obrigatórios!"
             mandarMensagem("Preencha os campos obrigatórios!")
@@ -129,6 +134,7 @@ class ProntuarioViewModel(
         )
 
         viewModelScope.launch {
+            salvando = true
             try {
                 if (idAtual == null) {
                     prontuarioApi.salvar(prontuario)
@@ -151,6 +157,8 @@ class ProntuarioViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar prontuário")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+                salvando = false
             }
         }
     }

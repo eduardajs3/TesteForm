@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -28,7 +30,8 @@ class BloqueioAgendaViewModel(
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(emptyList())
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     val psicologos = _psicologos.asStateFlow()
-
+    var salvando by mutableStateOf(false)
+        private set
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
@@ -103,6 +106,7 @@ class BloqueioAgendaViewModel(
         nomePsicologo(psicologoId, _psicologos.value)
 
     fun salvar() {
+        if (salvando) return
         val v1 = psicologo.validar()
         val v2 = dataInicio.validar()
         val v3 = horaInicio.validar()
@@ -133,6 +137,7 @@ class BloqueioAgendaViewModel(
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val bloqueio = BloqueioAgenda(
                     id = bloqueioId,
@@ -165,6 +170,8 @@ class BloqueioAgendaViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+                salvando = false
             }
         }
     }

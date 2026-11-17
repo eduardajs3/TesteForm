@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -42,6 +44,8 @@ class EvolucaoClinicaViewModel(
     val prontuarios = _prontuarios.asStateFlow()
     val psicologos = _psicologos.asStateFlow()
     val agendas = _agendas.asStateFlow()
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         carregarDados(evolucaoApi::carregar) { _evolucoes.value = it }
@@ -118,6 +122,7 @@ class EvolucaoClinicaViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         if (prontuarioId.value == null || psicologoId.value == null || agendaId.value == null ||
             dataRegistro.value.isBlank() || descricao.value.isBlank()
         ) {
@@ -147,6 +152,7 @@ class EvolucaoClinicaViewModel(
         )
 
         viewModelScope.launch {
+            salvando = true
             try {
                 if (idAtual == null) {
                     evolucaoApi.salvar(evolucao)
@@ -169,6 +175,9 @@ class EvolucaoClinicaViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar evolução clínica")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+                
+                salvando = false
             }
         }
     }

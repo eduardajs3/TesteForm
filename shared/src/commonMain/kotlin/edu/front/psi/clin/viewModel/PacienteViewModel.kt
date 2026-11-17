@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -27,7 +29,8 @@ class PacienteViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-
+    var salvando by mutableStateOf(false)
+        private set
     init {
         viewModelScope.launch {
             try {
@@ -73,6 +76,7 @@ class PacienteViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = dataNascimento.validar()
@@ -88,6 +92,7 @@ class PacienteViewModel(
         }
         val dataFormatada = formatarDataBrasileiraParaIso(dataNascimento.valor.value)
         viewModelScope.launch {
+            salvando = true
             try {
                 val paciente = Paciente(
                     id = id.value.toLongOrNull(),
@@ -127,6 +132,8 @@ class PacienteViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+                salvando = false
             }
         }
     }

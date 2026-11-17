@@ -21,7 +21,7 @@ fun EvolucaoClinicaFormulario(
     vm: EvolucaoClinicaViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
-
+    val salvando = vm.salvando
     val pacientes = vm.pacientes.collectAsState().value
     val prontuarios = vm.prontuarios.collectAsState().value
     val psicologos = vm.psicologos.collectAsState().value
@@ -137,13 +137,13 @@ fun EvolucaoClinicaFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

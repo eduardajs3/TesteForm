@@ -30,6 +30,7 @@ fun BloqueioAgendaFormulario(
     }
 
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
     val psicologos = vm.psicologos.collectAsState().value
     val psicologoOpcoes = psicologos.filter {
         it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
@@ -37,6 +38,7 @@ fun BloqueioAgendaFormulario(
     val psicologoSelecionado = psicologos.firstOrNull {
         it.id?.toString() == vm.psicologo.valor.value
     }
+    
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -111,9 +113,13 @@ fun BloqueioAgendaFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

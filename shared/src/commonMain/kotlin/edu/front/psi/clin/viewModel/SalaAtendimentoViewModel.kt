@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -24,7 +26,8 @@ class SalaAtendimentoViewModel(
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-
+    var salvando by mutableStateOf(false)
+        private set
     init {
         viewModelScope.launch {
             try {
@@ -60,7 +63,7 @@ class SalaAtendimentoViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-     
+        if (salvando) return
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
@@ -73,6 +76,7 @@ class SalaAtendimentoViewModel(
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val sala = SalaAtendimento(
                     id = id.value.toLongOrNull(),
@@ -108,6 +112,9 @@ class SalaAtendimentoViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+               
+                salvando = false
             }
         }
     }

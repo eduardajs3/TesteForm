@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -32,7 +34,8 @@ class HorarioDisponivelViewModel(
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
-
+    var salvando by mutableStateOf(false)
+        private set
     init {
         carregarDadosFormulario()
     }
@@ -101,6 +104,7 @@ class HorarioDisponivelViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         val v1 = psicologo.validar()
         val v2 = diaSemana.validar()
         val v3 = horaInicio.validar()
@@ -115,6 +119,7 @@ class HorarioDisponivelViewModel(
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val horario = HorarioDisponivel(
                     id = if (id.value.isEmpty()) null else id.value.toLong(),
@@ -153,6 +158,9 @@ class HorarioDisponivelViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+               
+                salvando = false
             }
         }
     }
