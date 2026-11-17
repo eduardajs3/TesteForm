@@ -107,11 +107,12 @@ fun AgendaListagem(
         }
 
         agendamentoSelecionado?.let { agendamento ->
-            val pacienteNome = pacientes.firstOrNull { it.id?.toLong() == agendamento.pacienteId }?.nome ?: "-"
-            val psicologoNome = psicologos.firstOrNull { it.id?.toLong() == agendamento.psicologoId }?.nome ?: "-"
-            val salaNome = salas.firstOrNull { it.id?.toLong() == agendamento.salaId }?.nome ?: "-"
-            val tipoNome = tiposAtendimento.firstOrNull { it.id?.toLong() == agendamento.tipoAtendimentoId }?.nome ?: "-"
-            val convenioNome = convenios.firstOrNull { it.id?.toLong() == agendamento.convenioId }?.nome ?: "-"
+    
+            val pacienteNome = pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome ?: "-"
+            val psicologoNome = psicologos.firstOrNull { it.id == agendamento.psicologoId }?.nome ?: "-"
+            val salaNome = salas.firstOrNull { it.id == agendamento.salaId }?.nome ?: "-"
+            val tipoNome = tiposAtendimento.firstOrNull { it.id == agendamento.tipoAtendimentoId }?.nome ?: "-"
+            val convenioNome = convenios.firstOrNull { it.id == agendamento.convenioId }?.nome ?: "-"
 
             AgendaDetalhesDialog(
                 agendamento = agendamento,
@@ -135,4 +136,3 @@ fun AgendaListagem(
         }
     }
 }
- 

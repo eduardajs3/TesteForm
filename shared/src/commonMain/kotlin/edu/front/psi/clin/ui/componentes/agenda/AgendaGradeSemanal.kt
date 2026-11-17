@@ -160,14 +160,15 @@ internal fun AgendaGradeSemanal(
                             dataIsoItem == dia.dataIso && horaItem == hora
                         }
 
+                        // Removidos os .toLong() redundantes nas linhas 164, 167 e 170
                         val nomePaciente = pacientes.firstOrNull {
-                            it.id?.toLong() == agendamentoNoHorario?.pacienteId
+                            it.id == agendamentoNoHorario?.pacienteId
                         }?.nome ?: "Paciente"
                         val nomePsicologo = psicologos.firstOrNull {
-                            it.id?.toLong() == agendamentoNoHorario?.psicologoId
+                            it.id == agendamentoNoHorario?.psicologoId
                         }?.nome ?: "Psicólogo"
                         val nomeTipo = tiposAtendimento.firstOrNull {
-                            it.id?.toLong() == agendamentoNoHorario?.tipoAtendimentoId
+                            it.id == agendamentoNoHorario?.tipoAtendimentoId
                         }?.nome ?: "Consulta"
 
                         CardAgendamentoGrade(

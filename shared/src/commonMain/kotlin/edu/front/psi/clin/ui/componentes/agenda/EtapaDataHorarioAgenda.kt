@@ -97,7 +97,7 @@ internal fun EtapaDataHorarioAgenda(
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            text = "${data.dayOfMonth.toString().padStart(2, '0')}/${data.monthNumber.toString().padStart(2, '0')}",
+                                            text = "${data.day.toString().padStart(2, '0')}/${data.month.toString().padStart(2, '0')}",
                                             color = if (selecionada) Branco else TextoSecundario,
                                             style = MaterialTheme.typography.labelSmall
                                         )
@@ -203,4 +203,3 @@ private fun nomeDia(data: LocalDate): String = when (data.dayOfWeek.ordinal + 1)
     6 -> "Sáb"
     else -> "Dom"
 }
- 

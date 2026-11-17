@@ -145,7 +145,7 @@ internal fun EtapaSalaRevisaoAgenda(
                 ItemDetalhe(
                     rotulo = "Data",
                     valor = dataSelecionada?.let {
-                        "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
+                        "${it.day.toString().padStart(2, '0')}/${it.month.toString().padStart(2, '0')}/${it.year}"
                     }
                 )
                 ItemDetalhe(
