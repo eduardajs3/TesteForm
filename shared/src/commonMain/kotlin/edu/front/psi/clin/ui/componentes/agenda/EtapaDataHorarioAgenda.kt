@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.HorarioDisponivel
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 import edu.front.psi.clin.ui.viewmodel.HorarioAgendamento
@@ -185,13 +186,11 @@ internal fun EtapaDataHorarioAgenda(
         ) {
             Text("Voltar")
         }
-        Button(
+        BotaoPadrao(
+            texto = "Escolher sala",
             onClick = onEscolherSala,
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica)
-        ) {
-            Text("Escolher sala")
-        }
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

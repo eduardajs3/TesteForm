@@ -2,17 +2,20 @@ package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import edu.front.psi.clin.ui.theme.TextoPrincipal
+import edu.front.psi.clin.ui.theme.Branco
+import edu.front.psi.clin.ui.theme.CardBordaCinza
+import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import frontpsiclinic.shared.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ModalDetalhesBase(
@@ -23,41 +26,45 @@ fun ModalDetalhesBase(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Branco,
+        shape = RoundedCornerShape(24.dp),
         title = {
-            Text(
-                text = titulo,
-                style = MaterialTheme.typography.titleLarge,
-                color = VerdeClinica
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = VerdeClinica
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        painter = painterResource(Res.drawable.close),
+                        contentDescription = "Fechar",
+                        tint = TextoSecundario,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 conteudo()
 
                 if (acoesExtras != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Ações Rápidas",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = VerdeClinica
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     acoesExtras()
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = "Fechar",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = VerdeClinica
-                )
-            }
-        }
+        confirmButton = {} // Removido o botão "Fechar" padrão do rodapé
     )
 }

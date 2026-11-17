@@ -9,6 +9,8 @@ val FundoSucesso = Color(0xFFF0FDF4)
 val VerdeSucesso = Color(0xFF166534)
 val FundoErro = Color(0xFFFEF2F2)
 val BordaErro = Color(0xFFFECACA)
+val FundoStatusNegativo = Color(0xFFFEE2E2)
+val TextoStatusNegativo = Color(0xFF991B1B)
 
 
 val Branco = Color(0xFFFFFFFF)

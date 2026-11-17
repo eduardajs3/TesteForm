@@ -12,6 +12,7 @@ import edu.front.psi.clin.model.Convenio
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.model.TipoAtendimento
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
@@ -92,12 +93,10 @@ internal fun EtapaDadosAtendimentoAgenda(
     }
 
     Spacer(Modifier.height(16.dp))
-    Button(
+    BotaoPadrao(
+        texto = "Ver disponibilidade",
         onClick = onAvancar,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica)
-    ) {
-        Text("Ver disponibilidade")
-    }
+        modifier = Modifier.fillMaxWidth()
+    )
 }
  

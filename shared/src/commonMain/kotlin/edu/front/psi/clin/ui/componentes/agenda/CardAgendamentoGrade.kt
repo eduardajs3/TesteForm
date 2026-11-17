@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,13 +27,13 @@ fun CardAgendamentoGrade(
 
     val corStatus = when (agendamento?.status?.uppercase()) {
         "CONFIRMADO", "REALIZADO", "AGENDADO" -> FundoSucesso
-        "CANCELADO", "FALTOU" -> Color(0xFFFEE2E2)
+        "CANCELADO", "FALTOU" -> FundoStatusNegativo
         else -> LinhaDivisoria.copy(alpha = 0.4f)
     }
 
     val corTextoStatus = when (agendamento?.status?.uppercase()) {
         "CONFIRMADO", "REALIZADO", "AGENDADO" -> VerdeSucesso
-        "CANCELADO", "FALTOU" -> Color(0xFF991B1B)
+        "CANCELADO", "FALTOU" -> TextoStatusNegativo
         else -> TextoSecundario
     }
 

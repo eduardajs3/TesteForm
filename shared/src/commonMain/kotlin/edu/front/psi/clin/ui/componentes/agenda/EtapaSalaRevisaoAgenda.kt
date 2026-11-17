@@ -1,18 +1,19 @@
 package edu.front.psi.clin.ui.screens.agenda
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.*
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 import edu.front.psi.clin.ui.viewmodel.HorarioAgendamento
@@ -87,30 +88,6 @@ internal fun EtapaSalaRevisaoAgenda(
                 onValueChange = { vm.observacoes.definir(it) },
                 label = "Observações (opcional)"
             )
-
-            HorizontalDivider()
-            Text(
-                text = "Revise os dados do agendamento",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica
-            )
-            ResumoAgendamento("Paciente", pacienteSelecionado?.nome)
-            ResumoAgendamento("Psicólogo", psicologoSelecionado?.nome)
-            ResumoAgendamento("Atendimento", tipoSelecionado?.nome)
-            ResumoAgendamento("Convênio", convenioSelecionado?.nome)
-            ResumoAgendamento(
-                "Data",
-                dataSelecionada?.let {
-                    "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
-                }
-            )
-            ResumoAgendamento(
-                "Horário",
-                horarioSelecionado?.let { "${it.inicio}–${it.fim}" }
-            )
-            ResumoAgendamento("Sala", salaSelecionada?.nome)
-            ResumoAgendamento("Status", vm.status.valor.value)
         }
     }
 
@@ -121,11 +98,13 @@ internal fun EtapaSalaRevisaoAgenda(
     ) {
         OutlinedButton(
             onClick = onVoltar,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).height(48.dp),
+            shape = RoundedCornerShape(24.dp)
         ) {
             Text("Voltar")
         }
-        Button(
+        BotaoPadrao(
+            texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
             onClick = {
                 if (
                     horarioSelecionado == null ||
@@ -142,81 +121,64 @@ internal fun EtapaSalaRevisaoAgenda(
                 }
             },
             modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica)
-        ) {
-            Text(if (isEdicao) "Confirmar alterações" else "Confirmar agendamento")
-        }
+            containerColor = VerdeClinica
+        )
     }
 
     if (exibirConfirmacao) {
-        AlertDialog(
-            onDismissRequest = { exibirConfirmacao = false },
-            title = { Text(if (isEdicao) "Confirmar alterações" else "Confirmar agendamento") },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .heightIn(max = 400.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("Confira os detalhes antes de confirmar:")
-                    HorizontalDivider()
-                    ResumoAgendamento("Paciente", pacienteSelecionado?.nome)
-                    ResumoAgendamento("Psicólogo", psicologoSelecionado?.nome)
-                    ResumoAgendamento("Atendimento", tipoSelecionado?.nome)
-                    ResumoAgendamento("Convênio", convenioSelecionado?.nome)
-                    ResumoAgendamento(
-                        "Data",
-                        dataSelecionada?.let {
-                            "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
-                        }
-                    )
-                    ResumoAgendamento(
-                        "Horário",
-                        horarioSelecionado?.let { "${it.inicio}–${it.fim}" }
-                    )
-                    ResumoAgendamento("Sala", salaSelecionada?.nome)
-                    ResumoAgendamento("Status", vm.status.valor.value)
-                    ResumoAgendamento(
-                        "Observações",
-                        vm.observacoes.valor.value.ifEmpty { null }
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        exibirConfirmacao = false
-                        onAgendar()
+        ModalDetalhesBase(
+            titulo = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
+            onDismiss = { exibirConfirmacao = false },
+            conteudo = {
+                Text(
+                    text = "Confira os detalhes antes de confirmar:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextoPrincipal
+                )
+                HorizontalDivider(color = CardBordaCinza.copy(alpha = 0.5f))
+
+                ItemDetalhe(rotulo = "Paciente", valor = pacienteSelecionado?.nome)
+                ItemDetalhe(rotulo = "Psicólogo", valor = psicologoSelecionado?.nome)
+                ItemDetalhe(rotulo = "Atendimento", valor = tipoSelecionado?.nome)
+                ItemDetalhe(rotulo = "Convênio", valor = convenioSelecionado?.nome)
+                ItemDetalhe(
+                    rotulo = "Data",
+                    valor = dataSelecionada?.let {
+                        "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
                     }
-                ) {
-                    Text(if (isEdicao) "Salvar alterações" else "Agendar")
-                }
+                )
+                ItemDetalhe(
+                    rotulo = "Horário",
+                    valor = horarioSelecionado?.let { "${it.inicio}–${it.fim}" }
+                )
+                ItemDetalhe(rotulo = "Sala", valor = salaSelecionada?.nome)
+                ItemDetalhe(rotulo = "Status", valor = vm.status.valor.value)
+                ItemDetalhe(rotulo = "Observações", valor = vm.observacoes.valor.value.ifEmpty { null })
             },
-            dismissButton = {
-                TextButton(onClick = { exibirConfirmacao = false }) {
-                    Text("Revisar")
+            acoesExtras = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { exibirConfirmacao = false },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text("Revisar")
+                    }
+                    BotaoPadrao(
+                        texto = if (isEdicao) "Salvar alterações" else "Agendar",
+                        onClick = {
+                            exibirConfirmacao = false
+                            onAgendar()
+                        },
+                        modifier = Modifier.weight(1f),
+                        containerColor = VerdeClinica
+                    )
                 }
             }
         )
     }
 }
-
-@Composable
-private fun ResumoAgendamento(rotulo: String, valor: String?) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$rotulo: ",
-            fontWeight = FontWeight.SemiBold,
-            color = TextoSecundario,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = valor ?: "—",
-            color = TextoPrincipal,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
- 

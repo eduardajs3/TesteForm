@@ -1,8 +1,6 @@
 package edu.front.psi.clin.ui.screens.agenda
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -14,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
@@ -59,15 +58,13 @@ internal fun AgendaDetalhesDialog(
             ) {
                 Text("Editar")
             }
-            Button(
+            BotaoPadrao(
+                texto = "Apagar",
                 onClick = { confirmarExclusao = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Apagar")
-            }
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError
+            )
         }
     )
 
