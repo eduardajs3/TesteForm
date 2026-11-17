@@ -26,12 +26,15 @@ fun EvolucaoClinicaFormulario(
     val prontuarios = vm.prontuarios.collectAsState().value
     val psicologos = vm.psicologos.collectAsState().value
     val agendas = vm.agendas.collectAsState().value
+    val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
     val prontuarioAtual = prontuarios.firstOrNull { it.id == vm.prontuarioId.value }
     val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
         agendas.filter { it.pacienteId == prontuario.pacienteId }
     }.orEmpty()
     val agendaAtual = agendasDoPaciente.firstOrNull { it.id == vm.agendaId.value }
-    val prontuarioOpcoes = prontuarios.mapNotNull { prontuario ->
+    val prontuarioOpcoes = prontuarios.filter {
+        pacienteIdFiltro == null || it.pacienteId == pacienteIdFiltro
+    }.mapNotNull { prontuario ->
         prontuario.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == prontuario.pacienteId }?.nome
                 ?: "Paciente #${prontuario.pacienteId}"

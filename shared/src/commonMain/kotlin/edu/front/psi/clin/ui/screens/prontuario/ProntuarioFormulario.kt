@@ -21,7 +21,11 @@ fun ProntuarioFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
     val pacientes = vm.pacientes.collectAsState().value
-    val pacienteOpcoes = pacientes.map { it.nome }.distinct()
+    val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
+    val pacientesOpcoes = pacientes.filter {
+        pacienteIdFiltro == null || it.id == pacienteIdFiltro
+    }
+    val pacienteOpcoes = pacientesOpcoes.map { it.nome }.distinct()
 
     val statusOpcoes = listOf(
         "Ativo",

@@ -46,13 +46,29 @@ class ProntuarioViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private val _pacienteIdFiltro = MutableStateFlow<Long?>(null)
+    val pacienteIdFiltro = _pacienteIdFiltro.asStateFlow()
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
+        _pacienteIdFiltro.value = null
     }
 
-    val prontuariosFiltrados = combine(_prontuarios, _pacientes, _filtro) { prontuarios, pacientes, filtro ->
-        if (filtro.isEmpty()) {
+    fun selecionarPaciente(pacienteSelecionado: Paciente) {
+        paciente.value = pacienteSelecionado.nome
+        _filtro.value = pacienteSelecionado.nome
+        _pacienteIdFiltro.value = pacienteSelecionado.id
+    }
+
+    val prontuariosFiltrados = combine(
+        _prontuarios,
+        _pacientes,
+        _filtro,
+        _pacienteIdFiltro
+    ) { prontuarios, pacientes, filtro, pacienteIdFiltro ->
+        if (pacienteIdFiltro != null) {
+            prontuarios.filter { it.pacienteId == pacienteIdFiltro }
+        } else if (filtro.isEmpty()) {
             prontuarios
         } else {
             prontuarios.filter {
@@ -82,7 +98,8 @@ class ProntuarioViewModel(
             mandarMensagem("Preencha os campos obrigatórios!")
             return
         }
-        val pacienteId = _pacientes.value.firstOrNull { it.nome == paciente.value }?.id
+        val pacienteId = _pacienteIdFiltro.value
+            ?: _pacientes.value.firstOrNull { it.nome == paciente.value }?.id
         if (pacienteId == null) {
             mensagem.value = "Selecione um paciente cadastrado."
             mandarMensagem(mensagem.value)
@@ -119,7 +136,6 @@ class ProntuarioViewModel(
                     prontuarioApi.atualizar(idAtual, prontuario)
                 }
                 _prontuarios.value = prontuarioApi.carregar()
-                _filtro.value = ""
 
                 val mensagemSucesso = if (ehNovo) {
                     "Prontuário salvo com sucesso!"

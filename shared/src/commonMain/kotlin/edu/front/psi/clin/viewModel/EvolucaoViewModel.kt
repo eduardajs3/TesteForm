@@ -66,14 +66,28 @@ class EvolucaoClinicaViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private val _pacienteIdFiltro = MutableStateFlow<Long?>(null)
+    val pacienteIdFiltro = _pacienteIdFiltro.asStateFlow()
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
+        _pacienteIdFiltro.value = null
     }
 
-    val evolucoesFiltradas = combine(_evolucoes, _filtro, _prontuarios, _pacientes) {
-            evolucoes, filtro, prontuarios, pacientes ->
-        if (filtro.isEmpty()) {
+    val evolucoesFiltradas = combine(
+        _evolucoes,
+        _filtro,
+        _prontuarios,
+        _pacientes,
+        _pacienteIdFiltro
+    ) { evolucoes, filtro, prontuarios, pacientes, pacienteIdFiltro ->
+        if (pacienteIdFiltro != null) {
+            evolucoes.filter { evolucao ->
+                prontuarios.any {
+                    it.id == evolucao.prontuarioId && it.pacienteId == pacienteIdFiltro
+                }
+            }
+        } else if (filtro.isEmpty()) {
             evolucoes
         } else {
             evolucoes.filter {
@@ -140,7 +154,6 @@ class EvolucaoClinicaViewModel(
                     evolucaoApi.atualizar(idAtual, evolucao)
                 }
                 _evolucoes.value = evolucaoApi.carregar()
-                _filtro.value = ""
 
                 val mensagemSucesso = if (ehNovo) {
                     "Evolução clínica salva com sucesso!"
@@ -182,9 +195,23 @@ class EvolucaoClinicaViewModel(
     }
 
     fun selecionarPaciente(nomePaciente: String) {
-        val pacienteId = _pacientes.value.firstOrNull { it.nome == nomePaciente }?.id
+        val paciente = _pacientes.value.firstOrNull { it.nome == nomePaciente }
+        if (paciente == null) {
+            _pacienteIdFiltro.value = null
+            _filtro.value = nomePaciente
+            prontuarioId.value = null
+            agendaId.value = null
+            psicologoId.value = null
+            return
+        }
+        selecionarPaciente(paciente)
+    }
+
+    fun selecionarPaciente(paciente: Paciente) {
+        _pacienteIdFiltro.value = paciente.id
+        _filtro.value = paciente.nome
         val prontuario = _prontuarios.value.firstOrNull {
-            it.pacienteId == pacienteId
+            it.pacienteId == paciente.id
         }
         if (prontuario != null) {
             selecionarProntuario(prontuario)
