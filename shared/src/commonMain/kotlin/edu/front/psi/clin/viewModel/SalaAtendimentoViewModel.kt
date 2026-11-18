@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -24,6 +26,9 @@ class SalaAtendimentoViewModel(
     
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -57,22 +62,22 @@ class SalaAtendimentoViewModel(
     val descricao = CampoValidado()
     val capacidade = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
-     
+        if (salvando) return
+        
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
         val v4 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val sala = SalaAtendimento(
                     id = id.value.toLongOrNull(),
@@ -97,7 +102,7 @@ class SalaAtendimentoViewModel(
                 } else {
                     "Sala atualizada com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 
@@ -105,9 +110,9 @@ class SalaAtendimentoViewModel(
                 backStack.add(SalaAtendimentoRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -130,7 +135,6 @@ class SalaAtendimentoViewModel(
         backStack.add(SalaAtendimentoRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(sala: SalaAtendimento) {
@@ -141,7 +145,6 @@ class SalaAtendimentoViewModel(
         descricao.definir(sala.descricao)
         capacidade.definir(sala.capacidade.toString())
         ativo.definir(sala.ativo.toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -149,6 +152,5 @@ class SalaAtendimentoViewModel(
         descricao.limpar()
         capacidade.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

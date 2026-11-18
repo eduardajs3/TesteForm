@@ -12,11 +12,11 @@ import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BarraPesquisa
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.componentes.CardPaciente
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
-import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoInativo
 import edu.front.psi.clin.ui.theme.TextoSecundario
 import edu.front.psi.clin.ui.theme.VerdeClinica
@@ -91,39 +91,25 @@ fun PacienteListagem(
                         )
                     },
                     acoesExtras = {
-                        Button(
+                        BotaoPadrao(
+                            texto = "Prontuário",
                             onClick = {
                                 val target = paciente
                                 pacienteSelecionado.value = null
                                 onNavegarParaProntuario(target)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text(
-                                text = "Prontuário",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Branco
-                            )
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                        Button(
+                        BotaoPadrao(
+                            texto = "Evolução Clínica",
                             onClick = {
                                 val target = paciente
                                 pacienteSelecionado.value = null
                                 onNavegarParaEvolucao(target)
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdeClinica),
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text(
-                                text = "Evolução Clínica",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Branco
-                            )
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
                         OutlinedButton(
                             onClick = { exibirDetalhesCadastrais = true },

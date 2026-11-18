@@ -14,12 +14,12 @@ import edu.front.psi.clin.ui.theme.CinzaTextoData
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.VerdeClinica
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import frontpsiclinic.shared.generated.resources.*
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 import org.jetbrains.compose.resources.painterResource
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,21 +94,26 @@ fun CampoDataPadrao(
 
         DatePickerDialog(
             onDismissRequest = { mostrarPicker = false },
+            shape = RoundedCornerShape(28.dp),
+            colors = DatePickerDefaults.colors(
+                containerColor = Branco // Garante que o fundo do diálogo inteiro seja branco
+            ),
             confirmButton = {
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")).apply {
-                                timeZone = TimeZone.getTimeZone("UTC")
-                            }
-                            onValueChange(formatter.format(Date(millis)))
+                            val data = Instant.fromEpochMilliseconds(millis)
+                                .toLocalDateTime(TimeZone.UTC)
+                                .date
+                            onValueChange(formatarDataIsoParaBrasileira(data.toString()))
                         }
                         mostrarPicker = false
                     }
                 ) {
                     Text(
-                        text = "OK",
+                        text = "Confirmar",
                         style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                         color = VerdeClinica
                     )
                 }
@@ -120,12 +125,18 @@ fun CampoDataPadrao(
                     Text(
                         text = "Cancelar",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = CinzaTextoData
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        color = CinzaTextoData // Cor cinza bem legível e profissional
                     )
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = Branco
+                )
+            )
         }
     }
 }

@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -24,6 +26,9 @@ class FuncionarioViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    var salvando by mutableStateOf(false)
+        private set
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro
@@ -57,7 +62,6 @@ class FuncionarioViewModel(
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val senha = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     init {
         viewModelScope.launch {
@@ -71,6 +75,8 @@ class FuncionarioViewModel(
     }
 
     fun salvar() {
+        if (salvando) return
+
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()
@@ -80,12 +86,12 @@ class FuncionarioViewModel(
         val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val funcionario = Funcionario(
                     id = id.value.toLongOrNull(),
@@ -107,11 +113,9 @@ class FuncionarioViewModel(
                         try {
                             funcionarioApi.alterarSenha(idNumber, senhaNova)
                         } catch (e: Exception) {
-                            val mensagemErro = e.mensagemParaUsuario(
-                                "Dados atualizados, mas não foi possível alterar a senha"
+                            mandarMensagem(
+                                e.mensagemParaUsuario("Dados atualizados, mas não foi possível alterar a senha")
                             )
-                            mensagem.value = mensagemErro
-                            mandarMensagem(mensagemErro)
                             return@launch
                         }
                     }
@@ -124,15 +128,15 @@ class FuncionarioViewModel(
                 } else {
                     "Funcionário atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
                 backStack.add(FuncionarioRotas.Listagem)
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -142,7 +146,6 @@ class FuncionarioViewModel(
             try {
                 funcionarioApi.apagar(funcionario)
                 _funcionarios.value = funcionarioApi.carregar()
-                println("Funcionários após apagar: ${_funcionarios.value}")
                 mandarMensagem("Funcionário apagado com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -157,7 +160,6 @@ class FuncionarioViewModel(
         )
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(funcionario: Funcionario) {
@@ -172,7 +174,6 @@ class FuncionarioViewModel(
         telefone.definir(funcionario.telefone.orEmpty())
         senha.definir("")
         ativo.definir((funcionario.ativo ?: true).toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {

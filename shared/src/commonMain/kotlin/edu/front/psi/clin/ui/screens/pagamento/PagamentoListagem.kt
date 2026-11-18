@@ -51,12 +51,12 @@ fun PagamentoListagem(
                 pagamentoParaExcluir.value = pagamento
             },
             textoCompacto = { pagamento ->
-                pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome
+                pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome
                     ?: "Paciente #${pagamento.pacienteId}"
             },
             placeholderPesquisa = "Buscar por forma de pagamento ou status..."
         ) { pagamento ->
-            val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome ?: "Paciente #${pagamento.pacienteId}"
+            val pacienteNome = pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome ?: "Paciente #${pagamento.pacienteId}"
             val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
 
             CelulaTabelaTexto(
@@ -83,8 +83,8 @@ fun PagamentoListagem(
         }
 
         pagamentoSelecionado.value?.let { pagamento ->
-            val pacienteNome = pacientesLista.firstOrNull { it.id?.toLong() == pagamento.pacienteId }?.nome ?: "-"
-            val convenioNome = conveniosLista.firstOrNull { it.id?.toLong() == pagamento.convenioId }?.nome ?: "-"
+            val pacienteNome = pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome ?: "-"
+            val convenioNome = conveniosLista.firstOrNull { it.id == pagamento.convenioId }?.nome ?: "-"
             val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
 
             ModalDetalhesBase(

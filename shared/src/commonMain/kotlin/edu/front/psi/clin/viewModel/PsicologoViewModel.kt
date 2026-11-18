@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -25,6 +27,9 @@ class PsicologoViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -68,9 +73,10 @@ class PsicologoViewModel(
     val crp = CampoValidado(formatador = { MaskUtils.aplicarMascaraCrp(it) })
     val especialidade = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
+
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()
@@ -82,12 +88,12 @@ class PsicologoViewModel(
         val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val psicologo = Psicologo(
                     id = id.value.toLongOrNull(),
@@ -113,16 +119,11 @@ class PsicologoViewModel(
                         try {
                             psicologoApi.alterarSenha(idNumber, senhaNova)
                         } catch (e: Exception) {
-                            val mensagemErro = e.mensagemParaUsuario(
-                                "Dados atualizados, mas não foi possível alterar a senha"
-                            )
-                            mensagem.value = mensagemErro
-                            mandarMensagem(mensagemErro)
+                            mandarMensagem(e.mensagemParaUsuario("Dados atualizados, mas não foi possível alterar a senha"))
                             return@launch
                         }
                     }
                 }
-
 
                 _psicologos.value = psicologoApi.carregar()
                 println("Psicólogos após salvar: ${_psicologos.value}")
@@ -132,7 +133,7 @@ class PsicologoViewModel(
                 } else {
                     "Psicólogo atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
@@ -140,9 +141,9 @@ class PsicologoViewModel(
                 backStack.add(PsicologoRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -165,7 +166,6 @@ class PsicologoViewModel(
         backStack.add(PsicologoRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(psicologo: Psicologo) {
@@ -180,7 +180,6 @@ class PsicologoViewModel(
         crp.definir(psicologo.crp)
         especialidade.definir(psicologo.especialidade)
         ativo.definir(psicologo.ativo.toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -192,6 +191,5 @@ class PsicologoViewModel(
         crp.limpar()
         especialidade.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

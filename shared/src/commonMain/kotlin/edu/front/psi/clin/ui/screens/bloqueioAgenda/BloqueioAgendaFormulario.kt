@@ -1,9 +1,12 @@
 package edu.front.psi.clin.ui.screens.bloqueioAgenda
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
@@ -19,9 +22,19 @@ fun BloqueioAgendaFormulario(
     innerPadding: PaddingValues,
     vm: BloqueioAgendaViewModel
 ) {
+    LaunchedEffect(vm) {
+        vm.carregarDadosFormulario()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        vm.carregarDadosFormulario()
+    }
+
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
     val psicologos = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologos.map { it.nome }
+    val psicologoOpcoes = psicologos.filter {
+        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
+    }.map { it.nome }
     val psicologoSelecionado = psicologos.firstOrNull {
         it.id?.toString() == vm.psicologo.valor.value
     }
@@ -30,13 +43,11 @@ fun BloqueioAgendaFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Bloqueio" else "Cadastro de Bloqueio de Agenda",
             subtitulo = if (isEdicao) "Altere os dados do bloqueio ID: ${vm.id.value}" else "Preencha os dados para criar um novo bloqueio.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(BloqueioAgendaRotas.Listagem)
             }
         ) {
-    
             CampoDropdownPadrao(
                 label = "Nome do psicólogo *",
                 valorSelecionado = psicologoSelecionado?.nome.orEmpty(),
@@ -99,9 +110,13 @@ fun BloqueioAgendaFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

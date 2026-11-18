@@ -23,6 +23,7 @@ import frontpsiclinic.shared.generated.resources.*
 fun EvolucaoClinicaListagem(
     innerPadding: PaddingValues,
     vm: EvolucaoClinicaViewModel,
+    onVoltar: () -> Unit,
     nomePaciente: String = vm.filtro.collectAsState().value.ifEmpty { "Paciente" }
 ) {
     val listaEvolucoes by vm.evolucoesFiltradas.collectAsState()
@@ -48,6 +49,7 @@ fun EvolucaoClinicaListagem(
                 titulo = "Evolução Clínica",
                 textoBotao = "Nova Evolução",
                 iconeBotao = painterResource(Res.drawable.add),
+                onVoltar = onVoltar,
                 onClickBotao = { vm.novaEvolucao(nomePaciente) }
             )
 

@@ -63,7 +63,7 @@ fun CampoDropdownPadrao(
                 errorTrailingIconColor = TextoErro
             ),
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
 

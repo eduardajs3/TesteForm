@@ -2,14 +2,25 @@ package edu.front.psi.clin.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-
 val VerdeClinica = Color(0xFF3B5760)
 val VerdeSuave = Color(0xFF86EFAC)
 val FundoSucesso = Color(0xFFF0FDF4)
 val VerdeSucesso = Color(0xFF166534)
 val FundoErro = Color(0xFFFEF2F2)
 val BordaErro = Color(0xFFFECACA)
+val FundoStatusNegativo = Color(0xFFFEE2E2)
+val TextoStatusNegativo = Color(0xFF991B1B)
+val FundoStatusAgendado = Color(0xFFFEF9C3)
+val BordaStatusAgendado = Color(0xFFCA8A04)
+val TextoStatusAgendado = Color(0xFF854D0E)
 
+val FundoStatusConfirmado = Color(0xFFE6F4EA)
+val BordaStatusConfirmado = Color(0xFF34A853)
+val TextoStatusConfirmado = Color(0xFF137333)
+
+val FundoStatusRealizado = Color(0xFFE8F0FE)
+val BordaStatusRealizado = Color(0xFF4285F4)
+val TextoStatusRealizado = Color(0xFF1967D2)
 
 val Branco = Color(0xFFFFFFFF)
 val CremeCampo = Color(0xFFFBFBF9)
@@ -17,13 +28,11 @@ val CardFundoCinza = Color(0xFFFFFFFF)
 val CardBordaCinza = Color(0xFFE5E7EB)
 val LinhaDivisoria = Color(0xFFF3F4F6)
 
-
 val TextoPrincipal = Color(0xFF1F2937)
 val TextoSecundario = Color(0xFF9CA3AF)
 val TextoInativo = Color(0xFF92400E)
 val TextoErro = Color(0xFFEF4444)
 val BotaoExcluir = Color(0xFFA30D18)
-
 
 val CinzaBordaPesquisa = Color(0xFFD0D0D0)
 val CinzaTextoPesquisa = Color(0xFF6E6E6E)

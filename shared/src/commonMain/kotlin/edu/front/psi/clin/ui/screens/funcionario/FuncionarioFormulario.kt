@@ -1,12 +1,10 @@
 package edu.front.psi.clin.ui.screens.funcionario
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -14,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.navigation.FuncionarioRotas
 import edu.front.psi.clin.ui.componentes.AuthLayout
 import edu.front.psi.clin.ui.componentes.AuthTextField
-import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.BotaoPadrao
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.TextoSecundario
@@ -33,7 +31,7 @@ fun FuncionarioFormulario(
     vm: FuncionarioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
-    val senhaVisivel = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var senhaVisivel by remember { mutableStateOf(false) }
 
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
@@ -119,14 +117,14 @@ fun FuncionarioFormulario(
                 onValueChange = { vm.senha.definir(it) },
                 label = if (isEdicao) "Nova senha (opcional)" else "Senha *",
                 placeholder = if (isEdicao) "Digite para alterar a senha" else "Digite a senha",
-                visualTransformation = if (senhaVisivel.value) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { senhaVisivel.value = !senhaVisivel.value }) {
+                    IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
                         Icon(
                             painter = painterResource(
-                                if (senhaVisivel.value) Res.drawable.visibility else Res.drawable.visibility_off
+                                if (senhaVisivel) Res.drawable.visibility else Res.drawable.visibility_off
                             ),
-                            contentDescription = if (senhaVisivel.value) "Ocultar senha" else "Mostrar senha",
+                            contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha",
                             tint = VerdeClinica,
                             modifier = Modifier.size(20.dp)
                         )
@@ -150,20 +148,16 @@ fun FuncionarioFormulario(
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
-            if (vm.mensagem.value.isNotBlank()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = vm.mensagem.value,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSecundario
-                )
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             BotaoPadrao(
-                texto = if (isEdicao) "Salvar Alterações" else "Cadastrar Funcionário",
+                texto = when {
+                    vm.salvando -> "Salvando..."
+                    isEdicao -> "Salvar Alterações"
+                    else -> "Cadastrar Funcionário"
+                },
                 onClick = vm::salvar,
+                enabled = !vm.salvando,
                 containerColor = VerdeClinica,
                 contentColor = Branco,
                 modifier = Modifier
@@ -174,6 +168,7 @@ fun FuncionarioFormulario(
             if (!isEdicao) {
                 TextButton(
                     onClick = vm::limparCampos,
+                    enabled = !vm.salvando,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     Text(

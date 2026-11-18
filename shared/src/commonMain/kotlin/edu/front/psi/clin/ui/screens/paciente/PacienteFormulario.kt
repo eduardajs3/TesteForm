@@ -19,7 +19,7 @@ fun PacienteFormulario(
     vm: PacienteViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
-
+    val salvando = vm.salvando
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -27,7 +27,6 @@ fun PacienteFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar informações de Paciente" else "Cadastro de Paciente",
             subtitulo = if (isEdicao) "Altere os dados do paciente selecionado." else "Preencha os dados do paciente",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(PacienteRotas.Listagem)
@@ -108,13 +107,13 @@ fun PacienteFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

@@ -6,22 +6,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.Serializable
-
-@Serializable
-private data class PsicologoAtualizacaoRequest(
-    val id: Long? = null,
-    val nome: String,
-    val cpf: String,
-    val email: String,
-    val telefone: String,
-    val ativo: Boolean,
-    val crp: String,
-    val especialidade: String
-)
 
 class PsicologoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/psicologos"
+    private val endPoint = "/psicologos"
     private val token
         get() = SessionManager.token
 
@@ -29,7 +16,7 @@ class PsicologoAPI(private val httpClient: HttpClient) {
         val lista = httpClient.get(endPoint) {
             bearerAuth(token)
         }.body<List<Psicologo>>()
-        
+
         println("GET Psicólogos Carregados: $lista")
         return lista
     }
@@ -47,18 +34,7 @@ class PsicologoAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(
-                PsicologoAtualizacaoRequest(
-                    id = psicologo.id,
-                    nome = psicologo.nome,
-                    cpf = psicologo.cpf,
-                    email = psicologo.email,
-                    telefone = psicologo.telefone,
-                    ativo = psicologo.ativo,
-                    crp = psicologo.crp,
-                    especialidade = psicologo.especialidade
-                )
-            )
+            setBody(psicologo)
         }
         println("Status do Atualizar Psicólogo: ${response.status}")
     }

@@ -1,9 +1,12 @@
 package edu.front.psi.clin.ui.screens.horarioDisponivel
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
@@ -18,10 +21,19 @@ fun HorarioDisponivelFormulario(
     innerPadding: PaddingValues,
     vm: HorarioDisponivelViewModel
 ) {
-    val isEdicao = vm.id.value.isNotEmpty()
+    LaunchedEffect(vm) {
+        vm.carregarDadosFormulario()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        vm.carregarDadosFormulario()
+    }
 
+    val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
     val psicologosLista = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologosLista.map { it.nome }
+    val psicologoOpcoes = psicologosLista.filter {
+        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
+    }.map { it.nome }
 
     val diasOpcoes = listOf("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
 
@@ -37,7 +49,6 @@ fun HorarioDisponivelFormulario(
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Horário Disponível" else "Cadastro de Horário Disponível",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(HorarioDisponivelRotas.Listagem)
@@ -110,9 +121,13 @@ fun HorarioDisponivelFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

@@ -18,15 +18,15 @@ fun ConvenioFormulario(
     vm: ConvenioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
-
+    val salvando = vm.salvando
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
-
+    
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Convênio" else "Cadastro de Convênio",
             subtitulo = if (isEdicao) "Altere os dados do convênio selecionado." else "Preencha os dados do convênio.",
-            mensagemFeedback = vm.mensagem.value,
+            // REMOVIDO: mensagemFeedback = vm.mensagem.value, pois agora usamos o toast flutuante
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(ConvenioRotas.Listagem)
@@ -84,13 +84,13 @@ fun ConvenioFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

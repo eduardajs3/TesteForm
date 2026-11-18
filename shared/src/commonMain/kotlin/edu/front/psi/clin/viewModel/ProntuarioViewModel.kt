@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -26,6 +28,9 @@ class ProntuarioViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
+    
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -46,13 +51,29 @@ class ProntuarioViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private val _pacienteIdFiltro = MutableStateFlow<Long?>(null)
+    val pacienteIdFiltro = _pacienteIdFiltro.asStateFlow()
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
+        _pacienteIdFiltro.value = null
     }
 
-    val prontuariosFiltrados = combine(_prontuarios, _pacientes, _filtro) { prontuarios, pacientes, filtro ->
-        if (filtro.isEmpty()) {
+    fun selecionarPaciente(pacienteSelecionado: Paciente) {
+        paciente.value = pacienteSelecionado.nome
+        _filtro.value = pacienteSelecionado.nome
+        _pacienteIdFiltro.value = pacienteSelecionado.id
+    }
+
+    val prontuariosFiltrados = combine(
+        _prontuarios,
+        _pacientes,
+        _filtro,
+        _pacienteIdFiltro
+    ) { prontuarios, pacientes, filtro, pacienteIdFiltro ->
+        if (pacienteIdFiltro != null) {
+            prontuarios.filter { it.pacienteId == pacienteIdFiltro }
+        } else if (filtro.isEmpty()) {
             prontuarios
         } else {
             prontuarios.filter {
@@ -67,31 +88,28 @@ class ProntuarioViewModel(
         ProntuarioRotas.Listagem
     )
 
-
     val id = mutableStateOf("")
     val paciente = mutableStateOf("")
     val dataAbertura = mutableStateOf("")
     val queixaPrincipal = mutableStateOf("")
     val status = mutableStateOf("")
     val ativo = mutableStateOf("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
-            mensagem.value = "Preencha os campos obrigatórios!"
             mandarMensagem("Preencha os campos obrigatórios!")
             return
         }
-        val pacienteId = _pacientes.value.firstOrNull { it.nome == paciente.value }?.id
+        val pacienteId = _pacienteIdFiltro.value
+            ?: _pacientes.value.firstOrNull { it.nome == paciente.value }?.id
         if (pacienteId == null) {
-            mensagem.value = "Selecione um paciente cadastrado."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Selecione um paciente cadastrado.")
             return
         }
 
         val idAtual = id.value.toLongOrNull()
         if (id.value.isNotEmpty() && idAtual == null) {
-            mensagem.value = "Identificador do prontuário inválido."
             mandarMensagem("Identificador do prontuário inválido.")
             return
         }
@@ -112,6 +130,7 @@ class ProntuarioViewModel(
         )
 
         viewModelScope.launch {
+            salvando = true
             try {
                 if (idAtual == null) {
                     prontuarioApi.salvar(prontuario)
@@ -119,22 +138,21 @@ class ProntuarioViewModel(
                     prontuarioApi.atualizar(idAtual, prontuario)
                 }
                 _prontuarios.value = prontuarioApi.carregar()
-                _filtro.value = ""
 
                 val mensagemSucesso = if (ehNovo) {
                     "Prontuário salvo com sucesso!"
                 } else {
                     "Prontuário atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
                 backStack.add(ProntuarioRotas.Listagem)
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar prontuário")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar prontuário"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -173,7 +191,6 @@ class ProntuarioViewModel(
             else -> "Ativo"
         }
         ativo.value = prontuario.ativo.toString()
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -183,6 +200,5 @@ class ProntuarioViewModel(
         queixaPrincipal.value = ""
         status.value = ""
         ativo.value = "true"
-        mensagem.value = "Campos limpos."
     }
 }

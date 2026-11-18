@@ -485,16 +485,14 @@ fun App() {
                             vm = pacienteVm,
                             onNavegarParaProntuario = { paciente ->
                                 pacienteSelecionadoNome = paciente.nome
-                                prontuarioVm.paciente.value = paciente.nome
-                                prontuarioVm.atualizarFiltro(paciente.nome)
+                                prontuarioVm.selecionarPaciente(paciente)
                                 prontuarioVm.backStack.clear()
                                 prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
                                 principalVm.backstack.add(Route.Prontuario)
                             },
                             onNavegarParaEvolucao = { paciente ->
                                 pacienteSelecionadoNome = paciente.nome
-                                evolucaoVm.selecionarPaciente(paciente.nome)
-                                evolucaoVm.atualizarFiltro(paciente.nome)
+                                evolucaoVm.selecionarPaciente(paciente)
                                 evolucaoVm.backStack.clear()
                                 evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
                                 principalVm.backstack.add(Route.EvolucaoClinica)
@@ -579,6 +577,11 @@ fun App() {
                         EvolucaoClinicaListagem(
                             innerPadding = contentPadding,
                             vm = evolucaoVm,
+                            onVoltar = {
+                                if (principalVm.backstack.size > 1) {
+                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                                }
+                            },
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
@@ -594,6 +597,11 @@ fun App() {
                         ProntuarioListagem(
                             innerPadding = contentPadding,
                             vm = prontuarioVm,
+                            onVoltar = {
+                                if (principalVm.backstack.size > 1) {
+                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                                }
+                            },
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }

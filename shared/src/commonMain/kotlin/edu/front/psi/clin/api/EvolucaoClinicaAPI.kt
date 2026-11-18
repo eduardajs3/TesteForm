@@ -7,16 +7,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.Serializable
-
-@Serializable
-private data class EvolucaoClinicaRequest(
-    val prontuarioId: Long,
-    val psicologoId: Long,
-    val agendaId: Long,
-    val dataRegistro: String,
-    val descricao: String?
-)
 
 class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
     private val endPoint = "/evolucoes-clinicas"
@@ -34,7 +24,7 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
         val response = httpClient.post(endPoint) {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(evolucao.toRequest())
+            setBody(evolucao.normalizada())
         }
         response.lancarErroSeNecessario()
     }
@@ -43,20 +33,16 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(evolucao.toRequest())
+            setBody(evolucao.normalizada())
         }
         response.lancarErroSeNecessario()
     }
 
-    private fun EvolucaoClinica.toRequest() = EvolucaoClinicaRequest(
-        prontuarioId = prontuarioId,
-        psicologoId = psicologoId,
-        agendaId = agendaId,
+    private fun EvolucaoClinica.normalizada() = copy(
         dataRegistro = formatarDataBrasileiraOuIsoParaDataHoraIso(
             dataRegistro,
             "Data de registro da evolução clínica inválida."
-        ),
-        descricao = descricao
+        )
     )
 
     suspend fun apagar(evolucao: EvolucaoClinica) {
@@ -68,3 +54,4 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
     }
 
 }
+ 

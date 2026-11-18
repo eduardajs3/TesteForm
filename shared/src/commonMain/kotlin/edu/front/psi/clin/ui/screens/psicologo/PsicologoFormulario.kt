@@ -18,6 +18,7 @@ fun PsicologoFormulario(
     vm: PsicologoViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
 
     val statusOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
@@ -26,7 +27,6 @@ fun PsicologoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Psicólogo" else "Cadastro de Psicólogo",
             subtitulo = if (isEdicao) "Altere os dados do psicólogo selecionado." else "Preencha os dados do psicólogo.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(PsicologoRotas.Listagem)
@@ -112,13 +112,13 @@ fun PsicologoFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar =
-                    if (isEdicao)
-                        "Salvar Alterações"
-                    else
-                        "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

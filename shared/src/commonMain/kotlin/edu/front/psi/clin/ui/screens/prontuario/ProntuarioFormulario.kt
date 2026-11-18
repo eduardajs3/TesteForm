@@ -20,8 +20,13 @@ fun ProntuarioFormulario(
     vm: ProntuarioViewModel
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
     val pacientes = vm.pacientes.collectAsState().value
-    val pacienteOpcoes = pacientes.map { it.nome }.distinct()
+    val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
+    val pacientesOpcoes = pacientes.filter {
+        pacienteIdFiltro == null || it.id == pacienteIdFiltro
+    }
+    val pacienteOpcoes = pacientesOpcoes.map { it.nome }.distinct()
 
     val statusOpcoes = listOf(
         "Ativo",
@@ -45,7 +50,6 @@ fun ProntuarioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Prontuário" else "Cadastro de Prontuário",
             subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(ProntuarioRotas.Listagem)
@@ -83,9 +87,13 @@ fun ProntuarioFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else { {} },
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

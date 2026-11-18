@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -13,6 +15,7 @@ import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -30,15 +33,40 @@ class HorarioDisponivelViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private var carregamentoDadosFormulario: Job? = null
+    
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
-        viewModelScope.launch {
+        carregarDadosFormulario()
+    }
+
+    fun carregarDadosFormulario() {
+        if (carregamentoDadosFormulario?.isActive == true) return
+
+        carregamentoDadosFormulario = viewModelScope.launch {
             try {
-                _horarios.value = horarioApi.carregar()
-                _psicologos.value = psicologoApi.carregar()
+                val horariosAtualizados = horarioApi.carregar()
+                val psicologosAtualizados = psicologoApi.carregar()
+
+                _horarios.value = horariosAtualizados
+                _psicologos.value = psicologosAtualizados
+                val psicologoSelecionadoId = psicologo.valor.value.toLongOrNull()
+                if (
+                    id.value.isEmpty() &&
+                    psicologoSelecionadoId != null &&
+                    psicologosAtualizados.none {
+                        it.id == psicologoSelecionadoId && it.ativo
+                    }
+                ) {
+                    psicologo.limpar()
+                }
                 println("Horários disponíveis carregados no init: ${_horarios.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
+            } finally {
+                carregamentoDadosFormulario = null
             }
         }
     }
@@ -63,6 +91,7 @@ class HorarioDisponivelViewModel(
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val backStack = NavBackStack<HorarioDisponivelRotas>(
         HorarioDisponivelRotas.Listagem
     )
@@ -75,9 +104,9 @@ class HorarioDisponivelViewModel(
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val descricao = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
         val v1 = psicologo.validar()
         val v2 = diaSemana.validar()
         val v3 = horaInicio.validar()
@@ -86,12 +115,12 @@ class HorarioDisponivelViewModel(
         val v6 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val horario = HorarioDisponivel(
                     id = if (id.value.isEmpty()) null else id.value.toLong(),
@@ -110,16 +139,14 @@ class HorarioDisponivelViewModel(
                     horarioApi.atualizar(idNumber, horario)
                 }
 
-
                 _horarios.value = horarioApi.carregar()
-                println("Horários após salvar: ${_horarios.value}")
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Horário disponível salvo com sucesso!"
                 } else {
                     "Horário disponível atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
@@ -127,9 +154,9 @@ class HorarioDisponivelViewModel(
                 backStack.add(HorarioDisponivelRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -139,7 +166,6 @@ class HorarioDisponivelViewModel(
             try {
                 horarioApi.apagar(horario)
                 _horarios.value = horarioApi.carregar()
-                println("Horários após apagar: ${_horarios.value}")
                 mandarMensagem("Horário apagado com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -152,7 +178,6 @@ class HorarioDisponivelViewModel(
         backStack.add(HorarioDisponivelRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(horario: HorarioDisponivel) {
@@ -165,7 +190,6 @@ class HorarioDisponivelViewModel(
         horaFim.definir(horario.horaFim)
         descricao.definir(horario.descricao ?: "")
         ativo.definir(horario.ativo.toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -175,6 +199,5 @@ class HorarioDisponivelViewModel(
         horaFim.limpar()
         descricao.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

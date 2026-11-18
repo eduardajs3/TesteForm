@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -38,10 +40,14 @@ class EvolucaoClinicaViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
+    
     val pacientes = _pacientes.asStateFlow()
     val prontuarios = _prontuarios.asStateFlow()
     val psicologos = _psicologos.asStateFlow()
     val agendas = _agendas.asStateFlow()
+    
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         carregarDados(evolucaoApi::carregar) { _evolucoes.value = it }
@@ -66,14 +72,28 @@ class EvolucaoClinicaViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    private val _pacienteIdFiltro = MutableStateFlow<Long?>(null)
+    val pacienteIdFiltro = _pacienteIdFiltro.asStateFlow()
 
     fun atualizarFiltro(novoFiltro: String) {
         _filtro.value = novoFiltro.trim()
+        _pacienteIdFiltro.value = null
     }
 
-    val evolucoesFiltradas = combine(_evolucoes, _filtro, _prontuarios, _pacientes) {
-            evolucoes, filtro, prontuarios, pacientes ->
-        if (filtro.isEmpty()) {
+    val evolucoesFiltradas = combine(
+        _evolucoes,
+        _filtro,
+        _prontuarios,
+        _pacientes,
+        _pacienteIdFiltro
+    ) { evolucoes, filtro, prontuarios, pacientes, pacienteIdFiltro ->
+        if (pacienteIdFiltro != null) {
+            evolucoes.filter { evolucao ->
+                prontuarios.any {
+                    it.id == evolucao.prontuarioId && it.pacienteId == pacienteIdFiltro
+                }
+            }
+        } else if (filtro.isEmpty()) {
             evolucoes
         } else {
             evolucoes.filter {
@@ -93,7 +113,6 @@ class EvolucaoClinicaViewModel(
         EvolucaoClinicaRotas.Listagem
     )
 
-
     val id = mutableStateOf("")
     val prontuarioId = mutableStateOf<Long?>(null)
     val psicologoId = mutableStateOf<Long?>(null)
@@ -101,23 +120,20 @@ class EvolucaoClinicaViewModel(
     val dataRegistro = mutableStateOf("")
     val descricao = mutableStateOf("")
     val ativo = mutableStateOf("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
+
         if (prontuarioId.value == null || psicologoId.value == null || agendaId.value == null ||
             dataRegistro.value.isBlank() || descricao.value.isBlank()
         ) {
-            val aviso = "Preencha os campos obrigatórios."
-            mensagem.value = aviso
-            mandarMensagem(aviso)
+            mandarMensagem("Preencha os campos obrigatórios.")
             return
         }
 
         val idAtual = id.value.toLongOrNull()
         if (id.value.isNotEmpty() && idAtual == null) {
-            val aviso = "Identificador da evolução clínica inválido."
-            mensagem.value = aviso
-            mandarMensagem(aviso)
+            mandarMensagem("Identificador da evolução clínica inválido.")
             return
         }
 
@@ -133,6 +149,7 @@ class EvolucaoClinicaViewModel(
         )
 
         viewModelScope.launch {
+            salvando = true
             try {
                 if (idAtual == null) {
                     evolucaoApi.salvar(evolucao)
@@ -140,22 +157,21 @@ class EvolucaoClinicaViewModel(
                     evolucaoApi.atualizar(idAtual, evolucao)
                 }
                 _evolucoes.value = evolucaoApi.carregar()
-                _filtro.value = ""
 
                 val mensagemSucesso = if (ehNovo) {
                     "Evolução clínica salva com sucesso!"
                 } else {
                     "Evolução clínica atualizada com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
                 backStack.add(EvolucaoClinicaRotas.Listagem)
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar evolução clínica")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar evolução clínica"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -182,9 +198,23 @@ class EvolucaoClinicaViewModel(
     }
 
     fun selecionarPaciente(nomePaciente: String) {
-        val pacienteId = _pacientes.value.firstOrNull { it.nome == nomePaciente }?.id
+        val paciente = _pacientes.value.firstOrNull { it.nome == nomePaciente }
+        if (paciente == null) {
+            _pacienteIdFiltro.value = null
+            _filtro.value = nomePaciente
+            prontuarioId.value = null
+            agendaId.value = null
+            psicologoId.value = null
+            return
+        }
+        selecionarPaciente(paciente)
+    }
+
+    fun selecionarPaciente(paciente: Paciente) {
+        _pacienteIdFiltro.value = paciente.id
+        _filtro.value = paciente.nome
         val prontuario = _prontuarios.value.firstOrNull {
-            it.pacienteId == pacienteId
+            it.pacienteId == paciente.id
         }
         if (prontuario != null) {
             selecionarProntuario(prontuario)
@@ -232,7 +262,6 @@ class EvolucaoClinicaViewModel(
         dataRegistro.value = formatarDataIsoParaBrasileira(evolucao.dataRegistro)
         descricao.value = evolucao.descricao.orEmpty()
         ativo.value = evolucao.ativo.toString()
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -243,7 +272,6 @@ class EvolucaoClinicaViewModel(
         dataRegistro.value = ""
         descricao.value = ""
         ativo.value = "true"
-        mensagem.value = "Campos limpos."
     }
 
     fun nomeProntuario(id: Long): String {
@@ -263,5 +291,4 @@ class EvolucaoClinicaViewModel(
             ?: "Paciente"
         return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
     }
-
 }
