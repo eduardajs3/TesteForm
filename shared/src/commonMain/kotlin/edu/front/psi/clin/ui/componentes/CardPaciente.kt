@@ -35,6 +35,7 @@ fun CardPaciente(
     onClick: () -> Unit,
     onEditarClick: () -> Unit,
     onExcluirClick: () -> Unit,
+    mostrarAcoesEscrita: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -99,28 +100,30 @@ fun CardPaciente(
                     isAtivo = paciente.ativo
                 )
 
-                IconButton(
-                    onClick = onEditarClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.edit_square_24px),
-                        contentDescription = "Editar Paciente",
-                        tint = VerdeClinica,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                if (mostrarAcoesEscrita) {
+                    IconButton(
+                        onClick = onEditarClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.edit_square_24px),
+                            contentDescription = "Editar Paciente",
+                            tint = VerdeClinica,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
 
-                IconButton(
-                    onClick = onExcluirClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.delete_24px),
-                        contentDescription = "Excluir Paciente",
-                        tint = TextoErro,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    IconButton(
+                        onClick = onExcluirClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.delete_24px),
+                            contentDescription = "Excluir Paciente",
+                            tint = TextoErro,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

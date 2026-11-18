@@ -11,6 +11,7 @@ import edu.front.psi.clin.api.EvolucaoClinicaAPI
 import edu.front.psi.clin.api.PacienteAPI
 import edu.front.psi.clin.api.ProntuarioAPI
 import edu.front.psi.clin.api.PsicologoAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Agenda
@@ -19,6 +20,8 @@ import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
@@ -50,11 +53,13 @@ class EvolucaoClinicaViewModel(
         private set
 
     init {
-        carregarDados(evolucaoApi::carregar) { _evolucoes.value = it }
-        carregarDados(pacienteApi::carregar) { _pacientes.value = it }
-        carregarDados(prontuarioApi::carregar) { _prontuarios.value = it }
-        carregarDados(psicologoApi::carregar) { _psicologos.value = it }
-        carregarDados(agendaApi::carregar) { _agendas.value = it }
+        if (PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.EVOLUCOES_CLINICAS)) {
+            carregarDados(evolucaoApi::carregar) { _evolucoes.value = it }
+            carregarDados(pacienteApi::carregar) { _pacientes.value = it }
+            carregarDados(prontuarioApi::carregar) { _prontuarios.value = it }
+            carregarDados(psicologoApi::carregar) { _psicologos.value = it }
+            carregarDados(agendaApi::carregar) { _agendas.value = it }
+        }
     }
 
     private fun <T> carregarDados(

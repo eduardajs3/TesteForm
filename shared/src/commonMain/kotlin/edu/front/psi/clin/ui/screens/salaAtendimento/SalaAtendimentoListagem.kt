@@ -6,7 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.SalaAtendimento
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -41,6 +44,10 @@ fun SalaAtendimentoListagem(
             textoFiltro = filtro.value,
             onFiltroChange = vm::atualizarFiltro,
             onNovoClick = vm::novaSala,
+            permitirEscrita = PermissoesAcesso.podeGerenciar(
+                SessionManager.role,
+                RecursoSistema.SALAS_ATENDIMENTO
+            ),
             colunas = colunas,
             itens = lista.value,
             onVisualizar = { sala -> salaSelecionada.value = sala },

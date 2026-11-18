@@ -8,11 +8,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.PacienteAPI
 import edu.front.psi.clin.api.ProntuarioAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.ProntuarioRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,18 +36,20 @@ class ProntuarioViewModel(
         private set
 
     init {
-        viewModelScope.launch {
-            try {
-                _prontuarios.value = prontuarioApi.carregar()
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar prontuários"))
+        if (PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.PRONTUARIOS)) {
+            viewModelScope.launch {
+                try {
+                    _prontuarios.value = prontuarioApi.carregar()
+                } catch (e: Exception) {
+                    mandarMensagem(e.mensagemParaUsuario("Erro ao carregar prontuários"))
+                }
             }
-        }
-        viewModelScope.launch {
-            try {
-                _pacientes.value = pacienteApi.carregar()
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pacientes"))
+            viewModelScope.launch {
+                try {
+                    _pacientes.value = pacienteApi.carregar()
+                } catch (e: Exception) {
+                    mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pacientes"))
+                }
             }
         }
     }

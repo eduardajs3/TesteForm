@@ -18,7 +18,8 @@ data class LoginRequest(
 @Serializable
 data class LoginResponse(
     @SerialName("token")
-    val accessToken: String
+    val accessToken: String,
+    val role: String
 )
 
 class AuthAPI(private val httpClient: HttpClient) {
@@ -35,6 +36,9 @@ class AuthAPI(private val httpClient: HttpClient) {
         val loginResponse = response.body<LoginResponse>()
         if (loginResponse.accessToken.isBlank()) {
             throw IllegalStateException("O servidor não retornou um token de acesso.")
+        }
+        if (!edu.front.psi.clin.security.PermissoesAcesso.roleConhecida(loginResponse.role)) {
+            throw IllegalStateException("O servidor retornou um perfil de acesso inválido.")
         }
 
         return loginResponse

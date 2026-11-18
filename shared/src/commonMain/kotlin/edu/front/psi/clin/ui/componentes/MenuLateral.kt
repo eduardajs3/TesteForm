@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.theme.CremeCampo
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.TextoPrincipal
@@ -44,7 +45,7 @@ fun MenuLateral(
     onNavigate: (String) -> Unit,
     content: @Composable () -> Unit
 ) {
-    val itensMenu = listOf(
+    val todosItensMenu = listOf(
         MenuItemData(
             nome = "Dashboard",
             iconeRes = Res.drawable.dashboard,
@@ -88,6 +89,16 @@ fun MenuLateral(
             )
         )
     )
+    val itensMenu = todosItensMenu.mapNotNull { item ->
+        if (item.subItens != null) {
+            val subItensPermitidos = item.subItens.filter {
+                PermissoesAcesso.podeAcessarTela(viewModel.role, it.tela)
+            }
+            item.copy(subItens = subItensPermitidos).takeIf { subItensPermitidos.isNotEmpty() }
+        } else {
+            item.takeIf { PermissoesAcesso.podeAcessarTela(viewModel.role, it.tela.orEmpty()) }
+        }
+    }
 
     var mostrarModalSair by remember { mutableStateOf(false) }
 

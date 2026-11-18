@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.FuncionarioAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Funcionario
 import edu.front.psi.clin.navigation.FuncionarioRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
@@ -64,12 +67,14 @@ class FuncionarioViewModel(
     val ativo = CampoValidado("true")
 
     init {
-        viewModelScope.launch {
-            try {
-                _funcionarios.value = funcionarioApi.carregar()
-                println("Funcionários carregados: ${_funcionarios.value}")
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar funcionários do servidor"))
+        if (PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.FUNCIONARIOS)) {
+            viewModelScope.launch {
+                try {
+                    _funcionarios.value = funcionarioApi.carregar()
+                    println("Funcionários carregados: ${_funcionarios.value}")
+                } catch (e: Exception) {
+                    mandarMensagem(e.mensagemParaUsuario("Erro ao carregar funcionários do servidor"))
+                }
             }
         }
     }

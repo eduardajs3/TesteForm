@@ -21,6 +21,7 @@ fun CabecalhoTela(
     textoBotao: String,
     iconeBotao: Painter,
     onVoltar: (() -> Unit)? = null,
+    mostrarBotao: Boolean = true,
     onClickBotao: () -> Unit
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -59,20 +60,22 @@ fun CabecalhoTela(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                if (mostrarBotao) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    BotaoPadrao(
-                        texto = textoBotao,
-                        onClick = onClickBotao,
-                        icone = iconeBotao,
-                        containerColor = VerdeClinica,
-                        contentColor = Branco,
-                        modifier = Modifier.wrapContentWidth()
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        BotaoPadrao(
+                            texto = textoBotao,
+                            onClick = onClickBotao,
+                            icone = iconeBotao,
+                            containerColor = VerdeClinica,
+                            contentColor = Branco,
+                            modifier = Modifier.wrapContentWidth()
+                        )
+                    }
                 }
             }
         } else {
@@ -114,16 +117,18 @@ fun CabecalhoTela(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                if (mostrarBotao) {
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                BotaoPadrao(
-                    texto = textoBotao,
-                    onClick = onClickBotao,
-                    icone = iconeBotao,
-                    containerColor = VerdeClinica,
-                    contentColor = Branco,
-                    modifier = Modifier.wrapContentWidth()
-                )
+                    BotaoPadrao(
+                        texto = textoBotao,
+                        onClick = onClickBotao,
+                        icone = iconeBotao,
+                        containerColor = VerdeClinica,
+                        contentColor = Branco,
+                        modifier = Modifier.wrapContentWidth()
+                    )
+                }
             }
         }
     }

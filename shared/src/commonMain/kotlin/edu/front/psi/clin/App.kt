@@ -14,12 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -43,6 +45,8 @@ import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.MenuLateral
 import edu.front.psi.clin.ui.componentes.NotificacaoFlutuante
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.screens.DashboardTela
 import edu.front.psi.clin.ui.screens.agenda.AgendaFormulario
 import edu.front.psi.clin.ui.screens.agenda.AgendaListagem
@@ -420,7 +424,7 @@ fun App() {
         }
     }
 
-    val stringTelaAtual = when (rotaAtual) {
+    fun telaDaRota(rota: Route) = when (rota) {
         Route.Dashboard -> "dashboard"
         Route.Paciente -> "paciente"
         Route.Pagamento -> "pagamento"
@@ -437,9 +441,24 @@ fun App() {
         Route.Agenda -> "agenda"
         else -> "dashboard"
     }
+    val stringTelaAtual = telaDaRota(rotaAtual)
+    val rotaPermitida = PermissoesAcesso.podeAcessarTela(principalVm.role, stringTelaAtual)
+    val rotaExibida = if (rotaPermitida) rotaAtual else Route.Dashboard
 
     val conteudoInterno: @Composable (PaddingValues) -> Unit = { contentPadding ->
-        NavDisplay(
+        if (!rotaPermitida) {
+            LaunchedEffect(rotaAtual, principalVm.role) {
+                principalVm.mostrarNotificacao("Acesso negado para este perfil.")
+                principalVm.backstack.clear()
+                principalVm.backstack.add(Route.Dashboard)
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Acesso não autorizado")
+            }
+        } else NavDisplay(
             backStack = principalVm.backstack,
             onBack = {
                 if (!voltarParaListagemInterna() && principalVm.backstack.size > 1) {
@@ -451,23 +470,57 @@ fun App() {
                     DashboardTela(
                         innerPadding = contentPadding,
                         vm = dashboardVm,
+                        podeCriarAgendamento = PermissoesAcesso.podeGerenciar(
+                            principalVm.role,
+                            RecursoSistema.AGENDAS
+                        ),
+                        podeCriarPaciente = PermissoesAcesso.podeGerenciar(
+                            principalVm.role,
+                            RecursoSistema.PACIENTES
+                        ),
+                        podeAcessarFinanceiro = PermissoesAcesso.podeAcessarTela(
+                            principalVm.role,
+                            "pagamento"
+                        ),
+                        podeConfirmarAgendamento = PermissoesAcesso.podeGerenciar(
+                            principalVm.role,
+                            RecursoSistema.AGENDAS
+                        ),
                         onNavegar = { rota ->
-                            if (rota == Route.Paciente) {
-                                pacienteVm.novoPaciente()
-                            } else if (rota == Route.Agenda) {
-                                agendaVm.backStack.clear()
-                                agendaVm.backStack.add(AgendaRotas.Listagem)
+                            val recursoParaCriar = when (rota) {
+                                Route.Paciente -> RecursoSistema.PACIENTES
+                                else -> null
                             }
+                            val podeAcessarRota = PermissoesAcesso.podeAcessarTela(
+                                principalVm.role,
+                                telaDaRota(rota)
+                            )
+                            val podeCriarRecurso = recursoParaCriar?.let {
+                                PermissoesAcesso.podeGerenciar(principalVm.role, it)
+                            } ?: true
+                            if (podeAcessarRota && podeCriarRecurso) {
+                                if (rota == Route.Paciente) {
+                                    pacienteVm.novoPaciente()
+                                } else if (rota == Route.Agenda) {
+                                    agendaVm.backStack.clear()
+                                    agendaVm.backStack.add(AgendaRotas.Listagem)
+                                }
 
-                            if (principalVm.backstack.lastOrNull() != rota) {
-                                principalVm.backstack.add(rota)
+                                if (principalVm.backstack.lastOrNull() != rota) {
+                                    principalVm.backstack.add(rota)
+                                }
+                            } else {
+                                principalVm.mostrarNotificacao("Acesso negado para este perfil.")
                             }
                         },
                         onAgendarConsulta = {
-                            agendaVm.novoAgendamento()
-
-                            if (principalVm.backstack.lastOrNull() != Route.Agenda) {
-                                principalVm.backstack.add(Route.Agenda)
+                            if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
+                                agendaVm.novoAgendamento()
+                                if (principalVm.backstack.lastOrNull() != Route.Agenda) {
+                                    principalVm.backstack.add(Route.Agenda)
+                                }
+                            } else {
+                                principalVm.mostrarNotificacao("Acesso negado para este perfil.")
                             }
                         }
                     )
@@ -477,25 +530,29 @@ fun App() {
                     val subRota = pacienteVm.backStack.lastOrNull()
                         ?: PacienteRotas.Listagem
 
-                    if (subRota is PacienteRotas.Formulario) {
+                    if (subRota is PacienteRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PACIENTES)) {
                         PacienteFormulario(contentPadding, pacienteVm)
                     } else {
                         PacienteListagem(
                             innerPadding = contentPadding,
                             vm = pacienteVm,
                             onNavegarParaProntuario = { paciente ->
-                                pacienteSelecionadoNome = paciente.nome
-                                prontuarioVm.selecionarPaciente(paciente)
-                                prontuarioVm.backStack.clear()
-                                prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
-                                principalVm.backstack.add(Route.Prontuario)
+                                if (PermissoesAcesso.podeAcessar(principalVm.role, RecursoSistema.PRONTUARIOS)) {
+                                    pacienteSelecionadoNome = paciente.nome
+                                    prontuarioVm.selecionarPaciente(paciente)
+                                    prontuarioVm.backStack.clear()
+                                    prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
+                                    principalVm.backstack.add(Route.Prontuario)
+                                }
                             },
                             onNavegarParaEvolucao = { paciente ->
-                                pacienteSelecionadoNome = paciente.nome
-                                evolucaoVm.selecionarPaciente(paciente)
-                                evolucaoVm.backStack.clear()
-                                evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
-                                principalVm.backstack.add(Route.EvolucaoClinica)
+                                if (PermissoesAcesso.podeAcessar(principalVm.role, RecursoSistema.EVOLUCOES_CLINICAS)) {
+                                    pacienteSelecionadoNome = paciente.nome
+                                    evolucaoVm.selecionarPaciente(paciente)
+                                    evolucaoVm.backStack.clear()
+                                    evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
+                                    principalVm.backstack.add(Route.EvolucaoClinica)
+                                }
                             }
                         )
                     }
@@ -505,7 +562,7 @@ fun App() {
                     val subRota = pagamentoVm.backStack.lastOrNull()
                         ?: PagamentoRotas.Listagem
 
-                    if (subRota is PagamentoRotas.Formulario) {
+                    if (subRota is PagamentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PAGAMENTOS)) {
                         PagamentoFormulario(contentPadding, pagamentoVm)
                     } else {
                         PagamentoListagem(contentPadding, pagamentoVm)
@@ -516,7 +573,7 @@ fun App() {
                     val subRota = convenioVm.backStack.lastOrNull()
                         ?: ConvenioRotas.Listagem
 
-                    if (subRota is ConvenioRotas.Formulario) {
+                    if (subRota is ConvenioRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.CONVENIOS)) {
                         ConvenioFormulario(contentPadding, convenioVm)
                     } else {
                         ConvenioListagem(contentPadding, convenioVm)
@@ -527,7 +584,7 @@ fun App() {
                     val subRota = horarioVm.backStack.lastOrNull()
                         ?: HorarioDisponivelRotas.Listagem
 
-                    if (subRota is HorarioDisponivelRotas.Formulario) {
+                    if (subRota is HorarioDisponivelRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.HORARIOS_DISPONIVEIS)) {
                         HorarioDisponivelFormulario(contentPadding, horarioVm)
                     } else {
                         HorarioDisponivelListagem(contentPadding, horarioVm)
@@ -538,7 +595,7 @@ fun App() {
                     val subRota = salaVm.backStack.lastOrNull()
                         ?: SalaAtendimentoRotas.Listagem
 
-                    if (subRota is SalaAtendimentoRotas.Formulario) {
+                    if (subRota is SalaAtendimentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.SALAS_ATENDIMENTO)) {
                         SalaAtendimentoFormulario(contentPadding, salaVm)
                     } else {
                         SalaAtendimentoListagem(contentPadding, salaVm)
@@ -549,7 +606,7 @@ fun App() {
                     val subRota = tipoVm.backStack.lastOrNull()
                         ?: TipoAtendimentoRotas.Listagem
 
-                    if (subRota is TipoAtendimentoRotas.Formulario) {
+                    if (subRota is TipoAtendimentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.TIPOS_ATENDIMENTO)) {
                         TipoAtendimentoFormulario(contentPadding, tipoVm)
                     } else {
                         TipoAtendimentoListagem(contentPadding, tipoVm)
@@ -560,7 +617,7 @@ fun App() {
                     val subRota = bloqueioVm.backStack.lastOrNull()
                         ?: BloqueioAgendaRotas.Listagem
 
-                    if (subRota is BloqueioAgendaRotas.Formulario) {
+                    if (subRota is BloqueioAgendaRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.BLOQUEIOS_AGENDA)) {
                         BloqueioAgendaFormulario(contentPadding, bloqueioVm)
                     } else {
                         BloqueioAgendaListagem(contentPadding, bloqueioVm)
@@ -611,7 +668,7 @@ fun App() {
                     val subRota = recepcionistaVm.backStack.lastOrNull()
                         ?: RecepcionistaRotas.Listagem
 
-                    if (subRota is RecepcionistaRotas.Formulario) {
+                    if (subRota is RecepcionistaRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.RECEPCIONISTAS)) {
                         RecepcionistaFormulario(contentPadding, recepcionistaVm)
                     } else {
                         RecepcionistaListagem(contentPadding, recepcionistaVm)
@@ -622,7 +679,7 @@ fun App() {
                     val subRota = funcionarioVm.backStack.lastOrNull()
                         ?: FuncionarioRotas.Listagem
 
-                    if (subRota is FuncionarioRotas.Formulario) {
+                    if (subRota is FuncionarioRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.FUNCIONARIOS)) {
                         FuncionarioFormulario(contentPadding, funcionarioVm)
                     } else {
                         FuncionarioListagem(contentPadding, funcionarioVm)
@@ -633,7 +690,7 @@ fun App() {
                     val subRota = psicologoVm.backStack.lastOrNull()
                         ?: PsicologoRotas.Listagem
 
-                    if (subRota is PsicologoRotas.Formulario) {
+                    if (subRota is PsicologoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PSICOLOGOS)) {
                         PsicologoFormulario(contentPadding, psicologoVm)
                     } else {
                         PsicologoListagem(contentPadding, psicologoVm)
@@ -643,7 +700,11 @@ fun App() {
                 entry<Route.Agenda> {
                     when (agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem) {
                         AgendaRotas.Listagem -> AgendaListagem(contentPadding, agendaVm)
-                        AgendaRotas.Formulario -> AgendaFormulario(contentPadding, agendaVm)
+                        AgendaRotas.Formulario -> if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
+                            AgendaFormulario(contentPadding, agendaVm)
+                        } else {
+                            AgendaListagem(contentPadding, agendaVm)
+                        }
                     }
                 }
             }
@@ -654,7 +715,7 @@ fun App() {
         Box(modifier = Modifier.fillMaxSize()) {
             MenuLateral(
                 viewModel = principalVm,
-                telaAtual = stringTelaAtual,
+                telaAtual = if (rotaPermitida) stringTelaAtual else "dashboard",
                 onNavigate = { destino ->
                     val novaRota = when (destino) {
                         "dashboard" -> Route.Dashboard
@@ -675,6 +736,8 @@ fun App() {
 
                     if (novaRota == Route.Login) {
                         principalVm.logout()
+                    } else if (!PermissoesAcesso.podeAcessarTela(principalVm.role, telaDaRota(novaRota))) {
+                        principalVm.mostrarNotificacao("Acesso negado para este perfil.")
                     } else if (novaRota != rotaAtual) {
                         principalVm.backstack.clear()
                         principalVm.backstack.add(Route.Dashboard)
@@ -690,7 +753,7 @@ fun App() {
                         TopAppBar(
                             title = {
                                 Text(
-                                    text = when (rotaAtual) {
+                                    text = when (rotaExibida) {
                                         Route.Dashboard -> "Dashboard"
                                         Route.Paciente -> "Pacientes"
                                         Route.Pagamento -> "Pagamentos"

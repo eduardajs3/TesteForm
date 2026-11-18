@@ -16,7 +16,8 @@ import edu.front.psi.clin.ui.viewmodel.ConsultaHojeItem
 @Composable
 fun CardConsultaHoje(
     consulta: ConsultaHojeItem,
-    onConfirmar: () -> Unit
+    onConfirmar: () -> Unit,
+    permitirConfirmacao: Boolean = true
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val telaPequena = maxWidth < 600.dp
@@ -74,7 +75,7 @@ fun CardConsultaHoje(
                         }
                     }
 
-                    if (consulta.status == "Agendado") {
+                    if (permitirConfirmacao && consulta.status == "Agendado") {
                         OutlinedButton(
                             onClick = onConfirmar,
                             shape = RoundedCornerShape(10.dp),
@@ -145,7 +146,7 @@ fun CardConsultaHoje(
                         }
                     }
 
-                    if (consulta.status == "Agendado") {
+                    if (permitirConfirmacao && consulta.status == "Agendado") {
                         OutlinedButton(
                             onClick = onConfirmar,
                             shape = RoundedCornerShape(10.dp),

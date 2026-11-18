@@ -31,7 +31,11 @@ fun DashboardTela(
     innerPadding: PaddingValues,
     vm: DashboardViewModel,
     onNavegar: (Route) -> Unit = {},
-    onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) }
+    onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) },
+    podeCriarAgendamento: Boolean = true,
+    podeCriarPaciente: Boolean = true,
+    podeAcessarFinanceiro: Boolean = true,
+    podeConfirmarAgendamento: Boolean = true
 ) {
     LaunchedEffect(vm) {
         vm.carregarDados()
@@ -41,6 +45,7 @@ fun DashboardTela(
     val consultas by vm.consultasFiltradas.collectAsState()
     val filtroStatus by vm.filtroStatus.collectAsState()
     val carregando by vm.carregando.collectAsState()
+    val exibirAcoesRapidas = podeCriarAgendamento || podeCriarPaciente || podeAcessarFinanceiro
 
     val scrollState = rememberScrollState()
 
@@ -94,39 +99,53 @@ fun DashboardTela(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Ações Rápidas
-            Text(
-                text = "Ações Rápidas",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = TextoPrincipal
-            )
-            Text(
-                text = "Acesse com um clique os principais módulos do sistema",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextoSecundario
-            )
+            if (exibirAcoesRapidas) {
+                Text(
+                    text = "Ações Rápidas",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextoPrincipal
+                )
+                Text(
+                    text = "Acesse com um clique os principais módulos do sistema",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoSecundario
+                )
 
-            Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-            if (telaPequena) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.fillMaxWidth(), onAgendarConsulta)
-                    CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Paciente) }
-                    CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Pagamento) }
+                if (telaPequena) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (podeCriarAgendamento) {
+                            CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.fillMaxWidth(), onAgendarConsulta)
+                        }
+                        if (podeCriarPaciente) {
+                            CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Paciente) }
+                        }
+                        if (podeAcessarFinanceiro) {
+                            CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Pagamento) }
+                        }
+                    }
                 }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.weight(1f), onAgendarConsulta)
-                    CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.weight(1f)) { onNavegar(Route.Paciente) }
-                    CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.weight(1f)) { onNavegar(Route.Pagamento) }
+                else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        if (podeCriarAgendamento) {
+                            CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.weight(1f), onAgendarConsulta)
+                        }
+                        if (podeCriarPaciente) {
+                            CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.weight(1f)) { onNavegar(Route.Paciente) }
+                        }
+                        if (podeAcessarFinanceiro) {
+                            CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.weight(1f)) { onNavegar(Route.Pagamento) }
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
 
             // Lista de Consultas
             Text(
@@ -151,7 +170,8 @@ fun DashboardTela(
                     consultas.forEach { consulta ->
                         CardConsultaHoje(
                             consulta = consulta,
-                            onConfirmar = { vm.confirmarConsulta(consulta.id) }
+                            onConfirmar = { vm.confirmarConsulta(consulta.id) },
+                            permitirConfirmacao = podeConfirmarAgendamento
                         )
                     }
                 }

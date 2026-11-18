@@ -25,6 +25,7 @@ fun <T> LayoutListagemBase(
     textoFiltro: String,
     onFiltroChange: (String) -> Unit,
     onNovoClick: () -> Unit,
+    permitirEscrita: Boolean = true,
     colunas: List<Pair<String, Float>>,
     itens: List<T>,
     onVisualizar: ((T) -> Unit)? = null,
@@ -47,6 +48,7 @@ fun <T> LayoutListagemBase(
                 titulo = titulo,
                 textoBotao = textoBotaoNovo,
                 iconeBotao = painterResource(Res.drawable.add),
+                mostrarBotao = permitirEscrita,
                 onClickBotao = onNovoClick
             )
 
@@ -73,7 +75,8 @@ fun <T> LayoutListagemBase(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    val larguraAcoes = if (onVisualizar != null) 108.dp else 72.dp
+                    val larguraAcoes = (if (onVisualizar != null) 36.dp else 0.dp) +
+                        (if (permitirEscrita) 72.dp else 0.dp)
 
                     Row(
                         modifier = Modifier
@@ -154,27 +157,29 @@ fun <T> LayoutListagemBase(
                                             )
                                         }
                                     }
-                                    IconButton(
-                                        onClick = { onEditar(item) },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.edit_square_24px),
-                                            contentDescription = "Editar",
-                                            tint = TextoSecundario,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = { onApagar(item) },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.delete_24px),
-                                            contentDescription = "Remover",
-                                            tint = TextoErro,
-                                            modifier = Modifier.size(20.dp)
-                                        )
+                                    if (permitirEscrita) {
+                                        IconButton(
+                                            onClick = { onEditar(item) },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.edit_square_24px),
+                                                contentDescription = "Editar",
+                                                tint = TextoSecundario,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { onApagar(item) },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.delete_24px),
+                                                contentDescription = "Remover",
+                                                tint = TextoErro,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }

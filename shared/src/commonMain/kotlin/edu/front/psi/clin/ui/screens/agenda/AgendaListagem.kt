@@ -6,12 +6,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
@@ -39,6 +42,10 @@ fun AgendaListagem(
     val salas = vm.salas.collectAsState().value
     val tiposAtendimento = vm.tiposAtendimento.collectAsState().value
     val convenios = vm.convenios.collectAsState().value
+    val podeGerenciarAgenda = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.AGENDAS
+    )
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
     var exibirModalExclusao by remember { mutableStateOf(false) }
@@ -82,6 +89,7 @@ fun AgendaListagem(
                     subtitulo = "Acompanhe e organize as consultas da semana",
                     textoBotao = "Novo Agendamento",
                     iconeBotao = painterResource(Res.drawable.add),
+                    mostrarBotao = podeGerenciarAgenda,
                     onClickBotao = vm::novoAgendamento
                 )
 
@@ -194,35 +202,37 @@ fun AgendaListagem(
                     ItemDetalhe(rotulo = "Status", valor = agendamento.status)
                     ItemDetalhe(rotulo = "Observações", valor = agendamento.observacoes?.ifEmpty { null })
                 },
-                acoesTopo = {
-                    IconButton(
-                        onClick = {
-                            exibirModalExclusao = true
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.delete_24px),
-                            contentDescription = "Excluir",
-                            tint = TextoErro,
-                            modifier = Modifier.size(18.dp)
-                        )
+                acoesTopo = if (podeGerenciarAgenda) {
+                    {
+                        IconButton(
+                            onClick = { exibirModalExclusao = true },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.delete_24px),
+                                contentDescription = "Excluir",
+                                tint = TextoErro,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                val item = agendamento
+                                agendamentoSelecionado = null
+                                vm.editar(item)
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.edit_square_24px),
+                                contentDescription = "Editar",
+                                tint = VerdeClinica,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
-                    IconButton(
-                        onClick = {
-                            val item = agendamento
-                            agendamentoSelecionado = null
-                            vm.editar(item)
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.edit_square_24px),
-                            contentDescription = "Editar",
-                            tint = VerdeClinica,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                } else {
+                    null
                 }
             )
         }

@@ -9,7 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Paciente
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BarraPesquisa
 import edu.front.psi.clin.ui.componentes.BotaoPadrao
@@ -37,6 +40,14 @@ fun PacienteListagem(
     val pacienteSelecionado = remember { mutableStateOf<Paciente?>(null) }
     var pacienteParaExcluir by remember { mutableStateOf<Paciente?>(null) }
     var exibirDetalhesCadastrais by remember { mutableStateOf(false) }
+    val podeGerenciarPacientes = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.PACIENTES
+    )
+    val podeAcessarAreaClinica = PermissoesAcesso.podeAcessar(
+        SessionManager.role,
+        RecursoSistema.PRONTUARIOS
+    )
 
     Box(
         modifier = Modifier
@@ -50,6 +61,7 @@ fun PacienteListagem(
                 subtitulo = "Gerencie os pacientes cadastrados na clínica",
                 textoBotao = "Novo Paciente",
                 iconeBotao = painterResource(Res.drawable.add),
+                mostrarBotao = podeGerenciarPacientes,
                 onClickBotao = vm::novoPaciente
             )
 
@@ -72,7 +84,8 @@ fun PacienteListagem(
                         paciente = paciente,
                         onClick = { pacienteSelecionado.value = paciente },
                         onEditarClick = { vm.editar(paciente) },
-                        onExcluirClick = { pacienteParaExcluir = paciente }
+                        onExcluirClick = { pacienteParaExcluir = paciente },
+                        mostrarAcoesEscrita = podeGerenciarPacientes
                     )
                 }
             }
@@ -91,25 +104,27 @@ fun PacienteListagem(
                         )
                     },
                     acoesExtras = {
-                        BotaoPadrao(
-                            texto = "Prontuário",
-                            onClick = {
-                                val target = paciente
-                                pacienteSelecionado.value = null
-                                onNavegarParaProntuario(target)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        if (podeAcessarAreaClinica) {
+                            BotaoPadrao(
+                                texto = "Prontuário",
+                                onClick = {
+                                    val target = paciente
+                                    pacienteSelecionado.value = null
+                                    onNavegarParaProntuario(target)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
-                        BotaoPadrao(
-                            texto = "Evolução Clínica",
-                            onClick = {
-                                val target = paciente
-                                pacienteSelecionado.value = null
-                                onNavegarParaEvolucao(target)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                            BotaoPadrao(
+                                texto = "Evolução Clínica",
+                                onClick = {
+                                    val target = paciente
+                                    pacienteSelecionado.value = null
+                                    onNavegarParaEvolucao(target)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
                         OutlinedButton(
                             onClick = { exibirDetalhesCadastrais = true },

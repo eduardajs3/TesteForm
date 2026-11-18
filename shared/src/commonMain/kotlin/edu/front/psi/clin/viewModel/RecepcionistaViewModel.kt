@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.RecepcionistaAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Recepcionista
 import edu.front.psi.clin.navigation.RecepcionistaRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
@@ -32,12 +35,14 @@ class RecepcionistaViewModel(
         private set
 
     init {
-        viewModelScope.launch {
-            try {
-                _recepcionistas.value = recepcionistaApi.carregar()
-                println("Recepcionistas carregadas no init: ${_recepcionistas.value}")
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar recepcionistas do servidor"))
+        if (PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.RECEPCIONISTAS)) {
+            viewModelScope.launch {
+                try {
+                    _recepcionistas.value = recepcionistaApi.carregar()
+                    println("Recepcionistas carregadas no init: ${_recepcionistas.value}")
+                } catch (e: Exception) {
+                    mandarMensagem(e.mensagemParaUsuario("Erro ao carregar recepcionistas do servidor"))
+                }
             }
         }
     }

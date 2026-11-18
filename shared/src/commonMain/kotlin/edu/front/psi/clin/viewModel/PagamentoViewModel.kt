@@ -9,6 +9,8 @@ import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.*
 import edu.front.psi.clin.model.*
 import edu.front.psi.clin.navigation.PagamentoRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
@@ -53,6 +55,7 @@ class PagamentoViewModel(
     }
 
     fun carregarDadosFormulario() {
+        if (!PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.PAGAMENTOS)) return
         if (carregamentoDadosFormulario?.isActive == true) return
 
         carregamentoDadosFormulario = viewModelScope.launch {

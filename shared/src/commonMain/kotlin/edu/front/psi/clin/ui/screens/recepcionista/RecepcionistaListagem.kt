@@ -6,7 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Recepcionista
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
@@ -42,6 +45,10 @@ fun RecepcionistaListagem(
             textoFiltro = filtro.value,
             onFiltroChange = vm::atualizarFiltro,
             onNovoClick = vm::novaRecepcionista,
+            permitirEscrita = PermissoesAcesso.podeGerenciar(
+                SessionManager.role,
+                RecursoSistema.RECEPCIONISTAS
+            ),
             colunas = colunas,
             itens = lista.value,
             onVisualizar = { recepcionista -> recepcionistaSelecionada.value = recepcionista },
