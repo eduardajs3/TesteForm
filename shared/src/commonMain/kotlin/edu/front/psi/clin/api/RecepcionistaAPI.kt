@@ -39,14 +39,6 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
         println("Status do Atualizar Recepcionista: ${response.status}")
     }
 
-    suspend fun alterarSenha(id: Long, novaSenha: String) {
-        httpClient.patch("$endPoint/$id/senha") {
-            bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(AlterarSenhaRequest(novaSenha))
-        }
-    }
-
     suspend fun apagar(recepcionista: Recepcionista) {
         val response = httpClient.delete("$endPoint/${recepcionista.id}") {
             bearerAuth(token)

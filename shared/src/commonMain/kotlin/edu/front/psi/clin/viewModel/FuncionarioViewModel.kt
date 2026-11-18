@@ -65,6 +65,7 @@ class FuncionarioViewModel(
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val senha = CampoValidado()
     val ativo = CampoValidado("true")
+    private val roleOriginal = mutableStateOf<String?>(null)
 
     init {
         if (PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.FUNCIONARIOS)) {
@@ -88,10 +89,16 @@ class FuncionarioViewModel(
         val v4 = telefone.validar()
         val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
-        val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
+            return
+        }
+
+        val roleParaSalvar = roleOriginal.value?.takeIf { it.isNotBlank() }
+
+        if (roleParaSalvar == null) {
+            mandarMensagem("Não foi possível identificar a role original. Recarregue o funcionário antes de salvar.")
             return
         }
 
@@ -106,7 +113,7 @@ class FuncionarioViewModel(
                     telefone = telefone.valor.value,
                     senha = senha.valor.value.takeIf { it.isNotBlank() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    role = "ADMIN"
+                    role = roleParaSalvar
                 )
 
                 if (id.value.isEmpty()) {
@@ -114,16 +121,6 @@ class FuncionarioViewModel(
                 } else {
                     val idNumber = id.value.toLong()
                     funcionarioApi.atualizar(idNumber, funcionario)
-                    if (senhaNova != null) {
-                        try {
-                            funcionarioApi.alterarSenha(idNumber, senhaNova)
-                        } catch (e: Exception) {
-                            mandarMensagem(
-                                e.mensagemParaUsuario("Dados atualizados, mas não foi possível alterar a senha")
-                            )
-                            return@launch
-                        }
-                    }
                 }
 
                 _funcionarios.value = funcionarioApi.carregar()
@@ -165,6 +162,7 @@ class FuncionarioViewModel(
         )
         id.value = ""
         limparCampos()
+        roleOriginal.value = null
     }
 
     fun editar(funcionario: Funcionario) {
@@ -179,6 +177,7 @@ class FuncionarioViewModel(
         telefone.definir(funcionario.telefone.orEmpty())
         senha.definir("")
         ativo.definir((funcionario.ativo ?: true).toString())
+        roleOriginal.value = funcionario.role
     }
 
     fun limparCampos() {
@@ -188,5 +187,6 @@ class FuncionarioViewModel(
         telefone.limpar()
         senha.limpar()
         ativo.definir("true")
+        roleOriginal.value = null
     }
 }

@@ -39,14 +39,6 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
         println("Status do Atualizar Funcionário: ${response.status}")
     }
 
-    suspend fun alterarSenha(id: Long, novaSenha: String) {
-        httpClient.patch("$endPoint/$id/senha") {
-            bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(AlterarSenhaRequest(novaSenha))
-        }
-    }
-
     suspend fun apagar(funcionario: Funcionario) {
         val id = requireNotNull(funcionario.id) { "Funcionário sem identificador não pode ser excluído." }
         val response = httpClient.delete("$endPoint/$id") {

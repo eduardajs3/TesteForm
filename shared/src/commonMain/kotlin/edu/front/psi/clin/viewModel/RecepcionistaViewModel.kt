@@ -90,7 +90,6 @@ class RecepcionistaViewModel(
         val v5 = id.value.isNotEmpty() || senha.validar()
         val v6 = ativo.validar()
         val v7 = setor.validar()
-        val senhaNova = senha.valor.value.takeIf { it.isNotBlank() }
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mensagem.value = "Preencha todos os campos obrigatórios."
@@ -118,18 +117,6 @@ class RecepcionistaViewModel(
                 } else {
                     val idNumber = id.value.toLong()
                     recepcionistaApi.atualizar(idNumber, recepcionista)
-                    if (senhaNova != null) {
-                        try {
-                            recepcionistaApi.alterarSenha(idNumber, senhaNova)
-                        } catch (e: Exception) {
-                            val mensagemErro = e.mensagemParaUsuario(
-                                "Dados atualizados, mas não foi possível alterar a senha"
-                            )
-                            mensagem.value = mensagemErro
-                            mandarMensagem(mensagemErro)
-                            return@launch
-                        }
-                    }
                 }
 
 

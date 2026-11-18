@@ -39,14 +39,6 @@ class PsicologoAPI(private val httpClient: HttpClient) {
         println("Status do Atualizar Psicólogo: ${response.status}")
     }
 
-    suspend fun alterarSenha(id: Long, novaSenha: String) {
-        httpClient.patch("$endPoint/$id/senha") {
-            bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(AlterarSenhaRequest(novaSenha))
-        }
-    }
-
     suspend fun apagar(psicologo: Psicologo) {
         val response = httpClient.delete("$endPoint/${psicologo.id}") {
             bearerAuth(token)
