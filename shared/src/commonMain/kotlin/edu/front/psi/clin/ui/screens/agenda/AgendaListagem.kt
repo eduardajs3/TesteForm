@@ -37,7 +37,7 @@ fun AgendaListagem(
     innerPadding: PaddingValues,
     vm: AgendaViewModel
 ) {
-    // Recarrega os dados do servidor sempre que a listagem da agenda foi aberta
+   
     LaunchedEffect(Unit) {
         vm.carregarDadosFormulario()
     }
@@ -56,12 +56,12 @@ fun AgendaListagem(
     var exibirModalExclusao by remember { mutableStateOf(false) }
     var menuMesesAberto by remember { mutableStateOf(false) }
 
-    // Pega a data de hoje via kotlinx-datetime com base no relógio do sistema
+ 
     val hoje = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     }
 
-    // Calcula a segunda-feira da semana do dia de hoje automaticamente
+   
     val segundaAtualState = remember {
         val diaDaSemanaOrdinal = hoje.dayOfWeek.ordinal // 0 = Segunda, ..., 6 = Domingo
         val segunda = hoje.minus(diaDaSemanaOrdinal, DateTimeUnit.DAY)
@@ -69,7 +69,6 @@ fun AgendaListagem(
     }
     var segundaAtual by remember { mutableStateOf(segundaAtualState) }
 
-    // Descobre o índice exato do dia de hoje na semana para selecioná-lo por padrão
     val diaHojeIndex = remember(segundaAtual, hoje) {
         val dias = criarDiasDaSemana(segundaAtual)
         val index = dias.indexOfFirst { it.dataIso == hoje.toString() }
@@ -78,7 +77,6 @@ fun AgendaListagem(
 
     var diaSelecionadoIndex by remember(segundaAtual) { mutableIntStateOf(diaHojeIndex) }
 
-    // Ajusta o dia selecionado automaticamente se o psicólogo filtrado não atender no dia atual
     LaunchedEffect(psicologoFiltroAtual, segundaAtual, horariosDisponiveisState) {
         val dias = criarDiasDaSemana(segundaAtual)
         val psicologoObj = psicologos.firstOrNull { it.nome == psicologoFiltroAtual }

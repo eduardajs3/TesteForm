@@ -79,24 +79,7 @@ fun LoginScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Text(
-                text = "Esqueci a senha",
-                modifier = Modifier.clickable {
-                    onNavigate(Route.RecuperarSenha)
-                },
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = VerdeClinica
-            )
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         errorMessage?.let { erro ->
             Text(

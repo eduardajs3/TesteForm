@@ -89,7 +89,7 @@ internal fun AgendaGradeSemanal(
                             if (temExpedienteNoDia || psicologoFiltro == "Todos") {
                                 Modifier.clickable { onSelecionarDia(index) }
                             } else {
-                                Modifier // Desativa o clique se não houver expediente e houver filtro ativo
+                                Modifier 
                             }
                         )
                 ) {

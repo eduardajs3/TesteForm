@@ -26,16 +26,14 @@ fun CardAgendamentoGrade(
     val isOcupado = agendamento != null
     val status = agendamento?.status?.uppercase() ?: ""
 
-    // Cores de fundo bem distintas para cada status
     val corFundo = when (status) {
-        "CONFIRMADO" -> FundoStatusConfirmado  // Verde suave
-        "REALIZADO" -> FundoStatusRealizado   // Azul suave
-        "AGENDADO" -> FundoStatusAgendado     // Amarelo/Laranja suave (Pendente)
-        "CANCELADO", "FALTOU" -> FundoStatusNegativo // Vermelho suave
-        else -> Branco // Para o slot "Livre"
+        "CONFIRMADO" -> FundoStatusConfirmado  
+        "REALIZADO" -> FundoStatusRealizado   
+        "AGENDADO" -> FundoStatusAgendado    
+        "CANCELADO", "FALTOU" -> FundoStatusNegativo 
+        else -> Branco 
     }
 
-    // Cores de texto correspondentes
     val corTexto = when (status) {
         "CONFIRMADO" -> TextoStatusConfirmado
         "REALIZADO" -> TextoStatusRealizado
@@ -43,8 +41,6 @@ fun CardAgendamentoGrade(
         "CANCELADO", "FALTOU" -> TextoStatusNegativo
         else -> TextoSecundario.copy(alpha = 0.45f)
     }
-
-    // Cores de borda correspondentes
     val corBorda = when (status) {
         "CONFIRMADO" -> BordaStatusConfirmado
         "REALIZADO" -> BordaStatusRealizado

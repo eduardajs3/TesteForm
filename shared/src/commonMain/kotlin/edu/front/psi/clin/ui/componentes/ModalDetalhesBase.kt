@@ -22,7 +22,7 @@ fun ModalDetalhesBase(
     onDismiss: () -> Unit,
     conteudo: @Composable ColumnScope.() -> Unit,
     acoesExtras: @Composable (ColumnScope.() -> Unit)? = null,
-    acoesTopo: @Composable (RowScope.() -> Unit)? = null // Novo slot para ícones no cabeçalho
+    acoesTopo: @Composable (RowScope.() -> Unit)? = null 
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

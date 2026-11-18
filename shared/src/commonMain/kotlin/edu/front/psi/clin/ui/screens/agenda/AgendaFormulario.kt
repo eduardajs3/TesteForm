@@ -100,7 +100,7 @@ fun AgendaFormulario(
                 vm.backStack.add(AgendaRotas.Listagem)
             }
         ) {
-            // Barra de Progresso / Wizard Interativa com Ícones de Check
+           
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,7 +184,7 @@ fun AgendaFormulario(
                             vm.tipoAtendimentoId.value == null ||
                             vm.convenioId.value == null
                         ) {
-                            // Validações tratadas via ViewModel/CamposValidados
+                            
                         } else {
                             vm.atualizarDisponibilidade()
                             etapa = 2
@@ -202,9 +202,9 @@ fun AgendaFormulario(
                     onVoltar = { etapa = 1 },
                     onEscolherSala = {
                         if (horarioSelecionado == null) {
-                            // Tratado na interface
+                           
                         } else if (salasDisponiveis.isEmpty()) {
-                            // Tratado na interface
+                        
                         } else {
                             etapa = 3
                         }
@@ -225,7 +225,7 @@ fun AgendaFormulario(
                     onVoltar = { etapa = 2 },
                     onAgendar = {
                         vm.salvar {
-                            // Ação pós salvamento (geralmente gerencia navegação no ViewModel)
+                           
                         }
                     }
                 )

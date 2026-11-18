@@ -148,7 +148,7 @@ class RecepcionistaViewModel(
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
             }finally {
-                salvando = false // Libera o botão novamente no final (com sucesso ou erro)
+                salvando = false 
             }
         }
     }
