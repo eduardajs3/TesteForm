@@ -49,10 +49,18 @@ class PacienteViewModel(
     }
 
     val pacientesFiltrados = combine(_pacientes, _filtro) { pacientes, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             pacientes
         } else {
-            pacientes.filter { it.nome.contains(filtro, ignoreCase = true) }
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            pacientes.filter { paciente ->
+                paciente.nome.contains(termo, ignoreCase = true) ||
+                paciente.cpf.contains(termo, ignoreCase = true) ||
+                (digitosFiltro.isNotEmpty() && paciente.cpf.filter { it.isDigit() }.contains(digitosFiltro)) ||
+                paciente.email.contains(termo, ignoreCase = true) ||
+                paciente.telefone.contains(termo, ignoreCase = true)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

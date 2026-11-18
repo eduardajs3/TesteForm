@@ -47,10 +47,17 @@ class ConvenioViewModel(
     }
 
     val conveniosFiltrados = combine(_convenios, _filtro) { convenios, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             convenios
         } else {
-            convenios.filter { it.nome.contains(filtro, ignoreCase = true) }
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            convenios.filter { convenio ->
+                convenio.nome.contains(termo, ignoreCase = true) ||
+                convenio.cnpj.contains(termo, ignoreCase = true) ||
+                (digitosFiltro.isNotEmpty() && convenio.cnpj.filter { it.isDigit() }.contains(digitosFiltro)) ||
+                convenio.telefone.contains(termo, ignoreCase = true)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

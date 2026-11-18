@@ -47,13 +47,19 @@ class PsicologoViewModel(
     }
 
     val psicologosFiltrados = combine(_psicologos, _filtro) { psicologos, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             psicologos
         } else {
-            psicologos.filter {
-                it.nome.contains(filtro, ignoreCase = true) ||
-                it.crp.contains(filtro, ignoreCase = true) ||
-                it.especialidade.contains(filtro, ignoreCase = true)
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            psicologos.filter { psicologo ->
+                psicologo.nome.contains(termo, ignoreCase = true) ||
+                psicologo.cpf.contains(termo, ignoreCase = true) ||
+                (digitosFiltro.isNotEmpty() && psicologo.cpf.filter { it.isDigit() }.contains(digitosFiltro)) ||
+                psicologo.crp.contains(termo, ignoreCase = true) ||
+                psicologo.especialidade.contains(termo, ignoreCase = true) ||
+                psicologo.email.contains(termo, ignoreCase = true) ||
+                psicologo.telefone.contains(termo, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

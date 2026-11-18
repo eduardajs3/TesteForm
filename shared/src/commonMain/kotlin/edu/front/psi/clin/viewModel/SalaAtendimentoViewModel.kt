@@ -46,10 +46,15 @@ class SalaAtendimentoViewModel(
     }
 
     val salasFiltradas = combine(_salas, _filtro) { salas, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             salas
         } else {
-            salas.filter { it.nome.contains(filtro, ignoreCase = true) }
+            val termo = filtro.trim()
+            salas.filter {
+                it.nome.contains(termo, ignoreCase = true) ||
+                it.descricao.contains(termo, ignoreCase = true) ||
+                it.capacidade.toString().contains(termo)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

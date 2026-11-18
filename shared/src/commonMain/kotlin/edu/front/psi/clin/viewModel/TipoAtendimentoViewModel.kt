@@ -47,10 +47,15 @@ class TipoAtendimentoViewModel(
     }
 
     val tiposFiltrados = combine(_tiposAtendimento, _filtro) { tipos, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             tipos
         } else {
-            tipos.filter { it.nome.contains(filtro, ignoreCase = true) }
+            val termo = filtro.trim()
+            tipos.filter {
+                it.nome.contains(termo, ignoreCase = true) ||
+                it.descricao.contains(termo, ignoreCase = true) ||
+                it.duracao.contains(termo, ignoreCase = true)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

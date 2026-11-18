@@ -111,13 +111,20 @@ class PagamentoViewModel(
         _filtro.value = novoFiltro
     }
 
-    val pagamentosFiltrados = combine(_pagamentos, _filtro) { pagamentos, filtro ->
-        if (filtro.isEmpty()) {
+    val pagamentosFiltrados = combine(_pagamentos, _filtro, _pacientes) { pagamentos, filtro, pacientes ->
+        if (filtro.isBlank()) {
             pagamentos
         } else {
-            pagamentos.filter {
-                it.formaPagamento.contains(filtro, ignoreCase = true) ||
-                it.status.contains(filtro, ignoreCase = true)
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            pagamentos.filter { pagamento ->
+                val paciente = pacientes.find { it.id == pagamento.pacienteId }
+                pagamento.formaPagamento.contains(termo, ignoreCase = true) ||
+                pagamento.status.contains(termo, ignoreCase = true) ||
+                pagamento.dataPagamento.contains(termo, ignoreCase = true) ||
+                paciente?.nome?.contains(termo, ignoreCase = true) == true ||
+                paciente?.cpf?.contains(termo, ignoreCase = true) == true ||
+                (digitosFiltro.isNotEmpty() && paciente?.cpf?.filter { it.isDigit() }?.contains(digitosFiltro) == true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

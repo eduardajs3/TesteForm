@@ -137,10 +137,25 @@ class AgendaViewModel(
     ) { agendamentos, filtro, psicologoFiltro, statusFiltro ->
 
         agendamentos.filter { item ->
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            val pacienteObj = _pacientes.value.firstOrNull { it.id == item.pacienteId }
+            val nomePac = item.paciente ?: pacienteObj?.nome.orEmpty()
+            val psicologoObj = _psicologos.value.firstOrNull { it.id == item.psicologoId }
+            val nomePsi = item.psicologo ?: psicologoObj?.nome.orEmpty()
+            val salaObj = _salas.value.firstOrNull { it.id == item.salaId }
+            val nomeSl = item.sala ?: salaObj?.nome.orEmpty()
+
             val filtroTexto =
-                filtro.isBlank() ||
-                item.observacoes?.contains(filtro, true) == true ||
-                item.status.contains(filtro, true)
+                termo.isBlank() ||
+                nomePac.contains(termo, ignoreCase = true) ||
+                (pacienteObj?.cpf?.contains(termo, ignoreCase = true) == true) ||
+                (digitosFiltro.isNotEmpty() && pacienteObj?.cpf?.filter { it.isDigit() }?.contains(digitosFiltro) == true) ||
+                nomePsi.contains(termo, ignoreCase = true) ||
+                (psicologoObj?.cpf?.contains(termo, ignoreCase = true) == true) ||
+                nomeSl.contains(termo, ignoreCase = true) ||
+                item.observacoes?.contains(termo, ignoreCase = true) == true ||
+                item.status.contains(termo, ignoreCase = true)
 
             val filtroPsicologo =
                 psicologoFiltro == "Todos" ||

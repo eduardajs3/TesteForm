@@ -47,13 +47,18 @@ class RecepcionistaViewModel(
     }
 
     val recepcionistasFiltrados = combine(_recepcionistas, _filtro) { recepcionistas, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             recepcionistas
         } else {
-            recepcionistas.filter {
-                it.nome.contains(filtro, ignoreCase = true) ||
-                it.cpf.contains(filtro, ignoreCase = true) ||
-                it.setor.contains(filtro, ignoreCase = true)
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            recepcionistas.filter { recepcionista ->
+                recepcionista.nome.contains(termo, ignoreCase = true) ||
+                recepcionista.cpf.contains(termo, ignoreCase = true) ||
+                (digitosFiltro.isNotEmpty() && recepcionista.cpf.filter { it.isDigit() }.contains(digitosFiltro)) ||
+                recepcionista.email.contains(termo, ignoreCase = true) ||
+                recepcionista.telefone.contains(termo, ignoreCase = true) ||
+                recepcionista.setor.contains(termo, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

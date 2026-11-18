@@ -35,13 +35,18 @@ class FuncionarioViewModel(
     }
 
     val funcionariosFiltrados = combine(_funcionarios, _filtro) { funcionarios, filtro ->
-        if (filtro.isEmpty()) {
+        if (filtro.isBlank()) {
             funcionarios
         } else {
-            funcionarios.filter {
-                it.nome.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.cpf.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.email.orEmpty().contains(filtro, ignoreCase = true)
+            val termo = filtro.trim()
+            val digitosFiltro = termo.filter { it.isDigit() }
+            funcionarios.filter { funcionario ->
+                funcionario.nome.orEmpty().contains(termo, ignoreCase = true) ||
+                funcionario.cpf.orEmpty().contains(termo, ignoreCase = true) ||
+                (digitosFiltro.isNotEmpty() && funcionario.cpf.orEmpty().filter { it.isDigit() }.contains(digitosFiltro)) ||
+                funcionario.email.orEmpty().contains(termo, ignoreCase = true) ||
+                funcionario.telefone.orEmpty().contains(termo, ignoreCase = true) ||
+                funcionario.role.orEmpty().contains(termo, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
