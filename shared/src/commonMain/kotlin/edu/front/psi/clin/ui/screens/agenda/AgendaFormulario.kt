@@ -1,14 +1,16 @@
 package edu.front.psi.clin.ui.screens.agenda
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -17,7 +19,6 @@ import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
-import edu.front.psi.clin.ui.viewmodel.HorarioAgendamento
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -28,12 +29,8 @@ fun AgendaFormulario(
     LaunchedEffect(vm) {
         vm.carregarDadosFormulario()
     }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        vm.carregarDadosFormulario()
-    }
 
     val isEdicao = vm.id.value.isNotEmpty()
-    val salvando = vm.salvando
     var etapa by remember(vm.id.value) { mutableIntStateOf(1) }
 
     val pacientes = vm.pacientes.collectAsState().value
@@ -103,6 +100,7 @@ fun AgendaFormulario(
                 vm.backStack.add(AgendaRotas.Listagem)
             }
         ) {
+            // Barra de Progresso / Wizard Interativa com Ícones de Check
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,21 +109,57 @@ fun AgendaFormulario(
             ) {
                 listOf("Atendimento", "Data e horário", "Sala e revisão").forEachIndexed { index, titulo ->
                     val numeroEtapa = index + 1
+                    val eConcluida = numeroEtapa < etapa
+                    val eAtual = numeroEtapa == etapa
+                    val podeClicar = numeroEtapa <= etapa
+
                     Surface(
                         shape = RoundedCornerShape(20.dp),
-                        color = if (etapa == numeroEtapa) VerdeClinica else CremeCampo,
+                        color = when {
+                            eConcluida || eAtual -> VerdeClinica
+                            else -> CremeCampo
+                        },
                         border = BorderStroke(
                             1.dp,
-                            if (etapa == numeroEtapa) VerdeClinica else CardBordaCinza
-                        )
+                            if (eAtual || eConcluida) VerdeClinica else CardBordaCinza
+                        ),
+                        modifier = Modifier
+                            .then(
+                                if (podeClicar) {
+                                    Modifier.clickable { etapa = numeroEtapa }
+                                } else {
+                                    Modifier
+                                }
+                            )
                     ) {
-                        Text(
-                            text = "$numeroEtapa. $titulo",
+                        Row(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (etapa == numeroEtapa) Branco else TextoSecundario
-                        )
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (eConcluida) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Concluído",
+                                    tint = Branco,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = "$numeroEtapa.",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (eAtual) Branco else TextoSecundario
+                                )
+                            }
+
+                            Text(
+                                text = titulo,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (eAtual || eConcluida) Branco else TextoSecundario
+                            )
+                        }
                     }
                 }
             }
@@ -150,7 +184,7 @@ fun AgendaFormulario(
                             vm.tipoAtendimentoId.value == null ||
                             vm.convenioId.value == null
                         ) {
-                            // Mensagens tratadas via ViewModel/Toast se necessário
+                            // Validações tratadas via ViewModel/CamposValidados
                         } else {
                             vm.atualizarDisponibilidade()
                             etapa = 2
@@ -191,7 +225,7 @@ fun AgendaFormulario(
                     onVoltar = { etapa = 2 },
                     onAgendar = {
                         vm.salvar {
-                            etapa = 2
+                            // Ação pós salvamento (geralmente gerencia navegação no ViewModel)
                         }
                     }
                 )

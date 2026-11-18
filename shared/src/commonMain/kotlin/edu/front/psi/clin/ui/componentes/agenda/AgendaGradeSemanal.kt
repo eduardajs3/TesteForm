@@ -1,8 +1,6 @@
 package edu.front.psi.clin.ui.screens.agenda
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -14,11 +12,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Agenda
+import edu.front.psi.clin.model.HorarioDisponivel
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.model.TipoAtendimento
@@ -35,6 +34,8 @@ internal fun AgendaGradeSemanal(
     pacientes: List<Paciente>,
     psicologos: List<Psicologo>,
     tiposAtendimento: List<TipoAtendimento>,
+    horariosDisponiveis: List<HorarioDisponivel>,
+    psicologoFiltro: String,
     onSelecionarDia: (Int) -> Unit,
     onSelecionarAgendamento: (Agenda) -> Unit
 ) {
@@ -42,6 +43,23 @@ internal fun AgendaGradeSemanal(
         listOf(diasDaSemana[diaSelecionadoIndex])
     } else {
         diasDaSemana
+    }
+
+    fun diaSemanaParaIso(nomeDia: String): String = when (nomeDia.lowercase()) {
+        "seg" -> "SEGUNDA"
+        "ter" -> "TERCA"
+        "qua" -> "QUARTA"
+        "qui" -> "QUINTA"
+        "sex" -> "SEXTA"
+        "sáb", "sab" -> "SABADO"
+        else -> "DOMINGO"
+    }
+
+    val psicologoObj = psicologos.firstOrNull { it.nome == psicologoFiltro }
+    val horariosDoProfissional = if (psicologoFiltro == "Todos") {
+        horariosDisponiveis.filter { it.ativo }
+    } else {
+        horariosDisponiveis.filter { it.ativo && it.psicologoId == psicologoObj?.id }
     }
 
     if (telaPequena) {
@@ -53,13 +71,27 @@ internal fun AgendaGradeSemanal(
         ) {
             diasDaSemana.forEachIndexed { index, dia ->
                 val selecionado = index == diaSelecionadoIndex
+                val diaIso = diaSemanaParaIso(dia.nomeDia)
+                val temExpedienteNoDia = horariosDoProfissional.any { it.diaSemana.equals(diaIso, ignoreCase = true) }
+
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (selecionado) VerdeClinica else Branco
                     ),
-                    border = BorderStroke(1.dp, if (selecionado) VerdeClinica else CardBordaCinza),
-                    modifier = Modifier.clickable { onSelecionarDia(index) }
+                    border = BorderStroke(
+                        1.dp,
+                        if (selecionado) VerdeClinica else CardBordaCinza
+                    ),
+                    modifier = Modifier
+                        .alpha(if (selecionado || temExpedienteNoDia) 1f else 0.4f)
+                        .then(
+                            if (temExpedienteNoDia || psicologoFiltro == "Todos") {
+                                Modifier.clickable { onSelecionarDia(index) }
+                            } else {
+                                Modifier // Desativa o clique se não houver expediente e houver filtro ativo
+                            }
+                        )
                 ) {
                     Column(
                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
@@ -91,12 +123,30 @@ internal fun AgendaGradeSemanal(
                 modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                diasDaSemana.forEach { dia ->
+                diasDaSemana.forEachIndexed { index, dia ->
+                    val selecionado = index == diaSelecionadoIndex
+                    val diaIso = diaSemanaParaIso(dia.nomeDia)
+                    val temExpedienteNoDia = horariosDoProfissional.any { it.diaSemana.equals(diaIso, ignoreCase = true) }
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Branco),
-                        border = BorderStroke(1.dp, CardBordaCinza),
-                        modifier = Modifier.weight(1f)
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selecionado) VerdeClinica else Branco
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (selecionado) VerdeClinica else CardBordaCinza
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .alpha(if (selecionado || temExpedienteNoDia) 1f else 0.4f)
+                            .then(
+                                if (temExpedienteNoDia || psicologoFiltro == "Todos") {
+                                    Modifier.clickable { onSelecionarDia(index) }
+                                } else {
+                                    Modifier
+                                }
+                            )
                     ) {
                         Column(
                             modifier = Modifier
@@ -108,7 +158,7 @@ internal fun AgendaGradeSemanal(
                                 text = dia.nomeDia,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = TextoPrincipal,
+                                color = if (selecionado) Branco else TextoPrincipal,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -116,7 +166,7 @@ internal fun AgendaGradeSemanal(
                             Text(
                                 text = dia.dataFormatada,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextoSecundario
+                                color = if (selecionado) Branco else TextoSecundario
                             )
                         }
                     }
@@ -151,7 +201,6 @@ internal fun AgendaGradeSemanal(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     diasExibidos.forEach { dia ->
-                        // Filtra TODOS os agendamentos que caem neste mesmo dia e horário
                         val agendamentosNoHorario = agendamentos.filter { item ->
                             val partesDataHora = item.dataHoraInicio.split("T")
                             if (partesDataHora.size != 2) return@filter false
@@ -161,13 +210,11 @@ internal fun AgendaGradeSemanal(
                             dataIsoItem == dia.dataIso && horaItem == hora
                         }
 
-                        // Cada coluna do dia agora exibe uma lista vertical de cards (ou slot livre se estiver vazia)
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             if (agendamentosNoHorario.isEmpty()) {
-                                // Se não houver nenhum, mostra o card de "Livre" padrão
                                 CardAgendamentoGrade(
                                     agendamento = null,
                                     nomePaciente = "",
@@ -177,7 +224,6 @@ internal fun AgendaGradeSemanal(
                                     onClick = null
                                 )
                             } else {
-                                // Se houver um ou mais, renderiza um card para cada agendamento simultâneo
                                 agendamentosNoHorario.forEach { agendamento ->
                                     val nomePaciente = pacientes.firstOrNull {
                                         it.id == agendamento.pacienteId

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -16,6 +17,9 @@ import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
 import edu.front.psi.clin.ui.viewmodel.HorarioAgendamento
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 @Composable
 internal fun EtapaDataHorarioAgenda(
@@ -28,6 +32,15 @@ internal fun EtapaDataHorarioAgenda(
     onVoltar: () -> Unit,
     onEscolherSala: () -> Unit
 ) {
+    // Seleciona automaticamente o dia de hoje (ou a primeira data disponível) ao abrir a etapa
+    LaunchedEffect(datasDisponiveis) {
+        if (dataSelecionada == null && datasDisponiveis.isNotEmpty()) {
+            val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val dataParaSelecionar = if (datasDisponiveis.contains(hoje)) hoje else datasDisponiveis.first()
+            vm.dataAtendimento.definir(dataParaSelecionar.toString())
+        }
+    }
+
     Card(
         colors = CardDefaults.cardColors(containerColor = Branco),
         border = BorderStroke(1.dp, CardBordaCinza),
