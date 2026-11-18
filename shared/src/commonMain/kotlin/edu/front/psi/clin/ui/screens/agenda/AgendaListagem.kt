@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Agenda
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.BotaoPadrao
 import edu.front.psi.clin.ui.componentes.CabecalhoTela
 import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -294,6 +295,19 @@ fun AgendaListagem(
                             contentDescription = "Editar",
                             tint = VerdeClinica,
                             modifier = Modifier.size(18.dp)
+                        )
+                    }
+                },
+                acoesExtras = {
+                    if (agendamento.status.equals("AGENDADO", ignoreCase = true)) {
+                        BotaoPadrao(
+                            texto = "Confirmar Consulta",
+                            onClick = {
+                                vm.alterarStatus(agendamento, "CONFIRMADO")
+                                agendamentoSelecionado = null
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = VerdeClinica
                         )
                     }
                 }

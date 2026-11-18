@@ -81,7 +81,9 @@ fun AgendaFormulario(
     
     val horarioSelecionado = horariosDisponiveis.firstOrNull {
         it.inicio == vm.horaInicio.valor.value && it.fim == vm.horaFim.valor.value
-    }
+    } ?: if (isEdicao && vm.horaInicio.valor.value.isNotEmpty() && vm.horaFim.valor.value.isNotEmpty()) {
+        edu.front.psi.clin.ui.viewmodel.HorarioAgendamento(vm.horaInicio.valor.value, vm.horaFim.valor.value)
+    } else null
     
     val salasDisponiveis = if (dataSelecionada != null && horarioSelecionado != null) {
         vm.salasDisponiveis(dataSelecionada, horarioSelecionado)

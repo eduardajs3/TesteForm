@@ -63,7 +63,7 @@ fun CardConsultaHoje(
                             Spacer(modifier = Modifier.height(4.dp))
                             BadgeStatus(
                                 texto = consulta.status,
-                                isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
+                                isAtivo = consulta.status.equals("Agendado", ignoreCase = true) || consulta.status.equals("Confirmado", ignoreCase = true)
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
@@ -74,7 +74,7 @@ fun CardConsultaHoje(
                         }
                     }
 
-                    if (consulta.status == "Agendado") {
+                    if (consulta.status.equals("Agendado", ignoreCase = true)) {
                         OutlinedButton(
                             onClick = onConfirmar,
                             shape = RoundedCornerShape(10.dp),
@@ -133,7 +133,7 @@ fun CardConsultaHoje(
                                 )
                                 BadgeStatus(
                                     texto = consulta.status,
-                                    isAtivo = consulta.status == "Agendado" || consulta.status == "Confirmado"
+                                    isAtivo = consulta.status.equals("Agendado", ignoreCase = true) || consulta.status.equals("Confirmado", ignoreCase = true)
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
@@ -145,7 +145,7 @@ fun CardConsultaHoje(
                         }
                     }
 
-                    if (consulta.status == "Agendado") {
+                    if (consulta.status.equals("Agendado", ignoreCase = true)) {
                         OutlinedButton(
                             onClick = onConfirmar,
                             shape = RoundedCornerShape(10.dp),

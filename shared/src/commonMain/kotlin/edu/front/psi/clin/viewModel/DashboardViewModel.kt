@@ -112,8 +112,16 @@ class DashboardViewModel(
 
         viewModelScope.launch {
             try {
+                val paraEnviar = agendamento.copy(
+                    status = "CONFIRMADO",
+                    paciente = null,
+                    psicologo = null,
+                    sala = null,
+                    tipoAtendimento = null,
+                    convenio = null
+                )
+                agendaApi.atualizar(consultaId, paraEnviar)
                 val atualizado = agendamento.copy(status = "CONFIRMADO")
-                agendaApi.atualizar(consultaId, atualizado)
                 _agendamentos.update { lista ->
                     lista.map { if (it.id == consultaId) atualizado else it }
                 }

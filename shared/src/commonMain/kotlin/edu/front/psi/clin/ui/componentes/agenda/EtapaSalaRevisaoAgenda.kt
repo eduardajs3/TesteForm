@@ -106,12 +106,7 @@ internal fun EtapaSalaRevisaoAgenda(
         BotaoPadrao(
             texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
             onClick = {
-                if (
-                    horarioSelecionado == null ||
-                    salasDisponiveis.none { it.id == vm.salaId.value }
-                ) {
-                   
-                } else {
+                if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
                     exibirConfirmacao = true
                 }
             },
@@ -166,9 +161,8 @@ internal fun EtapaSalaRevisaoAgenda(
                     BotaoPadrao(
                         texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
                         onClick = {
-                            if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
-                                exibirConfirmacao = true
-                            }
+                            exibirConfirmacao = false
+                            onAgendar()
                         },
                         modifier = Modifier.weight(1f),
                         containerColor = VerdeClinica

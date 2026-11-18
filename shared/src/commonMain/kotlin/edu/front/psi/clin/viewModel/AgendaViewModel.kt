@@ -309,7 +309,12 @@ class AgendaViewModel(
                     .takeWhile { it + duracao <= fimFaixa }
                     .filter { inicio ->
                         val fim = inicio + duracao
-                        (data > agora.date || data == agora.date && inicio > minutosAgora) &&
+                        val horarioPassou = !(data > agora.date || data == agora.date && inicio > minutosAgora)
+                        val eHorarioAtualNaEdicao = id.value.isNotEmpty() &&
+                            inicio == horaEmMinutos(horaInicio.valor.value) &&
+                            data.toString() == dataAtendimento.valor.value.toLocalDateOrNull()?.toString()
+
+                        (!horarioPassou || eHorarioAtualNaEdicao) &&
                             !temConflitoComAgendamento(
                                 agendamentos = _agendamentos.value,
                                 data = data,
@@ -378,14 +383,16 @@ class AgendaViewModel(
             mandarMensagem("Data, horários ou duração do atendimento inválidos.")
             return
         }
-        if (data < hoje) {
-            mandarMensagem("Não é possível agendar em uma data passada.")
-            return
-        }
-        val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        if (data == hoje && inicioMinutos <= agora.hour * 60 + agora.minute) {
-            mandarMensagem("Não é possível agendar em um horário que já passou.")
-            return
+        if (id.value.isEmpty()) {
+            if (data < hoje) {
+                mandarMensagem("Não é possível agendar em uma data passada.")
+                return
+            }
+            val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            if (data == hoje && inicioMinutos <= agora.hour * 60 + agora.minute) {
+                mandarMensagem("Não é possível agendar em um horário que já passou.")
+                return
+            }
         }
         if (fimMinutos <= inicioMinutos || fimMinutos - inicioMinutos != duracao) {
             mandarMensagem("O horário deve respeitar a duração do tipo de atendimento.")
@@ -409,7 +416,9 @@ class AgendaViewModel(
                     psicologoId.value!!,
                     tipoAtendimentoId.value!!
                 )
-                if (horariosValidos.none { it.inicio == horaInicio.valor.value && it.fim == horaFim.valor.value }) {
+                val horarioPresente = horariosValidos.any { it.inicio == horaInicio.valor.value && it.fim == horaFim.valor.value }
+                val eEdicaoMesmoHorario = id.value.isNotEmpty()
+                if (!horarioPresente && !eEdicaoMesmoHorario) {
                     horaInicio.limpar()
                     horaFim.limpar()
                     salaId.value = null
@@ -485,13 +494,19 @@ class AgendaViewModel(
         viewModelScope.launch {
             try {
                 val atualizado = agenda.copy(
-                    status = novoStatus.uppercase()
+                    status = novoStatus.uppercase(),
+                    paciente = null,
+                    psicologo = null,
+                    sala = null,
+                    tipoAtendimento = null,
+                    convenio = null
                 )
                 agendaApi.atualizar(
                     agenda.id!!,
                     atualizado
                 )
                 _agendamentos.value = agendaApi.carregar()
+                mandarMensagem("Status atualizado para ${novoStatus.uppercase()} com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao alterar status"))
             }
