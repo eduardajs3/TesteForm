@@ -3,7 +3,6 @@ package edu.front.psi.clin.ui.screens.agenda
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Agenda
@@ -24,6 +23,11 @@ import frontpsiclinic.shared.generated.resources.Res
 import frontpsiclinic.shared.generated.resources.add
 import frontpsiclinic.shared.generated.resources.delete_24px
 import frontpsiclinic.shared.generated.resources.edit_square_24px
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 
 private val horariosBase = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
@@ -33,18 +37,93 @@ fun AgendaListagem(
     innerPadding: PaddingValues,
     vm: AgendaViewModel
 ) {
+    // Recarrega os dados do servidor sempre que a listagem da agenda foi aberta
+    LaunchedEffect(Unit) {
+        vm.carregarDadosFormulario()
+    }
+
     val agendamentos by vm.agendamentosFiltrados.collectAsState()
     val pacientes = vm.pacientes.collectAsState().value
     val psicologos = vm.psicologos.collectAsState().value
     val salas = vm.salas.collectAsState().value
     val tiposAtendimento = vm.tiposAtendimento.collectAsState().value
     val convenios = vm.convenios.collectAsState().value
+    
+    val psicologoFiltroAtual by vm.psicologoFiltro.collectAsState()
+    val horariosDisponiveisState = vm.horariosDisponiveis.collectAsState().value
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
     var exibirModalExclusao by remember { mutableStateOf(false) }
-    var segundaAtual by remember { mutableStateOf(DataSimples(16, 11, 2026)) }
     var menuMesesAberto by remember { mutableStateOf(false) }
-    var diaSelecionadoIndex by remember { mutableIntStateOf(0) }
+
+    // Pega a data de hoje via kotlinx-datetime com base no relógio do sistema
+    val hoje = remember {
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    }
+
+    // Calcula a segunda-feira da semana do dia de hoje automaticamente
+    val segundaAtualState = remember {
+        val diaDaSemanaOrdinal = hoje.dayOfWeek.ordinal // 0 = Segunda, ..., 6 = Domingo
+        val segunda = hoje.minus(diaDaSemanaOrdinal, DateTimeUnit.DAY)
+        DataSimples(segunda.day, segunda.monthNumber, segunda.year)
+    }
+    var segundaAtual by remember { mutableStateOf(segundaAtualState) }
+
+    // Descobre o índice exato do dia de hoje na semana para selecioná-lo por padrão
+    val diaHojeIndex = remember(segundaAtual, hoje) {
+        val dias = criarDiasDaSemana(segundaAtual)
+        val index = dias.indexOfFirst { it.dataIso == hoje.toString() }
+        if (index != -1) index else 0
+    }
+
+    var diaSelecionadoIndex by remember(segundaAtual) { mutableIntStateOf(diaHojeIndex) }
+
+    // Ajusta o dia selecionado automaticamente se o psicólogo filtrado não atender no dia atual
+    LaunchedEffect(psicologoFiltroAtual, segundaAtual, horariosDisponiveisState) {
+        val dias = criarDiasDaSemana(segundaAtual)
+        val psicologoObj = psicologos.firstOrNull { it.nome == psicologoFiltroAtual }
+        
+        val horariosProfissional = if (psicologoFiltroAtual == "Todos") {
+            horariosDisponiveisState.filter { it.ativo }
+        } else {
+            horariosDisponiveisState.filter { it.ativo && it.psicologoId == psicologoObj?.id }
+        }
+
+        val diaAtualSelecionado = dias.getOrNull(diaSelecionadoIndex)
+        val diaIsoAtual = diaAtualSelecionado?.let { 
+            when (it.nomeDia.lowercase()) {
+                "seg" -> "SEGUNDA"
+                "ter" -> "TERCA"
+                "qua" -> "QUARTA"
+                "qui" -> "QUINTA"
+                "sex" -> "SEXTA"
+                "sáb", "sab" -> "SABADO"
+                else -> "DOMINGO"
+            }
+        }
+
+        val temExpedienteNoDiaAtual = diaIsoAtual != null && 
+            horariosProfissional.any { it.diaSemana.equals(diaIsoAtual, ignoreCase = true) }
+
+        if (!temExpedienteNoDiaAtual && psicologoFiltroAtual != "Todos" && dias.isNotEmpty()) {
+            val primeiroDiaValidoIndex = dias.indexOfFirst { dia ->
+                val iso = when (dia.nomeDia.lowercase()) {
+                    "seg" -> "SEGUNDA"
+                    "ter" -> "TERCA"
+                    "qua" -> "QUARTA"
+                    "qui" -> "QUINTA"
+                    "sex" -> "SEXTA"
+                    "sáb", "sab" -> "SABADO"
+                    else -> "DOMINGO"
+                }
+                horariosProfissional.any { it.diaSemana.equals(iso, ignoreCase = true) }
+            }
+
+            if (primeiroDiaValidoIndex != -1) {
+                diaSelecionadoIndex = primeiroDiaValidoIndex
+            }
+        }
+    }
 
     val domingoAtual = remember(segundaAtual) { segundaAtual.adicionarDias(6) }
     val diasDaSemana = remember(segundaAtual) { criarDiasDaSemana(segundaAtual) }
@@ -103,13 +182,11 @@ fun AgendaListagem(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Filtros organizados lado a lado (Row)
                 if (telaPequena) {
-                    // Em telas pequenas, mantemos empilhado para não espremer
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CampoDropdownPadrao(
                             label = "Psicólogo",
-                            valorSelecionado = vm.psicologoFiltro.collectAsState().value,
+                            valorSelecionado = psicologoFiltroAtual,
                             opcoes = listOf("Todos") + psicologos.map { it.nome },
                             onOpcaoSelecionada = { nome -> vm.filtrarPorPsicologo(nome) }
                         )
@@ -122,7 +199,6 @@ fun AgendaListagem(
                         )
                     }
                 } else {
-                    // Em telas maiores, ficam perfeitamente lado a lado dividindo o espaço
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -130,7 +206,7 @@ fun AgendaListagem(
                         Box(modifier = Modifier.weight(1f)) {
                             CampoDropdownPadrao(
                                 label = "Psicólogo",
-                                valorSelecionado = vm.psicologoFiltro.collectAsState().value,
+                                valorSelecionado = psicologoFiltroAtual,
                                 opcoes = listOf("Todos") + psicologos.map { it.nome },
                                 onOpcaoSelecionada = { nome -> vm.filtrarPorPsicologo(nome) }
                             )
@@ -157,6 +233,8 @@ fun AgendaListagem(
                     pacientes = pacientes,
                     psicologos = psicologos,
                     tiposAtendimento = tiposAtendimento,
+                    horariosDisponiveis = horariosDisponiveisState, 
+                    psicologoFiltro = psicologoFiltroAtual,         
                     onSelecionarDia = { diaSelecionadoIndex = it },
                     onSelecionarAgendamento = { agendamentoSelecionado = it }
                 )
@@ -184,7 +262,6 @@ fun AgendaListagem(
                         valor = formatarDataHoraIsoParaBrasileira(agendamento.dataHoraInicio)
                             .substringBefore(" ")
                     )
-
                     ItemDetalhe(
                         rotulo = "Horário",
                         valor = "${agendamento.dataHoraInicio.substringAfter("T").take(5)} às ${
@@ -196,9 +273,7 @@ fun AgendaListagem(
                 },
                 acoesTopo = {
                     IconButton(
-                        onClick = {
-                            exibirModalExclusao = true
-                        },
+                        onClick = { exibirModalExclusao = true },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
