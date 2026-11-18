@@ -96,7 +96,7 @@ fun CampoDataPadrao(
             onDismissRequest = { mostrarPicker = false },
             shape = RoundedCornerShape(28.dp),
             colors = DatePickerDefaults.colors(
-                containerColor = Branco // Garante que o fundo do diálogo inteiro seja branco
+                containerColor = Branco  
             ),
             confirmButton = {
                 TextButton(
@@ -126,7 +126,7 @@ fun CampoDataPadrao(
                         text = "Cancelar",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                        color = CinzaTextoData // Cor cinza bem legível e profissional
+                        color = CinzaTextoData 
                     )
                 }
             }

@@ -32,7 +32,6 @@ internal fun EtapaDataHorarioAgenda(
     onVoltar: () -> Unit,
     onEscolherSala: () -> Unit
 ) {
-    // Seleciona automaticamente o dia de hoje (ou a primeira data disponível) ao abrir a etapa
     LaunchedEffect(datasDisponiveis) {
         if (dataSelecionada == null && datasDisponiveis.isNotEmpty()) {
             val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date

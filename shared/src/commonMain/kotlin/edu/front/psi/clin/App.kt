@@ -28,7 +28,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.psiclin.front.ui.screens.auth.LoginScreen
-import com.psiclin.front.ui.screens.auth.RecuperarSenhaScreen
 import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.navigation.ConvenioRotas
@@ -91,27 +90,16 @@ fun App() {
     )
 
     if (!principalVm.autenticado) {
-        val rotaAuth = principalVm.backstack.lastOrNull() ?: Route.Login
-
         PsiClinTheme {
-            when (rotaAuth) {
-                Route.RecuperarSenha -> RecuperarSenhaScreen(
-                    onNavigate = { rota ->
-                        principalVm.backstack.clear()
-                        principalVm.backstack.add(rota)
-                    }
-                )
-
-                else -> LoginScreen(
-                    onNavigate = { rota ->
-                        principalVm.backstack.clear()
-                        principalVm.backstack.add(rota)
-                    },
-                    onLogin = principalVm::login,
-                    isLoading = principalVm.autenticando,
-                    errorMessage = principalVm.erroLogin
-                )
-            }
+            LoginScreen(
+                onNavigate = { rota ->
+                    principalVm.backstack.clear()
+                    principalVm.backstack.add(rota)
+                },
+                onLogin = principalVm::login,
+                isLoading = principalVm.autenticando,
+                errorMessage = principalVm.erroLogin
+            )
         }
         return
     }

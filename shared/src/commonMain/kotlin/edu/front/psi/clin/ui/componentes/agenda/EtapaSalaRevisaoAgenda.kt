@@ -110,7 +110,7 @@ internal fun EtapaSalaRevisaoAgenda(
                     horarioSelecionado == null ||
                     salasDisponiveis.none { it.id == vm.salaId.value }
                 ) {
-                    // Validação tratada diretamente na UI pelo texto de erro acima
+                   
                 } else {
                     exibirConfirmacao = true
                 }

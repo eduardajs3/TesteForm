@@ -62,7 +62,7 @@ fun DashboardTela(
                 .verticalScroll(scrollState)
                 .padding(if (telaPequena) 16.dp else 24.dp)
         ) {
-            // Cabeçalho
+            
             Text(
                 text = "Painel Geral",
                 style = MaterialTheme.typography.headlineMedium,
@@ -78,7 +78,6 @@ fun DashboardTela(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Métricas
             val linhasMetricas = metricas.chunked(if (telaPequena) 1 else 2)
             linhasMetricas.forEachIndexed { index, linha ->
                 Row(
@@ -147,7 +146,6 @@ fun DashboardTela(
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
-            // Lista de Consultas
             Text(
                 text = "Próximas Consultas de Hoje",
                 style = MaterialTheme.typography.titleMedium,

@@ -171,7 +171,6 @@ class AgendaViewModel(
     val tipoAtendimentoId = mutableStateOf<Long?>(null)
     val convenioId = mutableStateOf<Long?>(null)
 
-    // Campos Validados para exibição visual idêntica às outras entidades (borda vermelha e "Campo obrigatório")
     val pacienteIdValidado = CampoValidado()
     val psicologoIdValidado = CampoValidado()
     val tipoAtendimentoIdValidado = CampoValidado()
@@ -184,8 +183,6 @@ class AgendaViewModel(
     val status = CampoValidado("AGENDADO")
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
-
-    // --- VALIDAÇÕES CENTRALIZADAS (Padrão v1 & v2) ---
 
     fun validarDadosAtendimento(): Boolean {
         val v1 = pacienteIdValidado.validar()
@@ -247,8 +244,6 @@ class AgendaViewModel(
         }
         return true
     }
-
-    // ---------------------------------------------------
 
     fun diasDisponiveis(psicologoId: Long, tipoAtendimentoId: Long): List<LocalDate> {
         val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date

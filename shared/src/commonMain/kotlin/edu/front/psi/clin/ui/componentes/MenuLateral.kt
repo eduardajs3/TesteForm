@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.theme.CremeCampo
 import edu.front.psi.clin.ui.theme.TextoErro
-import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
 import org.jetbrains.compose.resources.DrawableResource
@@ -279,9 +278,10 @@ fun MenuLateral(
     )
 
     if (mostrarModalSair) {
-        AppDeleteModal(
-            title = "Encerrar Sessão",
-            message = "Tem certeza de que deseja sair do sistema?",
+        ModalLogout(
+            titulo = "Encerrar Sessão",
+            mensagem = "Tem certeza de que deseja sair do sistema?",
+            textoBotaoConfirmar = "Sair",
             onDismiss = { mostrarModalSair = false },
             onConfirm = {
                 mostrarModalSair = false

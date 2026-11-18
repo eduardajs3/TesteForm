@@ -26,7 +26,7 @@ fun ConvenioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Convênio" else "Cadastro de Convênio",
             subtitulo = if (isEdicao) "Altere os dados do convênio selecionado." else "Preencha os dados do convênio.",
-            // REMOVIDO: mensagemFeedback = vm.mensagem.value, pois agora usamos o toast flutuante
+      
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(ConvenioRotas.Listagem)

@@ -61,7 +61,7 @@ fun CardPaciente(
             .hoverable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null // Remove o clique cinza indesejado
+                indication = null 
             ) { onClick() }
     ) {
         Row(

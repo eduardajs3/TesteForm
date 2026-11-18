@@ -67,7 +67,7 @@ fun CardExpansivelBase(
             .hoverable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null // Remove o clique cinza padrão
+                indication = null 
             ) { onClickToggle() }
     ) {
         Column(
