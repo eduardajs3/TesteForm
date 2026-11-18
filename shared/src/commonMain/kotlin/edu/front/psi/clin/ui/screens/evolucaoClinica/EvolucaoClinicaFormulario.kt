@@ -32,6 +32,7 @@ fun EvolucaoClinicaFormulario(
         agendas.filter { it.pacienteId == prontuario.pacienteId }
     }.orEmpty()
     val agendaAtual = agendasDoPaciente.firstOrNull { it.id == vm.agendaId.value }
+    
     val prontuarioOpcoes = prontuarios.filter {
         pacienteIdFiltro == null || it.pacienteId == pacienteIdFiltro
     }.mapNotNull { prontuario ->
@@ -41,11 +42,13 @@ fun EvolucaoClinicaFormulario(
             id to "$paciente - ${prontuario.queixaPrincipal} (#$id)"
         }
     }
+    
     val psicologoOpcoes = psicologos.filter {
         agendaAtual != null && it.id == agendaAtual.psicologoId
     }.mapNotNull { psicologo ->
         psicologo.id?.let { it to "${psicologo.nome} (#$it)" }
     }
+    
     val agendaOpcoes = agendasDoPaciente.mapNotNull { agenda ->
         agenda.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
@@ -60,9 +63,11 @@ fun EvolucaoClinicaFormulario(
     val prontuarioExibicao = prontuarioOpcoes.firstOrNull {
         it.first == vm.prontuarioId.value
     }?.second.orEmpty()
+    
     val psicologoExibicao = psicologoOpcoes.firstOrNull {
         it.first == vm.psicologoId.value
     }?.second.orEmpty()
+    
     val agendaExibicao = agendaOpcoes.firstOrNull {
         it.first == vm.agendaId.value
     }?.second.orEmpty()
@@ -73,7 +78,6 @@ fun EvolucaoClinicaFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Evolução Clínica" else "Cadastro de Evolução Clínica",
             subtitulo = if (isEdicao) "Altere os dados do registro de evolução selecionado." else "Preencha os dados da evolução clínica.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(EvolucaoClinicaRotas.Listagem)

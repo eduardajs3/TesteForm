@@ -40,10 +40,12 @@ class EvolucaoClinicaViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
+    
     val pacientes = _pacientes.asStateFlow()
     val prontuarios = _prontuarios.asStateFlow()
     val psicologos = _psicologos.asStateFlow()
     val agendas = _agendas.asStateFlow()
+    
     var salvando by mutableStateOf(false)
         private set
 
@@ -111,7 +113,6 @@ class EvolucaoClinicaViewModel(
         EvolucaoClinicaRotas.Listagem
     )
 
-
     val id = mutableStateOf("")
     val prontuarioId = mutableStateOf<Long?>(null)
     val psicologoId = mutableStateOf<Long?>(null)
@@ -119,24 +120,20 @@ class EvolucaoClinicaViewModel(
     val dataRegistro = mutableStateOf("")
     val descricao = mutableStateOf("")
     val ativo = mutableStateOf("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
         if (salvando) return
+
         if (prontuarioId.value == null || psicologoId.value == null || agendaId.value == null ||
             dataRegistro.value.isBlank() || descricao.value.isBlank()
         ) {
-            val aviso = "Preencha os campos obrigatórios."
-            mensagem.value = aviso
-            mandarMensagem(aviso)
+            mandarMensagem("Preencha os campos obrigatórios.")
             return
         }
 
         val idAtual = id.value.toLongOrNull()
         if (id.value.isNotEmpty() && idAtual == null) {
-            val aviso = "Identificador da evolução clínica inválido."
-            mensagem.value = aviso
-            mandarMensagem(aviso)
+            mandarMensagem("Identificador da evolução clínica inválido.")
             return
         }
 
@@ -166,17 +163,14 @@ class EvolucaoClinicaViewModel(
                 } else {
                     "Evolução clínica atualizada com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
                 backStack.add(EvolucaoClinicaRotas.Listagem)
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar evolução clínica")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
-            }finally {
-                
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar evolução clínica"))
+            } finally {
                 salvando = false
             }
         }
@@ -268,7 +262,6 @@ class EvolucaoClinicaViewModel(
         dataRegistro.value = formatarDataIsoParaBrasileira(evolucao.dataRegistro)
         descricao.value = evolucao.descricao.orEmpty()
         ativo.value = evolucao.ativo.toString()
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -279,7 +272,6 @@ class EvolucaoClinicaViewModel(
         dataRegistro.value = ""
         descricao.value = ""
         ativo.value = "true"
-        mensagem.value = "Campos limpos."
     }
 
     fun nomeProntuario(id: Long): String {
@@ -299,5 +291,4 @@ class EvolucaoClinicaViewModel(
             ?: "Paciente"
         return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
     }
-
 }

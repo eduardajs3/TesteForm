@@ -49,7 +49,6 @@ fun HorarioDisponivelFormulario(
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Horário Disponível" else "Cadastro de Horário Disponível",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(HorarioDisponivelRotas.Listagem)

@@ -38,19 +38,16 @@ fun BloqueioAgendaFormulario(
     val psicologoSelecionado = psicologos.firstOrNull {
         it.id?.toString() == vm.psicologo.valor.value
     }
-    
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Bloqueio" else "Cadastro de Bloqueio de Agenda",
             subtitulo = if (isEdicao) "Altere os dados do bloqueio ID: ${vm.id.value}" else "Preencha os dados para criar um novo bloqueio.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(BloqueioAgendaRotas.Listagem)
             }
         ) {
-    
             CampoDropdownPadrao(
                 label = "Nome do psicólogo *",
                 valorSelecionado = psicologoSelecionado?.nome.orEmpty(),

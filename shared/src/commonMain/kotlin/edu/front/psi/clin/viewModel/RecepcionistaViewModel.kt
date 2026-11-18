@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -26,6 +28,8 @@ class RecepcionistaViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    var salvando by mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -73,7 +77,7 @@ class RecepcionistaViewModel(
     val mensagem = mutableStateOf("")
 
     fun salvar() {
-
+        if (salvando) return
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()
@@ -90,6 +94,7 @@ class RecepcionistaViewModel(
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val recepcionista = Recepcionista(
                     id = null,
@@ -142,6 +147,8 @@ class RecepcionistaViewModel(
                 val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
                 mensagem.value = mensagemErro
                 mandarMensagem(mensagemErro)
+            }finally {
+                salvando = false // Libera o botão novamente no final (com sucesso ou erro)
             }
         }
     }

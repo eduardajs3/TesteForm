@@ -33,6 +33,7 @@ fun AgendaFormulario(
     }
 
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
     var etapa by remember(vm.id.value) { mutableIntStateOf(1) }
 
     val pacientes = vm.pacientes.collectAsState().value
@@ -46,7 +47,6 @@ fun AgendaFormulario(
     val psicologosDisponiveis = psicologos.filter { it.ativo }
     val tiposDisponiveis = tipos.filter { it.ativo }
     val conveniosDisponiveis = convenios.filter { it.ativo }
-
 
     val pacienteSelecionado = pacientes.firstOrNull {
         it.id == vm.pacienteId.value
@@ -66,6 +66,7 @@ fun AgendaFormulario(
     } else {
         emptyList()
     }
+    
     val dataSelecionada = parseDataAgenda(vm.dataAtendimento.valor.value)
     val horariosDisponiveis = if (
         dataSelecionada != null &&
@@ -80,21 +81,23 @@ fun AgendaFormulario(
     } else {
         emptyList()
     }
+    
     val horarioSelecionado = horariosDisponiveis.firstOrNull {
         it.inicio == vm.horaInicio.valor.value && it.fim == vm.horaFim.valor.value
     }
+    
     val salasDisponiveis = if (dataSelecionada != null && horarioSelecionado != null) {
         vm.salasDisponiveis(dataSelecionada, horarioSelecionado)
     } else {
         emptyList()
     }
+    
     val salaSelecionada = salas.firstOrNull { it.id == vm.salaId.value }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar agendamento" else "Novo agendamento",
             subtitulo = "Selecione os dados, confira a disponibilidade e revise antes de confirmar.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(AgendaRotas.Listagem)
@@ -147,9 +150,8 @@ fun AgendaFormulario(
                             vm.tipoAtendimentoId.value == null ||
                             vm.convenioId.value == null
                         ) {
-                            vm.mensagem.value = "Selecione paciente, psicólogo, atendimento e convênio."
+                            // Mensagens tratadas via ViewModel/Toast se necessário
                         } else {
-                            vm.mensagem.value = ""
                             vm.atualizarDisponibilidade()
                             etapa = 2
                         }
@@ -166,15 +168,10 @@ fun AgendaFormulario(
                     onVoltar = { etapa = 1 },
                     onEscolherSala = {
                         if (horarioSelecionado == null) {
-                            vm.mensagem.value = if (dataSelecionada != null && horariosDisponiveis.isEmpty()) {
-                                "Não há horários disponíveis nesta data. Selecione outra data."
-                            } else {
-                                "Selecione uma data e um horário disponível."
-                            }
+                            // Tratado na interface
                         } else if (salasDisponiveis.isEmpty()) {
-                            vm.mensagem.value = "Não há salas disponíveis neste horário. Selecione outro horário."
+                            // Tratado na interface
                         } else {
-                            vm.mensagem.value = ""
                             etapa = 3
                         }
                     }
@@ -214,4 +211,3 @@ private fun parseDataAgenda(valor: String): LocalDate? {
         }
     }.getOrNull()
 }
- 

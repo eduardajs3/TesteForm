@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -57,17 +59,24 @@ class AgendaViewModel(
 
     private val _convenios = MutableStateFlow<List<Convenio>>(emptyList())
     val convenios = _convenios.asStateFlow()
+    
     private val _horariosDisponiveis = MutableStateFlow<List<HorarioDisponivel>>(emptyList())
     val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
+    
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
+    
     private var carregamentoDadosFormulario: Job? = null
     private val _statusFiltro = MutableStateFlow("Todos")
     val statusFiltro = _statusFiltro.asStateFlow()
 
+    var salvando by mutableStateOf(false)
+        private set
+
     fun filtrarPorStatus(status: String) {
         _statusFiltro.value = status
     }
+    
     fun filtrarPorPsicologo(nome: String) {
         _psicologoFiltro.value = nome
     }
@@ -101,6 +110,7 @@ class AgendaViewModel(
                     pacientesAtualizados.none { it.id == pacienteId.value && it.ativo }
                 ) {
                     pacienteId.value = null
+                    pacienteIdValidado.limpar()
                 }
                 _psicologos.value = psicologoApi.carregar()
                 _salas.value = salaApi.carregar()
@@ -127,7 +137,6 @@ class AgendaViewModel(
     ) { agendamentos, filtro, psicologoFiltro, statusFiltro ->
 
         agendamentos.filter { item ->
-
             val filtroTexto =
                 filtro.isBlank() ||
                 item.observacoes?.contains(filtro, true) == true ||
@@ -145,15 +154,15 @@ class AgendaViewModel(
 
             filtroTexto && filtroPsicologo && filtroStatus
         }
-
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         emptyList()
     )
+
     val backStack = NavBackStack<AgendaRotas>(
-    AgendaRotas.Listagem
-)
+        AgendaRotas.Listagem
+    )
 
     val id = mutableStateOf("")
     val pacienteId = mutableStateOf<Long?>(null)
@@ -162,6 +171,12 @@ class AgendaViewModel(
     val tipoAtendimentoId = mutableStateOf<Long?>(null)
     val convenioId = mutableStateOf<Long?>(null)
 
+    // Campos Validados para exibição visual idêntica às outras entidades (borda vermelha e "Campo obrigatório")
+    val pacienteIdValidado = CampoValidado()
+    val psicologoIdValidado = CampoValidado()
+    val tipoAtendimentoIdValidado = CampoValidado()
+    val convenioIdValidado = CampoValidado()
+
     val dataAtendimento = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
@@ -169,7 +184,71 @@ class AgendaViewModel(
     val status = CampoValidado("AGENDADO")
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
+
+    // --- VALIDAÇÕES CENTRALIZADAS (Padrão v1 & v2) ---
+
+    fun validarDadosAtendimento(): Boolean {
+        val v1 = pacienteIdValidado.validar()
+        val v2 = psicologoIdValidado.validar()
+        val v3 = tipoAtendimentoIdValidado.validar()
+        val v4 = convenioIdValidado.validar()
+
+        if (!(v1 && v2 && v3 && v4)) {
+            mandarMensagem("Preencha todos os campos obrigatórios.")
+            return false
+        }
+        return true
+    }
+
+    fun validarDataHorario(
+        datasDisponiveis: List<LocalDate>,
+        dataSelecionada: LocalDate?,
+        horariosDisponiveis: List<HorarioAgendamento>,
+        horarioSelecionado: HorarioAgendamento?
+    ): Boolean {
+        val v1 = datasDisponiveis.isNotEmpty()
+        val v2 = dataSelecionada != null
+        val v3 = horariosDisponiveis.isNotEmpty()
+        val v4 = horarioSelecionado != null
+
+        if (!v1) {
+            mandarMensagem("Não há datas disponíveis. Selecione outro psicólogo ou atendimento.")
+            return false
+        }
+        if (!v2) {
+            mandarMensagem("Selecione uma data para continuar.")
+            return false
+        }
+        if (!v3) {
+            mandarMensagem("Não há horários livres para esta data. Selecione outra data.")
+            return false
+        }
+        if (!v4) {
+            mandarMensagem("Selecione um horário para continuar.")
+            return false
+        }
+        return true
+    }
+
+    fun validarSalaEHorario(
+        salasDisponiveis: List<SalaAtendimento>,
+        horarioSelecionado: HorarioAgendamento?
+    ): Boolean {
+        val v1 = horarioSelecionado != null
+        val v2 = salasDisponiveis.isNotEmpty() && salasDisponiveis.any { it.id == salaId.value }
+
+        if (!v1) {
+            mandarMensagem("Este horário não está mais disponível. Selecione outro.")
+            return false
+        }
+        if (!v2) {
+            mandarMensagem("Não há sala disponível neste horário. Selecione outro horário.")
+            return false
+        }
+        return true
+    }
+
+    // ---------------------------------------------------
 
     fun diasDisponiveis(psicologoId: Long, tipoAtendimentoId: Long): List<LocalDate> {
         val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -256,9 +335,7 @@ class AgendaViewModel(
     }
 
     fun salvar(onDisponibilidadeIndisponivel: () -> Unit = {}) {
-        val vData = dataAtendimento.validar()
-        val vInicio = horaInicio.validar()
-        val vFim = horaFim.validar()
+        if (salvando) return
 
         if (
             pacienteId.value == null ||
@@ -267,17 +344,18 @@ class AgendaViewModel(
             convenioId.value == null ||
             salaId.value == null
         ) {
-            mensagem.value = "Selecione paciente, psicólogo, atendimento, convênio e sala."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Selecione paciente, psicólogo, atendimento, convênio e sala.")
             return
         }
 
+        val vData = dataAtendimento.validar()
+        val vInicio = horaInicio.validar()
+        val vFim = horaFim.validar()
+
         if (!(vData && vInicio && vFim)) {
-            mensagem.value = "Por favor, preencha a data e os horários de início e fim."
             mandarMensagem("Por favor, preencha a data e os horários de início e fim.")
             return
         }
-
 
         val data = dataAtendimento.valor.value.toLocalDateOrNull()
         val inicioMinutos = horaEmMinutos(horaInicio.valor.value)
@@ -287,33 +365,29 @@ class AgendaViewModel(
         val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
         if (data == null || inicioMinutos == null || fimMinutos == null || duracao == null) {
-            mensagem.value = "Data, horários ou duração do atendimento inválidos."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Data, horários ou duração do atendimento inválidos.")
             return
         }
         if (data < hoje) {
-            mensagem.value = "Não é possível agendar em uma data passada."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Não é possível agendar em uma data passada.")
             return
         }
         val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         if (data == hoje && inicioMinutos <= agora.hour * 60 + agora.minute) {
-            mensagem.value = "Não é possível agendar em um horário que já passou."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Não é possível agendar em um horário que já passou.")
             return
         }
         if (fimMinutos <= inicioMinutos || fimMinutos - inicioMinutos != duracao) {
-            mensagem.value = "O horário deve respeitar a duração do tipo de atendimento."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("O horário deve respeitar a duração do tipo de atendimento.")
             return
         }
         if (id.value.isEmpty() && status.valor.value !in setOf("AGENDADO", "CONFIRMADO")) {
-            mensagem.value = "Para novos agendamentos, selecione Agendado ou Confirmado."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Para novos agendamentos, selecione Agendado ou Confirmado.")
             return
         }
 
         viewModelScope.launch {
+            salvando = true
             try {
                 val agendamentosAtualizados = agendaApi.carregar()
                 _agendamentos.value = agendamentosAtualizados
@@ -326,8 +400,6 @@ class AgendaViewModel(
                     tipoAtendimentoId.value!!
                 )
                 if (horariosValidos.none { it.inicio == horaInicio.valor.value && it.fim == horaFim.valor.value }) {
-                    mensagem.value = "Esse horário não está mais disponível. Selecione outra data ou horário."
-                    mandarMensagem(mensagem.value)
                     horaInicio.limpar()
                     horaFim.limpar()
                     salaId.value = null
@@ -340,8 +412,6 @@ class AgendaViewModel(
                     HorarioAgendamento(horaInicio.valor.value, horaFim.valor.value)
                 )
                 if (salasValidas.none { it.id == salaId.value }) {
-                    mensagem.value = "A sala selecionada não está mais disponível. Selecione outro horário ou sala."
-                    mandarMensagem(mensagem.value)
                     salaId.value = null
                     onDisponibilidadeIndisponivel()
                     return@launch
@@ -353,19 +423,16 @@ class AgendaViewModel(
 
                 val agenda = Agenda(
                     id = id.value.toLongOrNull(),
-
                     pacienteId = pacienteId.value!!,
                     psicologoId = psicologoId.value!!,
                     salaId = salaId.value!!,
                     tipoAtendimentoId = tipoAtendimentoId.value!!,
                     convenioId = convenioId.value!!,
-
                     paciente = null,
                     psicologo = null,
                     sala = null,
                     tipoAtendimento = null,
                     convenio = null,
-
                     dataHoraInicio = inicioFormatado,
                     dataHoraFim = fimFormatado,
                     status = status.valor.value,
@@ -380,12 +447,13 @@ class AgendaViewModel(
                 }
 
                 _agendamentos.value = agendaApi.carregar()
+                
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Agendamento salvo com sucesso!"
                 } else {
                     "Agendamento atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
@@ -393,12 +461,13 @@ class AgendaViewModel(
                 backStack.add(AgendaRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
+
     fun alterarStatus(
         agenda: Agenda,
         novoStatus: String
@@ -408,14 +477,11 @@ class AgendaViewModel(
                 val atualizado = agenda.copy(
                     status = novoStatus.uppercase()
                 )
-
                 agendaApi.atualizar(
                     agenda.id!!,
                     atualizado
                 )
-
                 _agendamentos.value = agendaApi.carregar()
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao alterar status"))
             }
@@ -489,6 +555,12 @@ class AgendaViewModel(
         salaId.value = null
         tipoAtendimentoId.value = null
         convenioId.value = null
+        
+        pacienteIdValidado.limpar()
+        psicologoIdValidado.limpar()
+        tipoAtendimentoIdValidado.limpar()
+        convenioIdValidado.limpar()
+
         dataAtendimento.limpar()
         horaInicio.limpar()
         horaFim.limpar()
@@ -497,7 +569,6 @@ class AgendaViewModel(
         }
         observacoes.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 
     fun apagar(agenda: Agenda) {
@@ -517,18 +588,26 @@ class AgendaViewModel(
         backStack.add(AgendaRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(agenda: Agenda) {
         backStack.clear()
         backStack.add(AgendaRotas.Formulario)
         id.value = agenda.id?.toString() ?: ""
+        
         pacienteId.value = agenda.pacienteId
+        pacienteIdValidado.definir(agenda.pacienteId?.toString() ?: "")
+        
         psicologoId.value = agenda.psicologoId
+        psicologoIdValidado.definir(agenda.psicologoId?.toString() ?: "")
+        
         salaId.value = agenda.salaId
+        
         tipoAtendimentoId.value = agenda.tipoAtendimentoId
+        tipoAtendimentoIdValidado.definir(agenda.tipoAtendimentoId?.toString() ?: "")
+        
         convenioId.value = agenda.convenioId
+        convenioIdValidado.definir(agenda.convenioId?.toString() ?: "")
 
         val partesDataHora = agenda.dataHoraInicio.split("T")
         if (partesDataHora.size == 2) {
@@ -545,6 +624,5 @@ class AgendaViewModel(
         status.definir(agenda.status)
         observacoes.definir(agenda.observacoes ?: "")
         ativo.definir(agenda.ativo.toString())
-        mensagem.value = ""
     }
 }

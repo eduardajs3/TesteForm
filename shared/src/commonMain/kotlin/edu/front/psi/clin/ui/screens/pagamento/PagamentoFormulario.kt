@@ -29,6 +29,7 @@ fun PagamentoFormulario(
     }
 
     val isEdicao = vm.id.value.isNotEmpty()
+    val salvando = vm.salvando
 
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
@@ -62,7 +63,6 @@ fun PagamentoFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Pagamento" else "Cadastro de Pagamento",
             subtitulo = if (isEdicao) "Altere os dados do pagamento selecionado." else "Preencha os dados do pagamento.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(PagamentoRotas.Listagem)
@@ -80,9 +80,7 @@ fun PagamentoFormulario(
                     vm.agendaId.value = agendaEscolhida?.id
                     vm.pacienteId.value = agendaEscolhida?.pacienteId
                     vm.convenioId.value = agendaEscolhida?.convenioId
-                },
-                isError = vm.agendaId.value == null && vm.mensagem.value.isNotEmpty(),
-                errorMessage = if (vm.agendaId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
+                }
             )
 
             CampoDropdownPadrao(
@@ -92,9 +90,7 @@ fun PagamentoFormulario(
                 onOpcaoSelecionada = { nome ->
                     val pacienteEscolhido = pacientesDisponiveis.firstOrNull { it.nome == nome }
                     vm.pacienteId.value = pacienteEscolhido?.id
-                },
-                isError = vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty(),
-                errorMessage = if (vm.pacienteId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
+                }
             )
 
             CampoDropdownPadrao(
@@ -104,9 +100,7 @@ fun PagamentoFormulario(
                 onOpcaoSelecionada = { nome ->
                     val convenioEscolhido = conveniosDisponiveis.firstOrNull { it.nome == nome }
                     vm.convenioId.value = convenioEscolhido?.id
-                },
-                isError = vm.convenioId.value == null && vm.mensagem.value.isNotEmpty(),
-                errorMessage = if (vm.convenioId.value == null && vm.mensagem.value.isNotEmpty()) "Campo obrigatório" else null
+                }
             )
 
             CampoTextoPadrao(
@@ -167,9 +161,13 @@ fun PagamentoFormulario(
             )
 
             BotoesAcaoFormulario(
-                onLimpar = if (!isEdicao) vm::limparCampos else null,
+                onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
-                textoBotaoSalvar = if (isEdicao) "Salvar Alterações" else "Gravar"
+                textoBotaoSalvar = if (salvando) {
+                    "Salvando..."
+                } else {
+                    if (isEdicao) "Salvar Alterações" else "Gravar"
+                }
             )
         }
     }

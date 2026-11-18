@@ -29,8 +29,10 @@ class PacienteViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+    
     var salvando by mutableStateOf(false)
         private set
+
     init {
         viewModelScope.launch {
             try {
@@ -58,7 +60,6 @@ class PacienteViewModel(
         PacienteRotas.Listagem
     )
 
-
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
@@ -73,7 +74,6 @@ class PacienteViewModel(
     val endereco = CampoValidado()
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
         if (salvando) return
@@ -86,11 +86,11 @@ class PacienteViewModel(
         val v7 = ativo.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
-            mensagem.value = "Por favor, corrija os erros no formulário."
             mandarMensagem("Por favor, corrija os erros no formulário.")
             return
         }
         val dataFormatada = formatarDataBrasileiraParaIso(dataNascimento.valor.value)
+        
         viewModelScope.launch {
             salvando = true
             try {
@@ -113,7 +113,6 @@ class PacienteViewModel(
                     pacienteApi.atualizar(idNumber, paciente)
                 }
 
-
                 _pacientes.value = pacienteApi.carregar()
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
@@ -121,7 +120,7 @@ class PacienteViewModel(
                 } else {
                     "Paciente atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
@@ -129,10 +128,8 @@ class PacienteViewModel(
                 backStack.add(PacienteRotas.Listagem)
 
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
-            }finally {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
                 salvando = false
             }
         }
@@ -155,7 +152,6 @@ class PacienteViewModel(
         backStack.add(PacienteRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(paciente: Paciente) {
@@ -168,11 +164,8 @@ class PacienteViewModel(
         email.definir(paciente.email)
         telefone.definir(paciente.telefone)
         endereco.definir(paciente.endereco)
-        observacoes.definir(
-            paciente.observacoes
-        )
+        observacoes.definir(paciente.observacoes)
         ativo.definir(paciente.ativo.toString())
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -184,6 +177,5 @@ class PacienteViewModel(
         endereco.limpar()
         observacoes.limpar()
         ativo.definir("true")
-        mensagem.value = "Campos limpos."
     }
 }

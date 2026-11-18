@@ -27,7 +27,6 @@ fun PacienteFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar informações de Paciente" else "Cadastro de Paciente",
             subtitulo = if (isEdicao) "Altere os dados do paciente selecionado." else "Preencha os dados do paciente",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(PacienteRotas.Listagem)

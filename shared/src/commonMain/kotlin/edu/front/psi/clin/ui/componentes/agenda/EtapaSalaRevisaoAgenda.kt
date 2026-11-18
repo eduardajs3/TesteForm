@@ -110,13 +110,8 @@ internal fun EtapaSalaRevisaoAgenda(
                     horarioSelecionado == null ||
                     salasDisponiveis.none { it.id == vm.salaId.value }
                 ) {
-                    vm.mensagem.value = if (horarioSelecionado == null) {
-                        "Este horário não está mais disponível. Selecione outro."
-                    } else {
-                        "Não há sala disponível neste horário. Selecione outro horário."
-                    }
+                    // Validação tratada diretamente na UI pelo texto de erro acima
                 } else {
-                    vm.mensagem.value = ""
                     exibirConfirmacao = true
                 }
             },
@@ -169,10 +164,11 @@ internal fun EtapaSalaRevisaoAgenda(
                         Text("Revisar")
                     }
                     BotaoPadrao(
-                        texto = if (isEdicao) "Salvar alterações" else "Agendar",
+                        texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
                         onClick = {
-                            exibirConfirmacao = false
-                            onAgendar()
+                            if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
+                                exibirConfirmacao = true
+                            }
                         },
                         modifier = Modifier.weight(1f),
                         containerColor = VerdeClinica

@@ -28,6 +28,7 @@ class ProntuarioViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
+    
     var salvando by mutableStateOf(false)
         private set
 
@@ -87,33 +88,28 @@ class ProntuarioViewModel(
         ProntuarioRotas.Listagem
     )
 
-
     val id = mutableStateOf("")
     val paciente = mutableStateOf("")
     val dataAbertura = mutableStateOf("")
     val queixaPrincipal = mutableStateOf("")
     val status = mutableStateOf("")
     val ativo = mutableStateOf("true")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
         if (salvando) return
         if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
-            mensagem.value = "Preencha os campos obrigatórios!"
             mandarMensagem("Preencha os campos obrigatórios!")
             return
         }
         val pacienteId = _pacienteIdFiltro.value
             ?: _pacientes.value.firstOrNull { it.nome == paciente.value }?.id
         if (pacienteId == null) {
-            mensagem.value = "Selecione um paciente cadastrado."
-            mandarMensagem(mensagem.value)
+            mandarMensagem("Selecione um paciente cadastrado.")
             return
         }
 
         val idAtual = id.value.toLongOrNull()
         if (id.value.isNotEmpty() && idAtual == null) {
-            mensagem.value = "Identificador do prontuário inválido."
             mandarMensagem("Identificador do prontuário inválido.")
             return
         }
@@ -148,16 +144,14 @@ class ProntuarioViewModel(
                 } else {
                     "Prontuário atualizado com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+                
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
                 backStack.add(ProntuarioRotas.Listagem)
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar prontuário")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
-            }finally {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar prontuário"))
+            } finally {
                 salvando = false
             }
         }
@@ -197,7 +191,6 @@ class ProntuarioViewModel(
             else -> "Ativo"
         }
         ativo.value = prontuario.ativo.toString()
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -207,6 +200,5 @@ class ProntuarioViewModel(
         queixaPrincipal.value = ""
         status.value = ""
         ativo.value = "true"
-        mensagem.value = "Campos limpos."
     }
 }

@@ -50,9 +50,12 @@ internal fun EtapaDadosAtendimentoAgenda(
                 valorSelecionado = pacienteSelecionado?.nome.orEmpty(),
                 opcoes = pacientesDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
-                    vm.pacienteId.value = pacientesDisponiveis
-                        .firstOrNull { it.nome == nome }?.id
-                }
+                    val sel = pacientesDisponiveis.firstOrNull { it.nome == nome }
+                    vm.pacienteId.value = sel?.id
+                    vm.pacienteIdValidado.definir(sel?.id?.toString().orEmpty())
+                },
+                isError = vm.pacienteIdValidado.temErro.value,
+                errorMessage = if (vm.pacienteIdValidado.temErro.value) "Campo obrigatório" else null
             )
             CampoDropdownPadrao(
                 label = "Psicólogo *",
@@ -61,11 +64,14 @@ internal fun EtapaDadosAtendimentoAgenda(
                 onOpcaoSelecionada = { nome ->
                     val selecionado = psicologosDisponiveis.firstOrNull { it.nome == nome }
                     vm.psicologoId.value = selecionado?.id
+                    vm.psicologoIdValidado.definir(selecionado?.id?.toString().orEmpty())
                     vm.dataAtendimento.limpar()
                     vm.horaInicio.limpar()
                     vm.horaFim.limpar()
                     vm.salaId.value = null
-                }
+                },
+                isError = vm.psicologoIdValidado.temErro.value,
+                errorMessage = if (vm.psicologoIdValidado.temErro.value) "Campo obrigatório" else null
             )
             CampoDropdownPadrao(
                 label = "Tipo de atendimento *",
@@ -74,20 +80,26 @@ internal fun EtapaDadosAtendimentoAgenda(
                 onOpcaoSelecionada = { nome ->
                     val selecionado = tiposDisponiveis.firstOrNull { it.nome == nome }
                     vm.tipoAtendimentoId.value = selecionado?.id
+                    vm.tipoAtendimentoIdValidado.definir(selecionado?.id?.toString().orEmpty())
                     vm.dataAtendimento.limpar()
                     vm.horaInicio.limpar()
                     vm.horaFim.limpar()
                     vm.salaId.value = null
-                }
+                },
+                isError = vm.tipoAtendimentoIdValidado.temErro.value,
+                errorMessage = if (vm.tipoAtendimentoIdValidado.temErro.value) "Campo obrigatório" else null
             )
             CampoDropdownPadrao(
                 label = "Convênio *",
                 valorSelecionado = convenioSelecionado?.nome.orEmpty(),
                 opcoes = conveniosDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
-                    vm.convenioId.value = conveniosDisponiveis
-                        .firstOrNull { it.nome == nome }?.id
-                }
+                    val sel = conveniosDisponiveis.firstOrNull { it.nome == nome }
+                    vm.convenioId.value = sel?.id
+                    vm.convenioIdValidado.definir(sel?.id?.toString().orEmpty())
+                },
+                isError = vm.convenioIdValidado.temErro.value,
+                errorMessage = if (vm.convenioIdValidado.temErro.value) "Campo obrigatório" else null
             )
         }
     }
@@ -95,8 +107,12 @@ internal fun EtapaDadosAtendimentoAgenda(
     Spacer(Modifier.height(16.dp))
     BotaoPadrao(
         texto = "Ver disponibilidade",
-        onClick = onAvancar,
+        onClick = {
+            if (vm.validarDadosAtendimento()) {
+                vm.atualizarDisponibilidade()
+                onAvancar()
+            }
+        },
         modifier = Modifier.fillMaxWidth()
     )
 }
- 

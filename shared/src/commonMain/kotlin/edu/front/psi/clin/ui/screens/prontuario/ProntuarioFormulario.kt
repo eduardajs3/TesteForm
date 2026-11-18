@@ -50,7 +50,6 @@ fun ProntuarioFormulario(
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Prontuário" else "Cadastro de Prontuário",
             subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
-            mensagemFeedback = vm.mensagem.value,
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(ProntuarioRotas.Listagem)

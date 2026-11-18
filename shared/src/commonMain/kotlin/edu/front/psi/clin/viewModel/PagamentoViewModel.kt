@@ -1,6 +1,8 @@
 package edu.front.psi.clin.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
@@ -28,7 +30,6 @@ class PagamentoViewModel(
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
 
-
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
 
@@ -38,6 +39,9 @@ class PagamentoViewModel(
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
     val agendas = _agendas.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
+
+    var salvando by mutableStateOf(false)
+        private set
 
     val agendasSemPagamento = combine(_agendas, _pagamentos) { agendas, pagamentos ->
         val agendasComPagamento = pagamentos.mapTo(mutableSetOf()) { it.agendaId }
@@ -131,23 +135,22 @@ class PagamentoViewModel(
     val formaPagamento = CampoValidado()
     val dataPagamento = CampoValidado()
     val status = CampoValidado("PENDENTE")
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
+        if (salvando) return
+
+        if (agendaId.value == null || pacienteId.value == null || convenioId.value == null) {
+            mandarMensagem("Selecione Agenda, Paciente e Convênio.")
+            return
+        }
+
         val v1 = valorTotal.validar()
         val v2 = valorConvenio.validar()
         val v3 = valorPaciente.validar()
         val v4 = formaPagamento.validar()
         val v5 = dataPagamento.validar()
 
-        if (agendaId.value == null || pacienteId.value == null || convenioId.value == null) {
-            mensagem.value = "Selecione Agenda, Paciente e Convênio."
-            mandarMensagem("Selecione Agenda, Paciente e Convênio.")
-            return
-        }
-
         if (!(v1 && v2 && v3 && v4 && v5)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -173,6 +176,7 @@ class PagamentoViewModel(
             )
 
             viewModelScope.launch {
+                salvando = true
                 try {
                     if (id.value.isEmpty()) {
                         pagamentoApi.salvar(pagamento)
@@ -180,25 +184,25 @@ class PagamentoViewModel(
                         pagamentoApi.atualizar(id.value.toLong(), pagamento)
                     }
                     _pagamentos.value = pagamentoApi.carregar()
+                    
                     val mensagemSucesso = if (id.value.isEmpty()) {
                         "Pagamento salvo com sucesso!"
                     } else {
                         "Pagamento atualizado com sucesso!"
                     }
-                    mensagem.value = mensagemSucesso
+                    
                     mandarMensagem(mensagemSucesso)
                     limparCampos()
 
                     backStack.clear()
                     backStack.add(PagamentoRotas.Listagem)
                 } catch (e: Exception) {
-                    val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                    mensagem.value = mensagemErro
-                    mandarMensagem(mensagemErro)
+                    mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+                } finally {
+                    salvando = false
                 }
             }
         } catch (e: Exception) {
-            mensagem.value = "Erro ao processar valores: ${e.message}"
             mandarMensagem("Erro ao processar valores: ${e.message}")
         }
     }
@@ -220,7 +224,6 @@ class PagamentoViewModel(
         backStack.add(PagamentoRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
     }
 
     fun editar(pagamento: Pagamento) {
@@ -239,7 +242,6 @@ class PagamentoViewModel(
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
         status.definir(pagamento.status)
-        mensagem.value = ""
     }
 
     fun limparCampos() {
@@ -252,6 +254,5 @@ class PagamentoViewModel(
         formaPagamento.limpar()
         dataPagamento.limpar()
         status.definir("PENDENTE")
-        mensagem.value = "Campos limpos."
     }
 }

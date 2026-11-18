@@ -57,7 +57,7 @@ internal fun EtapaDataHorarioAgenda(
                 )
             } else if (datasDisponiveis.isEmpty()) {
                 Text(
-                    text = "Não há datas disponíveis nos próximos 60 dias. Selecione outro psicólogo ou atendimento.",
+                    text = "Não há datas disponíveis nos próximos dias. Selecione outro psicólogo ou atendimento.",
                     color = TextoErro,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -182,7 +182,11 @@ internal fun EtapaDataHorarioAgenda(
         }
         BotaoPadrao(
             texto = "Escolher sala",
-            onClick = onEscolherSala,
+            onClick = {
+                if (vm.validarDataHorario(datasDisponiveis, dataSelecionada, horariosDisponiveis, horarioSelecionado)) {
+                    onEscolherSala()
+                }
+            },
             modifier = Modifier.weight(1f)
         )
     }
