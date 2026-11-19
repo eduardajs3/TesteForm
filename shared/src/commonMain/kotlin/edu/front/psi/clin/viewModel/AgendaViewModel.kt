@@ -247,9 +247,14 @@ class AgendaViewModel(
 
     fun diasDisponiveis(psicologoId: Long, tipoAtendimentoId: Long): List<LocalDate> {
         val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        return (0..60)
+        val datas = (0..60)
             .map { hoje.plus(it, DateTimeUnit.DAY) }
             .filter { data -> buscarHorariosDisponiveis(data, psicologoId, tipoAtendimentoId).isNotEmpty() }
+        val dataAtual = agendaEmEdicao()
+            ?.dataHoraInicio
+            ?.substringBefore('T')
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        return (datas + listOfNotNull(dataAtual)).distinct().sorted()
     }
 
     fun buscarHorariosDisponiveis(
@@ -276,7 +281,7 @@ class AgendaViewModel(
         val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val minutosAgora = agora.hour * 60 + agora.minute
 
-        return _horariosDisponiveis.value
+        val horarios = _horariosDisponiveis.value
             .asSequence()
             .filter {
                 it.ativo &&
@@ -313,12 +318,46 @@ class AgendaViewModel(
             .distinctBy { it.inicio }
             .sortedBy { it.inicio }
             .toList()
+
+        val agendaAtual = agendaEmEdicao()?.takeIf {
+            it.psicologoId == psicologoId && it.dataHoraInicio.substringBefore('T') == data.toString()
+        }
+        val inicioAtual = agendaAtual
+            ?.dataHoraInicio
+            ?.substringAfter('T', "")
+            ?.take(5)
+            ?.let(::horaEmMinutos)
+        val fimAtual = agendaAtual
+            ?.dataHoraFim
+            ?.substringAfter('T', "")
+            ?.take(5)
+            ?.let(::horaEmMinutos)
+        val horarioAtual = if (
+            inicioAtual != null &&
+            fimAtual != null &&
+            fimAtual - inicioAtual == duracao &&
+            !temConflitoComAgendamento(
+                agendamentos = _agendamentos.value,
+                data = data,
+                inicio = inicioAtual,
+                fim = fimAtual,
+                psicologoId = psicologoId
+            )
+        ) {
+            HorarioAgendamento(formatarHora(inicioAtual), formatarHora(fimAtual))
+        } else {
+            null
+        }
+
+        return (horarios + listOfNotNull(horarioAtual))
+            .distinctBy { it.inicio }
+            .sortedBy { it.inicio }
     }
 
     fun salasDisponiveis(data: LocalDate, horario: HorarioAgendamento): List<SalaAtendimento> {
         val inicio = horaEmMinutos(horario.inicio) ?: return emptyList()
         val fim = horaEmMinutos(horario.fim) ?: return emptyList()
-        return _salas.value.filter { sala ->
+        val disponiveis = _salas.value.filter { sala ->
             sala.ativo && !temConflitoComAgendamento(
                 agendamentos = _agendamentos.value,
                 data = data,
@@ -327,7 +366,29 @@ class AgendaViewModel(
                 salaId = sala.id
             )
         }
+        val salaAtual = agendaEmEdicao()?.takeIf { agenda ->
+            agenda.dataHoraInicio.substringBefore('T') == data.toString() &&
+                agenda.dataHoraInicio.substringAfter('T', "").take(5) == horario.inicio &&
+                agenda.dataHoraFim.substringAfter('T', "").take(5) == horario.fim
+        }?.let { agenda ->
+            _salas.value.firstOrNull { sala ->
+                sala.id == agenda.salaId &&
+                    !temConflitoComAgendamento(
+                        agendamentos = _agendamentos.value,
+                        data = data,
+                        inicio = inicio,
+                        fim = fim,
+                        salaId = sala.id
+                    )
+            }
+        }
+        return (disponiveis + listOfNotNull(salaAtual)).distinctBy { it.id }
     }
+
+    private fun agendaEmEdicao(): Agenda? =
+        id.value.toLongOrNull()?.let { idEdicao ->
+            _agendamentos.value.firstOrNull { it.id == idEdicao }
+        }
 
     fun salvar(onDisponibilidadeIndisponivel: () -> Unit = {}) {
         if (salvando) return

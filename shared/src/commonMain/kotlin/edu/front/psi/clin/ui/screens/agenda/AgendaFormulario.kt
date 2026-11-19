@@ -224,9 +224,7 @@ fun AgendaFormulario(
                     horarioSelecionado = horarioSelecionado,
                     onVoltar = { etapa = 2 },
                     onAgendar = {
-                        vm.salvar {
-                           
-                        }
+                        vm.salvar { etapa = 2 }
                     }
                 )
             }

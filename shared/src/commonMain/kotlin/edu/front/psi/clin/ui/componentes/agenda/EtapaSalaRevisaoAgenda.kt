@@ -104,14 +104,9 @@ internal fun EtapaSalaRevisaoAgenda(
             Text("Voltar")
         }
         BotaoPadrao(
-            texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
+            texto = if (isEdicao) "Salvar alterações" else "Agendar",
             onClick = {
-                if (
-                    horarioSelecionado == null ||
-                    salasDisponiveis.none { it.id == vm.salaId.value }
-                ) {
-                   
-                } else {
+                if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
                     exibirConfirmacao = true
                 }
             },
@@ -164,10 +159,11 @@ internal fun EtapaSalaRevisaoAgenda(
                         Text("Revisar")
                     }
                     BotaoPadrao(
-                        texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
+                        texto = if (isEdicao) "Salvar alterações" else "Agendar",
                         onClick = {
                             if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
-                                exibirConfirmacao = true
+                                exibirConfirmacao = false
+                                onAgendar()
                             }
                         },
                         modifier = Modifier.weight(1f),

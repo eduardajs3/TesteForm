@@ -13,6 +13,7 @@ import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
+import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
 @Composable
@@ -31,7 +32,9 @@ fun EvolucaoClinicaFormulario(
     val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
         agendas.filter { it.pacienteId == prontuario.pacienteId }
     }.orEmpty()
-    val agendaAtual = agendasDoPaciente.firstOrNull { it.id == vm.agendaId.value }
+    val agendaAtual = agendas.firstOrNull { it.id == vm.agendaId.value }
+    val agendasParaOpcoes = (agendasDoPaciente + listOfNotNull(agendaAtual))
+        .distinctBy { it.id }
     
     val prontuarioOpcoes = prontuarios.filter {
         pacienteIdFiltro == null || it.pacienteId == pacienteIdFiltro
@@ -43,20 +46,26 @@ fun EvolucaoClinicaFormulario(
         }
     }
     
-    val psicologoOpcoes = psicologos.filter {
-        agendaAtual != null && it.id == agendaAtual.psicologoId
-    }.mapNotNull { psicologo ->
-        psicologo.id?.let { it to "${psicologo.nome} (#$it)" }
-    }
+    val psicologoAssociadoId = agendaAtual?.psicologoId ?: vm.psicologoId.value
+    val psicologoAssociado = psicologos.firstOrNull { it.id == psicologoAssociadoId }
+    val psicologoOpcoes = listOfNotNull(
+        psicologoAssociadoId?.let { id ->
+            id to "${psicologoAssociado?.nome ?: agendaAtual?.psicologo ?: "Psicólogo #$id"} (#$id)"
+        }
+    )
     
-    val agendaOpcoes = agendasDoPaciente.mapNotNull { agenda ->
+    val agendaOpcoes = agendasParaOpcoes.mapNotNull { agenda ->
         agenda.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
                 ?: agenda.paciente
                 ?: "Paciente"
             id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
         }
-    }
+    } + listOfNotNull(
+        vm.agendaId.value
+            ?.takeIf { id -> agendasParaOpcoes.none { it.id == id } }
+            ?.let { it to "Agenda #$it" }
+    )
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
@@ -65,7 +74,7 @@ fun EvolucaoClinicaFormulario(
     }?.second.orEmpty()
     
     val psicologoExibicao = psicologoOpcoes.firstOrNull {
-        it.first == vm.psicologoId.value
+        it.first == psicologoAssociadoId
     }?.second.orEmpty()
     
     val agendaExibicao = agendaOpcoes.firstOrNull {
@@ -103,7 +112,7 @@ fun EvolucaoClinicaFormulario(
                     val agendaId = agendaOpcoes.firstOrNull {
                         it.second == selecao
                     }?.first
-                    agendasDoPaciente.firstOrNull { it.id == agendaId }?.let(vm::selecionarAgenda)
+                    agendas.firstOrNull { it.id == agendaId }?.let(vm::selecionarAgenda)
                 }
             )
 
@@ -121,7 +130,14 @@ fun EvolucaoClinicaFormulario(
             CampoDataPadrao(
                 value = vm.dataRegistro.value,
                 onValueChange = { vm.dataRegistro.value = it },
-                label = "Data e hora do registro"
+                label = "Data do registro"
+            )
+
+            CampoTextoPadrao(
+                value = vm.horaRegistro.value,
+                onValueChange = { vm.horaRegistro.value = MaskUtils.aplicarMascaraHora(it) },
+                label = "Horário do registro",
+                placeholder = "HH:mm"
             )
 
             CampoTextoPadrao(
