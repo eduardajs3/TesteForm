@@ -58,7 +58,7 @@ androidComponents {
     onVariants { variant ->
         val variantName = variant.name
         val capitalizedVariantName = variantName.replaceFirstChar { it.uppercase() }
-        val copyApkTask = tasks.register<Copy>("copy${capitalizedVariantName}Apk") {
+        val stageApkTask = tasks.register<Copy>("stage${capitalizedVariantName}Apk") {
             from(layout.buildDirectory.dir("outputs/apk/$variantName")) {
                 include("androidApp-$variantName*.apk")
             }
@@ -67,7 +67,7 @@ androidComponents {
         }
 
         tasks.matching { it.name == "assemble$capitalizedVariantName" }.configureEach {
-            finalizedBy(copyApkTask)
+            finalizedBy(stageApkTask)
         }
     }
 }

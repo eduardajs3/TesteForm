@@ -28,6 +28,11 @@ compose.desktop {
 
             windows {
                 shortcut = true
+                iconFile.set(project.file("icons/PsiClin.ico"))
+            }
+
+            linux {
+                iconFile.set(project.file("icons/PsiClin.png"))
             }
         }
     }
