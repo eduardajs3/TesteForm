@@ -118,7 +118,6 @@ fun MenuLateral(
                             .height(80.dp)
                             .padding(vertical = 4.dp)
                     )
-
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
                     Spacer(modifier = Modifier.height(16.dp))
@@ -242,6 +241,39 @@ fun MenuLateral(
 
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(color = VerdeClinica.copy(alpha = 0.2f))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.account_circle),
+                            contentDescription = "Perfil conectado",
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = viewModel.usuarioConectado?.substringBefore('@')
+                                    ?.replaceFirstChar { it.uppercase() }
+                                    ?: "Usuário conectado",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = VerdeClinica
+                            )
+                            Text(
+                                text = when (viewModel.role?.uppercase()) {
+                                    "ADMIN" -> "Administrador"
+                                    "RECEPCIONISTA" -> "Recepcionista"
+                                    "PSICOLOGO" -> "Psicólogo"
+                                    else -> "Perfil não identificado"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = VerdeClinica.copy(alpha = 0.75f)
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
 
                     NavigationDrawerItem(

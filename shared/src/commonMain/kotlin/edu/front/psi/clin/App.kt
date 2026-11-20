@@ -741,23 +741,7 @@ fun App() {
                         TopAppBar(
                             title = {
                                 Text(
-                                    text = when (rotaExibida) {
-                                        Route.Dashboard -> "Dashboard"
-                                        Route.Paciente -> "Pacientes"
-                                        Route.Pagamento -> "Pagamentos"
-                                        Route.Convenio -> "Convênios"
-                                        Route.HorarioDisponivel -> "Horários Disponíveis"
-                                        Route.SalaAtendimento -> "Salas de Atendimento"
-                                        Route.TipoAtendimento -> "Tipos de Atendimento"
-                                        Route.BloqueioAgenda -> "Bloqueios"
-                                        Route.EvolucaoClinica -> "Evoluções"
-                                        Route.Prontuario -> "Prontuários"
-                                        Route.Recepcionista -> "Recepcionistas"
-                                        Route.Funcionario -> "Funcionários"
-                                        Route.Psicologo -> "Psicólogos"
-                                        Route.Agenda -> "Agendas"
-                                        else -> "PsiClin"
-                                    },
+                                    text = "PsiClin",
                                     style = MaterialTheme.typography.titleLarge,
                                     color = Branco
                                 )

@@ -201,11 +201,7 @@ fun AgendaFormulario(
                     horarioSelecionado = horarioSelecionado,
                     onVoltar = { etapa = 1 },
                     onEscolherSala = {
-                        if (horarioSelecionado == null) {
-                           
-                        } else if (salasDisponiveis.isEmpty()) {
-                        
-                        } else {
+                        if (vm.validarDisponibilidadeSala(salasDisponiveis, horarioSelecionado)) {
                             etapa = 3
                         }
                     }

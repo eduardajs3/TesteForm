@@ -177,6 +177,7 @@ class AgendaViewModel(
 
     val pacienteIdValidado = CampoValidado()
     val psicologoIdValidado = CampoValidado()
+    val salaIdValidado = CampoValidado()
     val tipoAtendimentoIdValidado = CampoValidado()
     val convenioIdValidado = CampoValidado()
 
@@ -236,14 +237,34 @@ class AgendaViewModel(
         horarioSelecionado: HorarioAgendamento?
     ): Boolean {
         val v1 = horarioSelecionado != null
-        val v2 = salasDisponiveis.isNotEmpty() && salasDisponiveis.any { it.id == salaId.value }
+        val salaSelecionadaDisponivel = salasDisponiveis.any { it.id == salaId.value }
 
         if (!v1) {
             mandarMensagem("Este horário não está mais disponível. Selecione outro.")
             return false
         }
-        if (!v2) {
-            mandarMensagem("Não há sala disponível neste horário. Selecione outro horário.")
+        if (salasDisponiveis.isEmpty()) {
+            mandarMensagem("Não há sala disponível. Escolha outra data e horário.")
+            return false
+        }
+        if (!salaSelecionadaDisponivel) {
+            salaIdValidado.validar()
+            mandarMensagem("Selecione uma sala disponível para continuar.")
+            return false
+        }
+        return true
+    }
+
+    fun validarDisponibilidadeSala(
+        salasDisponiveis: List<SalaAtendimento>,
+        horarioSelecionado: HorarioAgendamento?
+    ): Boolean {
+        if (horarioSelecionado == null) {
+            mandarMensagem("Selecione uma data e um horário disponíveis para continuar.")
+            return false
+        }
+        if (salasDisponiveis.isEmpty()) {
+            mandarMensagem("Não há sala disponível. Escolha outra data e horário.")
             return false
         }
         return true

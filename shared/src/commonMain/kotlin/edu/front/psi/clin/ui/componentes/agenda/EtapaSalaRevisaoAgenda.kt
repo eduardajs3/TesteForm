@@ -58,7 +58,10 @@ internal fun EtapaSalaRevisaoAgenda(
                 onOpcaoSelecionada = { nome ->
                     vm.salaId.value = salasDisponiveis
                         .firstOrNull { it.nome == nome }?.id
-                }
+                    vm.salaIdValidado.definir(vm.salaId.value?.toString().orEmpty())
+                },
+                isError = vm.salaIdValidado.temErro.value,
+                errorMessage = if (vm.salaIdValidado.temErro.value) "Campo obrigatório" else null
             )
             if (horarioSelecionado == null || salasDisponiveis.isEmpty()) {
                 Text(

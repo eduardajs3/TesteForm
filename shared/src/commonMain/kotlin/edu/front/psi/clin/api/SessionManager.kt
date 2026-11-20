@@ -7,13 +7,18 @@ object SessionManager {
     var role: String? = null
         private set
 
-    fun iniciarSessao(accessToken: String, role: String) {
+    var email: String? = null
+        private set
+
+    fun iniciarSessao(accessToken: String, role: String, email: String) {
         token = accessToken
         this.role = edu.front.psi.clin.security.PermissoesAcesso.normalizarRole(role)
+        this.email = email
     }
 
     fun encerrarSessao() {
         token = ""
         role = null
+        email = null
     }
 }

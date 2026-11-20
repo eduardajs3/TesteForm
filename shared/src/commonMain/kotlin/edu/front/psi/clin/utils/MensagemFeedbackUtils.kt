@@ -21,6 +21,8 @@ object MensagemFeedbackUtils {
             "ja cadastrado",
             "não encontrado",
             "nao encontrado",
+            "não há",
+            "nao ha",
             "inválido",
             "invalido",
             "não pode",
