@@ -82,10 +82,15 @@ fun ProntuarioFormulario(
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     vm.status.value = selecao
-                    vm.ativo.value = (selecao == "Ativo").toString()
                 }
             )
 
+            CampoDropdownPadrao(
+                label = "Ativo",
+                valorSelecionado = if (vm.ativo.value.toBooleanStrictOrNull() == false) "Não" else "Sim",
+                opcoes = listOf("Sim", "Não"),
+                onOpcaoSelecionada = { selecao -> vm.ativo.value = (selecao == "Ativo").toString() }
+            )
             BotoesAcaoFormulario(
                 onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,

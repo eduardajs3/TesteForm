@@ -131,7 +131,7 @@ class ProntuarioViewModel(
             dataAbertura = dataAbertura.value.trim().ifEmpty { null },
             queixaPrincipal = queixaPrincipal.value.trim(),
             status = statusApi,
-            ativo = statusApi == "ATIVO"
+            ativo = ativo.value.toBooleanStrictOrNull() ?: true
         )
 
         viewModelScope.launch {

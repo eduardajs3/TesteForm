@@ -237,15 +237,18 @@ class PagamentoViewModel(
         pacienteId.value = pagamento.pacienteId
         convenioId.value = pagamento.convenioId
 
-        valorTotal.definir(pagamento.valorTotal.toString())
-        valorConvenio.definir(pagamento.valorConvenio.toString())
-        valorPaciente.definir(pagamento.valorPaciente.toString())
+        valorTotal.definir(valorParaCentavos(pagamento.valorTotal))
+        valorConvenio.definir(valorParaCentavos(pagamento.valorConvenio))
+        valorPaciente.definir(valorParaCentavos(pagamento.valorPaciente))
         formaPagamento.definir(pagamento.formaPagamento)
 
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
         status.definir(pagamento.status)
     }
+
+    private fun valorParaCentavos(valor: Double): String =
+        (valor * 100.0).toLong().toString()
 
     fun limparCampos() {
         agendaId.value = null

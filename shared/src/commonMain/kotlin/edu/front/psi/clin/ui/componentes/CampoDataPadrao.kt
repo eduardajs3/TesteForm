@@ -18,6 +18,8 @@ import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import frontpsiclinic.shared.generated.resources.*
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.atStartOfDayIn
 import kotlin.time.Instant
 import org.jetbrains.compose.resources.painterResource
 
@@ -90,7 +92,18 @@ fun CampoDataPadrao(
     }
 
     if (mostrarPicker) {
-        val datePickerState = rememberDatePickerState()
+        val dataInicialMillis = remember(value) {
+            runCatching {
+                val data = if (value.matches(Regex("\\d{2}/\\d{2}/\\d{4}"))) {
+                    val (dia, mes, ano) = value.split("/").map(String::toInt)
+                    LocalDate(ano, mes, dia)
+                } else {
+                    LocalDate.parse(value.substringBefore('T'))
+                }
+                data.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+            }.getOrNull()
+        }
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dataInicialMillis)
 
         DatePickerDialog(
             onDismissRequest = { mostrarPicker = false },
