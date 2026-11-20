@@ -39,6 +39,7 @@ class AgendaViewModel(
     private val tipoAtendimentoApi = TipoAtendimentoAPI(httpClient)
     private val convenioAPI = ConvenioAPI(httpClient)
     private val horarioDisponivelApi = HorarioDisponivelAPI(httpClient)
+    private val bloqueioAgendaApi = BloqueioAgendaAPI(httpClient)
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(emptyList())
     val agendamentos = _agendamentos.asStateFlow()
@@ -62,6 +63,7 @@ class AgendaViewModel(
     
     private val _horariosDisponiveis = MutableStateFlow<List<HorarioDisponivel>>(emptyList())
     val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
+    private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(emptyList())
     
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
@@ -85,6 +87,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             try {
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
                 _agendamentos.value = agendaApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao atualizar a disponibilidade"))
@@ -117,6 +120,7 @@ class AgendaViewModel(
                 _tiposAtendimento.value = tipoAtendimentoApi.carregar()
                 _convenios.value = convenioAPI.carregar()
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados do servidor"))
             } finally {
@@ -300,6 +304,7 @@ class AgendaViewModel(
                     .filter { inicio ->
                         val fim = inicio + duracao
                         (data > agora.date || data == agora.date && inicio > minutosAgora) &&
+                            !temConflitoComBloqueio(data, inicio, fim, psicologoId) &&
                             !temConflitoComAgendamento(
                                 agendamentos = _agendamentos.value,
                                 data = data,
@@ -336,6 +341,7 @@ class AgendaViewModel(
             inicioAtual != null &&
             fimAtual != null &&
             fimAtual - inicioAtual == duracao &&
+            !temConflitoComBloqueio(data, inicioAtual, fimAtual, psicologoId) &&
             !temConflitoComAgendamento(
                 agendamentos = _agendamentos.value,
                 data = data,
@@ -389,6 +395,24 @@ class AgendaViewModel(
         id.value.toLongOrNull()?.let { idEdicao ->
             _agendamentos.value.firstOrNull { it.id == idEdicao }
         }
+
+    private fun temConflitoComBloqueio(
+        data: LocalDate,
+        inicio: Int,
+        fim: Int,
+        psicologoId: Long
+    ): Boolean {
+        val inicioAgendamento = "${data}T${formatarHora(inicio)}:00"
+        val fimAgendamento = "${data}T${formatarHora(fim)}:00"
+        return _bloqueios.value.any { bloqueio ->
+            val inicioBloqueio = bloqueio.dataHoraInicio
+            val fimBloqueio = bloqueio.dataHoraFim
+            bloqueio.ativo &&
+                bloqueio.psicologoId == psicologoId &&
+                inicioBloqueio != null && fimBloqueio != null &&
+                inicioAgendamento < fimBloqueio && fimAgendamento > inicioBloqueio
+        }
+    }
 
     fun salvar(onDisponibilidadeIndisponivel: () -> Unit = {}) {
         if (salvando) return
@@ -448,6 +472,7 @@ class AgendaViewModel(
                 val agendamentosAtualizados = agendaApi.carregar()
                 _agendamentos.value = agendamentosAtualizados
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
                 _salas.value = salaApi.carregar()
 
                 val horariosValidos = buscarHorariosDisponiveis(
