@@ -38,12 +38,10 @@ object MaskUtils {
         return sb.toString()
     }
     fun aplicarMascaraMoeda(valor: String): String {
-
         val apenasDigitos = valor.filter { it.isDigit() }
-        if (apenasDigitos.isEmpty()) return ""
-
-
         val valorLong = apenasDigitos.toLongOrNull() ?: 0L
+        if (valorLong == 0L) return ""
+
         val reais = valorLong / 100
         val centavos = (valorLong % 100).toString().padStart(2, '0')
         val reaisFormatados = reais

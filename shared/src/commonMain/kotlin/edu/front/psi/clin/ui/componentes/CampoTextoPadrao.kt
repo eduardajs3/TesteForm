@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.CinzaBordaCampo
@@ -26,14 +28,36 @@ fun CampoTextoPadrao(
     apenasNumeros: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    var textFieldValueState by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            )
+        )
+    }
+
+    val textFieldValue = textFieldValueState.copy(
+        text = value,
+        selection = if (value != textFieldValueState.text) {
+            TextRange(value.length)
+        } else {
+            textFieldValueState.selection
+        }
+    )
+
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = value,
-            onValueChange = { novoTexto ->
-                if (apenasNumeros) {
-                    onValueChange(novoTexto.filter { it.isDigit() })
+            value = textFieldValue,
+            onValueChange = { novoTfv ->
+                val textoProcessado = if (apenasNumeros) {
+                    novoTfv.text.filter { it.isDigit() }
                 } else {
-                    onValueChange(novoTexto)
+                    novoTfv.text
+                }
+                textFieldValueState = novoTfv.copy(text = textoProcessado)
+                if (value != textoProcessado) {
+                    onValueChange(textoProcessado)
                 }
             },
             label = {
