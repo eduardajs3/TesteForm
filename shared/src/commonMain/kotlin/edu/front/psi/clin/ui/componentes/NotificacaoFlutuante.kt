@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +28,15 @@ fun NotificacaoFlutuante(
     mensagem: String?,
     modifier: Modifier = Modifier
 ) {
-    val ehErro = mensagem?.let(MensagemFeedbackUtils::ehErro) == true
+    var mensagemExibida by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(mensagem) {
+        if (!mensagem.isNullOrEmpty()) {
+            mensagemExibida = mensagem
+        }
+    }
+
+    val ehErro = mensagemExibida?.let(MensagemFeedbackUtils::ehErro) == true
 
     Box(
         modifier = modifier
@@ -54,7 +67,7 @@ fun NotificacaoFlutuante(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = mensagem ?: "",
+                        text = mensagemExibida ?: "",
                         style = MaterialTheme.typography.bodyLarge,
                         color = if (ehErro) TextoErro else VerdeSucesso
                     )

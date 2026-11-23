@@ -33,6 +33,9 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
     val role: String?
         get() = SessionManager.role
 
+    val usuarioConectado: String?
+        get() = SessionManager.email
+
 
     val drawerState = DrawerState(DrawerValue.Closed)
 
@@ -71,7 +74,7 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
             erroLogin = null
             try {
                 val resposta = authAPI.login(email.trim(), senha)
-                SessionManager.iniciarSessao(resposta.accessToken, resposta.role)
+                SessionManager.iniciarSessao(resposta.accessToken, resposta.role, email.trim())
                 autenticado = true
                 backstack.clear()
                 backstack.add(Route.Dashboard)

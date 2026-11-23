@@ -58,7 +58,10 @@ internal fun EtapaSalaRevisaoAgenda(
                 opcoes = salasPorOpcao.keys.toList(),
                 onOpcaoSelecionada = { opcao ->
                     vm.salaId.value = salasPorOpcao[opcao]?.id
-                }
+                    vm.salaIdValidado.definir(vm.salaId.value?.toString().orEmpty())
+                },
+                isError = vm.salaIdValidado.temErro.value,
+                errorMessage = if (vm.salaIdValidado.temErro.value) "Campo obrigatório" else null
             )
             if (horarioSelecionado == null || salasDisponiveis.isEmpty()) {
                 Text(
@@ -104,14 +107,9 @@ internal fun EtapaSalaRevisaoAgenda(
             Text("Voltar")
         }
         BotaoPadrao(
-            texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
+            texto = if (isEdicao) "Salvar alterações" else "Agendar",
             onClick = {
-                if (
-                    horarioSelecionado == null ||
-                    salasDisponiveis.none { it.id == vm.salaId.value }
-                ) {
-                   
-                } else {
+                if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
                     exibirConfirmacao = true
                 }
             },
@@ -170,10 +168,11 @@ internal fun EtapaSalaRevisaoAgenda(
                         Text("Revisar")
                     }
                     BotaoPadrao(
-                        texto = if (isEdicao) "Confirmar alterações" else "Confirmar agendamento",
+                        texto = if (isEdicao) "Salvar alterações" else "Agendar",
                         onClick = {
                             if (vm.validarSalaEHorario(salasDisponiveis, horarioSelecionado)) {
-                                exibirConfirmacao = true
+                                exibirConfirmacao = false
+                                onAgendar()
                             }
                         },
                         modifier = Modifier.weight(1f),
@@ -184,7 +183,6 @@ internal fun EtapaSalaRevisaoAgenda(
         )
     }
 }
-
 private fun SalaAtendimento.rotuloParaSelecao(): String =
     if (recursosDisponiveis.isEmpty()) {
         nome

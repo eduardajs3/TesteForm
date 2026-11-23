@@ -16,7 +16,6 @@ import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
-import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -77,7 +76,6 @@ class RecepcionistaViewModel(
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })
     val senha = CampoValidado()
     val ativo = CampoValidado("true")
-    val dataCadastro = CampoValidado()
     val setor = CampoValidado()
     val mensagem = mutableStateOf("")
 
@@ -100,16 +98,19 @@ class RecepcionistaViewModel(
         viewModelScope.launch {
             salvando = true
             try {
+                val idAtual = id.value.toLongOrNull()
+                val dadosAtuais = _recepcionistas.value.firstOrNull { it.id == idAtual }
                 val recepcionista = Recepcionista(
-                    id = null,
+                    id = idAtual,
                     nome = nome.valor.value,
                     cpf = cpf.valor.value,
                     email = email.valor.value,
                     telefone = telefone.valor.value,
                     senha = senha.valor.value.takeIf { it.isNotEmpty() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = null,
-                    setor = setor.valor.value
+                    dataCadastro = dadosAtuais?.dataCadastro,
+                    setor = setor.valor.value,
+                    role = dadosAtuais?.role
                 )
 
                 if (id.value.isEmpty()) {
@@ -176,7 +177,6 @@ class RecepcionistaViewModel(
         telefone.definir(recepcionista.telefone)
         senha.definir(recepcionista.senha ?: "")
         ativo.definir(recepcionista.ativo.toString())
-        dataCadastro.definir(formatarDataIsoParaBrasileira(recepcionista.dataCadastro.orEmpty()))
         setor.definir(recepcionista.setor)
         mensagem.value = ""
     }
@@ -188,7 +188,6 @@ class RecepcionistaViewModel(
         telefone.limpar()
         senha.limpar()
         ativo.definir("true")
-        dataCadastro.limpar()
         setor.limpar()
         mensagem.value = "Campos limpos."
     }

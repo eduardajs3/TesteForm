@@ -23,7 +23,9 @@ import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
+import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
+import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -123,16 +125,26 @@ class EvolucaoClinicaViewModel(
     val psicologoId = mutableStateOf<Long?>(null)
     val agendaId = mutableStateOf<Long?>(null)
     val dataRegistro = mutableStateOf("")
+    val horaRegistro = mutableStateOf("")
     val descricao = mutableStateOf("")
     val ativo = mutableStateOf("true")
 
     fun salvar() {
         if (salvando) return
 
-        if (prontuarioId.value == null || psicologoId.value == null || agendaId.value == null ||
+        val psicologoDaAgenda = _agendas.value
+            .firstOrNull { it.id == agendaId.value }
+            ?.psicologoId
+            ?: psicologoId.value
+
+        if (prontuarioId.value == null || psicologoDaAgenda == null || agendaId.value == null ||
             dataRegistro.value.isBlank() || descricao.value.isBlank()
         ) {
             mandarMensagem("Preencha os campos obrigatórios.")
+            return
+        }
+        if (horaRegistro.value.isNotBlank() && !horaRegistro.value.matches(Regex("(?:[01]\\d|2[0-3]):[0-5]\\d"))) {
+            mandarMensagem("Informe um horário válido no formato HH:mm.")
             return
         }
 
@@ -146,9 +158,13 @@ class EvolucaoClinicaViewModel(
         val evolucao = EvolucaoClinica(
             id = idAtual,
             prontuarioId = prontuarioId.value!!,
-            psicologoId = psicologoId.value!!,
+            psicologoId = psicologoDaAgenda,
             agendaId = agendaId.value!!,
-            dataRegistro = dataRegistro.value.trim(),
+            dataRegistro = if (horaRegistro.value.isBlank()) {
+                dataRegistro.value.trim()
+            } else {
+                "${formatarDataBrasileiraParaIso(dataRegistro.value.trim())}T${horaRegistro.value}:00"
+            },
             descricao = descricao.value.trim(),
             ativo = ativo.value.toBooleanStrictOrNull() ?: true
         )
@@ -258,13 +274,15 @@ class EvolucaoClinicaViewModel(
         id.value = evolucao.id.toString()
         prontuarioId.value = evolucao.prontuarioId
         agendaId.value = evolucao.agendaId
-        val agenda = _agendas.value.firstOrNull { it.id == evolucao.agendaId }
-        if (agenda != null) {
-            selecionarAgenda(agenda)
-        } else {
-            psicologoId.value = evolucao.psicologoId
-        }
-        dataRegistro.value = formatarDataIsoParaBrasileira(evolucao.dataRegistro)
+        psicologoId.value = evolucao.psicologoId
+        _pacienteIdFiltro.value = null
+        _filtro.value = ""
+        val partesDataHora = evolucao.dataRegistro.split('T', limit = 2)
+        dataRegistro.value = formatarDataIsoParaBrasileira(partesDataHora[0])
+        horaRegistro.value = partesDataHora.getOrNull(1)
+            ?.take(5)
+            ?.takeIf { it.matches(Regex("(?:[01]\\d|2[0-3]):[0-5]\\d")) }
+            .orEmpty()
         descricao.value = evolucao.descricao.orEmpty()
         ativo.value = evolucao.ativo.toString()
     }
@@ -275,6 +293,7 @@ class EvolucaoClinicaViewModel(
         psicologoId.value = null
         agendaId.value = null
         dataRegistro.value = ""
+        horaRegistro.value = ""
         descricao.value = ""
         ativo.value = "true"
     }

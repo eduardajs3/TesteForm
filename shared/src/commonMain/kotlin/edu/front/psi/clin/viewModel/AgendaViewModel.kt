@@ -39,6 +39,7 @@ class AgendaViewModel(
     private val tipoAtendimentoApi = TipoAtendimentoAPI(httpClient)
     private val convenioAPI = ConvenioAPI(httpClient)
     private val horarioDisponivelApi = HorarioDisponivelAPI(httpClient)
+    private val bloqueioAgendaApi = BloqueioAgendaAPI(httpClient)
 
     private val _agendamentos = MutableStateFlow<List<Agenda>>(emptyList())
     val agendamentos = _agendamentos.asStateFlow()
@@ -62,6 +63,7 @@ class AgendaViewModel(
     
     private val _horariosDisponiveis = MutableStateFlow<List<HorarioDisponivel>>(emptyList())
     val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
+    private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(emptyList())
     
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
@@ -85,6 +87,7 @@ class AgendaViewModel(
         viewModelScope.launch {
             try {
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
                 _agendamentos.value = agendaApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao atualizar a disponibilidade"))
@@ -117,6 +120,7 @@ class AgendaViewModel(
                 _tiposAtendimento.value = tipoAtendimentoApi.carregar()
                 _convenios.value = convenioAPI.carregar()
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados do servidor"))
             } finally {
@@ -173,6 +177,7 @@ class AgendaViewModel(
 
     val pacienteIdValidado = CampoValidado()
     val psicologoIdValidado = CampoValidado()
+    val salaIdValidado = CampoValidado()
     val tipoAtendimentoIdValidado = CampoValidado()
     val convenioIdValidado = CampoValidado()
 
@@ -232,14 +237,34 @@ class AgendaViewModel(
         horarioSelecionado: HorarioAgendamento?
     ): Boolean {
         val v1 = horarioSelecionado != null
-        val v2 = salasDisponiveis.isNotEmpty() && salasDisponiveis.any { it.id == salaId.value }
+        val salaSelecionadaDisponivel = salasDisponiveis.any { it.id == salaId.value }
 
         if (!v1) {
             mandarMensagem("Este horário não está mais disponível. Selecione outro.")
             return false
         }
-        if (!v2) {
-            mandarMensagem("Não há sala disponível neste horário. Selecione outro horário.")
+        if (salasDisponiveis.isEmpty()) {
+            mandarMensagem("Não há sala disponível. Escolha outra data e horário.")
+            return false
+        }
+        if (!salaSelecionadaDisponivel) {
+            salaIdValidado.validar()
+            mandarMensagem("Selecione uma sala disponível para continuar.")
+            return false
+        }
+        return true
+    }
+
+    fun validarDisponibilidadeSala(
+        salasDisponiveis: List<SalaAtendimento>,
+        horarioSelecionado: HorarioAgendamento?
+    ): Boolean {
+        if (horarioSelecionado == null) {
+            mandarMensagem("Selecione uma data e um horário disponíveis para continuar.")
+            return false
+        }
+        if (salasDisponiveis.isEmpty()) {
+            mandarMensagem("Não há sala disponível. Escolha outra data e horário.")
             return false
         }
         return true
@@ -247,9 +272,14 @@ class AgendaViewModel(
 
     fun diasDisponiveis(psicologoId: Long, tipoAtendimentoId: Long): List<LocalDate> {
         val hoje = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        return (0..60)
+        val datas = (0..60)
             .map { hoje.plus(it, DateTimeUnit.DAY) }
             .filter { data -> buscarHorariosDisponiveis(data, psicologoId, tipoAtendimentoId).isNotEmpty() }
+        val dataAtual = agendaEmEdicao()
+            ?.dataHoraInicio
+            ?.substringBefore('T')
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        return (datas + listOfNotNull(dataAtual)).distinct().sorted()
     }
 
     fun buscarHorariosDisponiveis(
@@ -276,7 +306,7 @@ class AgendaViewModel(
         val agora = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val minutosAgora = agora.hour * 60 + agora.minute
 
-        return _horariosDisponiveis.value
+        val horarios = _horariosDisponiveis.value
             .asSequence()
             .filter {
                 it.ativo &&
@@ -295,6 +325,7 @@ class AgendaViewModel(
                     .filter { inicio ->
                         val fim = inicio + duracao
                         (data > agora.date || data == agora.date && inicio > minutosAgora) &&
+                            !temConflitoComBloqueio(data, inicio, fim, psicologoId) &&
                             !temConflitoComAgendamento(
                                 agendamentos = _agendamentos.value,
                                 data = data,
@@ -313,12 +344,47 @@ class AgendaViewModel(
             .distinctBy { it.inicio }
             .sortedBy { it.inicio }
             .toList()
+
+        val agendaAtual = agendaEmEdicao()?.takeIf {
+            it.psicologoId == psicologoId && it.dataHoraInicio.substringBefore('T') == data.toString()
+        }
+        val inicioAtual = agendaAtual
+            ?.dataHoraInicio
+            ?.substringAfter('T', "")
+            ?.take(5)
+            ?.let(::horaEmMinutos)
+        val fimAtual = agendaAtual
+            ?.dataHoraFim
+            ?.substringAfter('T', "")
+            ?.take(5)
+            ?.let(::horaEmMinutos)
+        val horarioAtual = if (
+            inicioAtual != null &&
+            fimAtual != null &&
+            fimAtual - inicioAtual == duracao &&
+            !temConflitoComBloqueio(data, inicioAtual, fimAtual, psicologoId) &&
+            !temConflitoComAgendamento(
+                agendamentos = _agendamentos.value,
+                data = data,
+                inicio = inicioAtual,
+                fim = fimAtual,
+                psicologoId = psicologoId
+            )
+        ) {
+            HorarioAgendamento(formatarHora(inicioAtual), formatarHora(fimAtual))
+        } else {
+            null
+        }
+
+        return (horarios + listOfNotNull(horarioAtual))
+            .distinctBy { it.inicio }
+            .sortedBy { it.inicio }
     }
 
     fun salasDisponiveis(data: LocalDate, horario: HorarioAgendamento): List<SalaAtendimento> {
         val inicio = horaEmMinutos(horario.inicio) ?: return emptyList()
         val fim = horaEmMinutos(horario.fim) ?: return emptyList()
-        return _salas.value.filter { sala ->
+        val disponiveis = _salas.value.filter { sala ->
             sala.ativo && !temConflitoComAgendamento(
                 agendamentos = _agendamentos.value,
                 data = data,
@@ -326,6 +392,46 @@ class AgendaViewModel(
                 fim = fim,
                 salaId = sala.id
             )
+        }
+        val salaAtual = agendaEmEdicao()?.takeIf { agenda ->
+            agenda.dataHoraInicio.substringBefore('T') == data.toString() &&
+                agenda.dataHoraInicio.substringAfter('T', "").take(5) == horario.inicio &&
+                agenda.dataHoraFim.substringAfter('T', "").take(5) == horario.fim
+        }?.let { agenda ->
+            _salas.value.firstOrNull { sala ->
+                sala.id == agenda.salaId &&
+                    !temConflitoComAgendamento(
+                        agendamentos = _agendamentos.value,
+                        data = data,
+                        inicio = inicio,
+                        fim = fim,
+                        salaId = sala.id
+                    )
+            }
+        }
+        return (disponiveis + listOfNotNull(salaAtual)).distinctBy { it.id }
+    }
+
+    private fun agendaEmEdicao(): Agenda? =
+        id.value.toLongOrNull()?.let { idEdicao ->
+            _agendamentos.value.firstOrNull { it.id == idEdicao }
+        }
+
+    private fun temConflitoComBloqueio(
+        data: LocalDate,
+        inicio: Int,
+        fim: Int,
+        psicologoId: Long
+    ): Boolean {
+        val inicioAgendamento = "${data}T${formatarHora(inicio)}:00"
+        val fimAgendamento = "${data}T${formatarHora(fim)}:00"
+        return _bloqueios.value.any { bloqueio ->
+            val inicioBloqueio = bloqueio.dataHoraInicio
+            val fimBloqueio = bloqueio.dataHoraFim
+            bloqueio.ativo &&
+                bloqueio.psicologoId == psicologoId &&
+                inicioBloqueio != null && fimBloqueio != null &&
+                inicioAgendamento < fimBloqueio && fimAgendamento > inicioBloqueio
         }
     }
 
@@ -387,6 +493,7 @@ class AgendaViewModel(
                 val agendamentosAtualizados = agendaApi.carregar()
                 _agendamentos.value = agendamentosAtualizados
                 _horariosDisponiveis.value = horarioDisponivelApi.carregar()
+                _bloqueios.value = bloqueioAgendaApi.carregar()
                 _salas.value = salaApi.carregar()
 
                 val horariosValidos = buscarHorariosDisponiveis(

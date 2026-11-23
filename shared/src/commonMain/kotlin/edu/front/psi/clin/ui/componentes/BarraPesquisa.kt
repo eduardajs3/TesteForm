@@ -21,7 +21,6 @@ import edu.front.psi.clin.ui.theme.CinzaTextoPesquisa
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import org.jetbrains.compose.resources.painterResource
 import frontpsiclinic.shared.generated.resources.*
-
 @Composable
 fun BarraPesquisa(
     text: String,
@@ -34,7 +33,6 @@ fun BarraPesquisa(
         onValueChange = onTextChange,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(50.dp)
             .background(Branco, shape = RoundedCornerShape(50.dp)),
         placeholder = {
