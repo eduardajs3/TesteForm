@@ -89,6 +89,10 @@ fun SalaAtendimentoListagem(
                     ItemDetalhe("Nome da sala", sala.nome)
                     ItemDetalhe("Capacidade", "${sala.capacidade} pessoas")
                     ItemDetalhe("Descrição", sala.descricao)
+                    ItemDetalhe(
+                        "Recursos disponíveis",
+                        sala.recursosDisponiveis.takeIf { it.isNotEmpty() }?.joinToString() ?: "Nenhum"
+                    )
                     ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(sala.dataCadastro))
                     ItemDetalhe(
                         rotulo = "Status",

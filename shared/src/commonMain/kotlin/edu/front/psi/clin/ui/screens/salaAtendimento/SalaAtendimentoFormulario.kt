@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
@@ -57,6 +58,13 @@ fun SalaAtendimentoFormulario(
                 apenasNumeros = true,
                 isError = vm.capacidade.temErro.value,
                 errorMessage = if (vm.capacidade.temErro.value) "Campo obrigatório" else null
+            )
+
+            CampoTextoPadrao(
+                value = vm.recursosTexto,
+                onValueChange = vm::definirRecursosTexto,
+                label = "Recursos disponíveis",
+                placeholder = "Ex.: Divã, brinquedos, computador"
             )
 
             CampoDropdownPadrao(
