@@ -33,7 +33,6 @@ import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.security.PermissoesAcesso
-import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.MenuLateral
 import edu.front.psi.clin.ui.componentes.NotificacaoFlutuante
 import edu.front.psi.clin.ui.screens.DashboardTela
@@ -224,33 +223,7 @@ fun App() {
     )
 
     val rotaAtual = principalVm.backstack.lastOrNull() ?: Route.Dashboard
-
-    fun telaDaRota(rota: Route) = when (rota) {
-        Route.Dashboard -> "dashboard"
-        Route.Paciente -> "paciente"
-        Route.Pagamento -> "pagamento"
-        Route.Convenio -> "convenio"
-        Route.HorarioDisponivel -> "horario"
-        Route.SalaAtendimento -> "sala"
-        Route.TipoAtendimento -> "tipo"
-        Route.BloqueioAgenda -> "bloqueio"
-        Route.EvolucaoClinica -> "evolucao"
-        Route.Prontuario -> "prontuario"
-        Route.Recepcionista -> "recepcionista"
-        Route.Funcionario -> "funcionario"
-        Route.Psicologo -> "psicologo"
-        Route.Agenda -> "agenda"
-        else -> "dashboard"
-    }
-
-    val stringTelaAtual = telaDaRota(rotaAtual)
-    val rotaPermitida = PermissoesAcesso.podeAcessarTela(principalVm.role, stringTelaAtual)
-
-    val voltarParaModuloAnterior: () -> Unit = {
-        if (principalVm.backstack.size > 1) {
-            principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-        }
-    }
+    val rotaPermitida = PermissoesAcesso.podeAcessarRota(principalVm.role, rotaAtual)
 
     val conteudoInterno: @Composable (PaddingValues) -> Unit = { contentPadding ->
         if (!rotaPermitida) {
@@ -268,51 +241,28 @@ fun App() {
         } else {
             NavDisplay(
                 backStack = principalVm.backstack,
-                onBack = {
-                    if (principalVm.backstack.size > 1) {
-                        principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-                    }
-                },
+                onBack = principalVm::voltar,
                 entryProvider = entryProvider {
                     entry<Route.Dashboard> {
                         DashboardTela(
                             innerPadding = contentPadding,
                             vm = dashboardVm,
                             onNavegar = { rota ->
-                                val recursoParaCriar = when (rota) {
-                                    Route.Paciente -> RecursoSistema.PACIENTES
-                                    else -> null
+                                if (rota == Route.Paciente) {
+                                    pacienteVm.novoPaciente()
+                                } else if (rota == Route.Agenda) {
+                                    agendaVm.backStack.clear()
+                                    agendaVm.backStack.add(AgendaRotas.Listagem)
                                 }
-                                val podeAcessarRota = PermissoesAcesso.podeAcessarTela(
-                                    principalVm.role,
-                                    telaDaRota(rota)
-                                )
-                                val podeCriarRecurso = recursoParaCriar?.let {
-                                    PermissoesAcesso.podeGerenciar(principalVm.role, it)
-                                } ?: true
-                                if (podeAcessarRota && podeCriarRecurso) {
-                                    if (rota == Route.Paciente) {
-                                        pacienteVm.novoPaciente()
-                                    } else if (rota == Route.Agenda) {
-                                        agendaVm.backStack.clear()
-                                        agendaVm.backStack.add(AgendaRotas.Listagem)
-                                    }
 
-                                    if (principalVm.backstack.lastOrNull() != rota) {
-                                        principalVm.backstack.add(rota)
-                                    }
-                                } else {
-                                    principalVm.mostrarNotificacao("Acesso negado para este perfil.")
+                                if (principalVm.backstack.lastOrNull() != rota) {
+                                    principalVm.backstack.add(rota)
                                 }
                             },
                             onAgendarConsulta = {
-                                if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
-                                    agendaVm.novoAgendamento()
-                                    if (principalVm.backstack.lastOrNull() != Route.Agenda) {
-                                        principalVm.backstack.add(Route.Agenda)
-                                    }
-                                } else {
-                                    principalVm.mostrarNotificacao("Acesso negado para este perfil.")
+                                agendaVm.novoAgendamento()
+                                if (principalVm.backstack.lastOrNull() != Route.Agenda) {
+                                    principalVm.backstack.add(Route.Agenda)
                                 }
                             }
                         )
@@ -323,22 +273,18 @@ fun App() {
                             innerPadding = contentPadding,
                             vm = pacienteVm,
                             onNavegarParaProntuario = { paciente ->
-                                if (PermissoesAcesso.podeAcessar(principalVm.role, RecursoSistema.PRONTUARIOS)) {
-                                    pacienteSelecionadoNome = paciente.nome
-                                    prontuarioVm.selecionarPaciente(paciente)
-                                    prontuarioVm.backStack.clear()
-                                    prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
-                                    principalVm.backstack.add(Route.Prontuario)
-                                }
+                                pacienteSelecionadoNome = paciente.nome
+                                prontuarioVm.selecionarPaciente(paciente)
+                                prontuarioVm.backStack.clear()
+                                prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
+                                principalVm.backstack.add(Route.Prontuario)
                             },
                             onNavegarParaEvolucao = { paciente ->
-                                if (PermissoesAcesso.podeAcessar(principalVm.role, RecursoSistema.EVOLUCOES_CLINICAS)) {
-                                    pacienteSelecionadoNome = paciente.nome
-                                    evolucaoVm.selecionarPaciente(paciente)
-                                    evolucaoVm.backStack.clear()
-                                    evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
-                                    principalVm.backstack.add(Route.EvolucaoClinica)
-                                }
+                                pacienteSelecionadoNome = paciente.nome
+                                evolucaoVm.selecionarPaciente(paciente)
+                                evolucaoVm.backStack.clear()
+                                evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
+                                principalVm.backstack.add(Route.EvolucaoClinica)
                             }
                         )
                     }
@@ -389,7 +335,7 @@ fun App() {
                         EvolucaoClinicaScreen(
                             innerPadding = contentPadding,
                             vm = evolucaoVm,
-                            onVoltar = voltarParaModuloAnterior,
+                            onVoltar = principalVm::voltar,
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
@@ -398,7 +344,7 @@ fun App() {
                         ProntuarioScreen(
                             innerPadding = contentPadding,
                             vm = prontuarioVm,
-                            onVoltar = voltarParaModuloAnterior,
+                            onVoltar = principalVm::voltar,
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
@@ -439,28 +385,11 @@ fun App() {
         Box(modifier = Modifier.fillMaxSize()) {
             MenuLateral(
                 viewModel = principalVm,
-                telaAtual = if (rotaPermitida) stringTelaAtual else "dashboard",
-                onNavigate = { destino ->
-                    val novaRota = when (destino) {
-                        "dashboard" -> Route.Dashboard
-                        "paciente" -> Route.Paciente
-                        "pagamento" -> Route.Pagamento
-                        "convenio" -> Route.Convenio
-                        "horario" -> Route.HorarioDisponivel
-                        "sala" -> Route.SalaAtendimento
-                        "tipo" -> Route.TipoAtendimento
-                        "bloqueio" -> Route.BloqueioAgenda
-                        "funcionario" -> Route.Funcionario
-                        "psicologo" -> Route.Psicologo
-                        "recepcionista" -> Route.Recepcionista
-                        "agenda" -> Route.Agenda
-                        "login" -> Route.Login
-                        else -> Route.Dashboard
-                    }
-
+                telaAtual = if (rotaPermitida) rotaAtual else Route.Dashboard,
+                onNavigate = { novaRota ->
                     if (novaRota == Route.Login) {
                         principalVm.logout()
-                    } else if (!PermissoesAcesso.podeAcessarTela(principalVm.role, telaDaRota(novaRota))) {
+                    } else if (!PermissoesAcesso.podeAcessarRota(principalVm.role, novaRota)) {
                         principalVm.mostrarNotificacao("Acesso negado para este perfil.")
                     } else if (novaRota != rotaAtual) {
                         principalVm.backstack.clear()

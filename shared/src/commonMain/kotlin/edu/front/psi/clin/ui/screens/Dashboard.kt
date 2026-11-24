@@ -8,10 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.security.PermissoesAcesso
@@ -37,7 +37,7 @@ fun DashboardTela(
     val role = SessionManager.role
     val podeCriarAgendamento = PermissoesAcesso.podeGerenciar(role, RecursoSistema.AGENDAS)
     val podeCriarPaciente = PermissoesAcesso.podeGerenciar(role, RecursoSistema.PACIENTES)
-    val podeAcessarFinanceiro = PermissoesAcesso.podeAcessarTela(role, "pagamento")
+    val podeAcessarFinanceiro = PermissoesAcesso.podeAcessarRota(role, Route.Pagamento)
     val podeConfirmarAgendamento = PermissoesAcesso.podeGerenciar(role, RecursoSistema.AGENDAS)
 
     val metricas by vm.metricas.collectAsState()

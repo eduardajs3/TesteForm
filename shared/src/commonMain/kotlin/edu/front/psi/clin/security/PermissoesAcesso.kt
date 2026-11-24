@@ -1,5 +1,7 @@
 package edu.front.psi.clin.security
 
+import edu.front.psi.clin.navigation.Route
+
 enum class RecursoSistema {
     FUNCIONARIOS,
     PSICOLOGOS,
@@ -70,25 +72,25 @@ object PermissoesAcesso {
         }
     }
 
-    fun recursoDaTela(tela: String): RecursoSistema? = when (tela) {
-        "funcionario" -> RecursoSistema.FUNCIONARIOS
-        "psicologo" -> RecursoSistema.PSICOLOGOS
-        "recepcionista" -> RecursoSistema.RECEPCIONISTAS
-        "prontuario" -> RecursoSistema.PRONTUARIOS
-        "evolucao" -> RecursoSistema.EVOLUCOES_CLINICAS
-        "horario" -> RecursoSistema.HORARIOS_DISPONIVEIS
-        "bloqueio" -> RecursoSistema.BLOQUEIOS_AGENDA
-        "pagamento" -> RecursoSistema.PAGAMENTOS
-        "agenda" -> RecursoSistema.AGENDAS
-        "paciente" -> RecursoSistema.PACIENTES
-        "convenio" -> RecursoSistema.CONVENIOS
-        "sala" -> RecursoSistema.SALAS_ATENDIMENTO
-        "tipo" -> RecursoSistema.TIPOS_ATENDIMENTO
+    fun recursoDaRota(rota: Route): RecursoSistema? = when (rota) {
+        Route.Funcionario -> RecursoSistema.FUNCIONARIOS
+        Route.Psicologo -> RecursoSistema.PSICOLOGOS
+        Route.Recepcionista -> RecursoSistema.RECEPCIONISTAS
+        Route.Prontuario -> RecursoSistema.PRONTUARIOS
+        Route.EvolucaoClinica -> RecursoSistema.EVOLUCOES_CLINICAS
+        Route.HorarioDisponivel -> RecursoSistema.HORARIOS_DISPONIVEIS
+        Route.BloqueioAgenda -> RecursoSistema.BLOQUEIOS_AGENDA
+        Route.Pagamento -> RecursoSistema.PAGAMENTOS
+        Route.Agenda -> RecursoSistema.AGENDAS
+        Route.Paciente -> RecursoSistema.PACIENTES
+        Route.Convenio -> RecursoSistema.CONVENIOS
+        Route.SalaAtendimento -> RecursoSistema.SALAS_ATENDIMENTO
+        Route.TipoAtendimento -> RecursoSistema.TIPOS_ATENDIMENTO
         else -> null
     }
 
-    fun podeAcessarTela(role: String?, tela: String): Boolean {
-        if (tela == "dashboard") return role?.let(::roleConhecida) == true
-        return recursoDaTela(tela)?.let { podeAcessar(role, it) } ?: false
+    fun podeAcessarRota(role: String?, rota: Route): Boolean {
+        if (rota == Route.Dashboard) return role?.let(::roleConhecida) == true
+        return recursoDaRota(rota)?.let { podeAcessar(role, it) } ?: false
     }
 }

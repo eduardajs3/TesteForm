@@ -12,90 +12,96 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.theme.CremeCampo
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.PrincipalViewModel
+import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import frontpsiclinic.shared.generated.resources.*
 
 data class SubMenuItemData(
     val nome: String,
-    val tela: String,
+    val rota: Route,
     val iconeRes: DrawableResource
 )
 
 data class MenuItemData(
     val nome: String,
     val iconeRes: DrawableResource,
-    val tela: String? = null,
+    val rota: Route? = null,
     val subItens: List<SubMenuItemData>? = null
 )
 
 @Composable
 fun MenuLateral(
     viewModel: PrincipalViewModel,
-    telaAtual: String,
-    onNavigate: (String) -> Unit,
+    telaAtual: Route,
+    onNavigate: (Route) -> Unit,
     content: @Composable () -> Unit
 ) {
     val todosItensMenu = listOf(
         MenuItemData(
             nome = "Dashboard",
             iconeRes = Res.drawable.dashboard,
-            tela = "dashboard"
+            rota = Route.Dashboard
         ),
         MenuItemData(
             nome = "Pacientes",
             iconeRes = Res.drawable.group_24px,
-            tela = "paciente"
+            rota = Route.Paciente
         ),
         MenuItemData(
             nome = "Cadastros",
             iconeRes = Res.drawable.assignment_24px,
             subItens = listOf(
-                SubMenuItemData("Convênios", "convenio", Res.drawable.handshake_24px),
-                SubMenuItemData("Salas de Atendimento", "sala", Res.drawable.door_open),
-                SubMenuItemData("Tipos de Atendimento", "tipo", Res.drawable.stethoscope_24px)
+                SubMenuItemData("Convênios", Route.Convenio, Res.drawable.handshake_24px),
+                SubMenuItemData("Salas de Atendimento", Route.SalaAtendimento, Res.drawable.door_open),
+                SubMenuItemData("Tipos de Atendimento", Route.TipoAtendimento, Res.drawable.stethoscope_24px)
             )
         ),
         MenuItemData(
             nome = "Agenda",
             iconeRes = Res.drawable.calendar_month,
             subItens = listOf(
-                SubMenuItemData("Agenda Geral", "agenda", Res.drawable.calendar_month),
-                SubMenuItemData("Bloqueio de Agenda", "bloqueio", Res.drawable.event_busy_24px),
-                SubMenuItemData("Horários Disponíveis", "horario", Res.drawable.calendar_check_24px)
+                SubMenuItemData("Agenda Geral", Route.Agenda, Res.drawable.calendar_month),
+                SubMenuItemData("Bloqueio de Agenda", Route.BloqueioAgenda, Res.drawable.event_busy_24px),
+                SubMenuItemData("Horários Disponíveis", Route.HorarioDisponivel, Res.drawable.calendar_check_24px)
             )
         ),
         MenuItemData(
             nome = "Pagamentos",
             iconeRes = Res.drawable.description_24px,
-            tela = "pagamento"
+            rota = Route.Pagamento
         ),
         MenuItemData(
             nome = "Funcionários",
             iconeRes = Res.drawable.badge_24px,
             subItens = listOf(
-                SubMenuItemData("Funcionários", "funcionario", Res.drawable.badge_24px),
-                SubMenuItemData("Psicólogos", "psicologo", Res.drawable.neurology_24px),
-                SubMenuItemData("Recepcionistas", "recepcionista", Res.drawable.headset_mic_24px)
+                SubMenuItemData("Funcionários", Route.Funcionario, Res.drawable.badge_24px),
+                SubMenuItemData("Psicólogos", Route.Psicologo, Res.drawable.neurology_24px),
+                SubMenuItemData("Recepcionistas", Route.Recepcionista, Res.drawable.headset_mic_24px)
             )
         )
     )
+
     val itensMenu = todosItensMenu.mapNotNull { item ->
         if (item.subItens != null) {
             val subItensPermitidos = item.subItens.filter {
-                PermissoesAcesso.podeAcessarTela(viewModel.role, it.tela)
+                PermissoesAcesso.podeAcessarRota(viewModel.role, it.rota)
             }
             item.copy(subItens = subItensPermitidos).takeIf { subItensPermitidos.isNotEmpty() }
         } else {
-            item.takeIf { PermissoesAcesso.podeAcessarTela(viewModel.role, it.tela.orEmpty()) }
+            item.rota?.let { rotaItem ->
+                item.takeIf { PermissoesAcesso.podeAcessarRota(viewModel.role, rotaItem) }
+            }
         }
     }
 
@@ -130,7 +136,7 @@ fun MenuLateral(
                         itensMenu.forEach { item ->
                             if (item.subItens != null) {
                                 var expandido by remember {
-                                    mutableStateOf(item.subItens.any { it.tela == telaAtual })
+                                    mutableStateOf(item.subItens.any { it.rota == telaAtual })
                                 }
 
                                 NavigationDrawerItem(
@@ -173,7 +179,7 @@ fun MenuLateral(
                                 ) {
                                     Column(modifier = Modifier.padding(start = 16.dp)) {
                                         item.subItens.forEach { subItem ->
-                                            val selecionado = telaAtual == subItem.tela
+                                            val selecionado = telaAtual == subItem.rota
                                             NavigationDrawerItem(
                                                 label = {
                                                     Text(
@@ -184,7 +190,7 @@ fun MenuLateral(
                                                 },
                                                 selected = selecionado,
                                                 onClick = {
-                                                    onNavigate(subItem.tela)
+                                                    onNavigate(subItem.rota)
                                                     viewModel.fecharGaveta()
                                                 },
                                                 icon = {
@@ -206,7 +212,7 @@ fun MenuLateral(
                                     }
                                 }
                             } else {
-                                val selecionado = telaAtual == item.tela
+                                val selecionado = telaAtual == item.rota
                                 NavigationDrawerItem(
                                     label = {
                                         Text(
@@ -217,7 +223,7 @@ fun MenuLateral(
                                     },
                                     selected = selecionado,
                                     onClick = {
-                                        item.tela?.let { onNavigate(it) }
+                                        item.rota?.let { onNavigate(it) }
                                         viewModel.fecharGaveta()
                                     },
                                     icon = {
@@ -245,7 +251,7 @@ fun MenuLateral(
 
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
                             painter = painterResource(Res.drawable.account_circle),
@@ -259,7 +265,7 @@ fun MenuLateral(
                                     ?.replaceFirstChar { it.uppercase() }
                                     ?: "Usuário conectado",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                fontWeight = FontWeight.Bold,
                                 color = VerdeClinica
                             )
                             Text(
@@ -317,7 +323,7 @@ fun MenuLateral(
             onDismiss = { mostrarModalSair = false },
             onConfirm = {
                 mostrarModalSair = false
-                onNavigate("login")
+                onNavigate(Route.Login)
             }
         )
     }
