@@ -5,15 +5,22 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.PsicologoRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
 
 @Composable
 fun PsicologoScreen(
     innerPadding: PaddingValues,
-    vm: PsicologoViewModel,
-    podeGerenciar: Boolean
+    vm: PsicologoViewModel
 ) {
+    val podeGerenciar = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.PSICOLOGOS
+    )
+
     NavDisplay(
         backStack = vm.backStack,
         onBack = {

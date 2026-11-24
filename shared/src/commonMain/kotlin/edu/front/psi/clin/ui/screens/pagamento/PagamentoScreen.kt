@@ -5,15 +5,22 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.PagamentoRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
 
 @Composable
 fun PagamentoScreen(
     innerPadding: PaddingValues,
-    vm: PagamentoViewModel,
-    podeGerenciar: Boolean
+    vm: PagamentoViewModel
 ) {
+    val podeGerenciar = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.PAGAMENTOS
+    )
+
     NavDisplay(
         backStack = vm.backStack,
         onBack = {

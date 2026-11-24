@@ -5,18 +5,25 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.navigation.PacienteRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
 
 @Composable
 fun PacienteScreen(
     innerPadding: PaddingValues,
     vm: PacienteViewModel,
-    podeGerenciar: Boolean,
     onNavegarParaProntuario: (Paciente) -> Unit,
     onNavegarParaEvolucao: (Paciente) -> Unit
 ) {
+    val podeGerenciar = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.PACIENTES
+    )
+
     NavDisplay(
         backStack = vm.backStack,
         onBack = {

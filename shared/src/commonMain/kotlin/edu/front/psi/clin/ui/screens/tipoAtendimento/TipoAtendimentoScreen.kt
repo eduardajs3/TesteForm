@@ -5,15 +5,22 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
 
 @Composable
 fun TipoAtendimentoScreen(
     innerPadding: PaddingValues,
-    vm: TipoAtendimentoViewModel,
-    podeGerenciar: Boolean
+    vm: TipoAtendimentoViewModel
 ) {
+    val podeGerenciar = PermissoesAcesso.podeGerenciar(
+        SessionManager.role,
+        RecursoSistema.TIPOS_ATENDIMENTO
+    )
+
     NavDisplay(
         backStack = vm.backStack,
         onBack = {

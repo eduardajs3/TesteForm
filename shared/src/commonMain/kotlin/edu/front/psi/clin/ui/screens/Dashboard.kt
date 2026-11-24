@@ -1,49 +1,47 @@
 package edu.front.psi.clin.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.Route
+import edu.front.psi.clin.security.PermissoesAcesso
+import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.dashboard.CardAtalho
 import edu.front.psi.clin.ui.componentes.dashboard.CardConsultaHoje
 import edu.front.psi.clin.ui.componentes.dashboard.CardMetrica
 import edu.front.psi.clin.ui.theme.*
 import edu.front.psi.clin.ui.viewmodel.DashboardViewModel
 import frontpsiclinic.shared.generated.resources.*
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun DashboardTela(
     innerPadding: PaddingValues,
     vm: DashboardViewModel,
     onNavegar: (Route) -> Unit = {},
-    onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) },
-    podeCriarAgendamento: Boolean = true,
-    podeCriarPaciente: Boolean = true,
-    podeAcessarFinanceiro: Boolean = true,
-    podeConfirmarAgendamento: Boolean = true
+    onAgendarConsulta: () -> Unit = { onNavegar(Route.Agenda) }
 ) {
     LaunchedEffect(vm) {
         vm.carregarDados()
     }
 
+    val role = SessionManager.role
+    val podeCriarAgendamento = PermissoesAcesso.podeGerenciar(role, RecursoSistema.AGENDAS)
+    val podeCriarPaciente = PermissoesAcesso.podeGerenciar(role, RecursoSistema.PACIENTES)
+    val podeAcessarFinanceiro = PermissoesAcesso.podeAcessarTela(role, "pagamento")
+    val podeConfirmarAgendamento = PermissoesAcesso.podeGerenciar(role, RecursoSistema.AGENDAS)
+
     val metricas by vm.metricas.collectAsState()
     val consultas by vm.consultasFiltradas.collectAsState()
-    val filtroStatus by vm.filtroStatus.collectAsState()
     val carregando by vm.carregando.collectAsState()
     val exibirAcoesRapidas = podeCriarAgendamento || podeCriarPaciente || podeAcessarFinanceiro
 
@@ -62,7 +60,6 @@ fun DashboardTela(
                 .verticalScroll(scrollState)
                 .padding(if (telaPequena) 16.dp else 24.dp)
         ) {
-            
             Text(
                 text = "Painel Geral",
                 style = MaterialTheme.typography.headlineMedium,
@@ -116,29 +113,60 @@ fun DashboardTela(
                 if (telaPequena) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (podeCriarAgendamento) {
-                            CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.fillMaxWidth(), onAgendarConsulta)
+                            CardAtalho(
+                                "Agendar Consulta",
+                                "Preencher dados",
+                                Res.drawable.calendar_month,
+                                Modifier.fillMaxWidth(),
+                                onAgendarConsulta
+                            )
                         }
                         if (podeCriarPaciente) {
-                            CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Paciente) }
+                            CardAtalho(
+                                "Novo Paciente",
+                                "Cadastrar ou consultar",
+                                Res.drawable.group_24px,
+                                Modifier.fillMaxWidth()
+                            ) { onNavegar(Route.Paciente) }
                         }
                         if (podeAcessarFinanceiro) {
-                            CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.fillMaxWidth()) { onNavegar(Route.Pagamento) }
+                            CardAtalho(
+                                "Financeiro",
+                                "Pagamentos e recibos",
+                                Res.drawable.description_24px,
+                                Modifier.fillMaxWidth()
+                            ) { onNavegar(Route.Pagamento) }
                         }
                     }
-                }
-                else {
+                } else {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         if (podeCriarAgendamento) {
-                            CardAtalho("Agendar Consulta", "Preencher dados", Res.drawable.calendar_month, Modifier.weight(1f), onAgendarConsulta)
+                            CardAtalho(
+                                "Agendar Consulta",
+                                "Preencher dados",
+                                Res.drawable.calendar_month,
+                                Modifier.weight(1f),
+                                onAgendarConsulta
+                            )
                         }
                         if (podeCriarPaciente) {
-                            CardAtalho("Novo Paciente", "Cadastrar ou consultar", Res.drawable.group_24px, Modifier.weight(1f)) { onNavegar(Route.Paciente) }
+                            CardAtalho(
+                                "Novo Paciente",
+                                "Cadastrar ou consultar",
+                                Res.drawable.group_24px,
+                                Modifier.weight(1f)
+                            ) { onNavegar(Route.Paciente) }
                         }
                         if (podeAcessarFinanceiro) {
-                            CardAtalho("Financeiro", "Pagamentos e recibos", Res.drawable.description_24px, Modifier.weight(1f)) { onNavegar(Route.Pagamento) }
+                            CardAtalho(
+                                "Financeiro",
+                                "Pagamentos e recibos",
+                                Res.drawable.description_24px,
+                                Modifier.weight(1f)
+                            ) { onNavegar(Route.Pagamento) }
                         }
                     }
                 }
