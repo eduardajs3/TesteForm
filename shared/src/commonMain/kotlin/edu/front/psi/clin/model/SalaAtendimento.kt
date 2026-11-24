@@ -8,5 +8,6 @@ data class SalaAtendimento(
     val descricao: String,
     val capacidade: Int,
     val ativo: Boolean,
-    val dataCadastro: String = ""
+    val dataCadastro: String = "",
+    val recursosDisponiveis: List<String> = emptyList()
 )

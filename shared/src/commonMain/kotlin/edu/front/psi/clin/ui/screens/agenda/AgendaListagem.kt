@@ -250,7 +250,12 @@ fun AgendaListagem(
         agendamentoSelecionado?.let { agendamento ->
             val pacienteNome = pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome ?: "-"
             val psicologoNome = psicologos.firstOrNull { it.id == agendamento.psicologoId }?.nome ?: "-"
-            val salaNome = salas.firstOrNull { it.id == agendamento.salaId }?.nome ?: "-"
+            val salaSelecionada = salas.firstOrNull { it.id == agendamento.salaId }
+            val salaNome = salaSelecionada?.nome ?: "-"
+            val recursosSala = salaSelecionada?.recursosDisponiveis
+                ?.takeIf { it.isNotEmpty() }
+                ?.joinToString()
+                ?: "Nenhum"
             val tipoAtendimento = tiposAtendimento.firstOrNull { it.id == agendamento.tipoAtendimentoId }
             val tipoNome = tipoAtendimento?.nome ?: "-"
             val convenioNome = convenios.firstOrNull { it.id == agendamento.convenioId }?.nome ?: "-"
@@ -262,6 +267,7 @@ fun AgendaListagem(
                     ItemDetalhe(rotulo = "Paciente", valor = pacienteNome)
                     ItemDetalhe(rotulo = "Psicólogo", valor = psicologoNome)
                     ItemDetalhe(rotulo = "Sala", valor = salaNome)
+                    ItemDetalhe(rotulo = "Recursos disponíveis", valor = recursosSala)
                     ItemDetalhe(rotulo = "Tipo de Atendimento", valor = tipoNome)
                     ItemDetalhe(rotulo = "Modalidade", valor = tipoAtendimento?.modalidade?.rotulo ?: "-")
                     ItemDetalhe(rotulo = "Convênio", valor = convenioNome)

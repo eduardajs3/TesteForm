@@ -62,6 +62,17 @@ class SalaAtendimentoViewModel(
     val descricao = CampoValidado()
     val capacidade = CampoValidado()
     val ativo = CampoValidado("true")
+    var recursosTexto by mutableStateOf("")
+    var recursosDisponiveis by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    fun definirRecursosTexto(texto: String) {
+        recursosTexto = texto
+        recursosDisponiveis = texto
+            .split(',')
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+    }
 
     fun salvar() {
         if (salvando) return
@@ -84,7 +95,8 @@ class SalaAtendimentoViewModel(
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     capacidade = capacidade.valor.value.toIntOrNull() ?: 0,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    recursosDisponiveis = recursosDisponiveis
                 )
 
                 if (id.value.isEmpty()) {
@@ -145,6 +157,8 @@ class SalaAtendimentoViewModel(
         descricao.definir(sala.descricao)
         capacidade.definir(sala.capacidade.toString())
         ativo.definir(sala.ativo.toString())
+        recursosDisponiveis = sala.recursosDisponiveis
+        recursosTexto = sala.recursosDisponiveis.joinToString(", ")
     }
 
     fun limparCampos() {
@@ -152,5 +166,7 @@ class SalaAtendimentoViewModel(
         descricao.limpar()
         capacidade.limpar()
         ativo.definir("true")
+        recursosTexto = ""
+        recursosDisponiveis = emptyList()
     }
 }

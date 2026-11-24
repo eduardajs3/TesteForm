@@ -35,6 +35,7 @@ internal fun EtapaSalaRevisaoAgenda(
     onAgendar: () -> Unit
 ) {
     var exibirConfirmacao by remember(vm.id.value) { mutableStateOf(false) }
+    val salasPorOpcao = salasDisponiveis.associateBy { it.rotuloParaSelecao() }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Branco),
@@ -53,11 +54,10 @@ internal fun EtapaSalaRevisaoAgenda(
             )
             CampoDropdownPadrao(
                 label = "Sala disponível *",
-                valorSelecionado = salaSelecionada?.nome.orEmpty(),
-                opcoes = salasDisponiveis.map { it.nome },
-                onOpcaoSelecionada = { nome ->
-                    vm.salaId.value = salasDisponiveis
-                        .firstOrNull { it.nome == nome }?.id
+                valorSelecionado = salaSelecionada?.rotuloParaSelecao().orEmpty(),
+                opcoes = salasPorOpcao.keys.toList(),
+                onOpcaoSelecionada = { opcao ->
+                    vm.salaId.value = salasPorOpcao[opcao]?.id
                     vm.salaIdValidado.definir(vm.salaId.value?.toString().orEmpty())
                 },
                 isError = vm.salaIdValidado.temErro.value,
@@ -146,6 +146,12 @@ internal fun EtapaSalaRevisaoAgenda(
                     valor = horarioSelecionado?.let { "${it.inicio}–${it.fim}" }
                 )
                 ItemDetalhe(rotulo = "Sala", valor = salaSelecionada?.nome)
+                ItemDetalhe(
+                    rotulo = "Recursos da sala",
+                    valor = salaSelecionada?.recursosDisponiveis
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.joinToString()
+                )
                 ItemDetalhe(rotulo = "Status", valor = vm.status.valor.value)
                 ItemDetalhe(rotulo = "Observações", valor = vm.observacoes.valor.value.ifEmpty { null })
             },
@@ -177,3 +183,9 @@ internal fun EtapaSalaRevisaoAgenda(
         )
     }
 }
+private fun SalaAtendimento.rotuloParaSelecao(): String =
+    if (recursosDisponiveis.isEmpty()) {
+        nome
+    } else {
+        "$nome - ${recursosDisponiveis.joinToString()}"
+    }
