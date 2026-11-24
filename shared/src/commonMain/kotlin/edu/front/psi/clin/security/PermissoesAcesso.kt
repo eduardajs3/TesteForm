@@ -32,7 +32,7 @@ object PermissoesAcesso {
         val perfil = role?.let(::normalizarRole) ?: return false
         return when (recurso) {
             RecursoSistema.FUNCIONARIOS -> perfil == "ADMIN"
-            RecursoSistema.PSICOLOGOS -> perfil in setOf("ADMIN", "RECEPCIONISTA", "PSICOLOGO")
+            RecursoSistema.PSICOLOGOS -> perfil in setOf("ADMIN", "RECEPCIONISTA")
             RecursoSistema.RECEPCIONISTAS -> perfil == "ADMIN"
             RecursoSistema.PRONTUARIOS,
             RecursoSistema.EVOLUCOES_CLINICAS -> perfil in setOf("ADMIN", "PSICOLOGO")

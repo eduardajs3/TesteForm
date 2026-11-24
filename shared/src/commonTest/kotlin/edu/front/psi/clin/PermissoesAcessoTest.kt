@@ -51,4 +51,14 @@ class PermissoesAcessoTest {
         assertFalse(PermissoesAcesso.podeAcessar("OUTRO", RecursoSistema.PACIENTES))
         assertFalse(PermissoesAcesso.podeAcessar(null, RecursoSistema.PACIENTES))
     }
+
+    @Test
+    fun psicologoNaoPodeAcessarModuloFuncionarios() {
+        assertFalse(PermissoesAcesso.podeAcessar("PSICOLOGO", RecursoSistema.FUNCIONARIOS))
+        assertFalse(PermissoesAcesso.podeAcessarTela("PSICOLOGO", "funcionario"))
+        assertFalse(PermissoesAcesso.podeAcessar("PSICOLOGO", RecursoSistema.PSICOLOGOS))
+        assertFalse(PermissoesAcesso.podeAcessarTela("PSICOLOGO", "psicologo"))
+        assertFalse(PermissoesAcesso.podeAcessar("PSICOLOGO", RecursoSistema.RECEPCIONISTAS))
+        assertFalse(PermissoesAcesso.podeAcessarTela("PSICOLOGO", "recepcionista"))
+    }
 }
