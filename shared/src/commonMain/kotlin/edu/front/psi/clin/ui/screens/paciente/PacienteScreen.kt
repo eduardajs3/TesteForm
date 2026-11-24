@@ -1,0 +1,56 @@
+package edu.front.psi.clin.ui.screens.paciente
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import edu.front.psi.clin.model.Paciente
+import edu.front.psi.clin.navigation.PacienteRotas
+import edu.front.psi.clin.ui.viewmodel.PacienteViewModel
+
+@Composable
+fun PacienteScreen(
+    innerPadding: PaddingValues,
+    vm: PacienteViewModel,
+    podeGerenciar: Boolean,
+    onNavegarParaProntuario: (Paciente) -> Unit,
+    onNavegarParaEvolucao: (Paciente) -> Unit
+) {
+    NavDisplay(
+        backStack = vm.backStack,
+        onBack = {
+            if (vm.backStack.size > 1) {
+                vm.backStack.removeAt(vm.backStack.lastIndex)
+            } else if (vm.backStack.lastOrNull() == PacienteRotas.Formulario) {
+                vm.backStack.clear()
+                vm.backStack.add(PacienteRotas.Listagem)
+            }
+        },
+        entryProvider = entryProvider<NavKey> {
+            entry<PacienteRotas.Listagem> {
+                PacienteListagem(
+                    innerPadding = innerPadding,
+                    vm = vm,
+                    onNavegarParaProntuario = onNavegarParaProntuario,
+                    onNavegarParaEvolucao = onNavegarParaEvolucao
+                )
+            }
+            entry<PacienteRotas.Formulario> {
+                if (podeGerenciar) {
+                    PacienteFormulario(
+                        innerPadding = innerPadding,
+                        vm = vm
+                    )
+                } else {
+                    PacienteListagem(
+                        innerPadding = innerPadding,
+                        vm = vm,
+                        onNavegarParaProntuario = onNavegarParaProntuario,
+                        onNavegarParaEvolucao = onNavegarParaEvolucao
+                    )
+                }
+            }
+        }
+    )
+}

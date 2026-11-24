@@ -20,8 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -42,37 +42,24 @@ import edu.front.psi.clin.navigation.RecepcionistaRotas
 import edu.front.psi.clin.navigation.Route
 import edu.front.psi.clin.navigation.SalaAtendimentoRotas
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
-import edu.front.psi.clin.ui.componentes.MenuLateral
-import edu.front.psi.clin.ui.componentes.NotificacaoFlutuante
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
+import edu.front.psi.clin.ui.componentes.MenuLateral
+import edu.front.psi.clin.ui.componentes.NotificacaoFlutuante
 import edu.front.psi.clin.ui.screens.DashboardTela
-import edu.front.psi.clin.ui.screens.agenda.AgendaFormulario
-import edu.front.psi.clin.ui.screens.agenda.AgendaListagem
-import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaFormulario
-import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaListagem
-import edu.front.psi.clin.ui.screens.convenio.ConvenioFormulario
-import edu.front.psi.clin.ui.screens.convenio.ConvenioListagem
-import edu.front.psi.clin.ui.screens.evolucaoClinica.EvolucaoClinicaFormulario
-import edu.front.psi.clin.ui.screens.evolucaoClinica.EvolucaoClinicaListagem
-import edu.front.psi.clin.ui.screens.funcionario.FuncionarioFormulario
-import edu.front.psi.clin.ui.screens.funcionario.FuncionarioListagem
-import edu.front.psi.clin.ui.screens.horarioDisponivel.HorarioDisponivelFormulario
-import edu.front.psi.clin.ui.screens.horarioDisponivel.HorarioDisponivelListagem
-import edu.front.psi.clin.ui.screens.paciente.PacienteFormulario
-import edu.front.psi.clin.ui.screens.paciente.PacienteListagem
-import edu.front.psi.clin.ui.screens.pagamento.PagamentoFormulario
-import edu.front.psi.clin.ui.screens.pagamento.PagamentoListagem
-import edu.front.psi.clin.ui.screens.prontuario.ProntuarioFormulario
-import edu.front.psi.clin.ui.screens.prontuario.ProntuarioListagem
-import edu.front.psi.clin.ui.screens.psicologo.PsicologoFormulario
-import edu.front.psi.clin.ui.screens.psicologo.PsicologoListagem
-import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaFormulario
-import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaListagem
-import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoFormulario
-import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoListagem
-import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoFormulario
-import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoListagem
+import edu.front.psi.clin.ui.screens.agenda.AgendaScreen
+import edu.front.psi.clin.ui.screens.bloqueioAgenda.BloqueioAgendaScreen
+import edu.front.psi.clin.ui.screens.convenio.ConvenioScreen
+import edu.front.psi.clin.ui.screens.evolucaoClinica.EvolucaoClinicaScreen
+import edu.front.psi.clin.ui.screens.funcionario.FuncionarioScreen
+import edu.front.psi.clin.ui.screens.horarioDisponivel.HorarioDisponivelScreen
+import edu.front.psi.clin.ui.screens.paciente.PacienteScreen
+import edu.front.psi.clin.ui.screens.pagamento.PagamentoScreen
+import edu.front.psi.clin.ui.screens.prontuario.ProntuarioScreen
+import edu.front.psi.clin.ui.screens.psicologo.PsicologoScreen
+import edu.front.psi.clin.ui.screens.recepcionista.RecepcionistaScreen
+import edu.front.psi.clin.ui.screens.salaAtendimento.SalaAtendimentoScreen
+import edu.front.psi.clin.ui.screens.tipoAtendimento.TipoAtendimentoScreen
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.PsiClinTheme
 import edu.front.psi.clin.ui.theme.VerdeClinica
@@ -110,9 +97,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 PacienteViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -122,9 +107,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 PagamentoViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -134,9 +117,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 ConvenioViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -146,9 +127,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 FuncionarioViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -158,9 +137,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 HorarioDisponivelViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -170,9 +147,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 SalaAtendimentoViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -182,9 +157,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 TipoAtendimentoViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -194,9 +167,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 BloqueioAgendaViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -206,9 +177,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 EvolucaoClinicaViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -218,9 +187,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 ProntuarioViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -230,9 +197,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 RecepcionistaViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -242,9 +207,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 PsicologoViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -254,9 +217,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 AgendaViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -266,9 +227,7 @@ fun App() {
         factory = viewModelFactory {
             initializer {
                 DashboardViewModel(
-                    mandarMensagem = { msg ->
-                        principalVm.mostrarNotificacao(msg)
-                    }
+                    mandarMensagem = { msg -> principalVm.mostrarNotificacao(msg) }
                 )
             }
         }
@@ -283,9 +242,7 @@ fun App() {
                     pacienteVm.backStack.clear()
                     pacienteVm.backStack.add(PacienteRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Pagamento -> {
@@ -293,9 +250,7 @@ fun App() {
                     pagamentoVm.backStack.clear()
                     pagamentoVm.backStack.add(PagamentoRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Convenio -> {
@@ -303,9 +258,7 @@ fun App() {
                     convenioVm.backStack.clear()
                     convenioVm.backStack.add(ConvenioRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.HorarioDisponivel -> {
@@ -313,9 +266,7 @@ fun App() {
                     horarioVm.backStack.clear()
                     horarioVm.backStack.add(HorarioDisponivelRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.SalaAtendimento -> {
@@ -323,9 +274,7 @@ fun App() {
                     salaVm.backStack.clear()
                     salaVm.backStack.add(SalaAtendimentoRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.TipoAtendimento -> {
@@ -333,9 +282,7 @@ fun App() {
                     tipoVm.backStack.clear()
                     tipoVm.backStack.add(TipoAtendimentoRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.BloqueioAgenda -> {
@@ -343,9 +290,7 @@ fun App() {
                     bloqueioVm.backStack.clear()
                     bloqueioVm.backStack.add(BloqueioAgendaRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.EvolucaoClinica -> {
@@ -353,9 +298,7 @@ fun App() {
                     evolucaoVm.backStack.clear()
                     evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Prontuario -> {
@@ -363,9 +306,7 @@ fun App() {
                     prontuarioVm.backStack.clear()
                     prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Recepcionista -> {
@@ -373,9 +314,7 @@ fun App() {
                     recepcionistaVm.backStack.clear()
                     recepcionistaVm.backStack.add(RecepcionistaRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Funcionario -> {
@@ -383,9 +322,7 @@ fun App() {
                     funcionarioVm.backStack.clear()
                     funcionarioVm.backStack.add(FuncionarioRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Psicologo -> {
@@ -393,9 +330,7 @@ fun App() {
                     psicologoVm.backStack.clear()
                     psicologoVm.backStack.add(PsicologoRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             Route.Agenda -> {
@@ -403,9 +338,7 @@ fun App() {
                     agendaVm.backStack.clear()
                     agendaVm.backStack.add(AgendaRotas.Listagem)
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
             else -> false
@@ -429,9 +362,15 @@ fun App() {
         Route.Agenda -> "agenda"
         else -> "dashboard"
     }
+
     val stringTelaAtual = telaDaRota(rotaAtual)
     val rotaPermitida = PermissoesAcesso.podeAcessarTela(principalVm.role, stringTelaAtual)
-    val rotaExibida = if (rotaPermitida) rotaAtual else Route.Dashboard
+
+    val voltarParaModuloAnterior: () -> Unit = {
+        if (principalVm.backstack.size > 1) {
+            principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+        }
+    }
 
     val conteudoInterno: @Composable (PaddingValues) -> Unit = { contentPadding ->
         if (!rotaPermitida) {
@@ -446,84 +385,83 @@ fun App() {
             ) {
                 Text("Acesso não autorizado")
             }
-        } else NavDisplay(
-            backStack = principalVm.backstack,
-            onBack = {
-                if (!voltarParaListagemInterna() && principalVm.backstack.size > 1) {
-                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-                }
-            },
-            entryProvider = entryProvider {
-                entry<Route.Dashboard> {
-                    DashboardTela(
-                        innerPadding = contentPadding,
-                        vm = dashboardVm,
-                        podeCriarAgendamento = PermissoesAcesso.podeGerenciar(
-                            principalVm.role,
-                            RecursoSistema.AGENDAS
-                        ),
-                        podeCriarPaciente = PermissoesAcesso.podeGerenciar(
-                            principalVm.role,
-                            RecursoSistema.PACIENTES
-                        ),
-                        podeAcessarFinanceiro = PermissoesAcesso.podeAcessarTela(
-                            principalVm.role,
-                            "pagamento"
-                        ),
-                        podeConfirmarAgendamento = PermissoesAcesso.podeGerenciar(
-                            principalVm.role,
-                            RecursoSistema.AGENDAS
-                        ),
-                        onNavegar = { rota ->
-                            val recursoParaCriar = when (rota) {
-                                Route.Paciente -> RecursoSistema.PACIENTES
-                                else -> null
-                            }
-                            val podeAcessarRota = PermissoesAcesso.podeAcessarTela(
+        } else {
+            NavDisplay(
+                backStack = principalVm.backstack,
+                onBack = {
+                    if (!voltarParaListagemInterna() && principalVm.backstack.size > 1) {
+                        principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
+                    }
+                },
+                entryProvider = entryProvider {
+                    entry<Route.Dashboard> {
+                        DashboardTela(
+                            innerPadding = contentPadding,
+                            vm = dashboardVm,
+                            podeCriarAgendamento = PermissoesAcesso.podeGerenciar(
                                 principalVm.role,
-                                telaDaRota(rota)
-                            )
-                            val podeCriarRecurso = recursoParaCriar?.let {
-                                PermissoesAcesso.podeGerenciar(principalVm.role, it)
-                            } ?: true
-                            if (podeAcessarRota && podeCriarRecurso) {
-                                if (rota == Route.Paciente) {
-                                    pacienteVm.novoPaciente()
-                                } else if (rota == Route.Agenda) {
-                                    agendaVm.backStack.clear()
-                                    agendaVm.backStack.add(AgendaRotas.Listagem)
+                                RecursoSistema.AGENDAS
+                            ),
+                            podeCriarPaciente = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.PACIENTES
+                            ),
+                            podeAcessarFinanceiro = PermissoesAcesso.podeAcessarTela(
+                                principalVm.role,
+                                "pagamento"
+                            ),
+                            podeConfirmarAgendamento = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.AGENDAS
+                            ),
+                            onNavegar = { rota ->
+                                val recursoParaCriar = when (rota) {
+                                    Route.Paciente -> RecursoSistema.PACIENTES
+                                    else -> null
                                 }
+                                val podeAcessarRota = PermissoesAcesso.podeAcessarTela(
+                                    principalVm.role,
+                                    telaDaRota(rota)
+                                )
+                                val podeCriarRecurso = recursoParaCriar?.let {
+                                    PermissoesAcesso.podeGerenciar(principalVm.role, it)
+                                } ?: true
+                                if (podeAcessarRota && podeCriarRecurso) {
+                                    if (rota == Route.Paciente) {
+                                        pacienteVm.novoPaciente()
+                                    } else if (rota == Route.Agenda) {
+                                        agendaVm.backStack.clear()
+                                        agendaVm.backStack.add(AgendaRotas.Listagem)
+                                    }
 
-                                if (principalVm.backstack.lastOrNull() != rota) {
-                                    principalVm.backstack.add(rota)
+                                    if (principalVm.backstack.lastOrNull() != rota) {
+                                        principalVm.backstack.add(rota)
+                                    }
+                                } else {
+                                    principalVm.mostrarNotificacao("Acesso negado para este perfil.")
                                 }
-                            } else {
-                                principalVm.mostrarNotificacao("Acesso negado para este perfil.")
+                            },
+                            onAgendarConsulta = {
+                                if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
+                                    agendaVm.novoAgendamento()
+                                    if (principalVm.backstack.lastOrNull() != Route.Agenda) {
+                                        principalVm.backstack.add(Route.Agenda)
+                                    }
+                                } else {
+                                    principalVm.mostrarNotificacao("Acesso negado para este perfil.")
+                                }
                             }
-                        },
-                        onAgendarConsulta = {
-                            if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
-                                agendaVm.novoAgendamento()
-                                if (principalVm.backstack.lastOrNull() != Route.Agenda) {
-                                    principalVm.backstack.add(Route.Agenda)
-                                }
-                            } else {
-                                principalVm.mostrarNotificacao("Acesso negado para este perfil.")
-                            }
-                        }
-                    )
-                }
+                        )
+                    }
 
-                entry<Route.Paciente> {
-                    val subRota = pacienteVm.backStack.lastOrNull()
-                        ?: PacienteRotas.Listagem
-
-                    if (subRota is PacienteRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PACIENTES)) {
-                        PacienteFormulario(contentPadding, pacienteVm)
-                    } else {
-                        PacienteListagem(
+                    entry<Route.Paciente> {
+                        PacienteScreen(
                             innerPadding = contentPadding,
                             vm = pacienteVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.PACIENTES
+                            ),
                             onNavegarParaProntuario = { paciente ->
                                 if (PermissoesAcesso.podeAcessar(principalVm.role, RecursoSistema.PRONTUARIOS)) {
                                     pacienteSelecionadoNome = paciente.nome
@@ -544,159 +482,137 @@ fun App() {
                             }
                         )
                     }
-                }
 
-                entry<Route.Pagamento> {
-                    val subRota = pagamentoVm.backStack.lastOrNull()
-                        ?: PagamentoRotas.Listagem
-
-                    if (subRota is PagamentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PAGAMENTOS)) {
-                        PagamentoFormulario(contentPadding, pagamentoVm)
-                    } else {
-                        PagamentoListagem(contentPadding, pagamentoVm)
+                    entry<Route.Pagamento> {
+                        PagamentoScreen(
+                            innerPadding = contentPadding,
+                            vm = pagamentoVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.PAGAMENTOS
+                            )
+                        )
                     }
-                }
 
-                entry<Route.Convenio> {
-                    val subRota = convenioVm.backStack.lastOrNull()
-                        ?: ConvenioRotas.Listagem
-
-                    if (subRota is ConvenioRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.CONVENIOS)) {
-                        ConvenioFormulario(contentPadding, convenioVm)
-                    } else {
-                        ConvenioListagem(contentPadding, convenioVm)
+                    entry<Route.Convenio> {
+                        ConvenioScreen(
+                            innerPadding = contentPadding,
+                            vm = convenioVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.CONVENIOS
+                            )
+                        )
                     }
-                }
 
-                entry<Route.HorarioDisponivel> {
-                    val subRota = horarioVm.backStack.lastOrNull()
-                        ?: HorarioDisponivelRotas.Listagem
-
-                    if (subRota is HorarioDisponivelRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.HORARIOS_DISPONIVEIS)) {
-                        HorarioDisponivelFormulario(contentPadding, horarioVm)
-                    } else {
-                        HorarioDisponivelListagem(contentPadding, horarioVm)
+                    entry<Route.HorarioDisponivel> {
+                        HorarioDisponivelScreen(
+                            innerPadding = contentPadding,
+                            vm = horarioVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.HORARIOS_DISPONIVEIS
+                            )
+                        )
                     }
-                }
 
-                entry<Route.SalaAtendimento> {
-                    val subRota = salaVm.backStack.lastOrNull()
-                        ?: SalaAtendimentoRotas.Listagem
-
-                    if (subRota is SalaAtendimentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.SALAS_ATENDIMENTO)) {
-                        SalaAtendimentoFormulario(contentPadding, salaVm)
-                    } else {
-                        SalaAtendimentoListagem(contentPadding, salaVm)
+                    entry<Route.SalaAtendimento> {
+                        SalaAtendimentoScreen(
+                            innerPadding = contentPadding,
+                            vm = salaVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.SALAS_ATENDIMENTO
+                            )
+                        )
                     }
-                }
 
-                entry<Route.TipoAtendimento> {
-                    val subRota = tipoVm.backStack.lastOrNull()
-                        ?: TipoAtendimentoRotas.Listagem
-
-                    if (subRota is TipoAtendimentoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.TIPOS_ATENDIMENTO)) {
-                        TipoAtendimentoFormulario(contentPadding, tipoVm)
-                    } else {
-                        TipoAtendimentoListagem(contentPadding, tipoVm)
+                    entry<Route.TipoAtendimento> {
+                        TipoAtendimentoScreen(
+                            innerPadding = contentPadding,
+                            vm = tipoVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.TIPOS_ATENDIMENTO
+                            )
+                        )
                     }
-                }
 
-                entry<Route.BloqueioAgenda> {
-                    val subRota = bloqueioVm.backStack.lastOrNull()
-                        ?: BloqueioAgendaRotas.Listagem
-
-                    if (subRota is BloqueioAgendaRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.BLOQUEIOS_AGENDA)) {
-                        BloqueioAgendaFormulario(contentPadding, bloqueioVm)
-                    } else {
-                        BloqueioAgendaListagem(contentPadding, bloqueioVm)
+                    entry<Route.BloqueioAgenda> {
+                        BloqueioAgendaScreen(
+                            innerPadding = contentPadding,
+                            vm = bloqueioVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.BLOQUEIOS_AGENDA
+                            )
+                        )
                     }
-                }
 
-                entry<Route.EvolucaoClinica> {
-                    val subRota = evolucaoVm.backStack.lastOrNull()
-                        ?: EvolucaoClinicaRotas.Listagem
-
-                    if (subRota is EvolucaoClinicaRotas.Formulario) {
-                        EvolucaoClinicaFormulario(contentPadding, evolucaoVm)
-                    } else {
-                        EvolucaoClinicaListagem(
+                    entry<Route.EvolucaoClinica> {
+                        EvolucaoClinicaScreen(
                             innerPadding = contentPadding,
                             vm = evolucaoVm,
-                            onVoltar = {
-                                if (principalVm.backstack.size > 1) {
-                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-                                }
-                            },
+                            onVoltar = voltarParaModuloAnterior,
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
-                }
 
-                entry<Route.Prontuario> {
-                    val subRota = prontuarioVm.backStack.lastOrNull()
-                        ?: ProntuarioRotas.Listagem
-
-                    if (subRota is ProntuarioRotas.Formulario) {
-                        ProntuarioFormulario(contentPadding, prontuarioVm)
-                    } else {
-                        ProntuarioListagem(
+                    entry<Route.Prontuario> {
+                        ProntuarioScreen(
                             innerPadding = contentPadding,
                             vm = prontuarioVm,
-                            onVoltar = {
-                                if (principalVm.backstack.size > 1) {
-                                    principalVm.backstack.removeAt(principalVm.backstack.lastIndex)
-                                }
-                            },
+                            onVoltar = voltarParaModuloAnterior,
                             nomePaciente = pacienteSelecionadoNome.ifEmpty { "Paciente" }
                         )
                     }
-                }
 
-                entry<Route.Recepcionista> {
-                    val subRota = recepcionistaVm.backStack.lastOrNull()
-                        ?: RecepcionistaRotas.Listagem
+                    entry<Route.Recepcionista> {
+                        RecepcionistaScreen(
+                            innerPadding = contentPadding,
+                            vm = recepcionistaVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.RECEPCIONISTAS
+                            )
+                        )
+                    }
 
-                    if (subRota is RecepcionistaRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.RECEPCIONISTAS)) {
-                        RecepcionistaFormulario(contentPadding, recepcionistaVm)
-                    } else {
-                        RecepcionistaListagem(contentPadding, recepcionistaVm)
+                    entry<Route.Funcionario> {
+                        FuncionarioScreen(
+                            innerPadding = contentPadding,
+                            vm = funcionarioVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.FUNCIONARIOS
+                            )
+                        )
+                    }
+
+                    entry<Route.Psicologo> {
+                        PsicologoScreen(
+                            innerPadding = contentPadding,
+                            vm = psicologoVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.PSICOLOGOS
+                            )
+                        )
+                    }
+
+                    entry<Route.Agenda> {
+                        AgendaScreen(
+                            innerPadding = contentPadding,
+                            vm = agendaVm,
+                            podeGerenciar = PermissoesAcesso.podeGerenciar(
+                                principalVm.role,
+                                RecursoSistema.AGENDAS
+                            )
+                        )
                     }
                 }
-
-                entry<Route.Funcionario> {
-                    val subRota = funcionarioVm.backStack.lastOrNull()
-                        ?: FuncionarioRotas.Listagem
-
-                    if (subRota is FuncionarioRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.FUNCIONARIOS)) {
-                        FuncionarioFormulario(contentPadding, funcionarioVm)
-                    } else {
-                        FuncionarioListagem(contentPadding, funcionarioVm)
-                    }
-                }
-
-                entry<Route.Psicologo> {
-                    val subRota = psicologoVm.backStack.lastOrNull()
-                        ?: PsicologoRotas.Listagem
-
-                    if (subRota is PsicologoRotas.Formulario && PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.PSICOLOGOS)) {
-                        PsicologoFormulario(contentPadding, psicologoVm)
-                    } else {
-                        PsicologoListagem(contentPadding, psicologoVm)
-                    }
-                }
-
-                entry<Route.Agenda> {
-                    when (agendaVm.backStack.lastOrNull() ?: AgendaRotas.Listagem) {
-                        AgendaRotas.Listagem -> AgendaListagem(contentPadding, agendaVm)
-                        AgendaRotas.Formulario -> if (PermissoesAcesso.podeGerenciar(principalVm.role, RecursoSistema.AGENDAS)) {
-                            AgendaFormulario(contentPadding, agendaVm)
-                        } else {
-                            AgendaListagem(contentPadding, agendaVm)
-                        }
-                    }
-                }
-            }
-        )
+            )
+        }
     }
 
     PsiClinTheme {

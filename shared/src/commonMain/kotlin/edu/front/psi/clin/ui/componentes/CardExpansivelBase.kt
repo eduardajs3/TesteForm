@@ -2,6 +2,7 @@ package edu.front.psi.clin.ui.componentes
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -16,7 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.CardBordaCinza
@@ -35,8 +36,9 @@ fun CardExpansivelBase(
     tituloPrincipal: String,
     isExpandido: Boolean,
     onClickToggle: () -> Unit,
-    onEditarClick: () -> Unit,
-    onExcluirClick: () -> Unit,
+    onEditarClick: () -> Unit = {},
+    onExcluirClick: () -> Unit = {},
+    mostrarAcoesTopo: Boolean = true,
     modifier: Modifier = Modifier,
     conteudoExpandido: @Composable ColumnScope.() -> Unit
 ) {
@@ -57,6 +59,11 @@ fun CardExpansivelBase(
         animationSpec = tween(durationMillis = 200)
     )
 
+    val rotacaoSeta by animateFloatAsState(
+        targetValue = if (isExpandido) 180f else 0f,
+        animationSpec = tween(durationMillis = 200)
+    )
+
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
@@ -67,7 +74,7 @@ fun CardExpansivelBase(
             .hoverable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null 
+                indication = null
             ) { onClickToggle() }
     ) {
         Column(
@@ -94,7 +101,7 @@ fun CardExpansivelBase(
                     )
                 }
 
-                if (isExpandido) {
+                if (isExpandido && mostrarAcoesTopo) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -125,9 +132,11 @@ fun CardExpansivelBase(
                 } else {
                     Icon(
                         painter = painterResource(Res.drawable.keyboard_arrow_down),
-                        contentDescription = "Expandir",
+                        contentDescription = if (isExpandido) "Recolher" else "Expandir",
                         tint = TextoPrincipal,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
+                            .rotate(rotacaoSeta)
                     )
                 }
             }
