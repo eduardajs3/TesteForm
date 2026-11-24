@@ -17,7 +17,9 @@ import kotlinx.coroutines.launch
 
 class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
 
-    val backstack = mutableStateListOf<Route>(Route.Login)
+    private val _backstack = mutableStateListOf<Route>(Route.Login)
+    val backstack: List<Route> get() = _backstack
+
     private val authAPI = AuthAPI(httpClientManager())
 
     var autenticado by mutableStateOf(false)
@@ -52,9 +54,29 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
         }
     }
 
+    fun definirRotaRaiz(rota: Route) {
+        _backstack.clear()
+        _backstack.add(rota)
+    }
+
+    fun navegarPara(rota: Route) {
+        if (_backstack.lastOrNull() != rota) {
+            _backstack.add(rota)
+        }
+    }
+
+    fun abrirModulo(rota: Route) {
+        if (_backstack.lastOrNull() == rota) return
+        _backstack.clear()
+        _backstack.add(Route.Dashboard)
+        if (rota != Route.Dashboard) {
+            _backstack.add(rota)
+        }
+    }
+
     fun voltar() {
-        if (backstack.size > 1) {
-            backstack.removeAt(backstack.lastIndex)
+        if (_backstack.size > 1) {
+            _backstack.removeAt(_backstack.lastIndex)
         }
     }
 
@@ -78,8 +100,7 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
                 val resposta = authAPI.login(email.trim(), senha)
                 SessionManager.iniciarSessao(resposta.accessToken, resposta.role, email.trim())
                 autenticado = true
-                backstack.clear()
-                backstack.add(Route.Dashboard)
+                definirRotaRaiz(Route.Dashboard)
             } catch (e: Exception) {
                 SessionManager.encerrarSessao()
                 erroLogin = e.message ?: "Não foi possível entrar. Tente novamente."
@@ -93,7 +114,6 @@ class PrincipalViewModel(private val scope: CoroutineScope) : ViewModel() {
         SessionManager.encerrarSessao()
         autenticado = false
         erroLogin = null
-        backstack.clear()
-        backstack.add(Route.Login)
+        definirRotaRaiz(Route.Login)
     }
 }

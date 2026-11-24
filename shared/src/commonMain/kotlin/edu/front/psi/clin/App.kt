@@ -68,10 +68,7 @@ fun App() {
     if (!principalVm.autenticado) {
         PsiClinTheme {
             LoginScreen(
-                onNavigate = { rota ->
-                    principalVm.backstack.clear()
-                    principalVm.backstack.add(rota)
-                },
+                onNavigate = principalVm::definirRotaRaiz,
                 onLogin = principalVm::login,
                 isLoading = principalVm.autenticando,
                 errorMessage = principalVm.erroLogin
@@ -229,8 +226,7 @@ fun App() {
         if (!rotaPermitida) {
             LaunchedEffect(rotaAtual, principalVm.role) {
                 principalVm.mostrarNotificacao("Acesso negado para este perfil.")
-                principalVm.backstack.clear()
-                principalVm.backstack.add(Route.Dashboard)
+                principalVm.definirRotaRaiz(Route.Dashboard)
             }
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -254,16 +250,11 @@ fun App() {
                                     agendaVm.backStack.clear()
                                     agendaVm.backStack.add(AgendaRotas.Listagem)
                                 }
-
-                                if (principalVm.backstack.lastOrNull() != rota) {
-                                    principalVm.backstack.add(rota)
-                                }
+                                principalVm.navegarPara(rota)
                             },
                             onAgendarConsulta = {
                                 agendaVm.novoAgendamento()
-                                if (principalVm.backstack.lastOrNull() != Route.Agenda) {
-                                    principalVm.backstack.add(Route.Agenda)
-                                }
+                                principalVm.navegarPara(Route.Agenda)
                             }
                         )
                     }
@@ -277,14 +268,14 @@ fun App() {
                                 prontuarioVm.selecionarPaciente(paciente)
                                 prontuarioVm.backStack.clear()
                                 prontuarioVm.backStack.add(ProntuarioRotas.Listagem)
-                                principalVm.backstack.add(Route.Prontuario)
+                                principalVm.navegarPara(Route.Prontuario)
                             },
                             onNavegarParaEvolucao = { paciente ->
                                 pacienteSelecionadoNome = paciente.nome
                                 evolucaoVm.selecionarPaciente(paciente)
                                 evolucaoVm.backStack.clear()
                                 evolucaoVm.backStack.add(EvolucaoClinicaRotas.Listagem)
-                                principalVm.backstack.add(Route.EvolucaoClinica)
+                                principalVm.navegarPara(Route.EvolucaoClinica)
                             }
                         )
                     }
@@ -391,13 +382,8 @@ fun App() {
                         principalVm.logout()
                     } else if (!PermissoesAcesso.podeAcessarRota(principalVm.role, novaRota)) {
                         principalVm.mostrarNotificacao("Acesso negado para este perfil.")
-                    } else if (novaRota != rotaAtual) {
-                        principalVm.backstack.clear()
-                        principalVm.backstack.add(Route.Dashboard)
-
-                        if (novaRota != Route.Dashboard) {
-                            principalVm.backstack.add(novaRota)
-                        }
+                    } else {
+                        principalVm.abrirModulo(novaRota)
                     }
                 }
             ) {

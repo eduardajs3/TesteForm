@@ -236,12 +236,10 @@ class PagamentoViewModel(
         agendaId.value = pagamento.agendaId
         pacienteId.value = pagamento.pacienteId
         convenioId.value = pagamento.convenioId
-
         valorTotal.definir(valorParaCentavos(pagamento.valorTotal))
         valorConvenio.definir(valorParaCentavos(pagamento.valorConvenio))
         valorPaciente.definir(valorParaCentavos(pagamento.valorPaciente))
         formaPagamento.definir(pagamento.formaPagamento)
-
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
         status.definir(pagamento.status)
