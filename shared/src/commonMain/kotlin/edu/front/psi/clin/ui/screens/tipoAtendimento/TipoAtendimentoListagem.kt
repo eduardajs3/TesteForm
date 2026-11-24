@@ -31,9 +31,10 @@ fun TipoAtendimentoListagem(
     val tipoParaExcluir = remember { mutableStateOf<TipoAtendimento?>(null) }
 
     val colunas = listOf(
-        "Tipo de Atendimento" to 1.5f,
-        "Duração" to 1.0f,
-        "Descrição" to 1.7f,
+        "Tipo de Atendimento" to 1.4f,
+        "Modalidade" to 1.0f,
+        "Duração" to 0.9f,
+        "Descrição" to 1.6f,
         "Status" to 0.8f
     )
 
@@ -54,22 +55,26 @@ fun TipoAtendimentoListagem(
             onEditar = vm::editar,
             onApagar = { tipo -> tipoParaExcluir.value = tipo },
             textoCompacto = { tipo -> tipo.nome },
-            placeholderPesquisa = "Buscar por tipo, duração ou descrição..."
+            placeholderPesquisa = "Buscar por tipo, modalidade, duração ou descrição..."
         ) { tipo ->
             val isAtivo = tipo.ativo
 
             CelulaTabelaTexto(
                 text = tipo.nome,
-                weight = 1.5f,
+                weight = 1.4f,
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = "${tipo.duracao} min",
+                text = tipo.modalidade.rotulo,
                 weight = 1.0f
             )
             CelulaTabelaTexto(
+                text = "${tipo.duracao} min",
+                weight = 0.9f
+            )
+            CelulaTabelaTexto(
                 text = tipo.descricao,
-                weight = 1.7f
+                weight = 1.6f
             )
             
             Box(modifier = Modifier.weight(0.8f)) {
@@ -87,6 +92,7 @@ fun TipoAtendimentoListagem(
                 onDismiss = { tipoSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe("Nome do atendimento", tipo.nome)
+                    ItemDetalhe("Modalidade", tipo.modalidade.rotulo)
                     ItemDetalhe("Duração", "${tipo.duracao} minutos")
                     ItemDetalhe("Descrição", tipo.descricao)
                     ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(tipo.dataCadastro))

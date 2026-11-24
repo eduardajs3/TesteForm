@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.TipoAtendimentoAPI
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
+import edu.front.psi.clin.model.ModalidadeAtendimento
 import edu.front.psi.clin.model.TipoAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
@@ -50,7 +51,11 @@ class TipoAtendimentoViewModel(
         if (filtro.isEmpty()) {
             tipos
         } else {
-            tipos.filter { it.nome.contains(filtro, ignoreCase = true) }
+            tipos.filter {
+                it.nome.contains(filtro, ignoreCase = true) ||
+                    it.modalidade.rotulo.contains(filtro, ignoreCase = true) ||
+                    it.modalidade.name.contains(filtro, ignoreCase = true)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -63,6 +68,7 @@ class TipoAtendimentoViewModel(
     val descricao = CampoValidado()
     val duracao = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val ativo = CampoValidado("true")
+    val modalidade = CampoValidado(ModalidadeAtendimento.PRESENCIAL.name)
 
     fun salvar() {
         if (salvando) return
@@ -71,8 +77,9 @@ class TipoAtendimentoViewModel(
         val v2 = descricao.validar()
         val v3 = duracao.validar()
         val v4 = ativo.validar()
+        val v5 = modalidade.validar()
 
-        if (!(v1 && v2 && v3 && v4)) {
+        if (!(v1 && v2 && v3 && v4 && v5)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -85,7 +92,8 @@ class TipoAtendimentoViewModel(
                     nome = nome.valor.value,
                     descricao = descricao.valor.value,
                     duracao = duracao.valor.value,
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
+                    modalidade = ModalidadeAtendimento.deValorApi(modalidade.valor.value)
                 )
 
                 if (id.value.isEmpty()) {
@@ -146,6 +154,7 @@ class TipoAtendimentoViewModel(
         descricao.definir(tipo.descricao)
         duracao.definir(tipo.duracao)
         ativo.definir(tipo.ativo.toString())
+        modalidade.definir(tipo.modalidade.name)
     }
 
     fun limparCampos() {
@@ -153,5 +162,6 @@ class TipoAtendimentoViewModel(
         descricao.limpar()
         duracao.limpar()
         ativo.definir("true")
+        modalidade.definir(ModalidadeAtendimento.PRESENCIAL.name)
     }
 }

@@ -75,10 +75,12 @@ internal fun EtapaDadosAtendimentoAgenda(
             )
             CampoDropdownPadrao(
                 label = "Tipo de atendimento *",
-                valorSelecionado = tipoSelecionado?.nome.orEmpty(),
-                opcoes = tiposDisponiveis.map { it.nome },
-                onOpcaoSelecionada = { nome ->
-                    val selecionado = tiposDisponiveis.firstOrNull { it.nome == nome }
+                valorSelecionado = tipoSelecionado?.let { "${it.nome} (${it.modalidade.rotulo})" }.orEmpty(),
+                opcoes = tiposDisponiveis.map { "${it.nome} (${it.modalidade.rotulo})" },
+                onOpcaoSelecionada = { selecao ->
+                    val selecionado = tiposDisponiveis.firstOrNull {
+                        "${it.nome} (${it.modalidade.rotulo})" == selecao
+                    }
                     vm.tipoAtendimentoId.value = selecionado?.id
                     vm.tipoAtendimentoIdValidado.definir(selecionado?.id?.toString().orEmpty())
                     vm.dataAtendimento.limpar()

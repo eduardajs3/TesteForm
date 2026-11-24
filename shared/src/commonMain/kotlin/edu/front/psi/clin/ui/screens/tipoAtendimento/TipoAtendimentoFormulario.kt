@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.model.ModalidadeAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
@@ -58,6 +59,18 @@ fun TipoAtendimentoFormulario(
                 apenasNumeros = true,
                 isError = vm.duracao.temErro.value,
                 errorMessage = if (vm.duracao.temErro.value) "Campo obrigatório" else null
+            )
+
+            CampoDropdownPadrao(
+                label = "Modalidade",
+                valorSelecionado = ModalidadeAtendimento.deValorApi(vm.modalidade.valor.value).rotulo,
+                opcoes = ModalidadeAtendimento.entries.map { it.rotulo },
+                onOpcaoSelecionada = { selecao ->
+                    val selecionada = ModalidadeAtendimento.entries.firstOrNull { it.rotulo == selecao }
+                    vm.modalidade.definir(selecionada?.name.orEmpty())
+                },
+                isError = vm.modalidade.temErro.value,
+                errorMessage = if (vm.modalidade.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(

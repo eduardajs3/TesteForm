@@ -251,7 +251,8 @@ fun AgendaListagem(
             val pacienteNome = pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome ?: "-"
             val psicologoNome = psicologos.firstOrNull { it.id == agendamento.psicologoId }?.nome ?: "-"
             val salaNome = salas.firstOrNull { it.id == agendamento.salaId }?.nome ?: "-"
-            val tipoNome = tiposAtendimento.firstOrNull { it.id == agendamento.tipoAtendimentoId }?.nome ?: "-"
+            val tipoAtendimento = tiposAtendimento.firstOrNull { it.id == agendamento.tipoAtendimentoId }
+            val tipoNome = tipoAtendimento?.nome ?: "-"
             val convenioNome = convenios.firstOrNull { it.id == agendamento.convenioId }?.nome ?: "-"
 
             ModalDetalhesBase(
@@ -262,6 +263,7 @@ fun AgendaListagem(
                     ItemDetalhe(rotulo = "Psicólogo", valor = psicologoNome)
                     ItemDetalhe(rotulo = "Sala", valor = salaNome)
                     ItemDetalhe(rotulo = "Tipo de Atendimento", valor = tipoNome)
+                    ItemDetalhe(rotulo = "Modalidade", valor = tipoAtendimento?.modalidade?.rotulo ?: "-")
                     ItemDetalhe(rotulo = "Convênio", valor = convenioNome)
                     ItemDetalhe(
                         rotulo = "Data",
