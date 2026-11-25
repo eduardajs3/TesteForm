@@ -39,6 +39,9 @@ fun BloqueioAgendaFormulario(
         it.id?.toString() == vm.psicologo.valor.value
     }
 
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
+
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Bloqueio" else "Cadastro de Bloqueio de Agenda",
@@ -107,6 +110,18 @@ fun BloqueioAgendaFormulario(
                 obrigatorio = true,
                 isError = vm.motivo.temErro.value,
                 errorMessage = if (vm.motivo.temErro.value) vm.motivo.mensagemErro.value else null
+            )
+
+            CampoDropdownPadrao(
+                label = "Status",
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
+                },
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

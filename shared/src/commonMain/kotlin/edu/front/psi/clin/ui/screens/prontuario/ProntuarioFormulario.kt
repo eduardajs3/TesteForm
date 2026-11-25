@@ -23,28 +23,32 @@ fun ProntuarioFormulario(
     val salvando = vm.salvando
     val pacientes = vm.pacientes.collectAsState().value
     val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
-    val pacientesOpcoes = pacientes.filter {
+    val pacientesFiltrados = pacientes.filter {
         pacienteIdFiltro == null || it.id == pacienteIdFiltro
     }
-    val pacienteOpcoes = pacientesOpcoes.map { it.nome }.distinct()
+    val pacienteOpcoes = pacientesFiltrados.map { it.nome }.distinct()
 
-    val statusOpcoes = listOf(
+    val statusProntuarioOpcoes = listOf(
         "Ativo",
         "Arquivado",
         "Encerrado"
     )
+
+    val statusRegistroOpcoes = listOf("Ativo", "Inativo")
 
     val pacienteAtual = vm.paciente.value
     val pacienteExibicao = pacienteAtual
 
     val statusAtual = vm.status.value
     val statusExibicao = when {
-        statusOpcoes.contains(statusAtual) -> statusAtual
+        statusProntuarioOpcoes.contains(statusAtual) -> statusAtual
         statusAtual.equals("ATIVO", ignoreCase = true) || statusAtual.lowercase() == "true" -> "Ativo"
         statusAtual.equals("ARQUIVADO", ignoreCase = true) -> "Arquivado"
         statusAtual.equals("ENCERRADO", ignoreCase = true) || statusAtual.lowercase() == "false" -> "Encerrado"
         else -> "Ativo"
     }
+
+    val ativoExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -79,18 +83,22 @@ fun ProntuarioFormulario(
             CampoDropdownPadrao(
                 label = "Status do prontuário",
                 valorSelecionado = statusExibicao,
-                opcoes = statusOpcoes,
+                opcoes = statusProntuarioOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     vm.status.value = selecao
                 }
             )
 
             CampoDropdownPadrao(
-                label = "Ativo",
-                valorSelecionado = if (vm.ativo.value.toBooleanStrictOrNull() == false) "Não" else "Sim",
-                opcoes = listOf("Sim", "Não"),
-                onOpcaoSelecionada = { selecao -> vm.ativo.value = (selecao == "Ativo").toString() }
+                label = "Status",
+                valorSelecionado = ativoExibicao,
+                opcoes = statusRegistroOpcoes,
+                onOpcaoSelecionada = { selecao ->
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.value = valorBoolean
+                }
             )
+
             BotoesAcaoFormulario(
                 onLimpar = if (!isEdicao && !salvando) vm::limparCampos else null,
                 onSalvar = vm::salvar,
