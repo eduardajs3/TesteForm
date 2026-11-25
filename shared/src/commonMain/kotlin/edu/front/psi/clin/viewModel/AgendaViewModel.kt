@@ -60,14 +60,14 @@ class AgendaViewModel(
 
     private val _convenios = MutableStateFlow<List<Convenio>>(emptyList())
     val convenios = _convenios.asStateFlow()
-    
+
     private val _horariosDisponiveis = MutableStateFlow<List<HorarioDisponivel>>(emptyList())
     val horariosDisponiveis = _horariosDisponiveis.asStateFlow()
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(emptyList())
-    
+
     private val _psicologoFiltro = MutableStateFlow("Todos")
     val psicologoFiltro = _psicologoFiltro.asStateFlow()
-    
+
     private var carregamentoDadosFormulario: Job? = null
     private val _statusFiltro = MutableStateFlow("Todos")
     val statusFiltro = _statusFiltro.asStateFlow()
@@ -78,7 +78,7 @@ class AgendaViewModel(
     fun filtrarPorStatus(status: String) {
         _statusFiltro.value = status
     }
-    
+
     fun filtrarPorPsicologo(nome: String) {
         _psicologoFiltro.value = nome
     }
@@ -530,16 +530,11 @@ class AgendaViewModel(
                     salaId = salaId.value!!,
                     tipoAtendimentoId = tipoAtendimentoId.value!!,
                     convenioId = convenioId.value!!,
-                    paciente = null,
-                    psicologo = null,
-                    sala = null,
-                    tipoAtendimento = null,
-                    convenio = null,
                     dataHoraInicio = inicioFormatado,
                     dataHoraFim = fimFormatado,
                     status = status.valor.value,
                     observacoes = observacoes.valor.value.ifEmpty { null },
-                    ativo = ativo.valor.value.toBoolean()
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
@@ -549,13 +544,13 @@ class AgendaViewModel(
                 }
 
                 _agendamentos.value = agendaApi.carregar()
-                
+
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Agendamento salvo com sucesso!"
                 } else {
                     "Agendamento atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
@@ -657,7 +652,7 @@ class AgendaViewModel(
         salaId.value = null
         tipoAtendimentoId.value = null
         convenioId.value = null
-        
+
         pacienteIdValidado.limpar()
         psicologoIdValidado.limpar()
         tipoAtendimentoIdValidado.limpar()
@@ -696,20 +691,20 @@ class AgendaViewModel(
         backStack.clear()
         backStack.add(AgendaRotas.Formulario)
         id.value = agenda.id?.toString() ?: ""
-        
+
         pacienteId.value = agenda.pacienteId
-        pacienteIdValidado.definir(agenda.pacienteId?.toString() ?: "")
-        
+        pacienteIdValidado.definir(agenda.pacienteId.toString())
+
         psicologoId.value = agenda.psicologoId
-        psicologoIdValidado.definir(agenda.psicologoId?.toString() ?: "")
-        
+        psicologoIdValidado.definir(agenda.psicologoId.toString())
+
         salaId.value = agenda.salaId
-        
+
         tipoAtendimentoId.value = agenda.tipoAtendimentoId
-        tipoAtendimentoIdValidado.definir(agenda.tipoAtendimentoId?.toString() ?: "")
-        
+        tipoAtendimentoIdValidado.definir(agenda.tipoAtendimentoId.toString())
+
         convenioId.value = agenda.convenioId
-        convenioIdValidado.definir(agenda.convenioId?.toString() ?: "")
+        convenioIdValidado.definir(agenda.convenioId.toString())
 
         val partesDataHora = agenda.dataHoraInicio.split("T")
         if (partesDataHora.size == 2) {

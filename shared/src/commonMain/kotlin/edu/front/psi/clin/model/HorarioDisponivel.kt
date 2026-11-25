@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 data class HorarioDisponivel(
     val id: Long? = null,
     val psicologoId: Long,
-    val psicologo: String = "",
     val diaSemana: String,
     val horaInicio: String,
     val horaFim: String,

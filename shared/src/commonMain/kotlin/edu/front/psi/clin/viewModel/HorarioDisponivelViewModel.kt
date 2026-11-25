@@ -84,7 +84,6 @@ class HorarioDisponivelViewModel(
                     .firstOrNull { it.id == horario.psicologoId }
                     ?.nome
                 (nomePsicologo?.contains(filtro, ignoreCase = true) == true) ||
-                    horario.psicologo.contains(filtro, ignoreCase = true) ||
                     horario.diaSemana.contains(filtro, ignoreCase = true) ||
                     horario.horaInicio.contains(filtro, ignoreCase = true) ||
                     horario.horaFim.contains(filtro, ignoreCase = true)
@@ -128,15 +127,10 @@ class HorarioDisponivelViewModel(
                 }
 
                 val psicologoIdValor = psicologo.valor.value.toLongOrNull() ?: 1L
-                val nomePsicologoSelecionado = _psicologos.value
-                    .firstOrNull { it.id == psicologoIdValor }
-                    ?.nome
-                    ?: "Psicólogo #$psicologoIdValor"
 
                 val horario = HorarioDisponivel(
                     id = if (id.value.isEmpty()) null else id.value.toLong(),
                     psicologoId = psicologoIdValor,
-                    psicologo = nomePsicologoSelecionado,
                     diaSemana = diaSemana.valor.value,
                     horaInicio = if (horaInicio.valor.value.length == 5) "${horaInicio.valor.value}:00" else horaInicio.valor.value,
                     horaFim = if (horaFim.valor.value.length == 5) "${horaFim.valor.value}:00" else horaFim.valor.value,

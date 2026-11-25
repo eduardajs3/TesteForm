@@ -35,7 +35,7 @@ fun EvolucaoClinicaFormulario(
     val agendaAtual = agendas.firstOrNull { it.id == vm.agendaId.value }
     val agendasParaOpcoes = (agendasDoPaciente + listOfNotNull(agendaAtual))
         .distinctBy { it.id }
-    
+
     val prontuarioOpcoes = prontuarios.filter {
         pacienteIdFiltro == null || it.pacienteId == pacienteIdFiltro
     }.mapNotNull { prontuario ->
@@ -45,20 +45,19 @@ fun EvolucaoClinicaFormulario(
             id to "$paciente - ${prontuario.queixaPrincipal} (#$id)"
         }
     }
-    
+
     val psicologoAssociadoId = agendaAtual?.psicologoId ?: vm.psicologoId.value
     val psicologoAssociado = psicologos.firstOrNull { it.id == psicologoAssociadoId }
     val psicologoOpcoes = listOfNotNull(
         psicologoAssociadoId?.let { id ->
-            id to "${psicologoAssociado?.nome ?: agendaAtual?.psicologo ?: "Psicólogo #$id"} (#$id)"
+            id to "${psicologoAssociado?.nome ?: "Psicólogo #$id"} (#$id)"
         }
     )
-    
+
     val agendaOpcoes = agendasParaOpcoes.mapNotNull { agenda ->
         agenda.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
-                ?: agenda.paciente
-                ?: "Paciente"
+                ?: "Paciente #${agenda.pacienteId}"
             id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
         }
     } + listOfNotNull(
@@ -72,11 +71,11 @@ fun EvolucaoClinicaFormulario(
     val prontuarioExibicao = prontuarioOpcoes.firstOrNull {
         it.first == vm.prontuarioId.value
     }?.second.orEmpty()
-    
+
     val psicologoExibicao = psicologoOpcoes.firstOrNull {
         it.first == psicologoAssociadoId
     }?.second.orEmpty()
-    
+
     val agendaExibicao = agendaOpcoes.firstOrNull {
         it.first == vm.agendaId.value
     }?.second.orEmpty()

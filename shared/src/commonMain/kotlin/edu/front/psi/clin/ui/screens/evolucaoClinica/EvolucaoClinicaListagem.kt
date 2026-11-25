@@ -73,7 +73,6 @@ fun EvolucaoClinicaListagem(
                     val agenda = agendas.firstOrNull { it.id == item.agendaId }
                     val pacienteNome = agenda?.let { agendamento ->
                         pacientes.firstOrNull { it.id == agendamento.pacienteId }?.nome
-                            ?: agendamento.paciente
                     } ?: "Paciente"
                     val agendaDescricao = agenda?.let {
                         "$pacienteNome - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}"

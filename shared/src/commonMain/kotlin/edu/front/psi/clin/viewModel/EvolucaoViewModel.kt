@@ -45,12 +45,12 @@ class EvolucaoClinicaViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
-    
+
     val pacientes = _pacientes.asStateFlow()
     val prontuarios = _prontuarios.asStateFlow()
     val psicologos = _psicologos.asStateFlow()
     val agendas = _agendas.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -184,7 +184,7 @@ class EvolucaoClinicaViewModel(
                 } else {
                     "Evolução clínica atualizada com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
@@ -311,8 +311,7 @@ class EvolucaoClinicaViewModel(
     fun nomeAgenda(id: Long): String {
         val agenda = _agendas.value.firstOrNull { it.id == id } ?: return "Agenda #$id"
         val paciente = _pacientes.value.firstOrNull { it.id == agenda.pacienteId }?.nome
-            ?: agenda.paciente
-            ?: "Paciente"
+            ?: "Paciente #${agenda.pacienteId}"
         return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
     }
 }

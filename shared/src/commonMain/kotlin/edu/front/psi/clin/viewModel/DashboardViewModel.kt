@@ -173,7 +173,7 @@ class DashboardViewModel(
                     agenda.dataHoraFim.substringAfter('T', "").take(5).toMinutos()
                         ?.let { minutoAtual < it } == true
             }
-            .mapNotNull { it.salaId }
+            .map { it.salaId }
             .toSet()
             .size
         val consultasAgendadasOuConfirmadas = consultasHoje.count {
@@ -208,23 +208,19 @@ class DashboardViewModel(
     }
 
     private fun Agenda.pacienteNome(): String =
-        paciente?.takeIf { it.isNotBlank() }
-            ?: _pacientes.value.firstOrNull { it.id == pacienteId }?.nome
+        _pacientes.value.firstOrNull { it.id == pacienteId }?.nome
             ?: "Paciente"
 
     private fun Agenda.psicologoNome(): String =
-        psicologo?.takeIf { it.isNotBlank() }
-            ?: _psicologos.value.firstOrNull { it.id == psicologoId }?.nome
+        _psicologos.value.firstOrNull { it.id == psicologoId }?.nome
             ?: "Psicólogo"
 
     private fun Agenda.salaNome(): String =
-        sala?.takeIf { it.isNotBlank() }
-            ?: _salas.value.firstOrNull { it.id == salaId }?.nome
+        _salas.value.firstOrNull { it.id == salaId }?.nome
             ?: "Sala"
 
     private fun Agenda.tipoAtendimentoNome(): String =
-        tipoAtendimento?.takeIf { it.isNotBlank() }
-            ?: _tiposAtendimento.value.firstOrNull { it.id == tipoAtendimentoId }?.nome
+        _tiposAtendimento.value.firstOrNull { it.id == tipoAtendimentoId }?.nome
             ?: "Atendimento"
 
     private fun String.toMinutos(): Int? {
