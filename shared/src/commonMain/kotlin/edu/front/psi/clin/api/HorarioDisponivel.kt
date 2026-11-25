@@ -28,6 +28,7 @@ class HorarioDisponivelAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(horario)
         }
+        response.lancarErroSeNecessario()
         println("Status do Salvar Horário Disponível: ${response.status}")
         println("Resposta Detalhada do Backend: ${response.bodyAsText()}")
     }
@@ -38,7 +39,7 @@ class HorarioDisponivelAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(horario)
         }
-        println("Status do Atualizar Horário Disponível: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(horario: HorarioDisponivel) {
@@ -47,7 +48,7 @@ class HorarioDisponivelAPI(private val httpClient: HttpClient) {
         val response = httpClient.delete("$endPoint/${horario.id}") {
             bearerAuth(token)
         }
-
+        response.lancarErroSeNecessario()
         println("Status do Apagar Horário Disponível: ${response.status}")
         println("Resposta: ${response.bodyAsText()}")
     }

@@ -111,10 +111,9 @@ class HorarioDisponivelViewModel(
         val v2 = diaSemana.validar()
         val v3 = horaInicio.validar()
         val v4 = horaFim.validar()
-        val v5 = descricao.validar()
         val v6 = ativo.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
+        if (!(v1 && v2 && v3 && v4 && v6)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -122,6 +121,12 @@ class HorarioDisponivelViewModel(
         viewModelScope.launch {
             salvando = true
             try {
+                val ativoValido = ativo.valor.value.toBooleanStrictOrNull()
+                if (ativoValido == null) {
+                    mandarMensagem("Selecione um status válido para o horário.")
+                    return@launch
+                }
+
                 val horario = HorarioDisponivel(
                     id = if (id.value.isEmpty()) null else id.value.toLong(),
                     psicologoId = psicologo.valor.value.toLongOrNull() ?: 1L,
@@ -129,7 +134,7 @@ class HorarioDisponivelViewModel(
                     horaInicio = if (horaInicio.valor.value.length == 5) "${horaInicio.valor.value}:00" else horaInicio.valor.value,
                     horaFim = if (horaFim.valor.value.length == 5) "${horaFim.valor.value}:00" else horaFim.valor.value,
                     descricao = descricao.valor.value.ifEmpty { null },
-                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
+                    ativo = ativoValido
                 )
 
                 if (id.value.isEmpty()) {
