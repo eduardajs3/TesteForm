@@ -103,7 +103,6 @@ fun HorarioDisponivelFormulario(
                 value = vm.descricao.valor.value,
                 onValueChange = { vm.descricao.definir(it) },
                 label = "Descrição",
-                obrigatorio = true,
                 isError = vm.descricao.temErro.value,
                 errorMessage = if (vm.descricao.temErro.value) "Campo obrigatório" else null
             )
