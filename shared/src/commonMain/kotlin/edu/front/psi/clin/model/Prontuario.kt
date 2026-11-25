@@ -9,5 +9,5 @@ data class Prontuario(
     val dataAbertura: String,
     val queixaPrincipal: String,
     val status: String,
-    val ativo: Boolean = true
+    val ativo: Boolean 
 )

@@ -9,5 +9,5 @@ data class EvolucaoClinica(
     val agendaId: Long,
     val dataRegistro: String,
     val descricao: String? = null,
-    val ativo: Boolean = true
+    val ativo: Boolean
 )

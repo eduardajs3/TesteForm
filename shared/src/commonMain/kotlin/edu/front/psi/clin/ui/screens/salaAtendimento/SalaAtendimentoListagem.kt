@@ -17,7 +17,6 @@ import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.SalaAtendimentoViewModel
-import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun SalaAtendimentoListagem(
@@ -27,7 +26,7 @@ fun SalaAtendimentoListagem(
     val lista = vm.salasFiltradas.collectAsState()
     val filtro = vm.filtro.collectAsState()
     val salaSelecionada = remember { mutableStateOf<SalaAtendimento?>(null) }
-    
+
     val salaParaExcluir = remember { mutableStateOf<SalaAtendimento?>(null) }
 
     val colunas = listOf(
@@ -71,7 +70,7 @@ fun SalaAtendimentoListagem(
                 text = sala.descricao,
                 weight = 1.6f
             )
-            
+
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -93,7 +92,6 @@ fun SalaAtendimentoListagem(
                         "Recursos disponíveis",
                         sala.recursosDisponiveis.takeIf { it.isNotEmpty() }?.joinToString() ?: "Nenhum"
                     )
-                    ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(sala.dataCadastro))
                     ItemDetalhe(
                         rotulo = "Status",
                         valor = if (isAtivo) "Ativo" else "Inativo",

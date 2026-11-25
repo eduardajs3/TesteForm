@@ -17,7 +17,6 @@ import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
-import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
 @Composable
 fun TipoAtendimentoListagem(
@@ -27,7 +26,7 @@ fun TipoAtendimentoListagem(
     val lista = vm.tiposFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
     val tipoSelecionado = remember { mutableStateOf<TipoAtendimento?>(null) }
-    
+
     val tipoParaExcluir = remember { mutableStateOf<TipoAtendimento?>(null) }
 
     val colunas = listOf(
@@ -76,7 +75,7 @@ fun TipoAtendimentoListagem(
                 text = tipo.descricao,
                 weight = 1.6f
             )
-            
+
             Box(modifier = Modifier.weight(0.8f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -95,11 +94,9 @@ fun TipoAtendimentoListagem(
                     ItemDetalhe("Modalidade", tipo.modalidade.rotulo)
                     ItemDetalhe("Duração", "${tipo.duracao} minutos")
                     ItemDetalhe("Descrição", tipo.descricao)
-                    ItemDetalhe("Data de cadastro", formatarDataIsoParaBrasileira(tipo.dataCadastro))
                     ItemDetalhe(
                         rotulo = "Status",
-                        valor = if (isAtivo) "Ativo" else "Inativo",
-                        
+                        valor = if (isAtivo) "Ativo" else "Inativo"
                     )
                 }
             )

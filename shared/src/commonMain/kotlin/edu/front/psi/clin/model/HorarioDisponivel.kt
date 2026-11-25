@@ -11,5 +11,5 @@ data class HorarioDisponivel(
     val horaInicio: String,
     val horaFim: String,
     val descricao: String? = null,
-    val ativo: Boolean = true
+    val ativo: Boolean
 )
