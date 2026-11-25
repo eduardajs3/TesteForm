@@ -8,17 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class SalaAtendimentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/salas-atendimento"
+    private val endPoint = "/salas-atendimento"
     private val token
         get() = SessionManager.token
-    suspend fun carregar(): List<SalaAtendimento> {
-        val lista = httpClient.get(endPoint) {
+
+    suspend fun carregar(): List<SalaAtendimento> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<SalaAtendimento>>()
-        
-        println("GET Salas Carregadas: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(sala: SalaAtendimento) {
         val response = httpClient.post(endPoint) {
@@ -26,7 +23,7 @@ class SalaAtendimentoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(sala)
         }
-        println("Status do Salvar Sala: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, sala: SalaAtendimento) {
@@ -35,13 +32,14 @@ class SalaAtendimentoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(sala)
         }
-        println("Status do Atualizar Sala: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(sala: SalaAtendimento) {
-        val response = httpClient.delete("$endPoint/${sala.id}") {
+        val id = requireNotNull(sala.id) { "Sala de atendimento sem identificador não pode ser excluída." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Sala: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }

@@ -12,14 +12,10 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<Funcionario> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Funcionario> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Funcionario>>()
-
-        println("GET Funcionários Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(funcionario: Funcionario) {
         val response = httpClient.post(endPoint) {
@@ -27,7 +23,7 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(funcionario)
         }
-        println("Status do Salvar Funcionário: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, funcionario: Funcionario) {
@@ -36,7 +32,7 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(funcionario)
         }
-        println("Status do Atualizar Funcionário: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(funcionario: Funcionario) {
@@ -44,7 +40,6 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
         val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Funcionário: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }
- 

@@ -8,16 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class AgendaAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/agendas"
-    private val token get() = SessionManager.token
+    private val endPoint = "/agendas"
+    private val token
+        get() = SessionManager.token
 
-    suspend fun carregar(): List<Agenda> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Agenda> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Agenda>>()
-        println("GET Agendas Carregadas: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(agenda: Agenda) {
         val response = httpClient.post(endPoint) {
@@ -25,9 +23,7 @@ class AgendaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(agenda)
         }
-
         response.lancarErroSeNecessario()
-        println("Status do Salvar Agenda: ${response.status}")
     }
 
     suspend fun atualizar(id: Long, agenda: Agenda) {
@@ -40,7 +36,8 @@ class AgendaAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun apagar(agenda: Agenda) {
-        val response = httpClient.delete("$endPoint/${agenda.id}") {
+        val id = requireNotNull(agenda.id) { "Agendamento sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

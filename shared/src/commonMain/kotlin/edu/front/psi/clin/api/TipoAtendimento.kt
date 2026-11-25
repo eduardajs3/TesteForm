@@ -8,18 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class TipoAtendimentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/tipos-atendimento"
+    private val endPoint = "/tipos-atendimento"
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<TipoAtendimento> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<TipoAtendimento> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<TipoAtendimento>>()
-        
-        println("GET Tipos de Atendimento Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(tipo: TipoAtendimento) {
         val response = httpClient.post(endPoint) {
@@ -27,7 +23,7 @@ class TipoAtendimentoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(tipo)
         }
-        println("Status do Salvar Tipo de Atendimento: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, tipo: TipoAtendimento) {
@@ -36,13 +32,14 @@ class TipoAtendimentoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(tipo)
         }
-        println("Status do Atualizar Tipo de Atendimento: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(tipo: TipoAtendimento) {
-        val response = httpClient.delete("$endPoint/${tipo.id}") {
+        val id = requireNotNull(tipo.id) { "Tipo de atendimento sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Tipo de Atendimento: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }

@@ -10,15 +10,13 @@ import io.ktor.http.contentType
 
 class ProntuarioAPI(private val httpClient: HttpClient) {
     private val endPoint = "/prontuarios"
-    private val token get() = SessionManager.token
+    private val token
+        get() = SessionManager.token
 
-    suspend fun carregar(): List<Prontuario> {
-        val response = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Prontuario> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }
-        response.lancarErroSeNecessario()
-        return response.body()
-    }
+        }.body()
 
     suspend fun salvar(prontuario: Prontuario) {
         val response = httpClient.post(endPoint) {
@@ -39,7 +37,7 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun apagar(prontuario: Prontuario) {
-        val id = requireNotNull(prontuario.id) { "Prontuário sem identificador." }
+        val id = requireNotNull(prontuario.id) { "Prontuário sem identificador não pode ser excluído." }
         val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }

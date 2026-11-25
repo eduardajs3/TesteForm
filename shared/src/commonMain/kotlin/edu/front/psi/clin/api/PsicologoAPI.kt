@@ -12,14 +12,10 @@ class PsicologoAPI(private val httpClient: HttpClient) {
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<Psicologo> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Psicologo> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Psicologo>>()
-
-        println("GET Psicólogos Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(psicologo: Psicologo) {
         val response = httpClient.post(endPoint) {
@@ -27,7 +23,7 @@ class PsicologoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(psicologo)
         }
-        println("Status do Salvar Psicólogo: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, psicologo: Psicologo) {
@@ -36,13 +32,14 @@ class PsicologoAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(psicologo)
         }
-        println("Status do Atualizar Psicólogo: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(psicologo: Psicologo) {
-        val response = httpClient.delete("$endPoint/${psicologo.id}") {
+        val id = requireNotNull(psicologo.id) { "Psicólogo sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Psicólogo: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }

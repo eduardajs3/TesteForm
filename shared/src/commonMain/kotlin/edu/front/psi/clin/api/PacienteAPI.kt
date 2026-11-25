@@ -8,40 +8,38 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class PacienteAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/pacientes"
+    private val endPoint = "/pacientes"
     private val token
         get() = SessionManager.token
-    suspend fun carregar(): List<Paciente> {
-        val lista = httpClient.get(endPoint) {
+
+    suspend fun carregar(): List<Paciente> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Paciente>>()
-        
-        println("GET Pacientes Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(paciente: Paciente) {
         val response = httpClient.post(endPoint) {
-            header("Authorization", "Bearer ${SessionManager.token}")
+            bearerAuth(token)
             contentType(ContentType.Application.Json)
             setBody(paciente)
         }
-
-        println("Status do Salvar Paciente: ${response.status}")
+        response.lancarErroSeNecessario()
     }
+
     suspend fun atualizar(id: Long, paciente: Paciente) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
             setBody(paciente)
         }
-        println("Status do Atualizar Paciente: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(paciente: Paciente) {
-        val response = httpClient.delete("$endPoint/${paciente.id}") {
+        val id = requireNotNull(paciente.id) { "Paciente sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Paciente: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }

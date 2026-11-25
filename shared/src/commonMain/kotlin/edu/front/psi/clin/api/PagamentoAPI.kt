@@ -5,60 +5,49 @@ import edu.front.psi.clin.utils.formatarDataBrasileiraOuIsoParaDataHoraIso
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class PagamentoAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/pagamentos"
-    private val token get() = SessionManager.token
+    private val endPoint = "/pagamentos"
+    private val token
+        get() = SessionManager.token
 
-    suspend fun carregar(): List<Pagamento> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Pagamento> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Pagamento>>()
-        println("GET Pagamentos Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(pagamento: Pagamento) {
         val response = httpClient.post(endPoint) {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(
-                pagamento.copy(
-                    dataPagamento = formatarDataBrasileiraOuIsoParaDataHoraIso(
-                        pagamento.dataPagamento,
-                        "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
-                    )
-                )
-            )
+            setBody(pagamento.normalizado())
         }
-        println("Status do Salvar Pagamento: ${response.status}")
-        println("Resposta Detalhada: ${response.bodyAsText()}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, pagamento: Pagamento) {
         val response = httpClient.put("$endPoint/$id") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(
-                pagamento.copy(
-                    dataPagamento = formatarDataBrasileiraOuIsoParaDataHoraIso(
-                        pagamento.dataPagamento,
-                        "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
-                    )
-                )
-            )
+            setBody(pagamento.normalizado())
         }
-        println("Status do Atualizar Pagamento: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(pagamento: Pagamento) {
-        val response = httpClient.delete("$endPoint/${pagamento.id}") {
+        val id = requireNotNull(pagamento.id) { "Pagamento sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Pagamento: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
+    private fun Pagamento.normalizado() = copy(
+        dataPagamento = formatarDataBrasileiraOuIsoParaDataHoraIso(
+            dataPagamento,
+            "Data de pagamento inválida: use dd/MM/yyyy ou yyyy-MM-dd."
+        )
+    )
 }

@@ -4,23 +4,18 @@ import edu.front.psi.clin.model.HorarioDisponivel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class HorarioDisponivelAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/horarios-disponiveis"
+    private val endPoint = "/horarios-disponiveis"
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<HorarioDisponivel> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<HorarioDisponivel> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<HorarioDisponivel>>()
-        
-        println("GET Horários Disponíveis Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(horario: HorarioDisponivel) {
         val response = httpClient.post(endPoint) {
@@ -29,8 +24,6 @@ class HorarioDisponivelAPI(private val httpClient: HttpClient) {
             setBody(horario)
         }
         response.lancarErroSeNecessario()
-        println("Status do Salvar Horário Disponível: ${response.status}")
-        println("Resposta Detalhada do Backend: ${response.bodyAsText()}")
     }
 
     suspend fun atualizar(id: Long, horario: HorarioDisponivel) {
@@ -43,13 +36,10 @@ class HorarioDisponivelAPI(private val httpClient: HttpClient) {
     }
 
     suspend fun apagar(horario: HorarioDisponivel) {
-        println("ID enviado para exclusão: ${horario.id}")
-
-        val response = httpClient.delete("$endPoint/${horario.id}") {
+        val id = requireNotNull(horario.id) { "Horário disponível sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()
-        println("Status do Apagar Horário Disponível: ${response.status}")
-        println("Resposta: ${response.bodyAsText()}")
     }
 }

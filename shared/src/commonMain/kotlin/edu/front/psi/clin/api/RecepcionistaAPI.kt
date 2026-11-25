@@ -12,14 +12,10 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<Recepcionista> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Recepcionista> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Recepcionista>>()
-
-        println("GET Recepcionistas Carregados: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(recepcionista: Recepcionista) {
         val response = httpClient.post(endPoint) {
@@ -27,7 +23,7 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(recepcionista)
         }
-        println("Status do Salvar Recepcionista: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, recepcionista: Recepcionista) {
@@ -36,14 +32,14 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(recepcionista)
         }
-        println("Status do Atualizar Recepcionista: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(recepcionista: Recepcionista) {
-        val response = httpClient.delete("$endPoint/${recepcionista.id}") {
+        val id = requireNotNull(recepcionista.id) { "Recepcionista sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar Recepcionista: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }
- 

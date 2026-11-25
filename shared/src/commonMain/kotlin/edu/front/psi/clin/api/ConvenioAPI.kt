@@ -8,18 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 class ConvenioAPI(private val httpClient: HttpClient) {
-    private val endPoint = "${ApiConfig.BASE_URL}/convenios"
+    private val endPoint = "/convenios"
     private val token
         get() = SessionManager.token
 
-    suspend fun carregar(): List<Convenio> {
-        val lista = httpClient.get(endPoint) {
+    suspend fun carregar(): List<Convenio> =
+        httpClient.get(endPoint) {
             bearerAuth(token)
-        }.body<List<Convenio>>()
-        
-        println("GET Carregar Lista: $lista")
-        return lista
-    }
+        }.body()
 
     suspend fun salvar(convenio: Convenio) {
         val response = httpClient.post(endPoint) {
@@ -27,7 +23,7 @@ class ConvenioAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(convenio)
         }
-        println("Status do Salvar: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun atualizar(id: Long, convenio: Convenio) {
@@ -36,13 +32,14 @@ class ConvenioAPI(private val httpClient: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(convenio)
         }
-        println("Status do Atualizar: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 
     suspend fun apagar(convenio: Convenio) {
-        val response = httpClient.delete("$endPoint/${convenio.id}") {
+        val id = requireNotNull(convenio.id) { "Convênio sem identificador não pode ser excluído." }
+        val response = httpClient.delete("$endPoint/$id") {
             bearerAuth(token)
         }
-        println("Status do Apagar: ${response.status}")
+        response.lancarErroSeNecessario()
     }
 }
