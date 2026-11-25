@@ -12,10 +12,10 @@ import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
-import edu.front.psi.clin.ui.componentes.ItemDetalhe
-import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
-import edu.front.psi.clin.ui.componentes.LayoutListagemBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.LayoutListagemBase
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.HorarioDisponivelViewModel
 
 @Composable
@@ -38,6 +38,9 @@ fun HorarioDisponivelListagem(
         "Status" to 0.8f
     )
 
+    fun nomeDoPsicologo(psicologoId: Long): String =
+        psicologos.firstOrNull { it.id == psicologoId }?.nome ?: "Psicólogo #$psicologoId"
+
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutListagemBase(
             titulo = "Horários Disponíveis",
@@ -54,15 +57,11 @@ fun HorarioDisponivelListagem(
             onVisualizar = { horario -> horarioSelecionado.value = horario },
             onEditar = vm::editar,
             onApagar = { horario -> horarioParaExcluir.value = horario },
-            textoCompacto = { horario ->
-                psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                    ?: "Psicólogo #${horario.psicologoId}"
-            },
+            textoCompacto = { horario -> nomeDoPsicologo(horario.psicologoId) },
             placeholderPesquisa = "Buscar por psicólogo, dia ou horário..."
         ) { horario ->
             val isAtivo = horario.ativo
-            val nomePsicologo = psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                ?: "Psicólogo #${horario.psicologoId}"
+            val nomePsicologo = nomeDoPsicologo(horario.psicologoId)
 
             CelulaTabelaTexto(
                 text = nomePsicologo,
@@ -92,13 +91,11 @@ fun HorarioDisponivelListagem(
 
         horarioSelecionado.value?.let { horario ->
             val isAtivo = horario.ativo
-            val nomePsicologo = psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                ?: "Psicólogo #${horario.psicologoId}"
             ModalDetalhesBase(
                 titulo = "Detalhes do Horário",
                 onDismiss = { horarioSelecionado.value = null },
                 conteudo = {
-                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = nomePsicologo)
+                    ItemDetalhe(rotulo = "Psicólogo(a)", valor = nomeDoPsicologo(horario.psicologoId))
                     ItemDetalhe(rotulo = "Dia da semana", valor = horario.diaSemana)
                     ItemDetalhe(rotulo = "Horário de início", valor = horario.horaInicio)
                     ItemDetalhe(rotulo = "Horário de fim", valor = horario.horaFim)
@@ -114,7 +111,7 @@ fun HorarioDisponivelListagem(
         horarioParaExcluir.value?.let { horario ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir este horário disponível? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir o horário disponível de ${nomeDoPsicologo(horario.psicologoId)}? Esta ação não pode ser desfeita.",
                 onDismiss = { horarioParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(horario)

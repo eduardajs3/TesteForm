@@ -12,10 +12,10 @@ import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
-import edu.front.psi.clin.ui.componentes.ItemDetalhe
-import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.BloqueioAgendaViewModel
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 
@@ -52,9 +52,7 @@ fun BloqueioAgendaListagem(
             itens = lista.value,
             onVisualizar = { item -> itemSelecionado.value = item },
             onEditar = vm::editar,
-            onApagar = { item ->
-                itemParaExcluir.value = item
-            },
+            onApagar = { item -> itemParaExcluir.value = item },
             textoCompacto = { bloqueio -> vm.nomePsicologo(bloqueio.psicologoId) },
             placeholderPesquisa = "Buscar por psicólogo..."
         ) { bloqueio ->
@@ -109,7 +107,7 @@ fun BloqueioAgendaListagem(
         itemParaExcluir.value?.let { item ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir este registo? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir o bloqueio de agenda de ${vm.nomePsicologo(item.psicologoId)}? Esta ação não pode ser desfeita.",
                 onDismiss = { itemParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(item)

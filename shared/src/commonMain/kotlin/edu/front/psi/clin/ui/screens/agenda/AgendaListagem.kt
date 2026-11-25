@@ -7,13 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Agenda
-import edu.front.psi.clin.ui.componentes.AppDeleteModal
-import edu.front.psi.clin.ui.componentes.CabecalhoTela
-import edu.front.psi.clin.ui.componentes.ItemDetalhe
-import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
-import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
+import edu.front.psi.clin.ui.componentes.AppDeleteModal
+import edu.front.psi.clin.ui.componentes.CabecalhoTela
+import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.theme.VerdeClinica
 import edu.front.psi.clin.ui.viewmodel.AgendaViewModel
@@ -30,8 +30,8 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Clock
 
 private val horariosBase = listOf("08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00")
 
@@ -40,7 +40,6 @@ fun AgendaListagem(
     innerPadding: PaddingValues,
     vm: AgendaViewModel
 ) {
-   
     LaunchedEffect(Unit) {
         vm.carregarDadosFormulario()
     }
@@ -55,20 +54,18 @@ fun AgendaListagem(
         SessionManager.role,
         RecursoSistema.AGENDAS
     )
-    
+
     val psicologoFiltroAtual by vm.psicologoFiltro.collectAsState()
     val horariosDisponiveisState = vm.horariosDisponiveis.collectAsState().value
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
-    var exibirModalExclusao by remember { mutableStateOf(false) }
+    var agendamentoParaExcluir by remember { mutableStateOf<Agenda?>(null) }
     var menuMesesAberto by remember { mutableStateOf(false) }
 
- 
     val hoje = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     }
 
-   
     val segundaAtualState = remember {
         val diaDaSemanaOrdinal = hoje.dayOfWeek.ordinal // 0 = Segunda, ..., 6 = Domingo
         val segunda = hoje.minus(diaDaSemanaOrdinal, DateTimeUnit.DAY)
@@ -87,7 +84,7 @@ fun AgendaListagem(
     LaunchedEffect(psicologoFiltroAtual, segundaAtual, horariosDisponiveisState) {
         val dias = criarDiasDaSemana(segundaAtual)
         val psicologoObj = psicologos.firstOrNull { it.nome == psicologoFiltroAtual }
-        
+
         val horariosProfissional = if (psicologoFiltroAtual == "Todos") {
             horariosDisponiveisState.filter { it.ativo }
         } else {
@@ -95,7 +92,7 @@ fun AgendaListagem(
         }
 
         val diaAtualSelecionado = dias.getOrNull(diaSelecionadoIndex)
-        val diaIsoAtual = diaAtualSelecionado?.let { 
+        val diaIsoAtual = diaAtualSelecionado?.let {
             when (it.nomeDia.lowercase()) {
                 "seg" -> "SEGUNDA"
                 "ter" -> "TERCA"
@@ -107,7 +104,7 @@ fun AgendaListagem(
             }
         }
 
-        val temExpedienteNoDiaAtual = diaIsoAtual != null && 
+        val temExpedienteNoDiaAtual = diaIsoAtual != null &&
             horariosProfissional.any { it.diaSemana.equals(diaIsoAtual, ignoreCase = true) }
 
         if (!temExpedienteNoDiaAtual && psicologoFiltroAtual != "Todos" && dias.isNotEmpty()) {
@@ -147,7 +144,7 @@ fun AgendaListagem(
             }
         ).distinct().sorted()
     }
-    
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -239,8 +236,8 @@ fun AgendaListagem(
                     pacientes = pacientes,
                     psicologos = psicologos,
                     tiposAtendimento = tiposAtendimento,
-                    horariosDisponiveis = horariosDisponiveisState, 
-                    psicologoFiltro = psicologoFiltroAtual,         
+                    horariosDisponiveis = horariosDisponiveisState,
+                    psicologoFiltro = psicologoFiltroAtual,
                     onSelecionarDia = { diaSelecionadoIndex = it },
                     onSelecionarAgendamento = { agendamentoSelecionado = it }
                 )
@@ -288,7 +285,10 @@ fun AgendaListagem(
                 acoesTopo = if (podeGerenciarAgenda) {
                     {
                         IconButton(
-                            onClick = { exibirModalExclusao = true },
+                            onClick = {
+                                agendamentoParaExcluir = agendamento
+                                agendamentoSelecionado = null
+                            },
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
@@ -320,18 +320,17 @@ fun AgendaListagem(
             )
         }
 
-        if (exibirModalExclusao && agendamentoSelecionado != null) {
+        agendamentoParaExcluir?.let { item ->
+            val pacienteNome = pacientes.firstOrNull { it.id == item.pacienteId }?.nome ?: "este paciente"
+            val horarioInicio = item.dataHoraInicio.substringAfter("T").take(5)
+
             AppDeleteModal(
-                title = "Excluir agendamento",
-                message = "Deseja realmente excluir este agendamento?",
-                onDismiss = { exibirModalExclusao = false },
+                title = "Confirmar Exclusão",
+                message = "Tem certeza de que deseja excluir o agendamento de $pacienteNome às $horarioInicio? Esta ação não pode ser desfeita.",
+                onDismiss = { agendamentoParaExcluir = null },
                 onConfirm = {
-                    val item = agendamentoSelecionado
-                    exibirModalExclusao = false
-                    agendamentoSelecionado = null
-                    if (item != null) {
-                        vm.apagar(item)
-                    }
+                    vm.apagar(item)
+                    agendamentoParaExcluir = null
                 }
             )
         }
