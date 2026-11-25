@@ -1,18 +1,28 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
-import edu.front.psi.clin.api.*
-import edu.front.psi.clin.model.*
+import edu.front.psi.clin.api.AgendaAPI
+import edu.front.psi.clin.api.ConvenioAPI
+import edu.front.psi.clin.api.PacienteAPI
+import edu.front.psi.clin.api.PagamentoAPI
+import edu.front.psi.clin.api.SessionManager
+import edu.front.psi.clin.api.httpClientManager
+import edu.front.psi.clin.api.mensagemParaUsuario
+import edu.front.psi.clin.model.Agenda
+import edu.front.psi.clin.model.Convenio
+import edu.front.psi.clin.model.Paciente
+import edu.front.psi.clin.model.Pagamento
 import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -40,6 +50,7 @@ class PagamentoViewModel(
 
     private val _agendas = MutableStateFlow<List<Agenda>>(emptyList())
     val agendas = _agendas.asStateFlow()
+
     private var carregamentoDadosFormulario: Job? = null
 
     var salvando by mutableStateOf(false)
@@ -120,7 +131,7 @@ class PagamentoViewModel(
         } else {
             pagamentos.filter {
                 it.formaPagamento.contains(filtro, ignoreCase = true) ||
-                it.status.contains(filtro, ignoreCase = true)
+                    it.status.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -138,6 +149,20 @@ class PagamentoViewModel(
     val formaPagamento = CampoValidado()
     val dataPagamento = CampoValidado()
     val status = CampoValidado("PENDENTE")
+
+    private fun irParaListagem() {
+        backStack.clear()
+        backStack.add(PagamentoRotas.Listagem)
+    }
+
+    private fun converterMoedaParaDouble(valorStr: String): Double {
+        val apenasDigitos = valorStr.filter { it.isDigit() }
+        if (apenasDigitos.isEmpty()) return 0.0
+        return apenasDigitos.toDouble() / 100.0
+    }
+
+    private fun valorParaCentavos(valor: Double): String =
+        (valor * 100.0).toLong().toString()
 
     fun salvar() {
         if (salvando) return
@@ -158,55 +183,57 @@ class PagamentoViewModel(
             return
         }
 
-        try {
-            fun converterMoedaParaDouble(valorStr: String): Double {
-                val apenasDigitos = valorStr.filter { it.isDigit() }
-                if (apenasDigitos.isEmpty()) return 0.0
-                return apenasDigitos.toDouble() / 100.0
-            }
+        val ehNovo = id.value.isEmpty()
+        val idAtual = if (ehNovo) null else id.value.toLongOrNull()
+        if (!ehNovo && idAtual == null) {
+            mandarMensagem("Identificador do pagamento inválido.")
+            return
+        }
 
-            val pagamento = Pagamento(
-                id = if (id.value.isEmpty()) null else id.value.toLong(),
-                agendaId = agendaId.value!!,
-                pacienteId = pacienteId.value!!,
-                convenioId = convenioId.value!!,
-                valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
-                valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
-                valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
-                formaPagamento = formaPagamento.valor.value,
-                dataPagamento = dataPagamento.valor.value,
-                status = status.valor.value.ifEmpty { "PENDENTE" }
-            )
+        val dataTexto = dataPagamento.valor.value.trim()
+        val dataFormatada = if (dataTexto.matches(Regex("\\d{2}/\\d{2}/\\d{4}"))) {
+            formatarDataBrasileiraParaIso(dataTexto)
+        } else {
+            dataTexto
+        }
 
-            viewModelScope.launch {
-                salvando = true
-                try {
-                    if (id.value.isEmpty()) {
-                        pagamentoApi.salvar(pagamento)
-                    } else {
-                        pagamentoApi.atualizar(id.value.toLong(), pagamento)
-                    }
-                    _pagamentos.value = pagamentoApi.carregar()
-                    
-                    val mensagemSucesso = if (id.value.isEmpty()) {
-                        "Pagamento salvo com sucesso!"
-                    } else {
-                        "Pagamento atualizado com sucesso!"
-                    }
-                    
-                    mandarMensagem(mensagemSucesso)
-                    limparCampos()
+        val pagamento = Pagamento(
+            id = idAtual,
+            agendaId = agendaId.value!!,
+            pacienteId = pacienteId.value!!,
+            convenioId = convenioId.value!!,
+            valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
+            valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
+            valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
+            formaPagamento = formaPagamento.valor.value.trim(),
+            dataPagamento = dataFormatada,
+            status = status.valor.value.ifEmpty { "PENDENTE" }
+        )
 
-                    backStack.clear()
-                    backStack.add(PagamentoRotas.Listagem)
-                } catch (e: Exception) {
-                    mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
-                } finally {
-                    salvando = false
+        viewModelScope.launch {
+            salvando = true
+            try {
+                if (ehNovo) {
+                    pagamentoApi.salvar(pagamento)
+                } else {
+                    pagamentoApi.atualizar(idAtual!!, pagamento)
                 }
+                _pagamentos.value = pagamentoApi.carregar()
+
+                val mensagemSucesso = if (ehNovo) {
+                    "Pagamento salvo com sucesso!"
+                } else {
+                    "Pagamento atualizado com sucesso!"
+                }
+
+                mandarMensagem(mensagemSucesso)
+                limparCampos()
+                irParaListagem()
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
-        } catch (e: Exception) {
-            mandarMensagem("Erro ao processar valores: ${e.message}")
         }
     }
 
@@ -223,15 +250,13 @@ class PagamentoViewModel(
     }
 
     fun novoPagamento() {
-        backStack.clear()
-        backStack.add(PagamentoRotas.Formulario)
         id.value = ""
         limparCampos()
+        backStack.clear()
+        backStack.add(PagamentoRotas.Formulario)
     }
 
     fun editar(pagamento: Pagamento) {
-        backStack.clear()
-        backStack.add(PagamentoRotas.Formulario)
         id.value = pagamento.id?.toString() ?: ""
         agendaId.value = pagamento.agendaId
         pacienteId.value = pagamento.pacienteId
@@ -241,14 +266,14 @@ class PagamentoViewModel(
         valorPaciente.definir(valorParaCentavos(pagamento.valorPaciente))
         formaPagamento.definir(pagamento.formaPagamento)
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
-
         status.definir(pagamento.status)
+
+        backStack.clear()
+        backStack.add(PagamentoRotas.Formulario)
     }
 
-    private fun valorParaCentavos(valor: Double): String =
-        (valor * 100.0).toLong().toString()
-
     fun limparCampos() {
+        id.value = ""
         agendaId.value = null
         pacienteId.value = null
         convenioId.value = null

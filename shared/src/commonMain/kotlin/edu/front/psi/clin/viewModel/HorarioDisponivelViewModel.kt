@@ -97,7 +97,6 @@ class HorarioDisponivelViewModel(
     )
 
     val id = mutableStateOf("")
-
     val psicologo = CampoValidado()
     val diaSemana = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })

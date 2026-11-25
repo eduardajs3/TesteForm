@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,6 +30,7 @@ class RecepcionistaViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -56,8 +57,8 @@ class RecepcionistaViewModel(
         } else {
             recepcionistas.filter {
                 it.nome.contains(filtro, ignoreCase = true) ||
-                it.cpf.contains(filtro, ignoreCase = true) ||
-                it.setor.contains(filtro, ignoreCase = true)
+                    it.cpf.contains(filtro, ignoreCase = true) ||
+                    it.setor.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -77,10 +78,10 @@ class RecepcionistaViewModel(
     val senha = CampoValidado()
     val ativo = CampoValidado("true")
     val setor = CampoValidado()
-    val mensagem = mutableStateOf("")
 
     fun salvar() {
         if (salvando) return
+
         val v1 = nome.validar()
         val v2 = cpf.validar()
         val v3 = email.validar()
@@ -90,7 +91,6 @@ class RecepcionistaViewModel(
         val v7 = setor.validar()
 
         if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
-            mensagem.value = "Preencha todos os campos obrigatórios."
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -102,14 +102,14 @@ class RecepcionistaViewModel(
                 val dadosAtuais = _recepcionistas.value.firstOrNull { it.id == idAtual }
                 val recepcionista = Recepcionista(
                     id = idAtual,
-                    nome = nome.valor.value,
+                    nome = nome.valor.value.trim(),
                     cpf = cpf.valor.value,
-                    email = email.valor.value,
+                    email = email.valor.value.trim(),
                     telefone = telefone.valor.value,
                     senha = senha.valor.value.takeIf { it.isNotEmpty() },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
                     dataCadastro = dadosAtuais?.dataCadastro,
-                    setor = setor.valor.value,
+                    setor = setor.valor.value.trim(),
                     role = dadosAtuais?.role
                 )
 
@@ -120,7 +120,6 @@ class RecepcionistaViewModel(
                     recepcionistaApi.atualizar(idNumber, recepcionista)
                 }
 
-
                 _recepcionistas.value = recepcionistaApi.carregar()
                 println("Recepcionistas após salvar: ${_recepcionistas.value}")
 
@@ -129,19 +128,17 @@ class RecepcionistaViewModel(
                 } else {
                     "Recepcionista atualizada com sucesso!"
                 }
-                mensagem.value = mensagemSucesso
+
                 mandarMensagem(mensagemSucesso)
+                id.value = ""
                 limparCampos()
 
                 backStack.clear()
                 backStack.add(RecepcionistaRotas.Listagem)
-
             } catch (e: Exception) {
-                val mensagemErro = e.mensagemParaUsuario("Erro ao salvar")
-                mensagem.value = mensagemErro
-                mandarMensagem(mensagemErro)
-            }finally {
-                salvando = false 
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
         }
     }
@@ -160,17 +157,14 @@ class RecepcionistaViewModel(
     }
 
     fun novaRecepcionista() {
-        backStack.clear()
-        backStack.add(RecepcionistaRotas.Formulario)
         id.value = ""
         limparCampos()
-        mensagem.value = ""
+        backStack.clear()
+        backStack.add(RecepcionistaRotas.Formulario)
     }
 
     fun editar(recepcionista: Recepcionista) {
-        backStack.clear()
-        backStack.add(RecepcionistaRotas.Formulario)
-        id.value = recepcionista.id.toString()
+        id.value = recepcionista.id?.toString() ?: ""
         nome.definir(recepcionista.nome)
         cpf.definir(recepcionista.cpf)
         email.definir(recepcionista.email)
@@ -178,7 +172,9 @@ class RecepcionistaViewModel(
         senha.definir(recepcionista.senha ?: "")
         ativo.definir(recepcionista.ativo.toString())
         setor.definir(recepcionista.setor)
-        mensagem.value = ""
+
+        backStack.clear()
+        backStack.add(RecepcionistaRotas.Formulario)
     }
 
     fun limparCampos() {
@@ -189,6 +185,5 @@ class RecepcionistaViewModel(
         senha.limpar()
         ativo.definir("true")
         setor.limpar()
-        mensagem.value = "Campos limpos."
     }
 }
