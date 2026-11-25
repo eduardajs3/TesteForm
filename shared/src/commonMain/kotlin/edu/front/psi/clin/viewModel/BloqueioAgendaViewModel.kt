@@ -101,7 +101,7 @@ class BloqueioAgendaViewModel(
         validadorExtra = { it.length <= 500 },
         mensagemErroPersonalizada = "O motivo deve ter no máximo 500 caracteres"
     )
-
+    val ativo = CampoValidado("true")
     fun nomePsicologo(psicologoId: Long?): String =
         nomePsicologo(psicologoId, _psicologos.value)
 
@@ -114,8 +114,9 @@ class BloqueioAgendaViewModel(
         val v4 = dataFim.validar()
         val v5 = horaFim.validar()
         val v6 = motivo.validar()
+        val v7 = ativo.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5 && v6)) {
+        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -139,11 +140,12 @@ class BloqueioAgendaViewModel(
             salvando = true
             try {
                 val bloqueio = BloqueioAgenda(
-                    id = bloqueioId,
+                    id = if (id.value.isEmpty()) null else bloqueioId,
                     psicologoId = psicologoId,
                     dataHoraInicio = inicio,
                     dataHoraFim = fim,
-                    motivo = motivo.valor.value
+                    motivo = motivo.valor.value,
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
@@ -204,6 +206,7 @@ class BloqueioAgendaViewModel(
         dataFim.definir(dataFimValor)
         horaFim.definir(horaFimValor)
         motivo.definir(bloqueio.motivo)
+        ativo.definir(bloqueio.ativo.toString())
     }
 
     fun limparCampos() {
@@ -213,6 +216,7 @@ class BloqueioAgendaViewModel(
         dataFim.limpar()
         horaFim.limpar()
         motivo.limpar()
+        ativo.definir("true")
     }
 
     private fun nomePsicologo(psicologoId: Long?, psicologos: List<Psicologo>): String =
