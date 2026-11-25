@@ -2,6 +2,7 @@ package edu.front.psi.clin.api
 
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -16,9 +17,15 @@ class BackendApiException(
 internal suspend fun HttpResponse.lancarErroSeNecessario() {
     if (status.isSuccess()) return
 
+    val request = call.request
+    val authorization = request.headers[HttpHeaders.Authorization].orEmpty()
+    val bearerPresente = authorization.startsWith("Bearer ", ignoreCase = true)
+    val endpoint = "${request.method.value} ${request.url.encodedPath}"
+    val autenticacao = if (bearerPresente) "Bearer enviado" else "Bearer ausente"
+
     throw BackendApiException(
         statusCode = status.value,
-        message = mensagemDeErroApi(bodyAsText())
+        message = "$endpoint retornou HTTP ${status.value} ($autenticacao): ${mensagemDeErroApi(bodyAsText())}"
     )
 }
 

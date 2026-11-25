@@ -11,7 +11,9 @@ object SessionManager {
         private set
 
     fun iniciarSessao(accessToken: String, role: String, email: String) {
-        token = accessToken
+        token = accessToken.trim()
+            .replace(Regex("^Bearer\\s+", RegexOption.IGNORE_CASE), "")
+            .trim()
         this.role = edu.front.psi.clin.security.PermissoesAcesso.normalizarRole(role)
         this.email = email
     }
