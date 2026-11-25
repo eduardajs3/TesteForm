@@ -105,7 +105,7 @@ fun SalaAtendimentoListagem(
         salaParaExcluir.value?.let { sala ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir a sala '${sala.nome}'? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir a sala ${sala.nome}? Esta ação não pode ser desfeita.",
                 onDismiss = { salaParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(sala)

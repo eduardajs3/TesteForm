@@ -84,6 +84,7 @@ object MaskUtils {
     fun aplicarMascaraPercentual(valor: String): String {
         val apenasDigitos = valor.filter { it.isDigit() }.take(3)
         if (apenasDigitos.isEmpty()) return ""
-        return "$apenasDigitos%"
+        val percentual = apenasDigitos.toIntOrNull()?.coerceAtMost(100) ?: return ""
+        return "$percentual%"
     }
 }

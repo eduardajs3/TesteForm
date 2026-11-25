@@ -66,11 +66,9 @@ fun ConvenioFormulario(
                 onValueChange = { vm.percentualCobertura.definir(it) },
                 label = "Percentual de cobertura (ex.: 80)",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.percentualCobertura.temErro.value,
                 errorMessage = if (vm.percentualCobertura.temErro.value) "Campo obrigatório" else null
             )
-
             CampoDropdownPadrao(
                 label = "Status",
                 valorSelecionado = statusExibicao,

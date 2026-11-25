@@ -108,7 +108,7 @@ fun TipoAtendimentoListagem(
         tipoParaExcluir.value?.let { tipo ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir o tipo '${tipo.nome}'? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir o tipo ${tipo.nome}? Esta ação não pode ser desfeita.",
                 onDismiss = { tipoParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(tipo)

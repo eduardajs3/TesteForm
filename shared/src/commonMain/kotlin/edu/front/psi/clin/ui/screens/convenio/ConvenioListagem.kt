@@ -100,7 +100,7 @@ fun ConvenioListagem(
         convenioParaExcluir.value?.let { convenio ->
             AppDeleteModal(
                 title = "Confirmar Exclusão",
-                message = "Tem certeza de que deseja excluir o convênio '${convenio.nome}'? Esta ação não pode ser desfeita.",
+                message = "Tem certeza de que deseja excluir o convênio ${convenio.nome}? Esta ação não pode ser desfeita.",
                 onDismiss = { convenioParaExcluir.value = null },
                 onConfirm = {
                     vm.apagar(convenio)
