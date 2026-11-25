@@ -64,9 +64,7 @@ fun ProntuarioListagem(
             ) {
                 items(listaOrdenada) { item ->
                     val isExpansivel = itemExpandidoId == item.id
-                    val dataAbertura = item.dataAbertura
-                        ?.let(::formatarDataIsoParaBrasileira)
-                        .orEmpty()
+                    val dataAbertura = formatarDataIsoParaBrasileira(item.dataAbertura)
 
                     CardExpansivelBase(
                         tituloTopo = dataAbertura,
@@ -78,7 +76,7 @@ fun ProntuarioListagem(
                         onEditarClick = { vm.editar(item) },
                         onExcluirClick = { itemParaExcluir = item }
                     ) {
-                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status.orEmpty())
+                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -105,7 +103,7 @@ fun ProntuarioListagem(
         itemParaExcluir?.let { item ->
             AppDeleteModal(
                 title = "Exclusão de prontuário",
-                message = "Tem certeza que deseja excluir o registro de ${item.dataAbertura?.let(::formatarDataIsoParaBrasileira)}?",
+                message = "Tem certeza que deseja excluir o registro de ${formatarDataIsoParaBrasileira(item.dataAbertura)}?",
                 onDismiss = { itemParaExcluir = null },
                 onConfirm = {
                     vm.apagar(item)

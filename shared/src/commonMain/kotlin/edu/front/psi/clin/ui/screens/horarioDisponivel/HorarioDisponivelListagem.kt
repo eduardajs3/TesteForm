@@ -55,16 +55,18 @@ fun HorarioDisponivelListagem(
             onEditar = vm::editar,
             onApagar = { horario -> horarioParaExcluir.value = horario },
             textoCompacto = { horario ->
-                horario.psicologo
-                    ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                    ?: "Psicólogo #${horario.psicologoId}"
+                horario.psicologo.ifBlank {
+                    psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                        ?: "Psicólogo #${horario.psicologoId}"
+                }
             },
             placeholderPesquisa = "Buscar por psicólogo, dia ou horário..."
         ) { horario ->
             val isAtivo = horario.ativo
-            val nomePsicologo = horario.psicologo
-                ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                ?: "Psicólogo #${horario.psicologoId}"
+            val nomePsicologo = horario.psicologo.ifBlank {
+                psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                    ?: "Psicólogo #${horario.psicologoId}"
+            }
 
             CelulaTabelaTexto(
                 text = nomePsicologo,
@@ -94,9 +96,10 @@ fun HorarioDisponivelListagem(
 
         horarioSelecionado.value?.let { horario ->
             val isAtivo = horario.ativo
-            val nomePsicologo = horario.psicologo
-                ?: psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
-                ?: "Psicólogo #${horario.psicologoId}"
+            val nomePsicologo = horario.psicologo.ifBlank {
+                psicologos.firstOrNull { it.id == horario.psicologoId }?.nome
+                    ?: "Psicólogo #${horario.psicologoId}"
+            }
             ModalDetalhesBase(
                 titulo = "Detalhes do Horário",
                 onDismiss = { horarioSelecionado.value = null },

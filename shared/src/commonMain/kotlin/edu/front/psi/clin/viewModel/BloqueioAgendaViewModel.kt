@@ -27,14 +27,14 @@ class BloqueioAgendaViewModel(
     private val httpClient = httpClientManager()
     private val bloqueioApi = BloqueioAgendaAPI(httpClient)
     private val psicologoApi = PsicologoAPI(httpClient)
-    
+
     private val _bloqueios = MutableStateFlow<List<BloqueioAgenda>>(emptyList())
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     val psicologos = _psicologos.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
-        
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
@@ -102,7 +102,8 @@ class BloqueioAgendaViewModel(
         mensagemErroPersonalizada = "O motivo deve ter no máximo 500 caracteres"
     )
     val ativo = CampoValidado("true")
-    fun nomePsicologo(psicologoId: Long?): String =
+
+    fun nomePsicologo(psicologoId: Long): String =
         nomePsicologo(psicologoId, _psicologos.value)
 
     fun salvar() {
@@ -130,7 +131,7 @@ class BloqueioAgendaViewModel(
             mandarMensagem("Informe psicólogo, datas e horários válidos.")
             return
         }
-        
+
         if (fim <= inicio) {
             mandarMensagem("O fim do bloqueio deve ser posterior ao início.")
             return
@@ -162,7 +163,7 @@ class BloqueioAgendaViewModel(
                 } else {
                     "Bloqueio de agenda atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
@@ -198,7 +199,7 @@ class BloqueioAgendaViewModel(
         backStack.clear()
         backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = bloqueio.id?.toString() ?: ""
-        psicologo.definir(bloqueio.psicologoId?.toString() ?: "")
+        psicologo.definir(bloqueio.psicologoId.toString())
         val (dataInicioValor, horaInicioValor) = separarDataHora(bloqueio.dataHoraInicio)
         val (dataFimValor, horaFimValor) = separarDataHora(bloqueio.dataHoraFim)
         dataInicio.definir(dataInicioValor)
@@ -219,10 +220,9 @@ class BloqueioAgendaViewModel(
         ativo.definir("true")
     }
 
-    private fun nomePsicologo(psicologoId: Long?, psicologos: List<Psicologo>): String =
+    private fun nomePsicologo(psicologoId: Long, psicologos: List<Psicologo>): String =
         psicologos.firstOrNull { it.id == psicologoId }?.nome
-            ?: psicologoId?.let { "Psicólogo #$it" }
-            ?: "Psicólogo"
+            ?: "Psicólogo #$psicologoId"
 
     private fun formatarDataHora(data: String, hora: String): String? {
         val partesData = data.split('/')
@@ -241,8 +241,8 @@ class BloqueioAgendaViewModel(
             "T${horaInt.toString().padStart(2, '0')}:${minutoInt.toString().padStart(2, '0')}:00"
     }
 
-    private fun separarDataHora(valor: String?): Pair<String, String> {
-        val partes = valor?.split('T', limit = 2) ?: return "" to ""
+    private fun separarDataHora(valor: String): Pair<String, String> {
+        val partes = valor.split('T', limit = 2)
         if (partes.size != 2) return "" to ""
         val data = partes[0].split('-')
         if (data.size != 3) return "" to ""

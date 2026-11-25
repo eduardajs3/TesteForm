@@ -155,9 +155,9 @@ class ConvenioViewModel(
         nome.definir(convenio.nome)
         cnpj.definir(convenio.cnpj)
         telefone.definir(convenio.telefone)
-        percentualCobertura.definir(convenio.percentualCobertura?.toInt()?.toString() ?: "")
+        percentualCobertura.definir(convenio.percentualCobertura.toInt().toString())
         ativo.definir(convenio.ativo.toString())
-        
+
         backStack.clear()
         backStack.add(ConvenioRotas.Formulario)
     }

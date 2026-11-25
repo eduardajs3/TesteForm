@@ -26,7 +26,7 @@ fun BloqueioAgendaListagem(
 ) {
     val lista = vm.bloqueiosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
-    
+
     val itemSelecionado = remember { mutableStateOf<BloqueioAgenda?>(null) }
     val itemParaExcluir = remember { mutableStateOf<BloqueioAgenda?>(null) }
 
@@ -52,8 +52,8 @@ fun BloqueioAgendaListagem(
             itens = lista.value,
             onVisualizar = { item -> itemSelecionado.value = item },
             onEditar = vm::editar,
-            onApagar = { item -> 
-                itemParaExcluir.value = item 
+            onApagar = { item ->
+                itemParaExcluir.value = item
             },
             textoCompacto = { bloqueio -> vm.nomePsicologo(bloqueio.psicologoId) },
             placeholderPesquisa = "Buscar por psicólogo..."
@@ -66,14 +66,14 @@ fun BloqueioAgendaListagem(
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty()),
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio),
                 weight = 1.3f
             )
             CelulaTabelaTexto(
-                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty()),
+                text = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim),
                 weight = 1.3f
             )
-            
+
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
                     texto = if (isAtivo) "Ativo" else "Inativo",
@@ -91,11 +91,11 @@ fun BloqueioAgendaListagem(
                     ItemDetalhe(rotulo = "Psicólogo(a)", valor = vm.nomePsicologo(bloqueio.psicologoId))
                     ItemDetalhe(
                         rotulo = "Data e hora de início",
-                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio.orEmpty())
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraInicio)
                     )
                     ItemDetalhe(
                         rotulo = "Data e hora de fim",
-                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim.orEmpty())
+                        valor = formatarDataHoraIsoParaBrasileira(bloqueio.dataHoraFim)
                     )
                     ItemDetalhe(rotulo = "Motivo", valor = bloqueio.motivo)
                     ItemDetalhe(

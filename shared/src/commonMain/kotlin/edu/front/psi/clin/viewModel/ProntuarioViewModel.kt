@@ -31,7 +31,7 @@ class ProntuarioViewModel(
     private val _prontuarios = MutableStateFlow<List<Prontuario>>(emptyList())
     private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
     val pacientes = _pacientes.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -84,7 +84,7 @@ class ProntuarioViewModel(
             prontuarios.filter {
                 pacientes.firstOrNull { paciente -> paciente.id == it.pacienteId }
                     ?.nome?.contains(filtro, ignoreCase = true) == true ||
-                it.queixaPrincipal.contains(filtro, ignoreCase = true)
+                    it.queixaPrincipal.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -102,7 +102,8 @@ class ProntuarioViewModel(
 
     fun salvar() {
         if (salvando) return
-        if (paciente.value.isBlank() || queixaPrincipal.value.isBlank()) {
+        val dataAberturaFormatada = dataAbertura.value.trim()
+        if (paciente.value.isBlank() || dataAberturaFormatada.isEmpty() || queixaPrincipal.value.isBlank()) {
             mandarMensagem("Preencha os campos obrigatórios!")
             return
         }
@@ -128,7 +129,7 @@ class ProntuarioViewModel(
         val prontuario = Prontuario(
             id = idAtual,
             pacienteId = pacienteId,
-            dataAbertura = dataAbertura.value.trim().ifEmpty { null },
+            dataAbertura = dataAberturaFormatada,
             queixaPrincipal = queixaPrincipal.value.trim(),
             status = statusApi,
             ativo = ativo.value.toBooleanStrictOrNull() ?: true
@@ -149,7 +150,7 @@ class ProntuarioViewModel(
                 } else {
                     "Prontuário atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
@@ -188,9 +189,9 @@ class ProntuarioViewModel(
         backStack.add(ProntuarioRotas.Formulario)
         id.value = prontuario.id?.toString() ?: ""
         paciente.value = _pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome.orEmpty()
-        dataAbertura.value = prontuario.dataAbertura?.let(::formatarDataIsoParaBrasileira).orEmpty()
+        dataAbertura.value = formatarDataIsoParaBrasileira(prontuario.dataAbertura)
         queixaPrincipal.value = prontuario.queixaPrincipal
-        status.value = when (prontuario.status?.uppercase()) {
+        status.value = when (prontuario.status.uppercase()) {
             "ARQUIVADO" -> "Arquivado"
             "ENCERRADO" -> "Encerrado"
             else -> "Ativo"
