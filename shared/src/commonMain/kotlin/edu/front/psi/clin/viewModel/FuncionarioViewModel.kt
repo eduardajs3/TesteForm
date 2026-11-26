@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,17 +43,16 @@ class FuncionarioViewModel(
         } else {
             funcionarios.filter {
                 it.nome.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.cpf.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.email.orEmpty().contains(filtro, ignoreCase = true) ||
-                it.role.orEmpty().contains(filtro, ignoreCase = true)
+                    it.cpf.orEmpty().contains(filtro, ignoreCase = true) ||
+                    it.email.orEmpty().contains(filtro, ignoreCase = true) ||
+                    it.role.orEmpty().contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val backStack =
-        NavBackStack<FuncionarioRotas>(
-            FuncionarioRotas.Listagem
-        )
+    val backStack = NavBackStack<FuncionarioRotas>(
+        FuncionarioRotas.Listagem
+    )
 
     val id = mutableStateOf("")
     val nome = CampoValidado()
@@ -130,7 +129,7 @@ class FuncionarioViewModel(
                 } else {
                     "Funcionário atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
                 backStack.clear()
@@ -162,7 +161,7 @@ class FuncionarioViewModel(
         )
         id.value = ""
         limparCampos()
-        roleOriginal.value = null
+        roleOriginal.value = "ADMIN"
     }
 
     fun editar(funcionario: Funcionario) {

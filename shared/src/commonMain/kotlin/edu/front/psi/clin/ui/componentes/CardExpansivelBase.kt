@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.Branco
 import edu.front.psi.clin.ui.theme.CardBordaCinza
@@ -35,8 +34,9 @@ fun CardExpansivelBase(
     tituloPrincipal: String,
     isExpandido: Boolean,
     onClickToggle: () -> Unit,
-    onEditarClick: () -> Unit,
-    onExcluirClick: () -> Unit,
+    onEditarClick: () -> Unit = {},
+    onExcluirClick: () -> Unit = {},
+    mostrarAcoes: Boolean = true,
     modifier: Modifier = Modifier,
     conteudoExpandido: @Composable ColumnScope.() -> Unit
 ) {
@@ -67,7 +67,7 @@ fun CardExpansivelBase(
             .hoverable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null 
+                indication = null
             ) { onClickToggle() }
     ) {
         Column(
@@ -95,31 +95,33 @@ fun CardExpansivelBase(
                 }
 
                 if (isExpandido) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = onEditarClick,
-                            modifier = Modifier.size(32.dp)
+                    if (mostrarAcoes) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.edit_square_24px),
-                                contentDescription = "Editar",
-                                tint = VerdeClinica,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onExcluirClick,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.delete_24px),
-                                contentDescription = "Excluir",
-                                tint = TextoErro,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            IconButton(
+                                onClick = onEditarClick,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.edit_square_24px),
+                                    contentDescription = "Editar",
+                                    tint = VerdeClinica,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = onExcluirClick,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.delete_24px),
+                                    contentDescription = "Excluir",
+                                    tint = TextoErro,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 } else {

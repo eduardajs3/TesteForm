@@ -161,11 +161,12 @@ class PsicologoViewModel(
         backStack.clear()
         backStack.add(PsicologoRotas.Formulario)
         id.value = psicologo.id?.toString() ?: ""
+        limparCampos()
         nome.definir(psicologo.nome)
         cpf.definir(psicologo.cpf)
         email.definir(psicologo.email)
         telefone.definir(psicologo.telefone)
-        senha.definir(psicologo.senha ?: "")
+        senha.definir("")
         crp.definir(psicologo.crp)
         especialidade.definir(psicologo.especialidade)
         ativo.definir(psicologo.ativo.toString())

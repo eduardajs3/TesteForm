@@ -33,6 +33,7 @@ fun EvolucaoClinicaFormulario(
     val psicologos = vm.psicologos.collectAsState().value
     val agendas = vm.agendas.collectAsState().value
     val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
+
     val prontuarioAtual = prontuarios.firstOrNull { it.id == prontuarioIdSelecionado }
     val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
         agendas.filter { it.pacienteId == prontuario.pacienteId }
@@ -75,7 +76,7 @@ fun EvolucaoClinicaFormulario(
 
     val prontuarioExibicao = prontuarioOpcoes.firstOrNull {
         it.first == prontuarioIdSelecionado
-    }?.second.orEmpty()
+    }?.second ?: prontuarioIdSelecionado?.let { vm.nomeProntuario(it) }.orEmpty()
 
     val psicologoExibicao = psicologoOpcoes.firstOrNull {
         it.first == psicologoAssociadoId
@@ -178,7 +179,8 @@ fun EvolucaoClinicaFormulario(
                 valorSelecionado = statusExibicao,
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    vm.ativo.definir((selecao == "Ativo").toString())
+                    val valorBoolean = (selecao == "Ativo").toString()
+                    vm.ativo.definir(valorBoolean)
                 },
                 isError = vm.ativo.temErro.value,
                 errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null

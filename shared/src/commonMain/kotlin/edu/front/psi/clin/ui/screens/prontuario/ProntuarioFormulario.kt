@@ -25,9 +25,9 @@ fun ProntuarioFormulario(
     val pacientes = vm.pacientes.collectAsState().value
     val nomePaciente = pacientes.firstOrNull { it.id == vm.pacienteId }?.nome.orEmpty()
 
-    val statusRegistroOpcoes = listOf("Ativo", "Inativo")
-    val statusExibicao = ProntuarioStatus.deValorApi(vm.status.valor.value).rotulo
-    val ativoExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
+    val statusOpcoes = listOf("Ativo", "Inativo")
+    val statusProntuarioExibicao = ProntuarioStatus.deValorApi(vm.status.valor.value).rotulo
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -58,7 +58,7 @@ fun ProntuarioFormulario(
 
             CampoDropdownPadrao(
                 label = "Status do prontuário",
-                valorSelecionado = statusExibicao,
+                valorSelecionado = statusProntuarioExibicao,
                 opcoes = ProntuarioStatus.entries.map { it.rotulo },
                 onOpcaoSelecionada = { selecao ->
                     val selecionado = ProntuarioStatus.entries.firstOrNull { it.rotulo == selecao }
@@ -70,8 +70,8 @@ fun ProntuarioFormulario(
 
             CampoDropdownPadrao(
                 label = "Status",
-                valorSelecionado = ativoExibicao,
-                opcoes = statusRegistroOpcoes,
+                valorSelecionado = statusExibicao,
+                opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     val valorBoolean = (selecao == "Ativo").toString()
                     vm.ativo.definir(valorBoolean)

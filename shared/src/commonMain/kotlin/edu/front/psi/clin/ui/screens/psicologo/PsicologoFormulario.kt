@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.navigation.PsicologoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.PsicologoViewModel
 
@@ -85,7 +85,6 @@ fun PsicologoFormulario(
                 label = "CRP",
                 placeholder = "00/00000",
                 obrigatorio = true,
-                apenasNumeros = true,
                 isError = vm.crp.temErro.value,
                 errorMessage = if (vm.crp.temErro.value) "Campo obrigatório" else null
             )
