@@ -10,11 +10,11 @@ import edu.front.psi.clin.api.ConvenioAPI
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.Convenio
+import edu.front.psi.clin.navigation.ConvenioRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import edu.front.psi.clin.navigation.ConvenioRotas
 
 class ConvenioViewModel(
     private val mandarMensagem: (String) -> Unit
@@ -24,10 +24,10 @@ class ConvenioViewModel(
     private val convenioApi = ConvenioAPI(httpClient)
 
     private val _convenios = MutableStateFlow<List<Convenio>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -35,7 +35,6 @@ class ConvenioViewModel(
         viewModelScope.launch {
             try {
                 _convenios.value = convenioApi.carregar()
-                println("Lista carregada no init: ${_convenios.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar convênios do servidor"))
             }
@@ -107,20 +106,18 @@ class ConvenioViewModel(
                     convenioApi.atualizar(idNumber, convenio)
                 }
                 _convenios.value = convenioApi.carregar()
-                println("Lista após salvar: ${_convenios.value}")
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Convênio salvo com sucesso!"
                 } else {
                     "Convênio atualizado com sucesso!"
                 }
-            
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
-         
+
                 backStack.clear()
                 backStack.add(ConvenioRotas.Listagem)
-                
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -134,7 +131,6 @@ class ConvenioViewModel(
             try {
                 convenioApi.apagar(convenio)
                 _convenios.value = convenioApi.carregar()
-                println("Lista após apagar: ${_convenios.value}")
                 mandarMensagem("Convênio apagado com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -150,13 +146,12 @@ class ConvenioViewModel(
     }
 
     fun editar(convenio: Convenio) {
-        id.value = convenio.id.toString()
+        id.value = convenio.id?.toString() ?: ""
         nome.definir(convenio.nome)
         cnpj.definir(convenio.cnpj)
         telefone.definir(convenio.telefone)
         percentualCobertura.definir(convenio.percentualCobertura.toInt().toString())
         ativo.definir(convenio.ativo.toString())
-
         backStack.clear()
         backStack.add(ConvenioRotas.Formulario)
     }

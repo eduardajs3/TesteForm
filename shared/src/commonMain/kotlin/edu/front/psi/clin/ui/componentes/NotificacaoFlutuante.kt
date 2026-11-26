@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.ui.theme.BordaErro
 import edu.front.psi.clin.ui.theme.FundoErro
@@ -53,7 +54,8 @@ fun NotificacaoFlutuante(
                 shape = RoundedCornerShape(12.dp),
                 color = if (ehErro) FundoErro else FundoSucesso,
                 shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, if (ehErro) BordaErro else VerdeSuave)
+                border = BorderStroke(1.dp, if (ehErro) BordaErro else VerdeSuave),
+                modifier = Modifier.widthIn(max = 460.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -62,14 +64,17 @@ fun NotificacaoFlutuante(
                 ) {
                     Text(
                         text = if (ehErro) "!" else "✓",
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
                         color = if (ehErro) TextoErro else VerdeSucesso,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = mensagemExibida ?: "",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = if (ehErro) TextoErro else VerdeSucesso
+                        color = if (ehErro) TextoErro else VerdeSucesso,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                 }
             }

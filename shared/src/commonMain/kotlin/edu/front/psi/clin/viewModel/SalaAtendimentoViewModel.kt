@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,10 +23,10 @@ class SalaAtendimentoViewModel(
     private val salaApi = SalaAtendimentoAPI(httpClient)
 
     private val _salas = MutableStateFlow<List<SalaAtendimento>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -34,7 +34,6 @@ class SalaAtendimentoViewModel(
         viewModelScope.launch {
             try {
                 _salas.value = salaApi.carregar()
-                println("Salas carregadas no init: ${_salas.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar salas do servidor"))
             }
@@ -76,7 +75,7 @@ class SalaAtendimentoViewModel(
 
     fun salvar() {
         if (salvando) return
-        
+
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = capacidade.validar()
@@ -107,20 +106,18 @@ class SalaAtendimentoViewModel(
                 }
 
                 _salas.value = salaApi.carregar()
-                println("Salas após salvar: ${_salas.value}")
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Sala salva com sucesso!"
                 } else {
                     "Sala atualizada com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
-                
+
                 backStack.clear()
                 backStack.add(SalaAtendimentoRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -134,7 +131,6 @@ class SalaAtendimentoViewModel(
             try {
                 salaApi.apagar(sala)
                 _salas.value = salaApi.carregar()
-                println("Salas após apagar: ${_salas.value}")
                 mandarMensagem("Sala apagada com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -152,7 +148,7 @@ class SalaAtendimentoViewModel(
     fun editar(sala: SalaAtendimento) {
         backStack.clear()
         backStack.add(SalaAtendimentoRotas.Formulario)
-        id.value = sala.id.toString()
+        id.value = sala.id?.toString() ?: ""
         nome.definir(sala.nome)
         descricao.definir(sala.descricao)
         capacidade.definir(sala.capacidade.toString())

@@ -36,7 +36,6 @@ class TipoAtendimentoViewModel(
         viewModelScope.launch {
             try {
                 _tiposAtendimento.value = tipoApi.carregar()
-                println("Tipos de atendimento carregados no init: ${_tiposAtendimento.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar tipos de atendimento do servidor"))
             }
@@ -104,7 +103,6 @@ class TipoAtendimentoViewModel(
                 }
 
                 _tiposAtendimento.value = tipoApi.carregar()
-                println("Tipos após salvar: ${_tiposAtendimento.value}")
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Tipo de atendimento salvo com sucesso!"
@@ -130,7 +128,6 @@ class TipoAtendimentoViewModel(
             try {
                 tipoApi.apagar(tipo)
                 _tiposAtendimento.value = tipoApi.carregar()
-                println("Tipos após apagar: ${_tiposAtendimento.value}")
                 mandarMensagem("Tipo de atendimento apagado com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -148,10 +145,10 @@ class TipoAtendimentoViewModel(
     fun editar(tipo: TipoAtendimento) {
         backStack.clear()
         backStack.add(TipoAtendimentoRotas.Formulario)
-        id.value = tipo.id.toString()
+        id.value = tipo.id?.toString() ?: ""
         nome.definir(tipo.nome)
         descricao.definir(tipo.descricao)
-        duracao.definir(tipo.duracao)
+        duracao.definir(tipo.duracao.take(5))
         ativo.definir(tipo.ativo.toString())
         modalidade.definir(tipo.modalidade.name)
     }

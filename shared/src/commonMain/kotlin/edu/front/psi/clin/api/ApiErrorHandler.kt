@@ -11,8 +11,9 @@ import kotlinx.serialization.json.contentOrNull
 
 class BackendApiException(
     val statusCode: Int,
-    message: String
-) : Exception(message)
+    val mensagemAmigavel: String,
+    val detalheTecnico: String
+) : Exception(mensagemAmigavel)
 
 internal suspend fun HttpResponse.lancarErroSeNecessario() {
     if (status.isSuccess()) return
@@ -22,10 +23,21 @@ internal suspend fun HttpResponse.lancarErroSeNecessario() {
     val bearerPresente = authorization.startsWith("Bearer ", ignoreCase = true)
     val endpoint = "${request.method.value} ${request.url.encodedPath}"
     val autenticacao = if (bearerPresente) "Bearer enviado" else "Bearer ausente"
+    val detalheApi = mensagemDeErroApi(bodyAsText())
+
+    val mensagemAmigavel = when (status.value) {
+        401 -> "Sua sessão expirou ou você não está autenticado. Faça login novamente."
+        403 -> "Você não tem permissão para realizar esta ação."
+        else -> detalheApi.takeIf { it != MENSAGEM_ERRO_PADRAO } ?: MENSAGEM_ERRO_PADRAO
+    }
+
+    val detalheTecnico = "$endpoint retornou HTTP ${status.value} ($autenticacao): $detalheApi"
+    println("[API ERROR] $detalheTecnico")
 
     throw BackendApiException(
         statusCode = status.value,
-        message = "$endpoint retornou HTTP ${status.value} ($autenticacao): ${mensagemDeErroApi(bodyAsText())}"
+        mensagemAmigavel = mensagemAmigavel,
+        detalheTecnico = detalheTecnico
     )
 }
 
@@ -57,13 +69,10 @@ internal fun mensagemDeErroApi(body: String): String {
 
 fun Throwable.mensagemParaUsuario(mensagemGenerica: String): String {
     if (this is BackendApiException) {
-        return message?.takeIf(String::isNotBlank) ?: mensagemGenerica
+        return mensagemAmigavel.takeIf(String::isNotBlank) ?: mensagemGenerica
     }
 
-    return message
-        ?.takeIf(String::isNotBlank)
-        ?.let { "$mensagemGenerica: $it" }
-        ?: mensagemGenerica
+    return mensagemGenerica
 }
 
 private const val MENSAGEM_ERRO_PADRAO =

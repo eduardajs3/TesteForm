@@ -18,6 +18,7 @@ import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.math.roundToLong
 
 class PagamentoViewModel(
     private val mandarMensagem: (String) -> Unit
@@ -101,8 +102,6 @@ class PagamentoViewModel(
                         agendaId.value = null
                     }
                 }
-
-                println("Dados de Pagamento e dependências carregados com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pagamentos"))
             } finally {
@@ -144,7 +143,11 @@ class PagamentoViewModel(
     fun salvar() {
         if (salvando) return
 
-        if (agendaId.value == null || pacienteId.value == null || convenioId.value == null) {
+        val agendaSelecionada = agendaId.value
+        val pacienteSelecionado = pacienteId.value
+        val convenioSelecionado = convenioId.value
+
+        if (agendaSelecionada == null || pacienteSelecionado == null || convenioSelecionado == null) {
             mandarMensagem("Selecione Agenda, Paciente e Convênio.")
             return
         }
@@ -160,55 +163,51 @@ class PagamentoViewModel(
             return
         }
 
-        try {
-            fun converterMoedaParaDouble(valorStr: String): Double {
-                val apenasDigitos = valorStr.filter { it.isDigit() }
-                if (apenasDigitos.isEmpty()) return 0.0
-                return apenasDigitos.toDouble() / 100.0
-            }
-
-            val pagamento = Pagamento(
-                id = if (id.value.isEmpty()) null else id.value.toLong(),
-                agendaId = agendaId.value!!,
-                pacienteId = pacienteId.value!!,
-                convenioId = convenioId.value!!,
-                valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
-                valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
-                valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
-                formaPagamento = formaPagamento.valor.value,
-                dataPagamento = dataPagamento.valor.value,
-                status = PagamentoStatus.deValorApi(status.valor.value)
-            )
-
-            viewModelScope.launch {
-                salvando = true
-                try {
-                    if (id.value.isEmpty()) {
-                        pagamentoApi.salvar(pagamento)
-                    } else {
-                        pagamentoApi.atualizar(id.value.toLong(), pagamento)
-                    }
-                    _pagamentos.value = pagamentoApi.carregar()
-
-                    val mensagemSucesso = if (id.value.isEmpty()) {
-                        "Pagamento salvo com sucesso!"
-                    } else {
-                        "Pagamento atualizado com sucesso!"
-                    }
-
-                    mandarMensagem(mensagemSucesso)
-                    limparCampos()
-
-                    backStack.clear()
-                    backStack.add(PagamentoRotas.Listagem)
-                } catch (e: Exception) {
-                    mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
-                } finally {
-                    salvando = false
+        viewModelScope.launch {
+            salvando = true
+            try {
+                fun converterMoedaParaDouble(valorStr: String): Double {
+                    val apenasDigitos = valorStr.filter { it.isDigit() }
+                    if (apenasDigitos.isEmpty()) return 0.0
+                    return apenasDigitos.toDouble() / 100.0
                 }
+
+                val pagamento = Pagamento(
+                    id = id.value.toLongOrNull(),
+                    agendaId = agendaSelecionada,
+                    pacienteId = pacienteSelecionado,
+                    convenioId = convenioSelecionado,
+                    valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
+                    valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
+                    valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
+                    formaPagamento = formaPagamento.valor.value,
+                    dataPagamento = dataPagamento.valor.value,
+                    status = PagamentoStatus.deValorApi(status.valor.value)
+                )
+
+                if (id.value.isEmpty()) {
+                    pagamentoApi.salvar(pagamento)
+                } else {
+                    pagamentoApi.atualizar(id.value.toLong(), pagamento)
+                }
+                _pagamentos.value = pagamentoApi.carregar()
+
+                val mensagemSucesso = if (id.value.isEmpty()) {
+                    "Pagamento salvo com sucesso!"
+                } else {
+                    "Pagamento atualizado com sucesso!"
+                }
+
+                mandarMensagem(mensagemSucesso)
+                limparCampos()
+
+                backStack.clear()
+                backStack.add(PagamentoRotas.Listagem)
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
+            } finally {
+                salvando = false
             }
-        } catch (e: Exception) {
-            mandarMensagem("Erro ao processar valores: ${e.message}")
         }
     }
 
@@ -238,7 +237,6 @@ class PagamentoViewModel(
         agendaId.value = pagamento.agendaId
         pacienteId.value = pagamento.pacienteId
         convenioId.value = pagamento.convenioId
-
         valorTotal.definir(valorParaCentavos(pagamento.valorTotal))
         valorConvenio.definir(valorParaCentavos(pagamento.valorConvenio))
         valorPaciente.definir(valorParaCentavos(pagamento.valorPaciente))
@@ -250,7 +248,7 @@ class PagamentoViewModel(
     }
 
     private fun valorParaCentavos(valor: Double): String =
-        (valor * 100.0).toLong().toString()
+        (valor * 100.0).roundToLong().toString()
 
     fun limparCampos() {
         agendaId.value = null
