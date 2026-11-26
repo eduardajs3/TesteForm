@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -52,7 +52,8 @@ class HorarioDisponivelViewModel(
 
                 _horarios.value = horariosAtualizados
                 _psicologos.value = psicologosAtualizados
-                val psicologoSelecionadoId = psicologo.valor.value.toLongOrNull()
+
+                val psicologoSelecionadoId = psicologoId.value
                 if (
                     id.value.isEmpty() &&
                     psicologoSelecionadoId != null &&
@@ -60,9 +61,8 @@ class HorarioDisponivelViewModel(
                         it.id == psicologoSelecionadoId && it.ativo
                     }
                 ) {
-                    psicologo.limpar()
+                    psicologoId.value = null
                 }
-                println("Horários disponíveis carregados no init: ${_horarios.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
             } finally {
@@ -97,7 +97,7 @@ class HorarioDisponivelViewModel(
 
     val id = mutableStateOf("")
 
-    val psicologo = CampoValidado()
+    val psicologoId = mutableStateOf<Long?>(null)
     val diaSemana = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
@@ -106,13 +106,19 @@ class HorarioDisponivelViewModel(
 
     fun salvar() {
         if (salvando) return
-        val v1 = psicologo.validar()
+
+        val psicologoSelecionado = psicologoId.value
+        if (psicologoSelecionado == null) {
+            mandarMensagem("Selecione um psicólogo.")
+            return
+        }
+
         val v2 = diaSemana.validar()
         val v3 = horaInicio.validar()
         val v4 = horaFim.validar()
         val v6 = ativo.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v6)) {
+        if (!(v2 && v3 && v4 && v6)) {
             mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
@@ -120,29 +126,25 @@ class HorarioDisponivelViewModel(
         viewModelScope.launch {
             salvando = true
             try {
-                val ativoValido = ativo.valor.value.toBooleanStrictOrNull()
-                if (ativoValido == null) {
-                    mandarMensagem("Selecione um status válido para o horário.")
-                    return@launch
-                }
-
-                val psicologoIdValor = psicologo.valor.value.toLongOrNull() ?: 1L
-
                 val horario = HorarioDisponivel(
-                    id = if (id.value.isEmpty()) null else id.value.toLong(),
-                    psicologoId = psicologoIdValor,
+                    id = id.value.toLongOrNull(),
+                    psicologoId = psicologoSelecionado,
                     diaSemana = diaSemana.valor.value,
                     horaInicio = if (horaInicio.valor.value.length == 5) "${horaInicio.valor.value}:00" else horaInicio.valor.value,
                     horaFim = if (horaFim.valor.value.length == 5) "${horaFim.valor.value}:00" else horaFim.valor.value,
                     descricao = descricao.valor.value.ifEmpty { null },
-                    ativo = ativoValido
+                    ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
                     horarioApi.salvar(horario)
                 } else {
-                    val idNumber = id.value.toLong()
-                    horarioApi.atualizar(idNumber, horario)
+                    val idAtual = id.value.toLongOrNull()
+                    if (idAtual == null) {
+                        mandarMensagem("ID de horário inválido.")
+                        return@launch
+                    }
+                    horarioApi.atualizar(idAtual, horario)
                 }
 
                 _horarios.value = horarioApi.carregar()
@@ -158,7 +160,6 @@ class HorarioDisponivelViewModel(
 
                 backStack.clear()
                 backStack.add(HorarioDisponivelRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -190,16 +191,16 @@ class HorarioDisponivelViewModel(
         backStack.clear()
         backStack.add(HorarioDisponivelRotas.Formulario)
         id.value = horario.id?.toString() ?: ""
-        psicologo.definir(horario.psicologoId.toString())
+        psicologoId.value = horario.psicologoId
         diaSemana.definir(horario.diaSemana)
-        horaInicio.definir(horario.horaInicio)
-        horaFim.definir(horario.horaFim)
+        horaInicio.definir(horario.horaInicio.take(5))
+        horaFim.definir(horario.horaFim.take(5))
         descricao.definir(horario.descricao ?: "")
         ativo.definir(horario.ativo.toString())
     }
 
     fun limparCampos() {
-        psicologo.limpar()
+        psicologoId.value = null
         diaSemana.limpar()
         horaInicio.limpar()
         horaFim.limpar()

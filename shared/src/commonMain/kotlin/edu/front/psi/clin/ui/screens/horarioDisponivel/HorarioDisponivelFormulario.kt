@@ -31,17 +31,24 @@ fun HorarioDisponivelFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
     val psicologosLista = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologosLista.filter {
-        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
-    }.map { it.nome }
+    val psicologosFiltrados = psicologosLista.filter {
+        it.ativo || (isEdicao && it.id == vm.psicologoId.value)
+    }
+    val psicologoOpcoes = psicologosFiltrados.map { it.nome }
 
     val diasOpcoes = listOf("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
-    val psicologoAtualObj = psicologosLista.firstOrNull { it.id?.toString() == vm.psicologo.valor.value }
+    val psicologoAtualObj = psicologosFiltrados.firstOrNull { it.id == vm.psicologoId.value }
     val psicologoAtualNome = psicologoAtualObj?.nome ?: (psicologoOpcoes.firstOrNull() ?: "")
-    
+
+    LaunchedEffect(psicologosFiltrados, vm.psicologoId.value) {
+        if (vm.psicologoId.value == null && psicologosFiltrados.isNotEmpty()) {
+            vm.psicologoId.value = psicologosFiltrados.first().id
+        }
+    }
+
     val diaAtualRotulo = vm.diaSemana.valor.value.ifBlank { diasOpcoes.first() }
 
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
@@ -59,13 +66,13 @@ fun HorarioDisponivelFormulario(
                 valorSelecionado = psicologoAtualNome,
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nomeSelecionado ->
-                    val psicologoEscolhido = psicologosLista.firstOrNull { it.nome == nomeSelecionado }
+                    val psicologoEscolhido = psicologosFiltrados.firstOrNull { it.nome == nomeSelecionado }
                     if (psicologoEscolhido?.id != null) {
-                        vm.psicologo.definir(psicologoEscolhido.id.toString())
+                        vm.psicologoId.value = psicologoEscolhido.id
                     }
                 },
-                isError = vm.psicologo.temErro.value,
-                errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
+                isError = false,
+                errorMessage = null
             )
 
             CampoDropdownPadrao(

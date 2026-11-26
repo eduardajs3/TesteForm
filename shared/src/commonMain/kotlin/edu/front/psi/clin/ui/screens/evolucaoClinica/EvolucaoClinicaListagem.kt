@@ -11,7 +11,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.EvolucaoClinica
 import edu.front.psi.clin.ui.componentes.*
-import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.theme.TextoPrincipal
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
@@ -66,7 +65,7 @@ fun EvolucaoClinicaListagem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(listaOrdenada) { item ->
+                items(listaOrdenada, key = { it.id ?: it.hashCode() }) { item ->
                     val isExpansivel = itemExpandidoId == item.id
                     val psicologoNome = psicologos.firstOrNull { it.id == item.psicologoId }?.nome
                         ?: "Psicólogo #${item.psicologoId}"

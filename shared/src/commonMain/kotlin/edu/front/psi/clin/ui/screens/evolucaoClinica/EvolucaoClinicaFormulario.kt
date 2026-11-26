@@ -23,16 +23,21 @@ fun EvolucaoClinicaFormulario(
 ) {
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
+
+    val prontuarioIdSelecionado = vm.prontuarioId.valor.value.toLongOrNull()
+    val agendaIdSelecionado = vm.agendaId.valor.value.toLongOrNull()
+    val psicologoIdSelecionado = vm.psicologoId.valor.value.toLongOrNull()
+
     val pacientes = vm.pacientes.collectAsState().value
     val prontuarios = vm.prontuarios.collectAsState().value
     val psicologos = vm.psicologos.collectAsState().value
     val agendas = vm.agendas.collectAsState().value
     val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
-    val prontuarioAtual = prontuarios.firstOrNull { it.id == vm.prontuarioId.value }
+    val prontuarioAtual = prontuarios.firstOrNull { it.id == prontuarioIdSelecionado }
     val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
         agendas.filter { it.pacienteId == prontuario.pacienteId }
     }.orEmpty()
-    val agendaAtual = agendas.firstOrNull { it.id == vm.agendaId.value }
+    val agendaAtual = agendas.firstOrNull { it.id == agendaIdSelecionado }
     val agendasParaOpcoes = (agendasDoPaciente + listOfNotNull(agendaAtual))
         .distinctBy { it.id }
 
@@ -46,7 +51,7 @@ fun EvolucaoClinicaFormulario(
         }
     }
 
-    val psicologoAssociadoId = agendaAtual?.psicologoId ?: vm.psicologoId.value
+    val psicologoAssociadoId = agendaAtual?.psicologoId ?: psicologoIdSelecionado
     val psicologoAssociado = psicologos.firstOrNull { it.id == psicologoAssociadoId }
     val psicologoOpcoes = listOfNotNull(
         psicologoAssociadoId?.let { id ->
@@ -61,7 +66,7 @@ fun EvolucaoClinicaFormulario(
             id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
         }
     } + listOfNotNull(
-        vm.agendaId.value
+        agendaIdSelecionado
             ?.takeIf { id -> agendasParaOpcoes.none { it.id == id } }
             ?.let { it to "Agenda #$it" }
     )
@@ -69,7 +74,7 @@ fun EvolucaoClinicaFormulario(
     val statusOpcoes = listOf("Ativo", "Inativo")
 
     val prontuarioExibicao = prontuarioOpcoes.firstOrNull {
-        it.first == vm.prontuarioId.value
+        it.first == prontuarioIdSelecionado
     }?.second.orEmpty()
 
     val psicologoExibicao = psicologoOpcoes.firstOrNull {
@@ -77,22 +82,30 @@ fun EvolucaoClinicaFormulario(
     }?.second.orEmpty()
 
     val agendaExibicao = agendaOpcoes.firstOrNull {
-        it.first == vm.agendaId.value
+        it.first == agendaIdSelecionado
     }?.second.orEmpty()
 
-    val statusExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
+    val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) {
+        "Ativo"
+    } else {
+        "Inativo"
+    }
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Evolução Clínica" else "Cadastro de Evolução Clínica",
-            subtitulo = if (isEdicao) "Altere os dados do registro de evolução selecionado." else "Preencha os dados da evolução clínica.",
+            subtitulo = if (isEdicao) {
+                "Altere os dados do registro de evolução selecionado."
+            } else {
+                "Preencha os dados da evolução clínica."
+            },
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(EvolucaoClinicaRotas.Listagem)
             }
         ) {
             CampoDropdownPadrao(
-                label = "Prontuário",
+                label = "Prontuário *",
                 valorSelecionado = prontuarioExibicao,
                 opcoes = prontuarioOpcoes.map { it.second },
                 onOpcaoSelecionada = { selecao ->
@@ -100,11 +113,13 @@ fun EvolucaoClinicaFormulario(
                         it.second == selecao
                     }?.first
                     prontuarios.firstOrNull { it.id == prontuarioId }?.let(vm::selecionarProntuario)
-                }
+                },
+                isError = vm.prontuarioId.temErro.value,
+                errorMessage = if (vm.prontuarioId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
-                label = "Agenda",
+                label = "Agenda *",
                 valorSelecionado = agendaExibicao,
                 opcoes = agendaOpcoes.map { it.second },
                 onOpcaoSelecionada = { selecao ->
@@ -112,37 +127,50 @@ fun EvolucaoClinicaFormulario(
                         it.second == selecao
                     }?.first
                     agendas.firstOrNull { it.id == agendaId }?.let(vm::selecionarAgenda)
-                }
+                },
+                isError = vm.agendaId.temErro.value,
+                errorMessage = if (vm.agendaId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
-                label = "Psicólogo da agenda",
+                label = "Psicólogo da agenda *",
                 valorSelecionado = psicologoExibicao,
                 opcoes = psicologoOpcoes.map { it.second },
                 onOpcaoSelecionada = { selecao ->
-                    vm.psicologoId.value = psicologoOpcoes.firstOrNull {
+                    val idSelecionado = psicologoOpcoes.firstOrNull {
                         it.second == selecao
                     }?.first
-                }
+                    vm.psicologoId.definir(idSelecionado?.toString().orEmpty())
+                },
+                isError = vm.psicologoId.temErro.value,
+                errorMessage = if (vm.psicologoId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(
-                value = vm.dataRegistro.value,
-                onValueChange = { vm.dataRegistro.value = it },
-                label = "Data do registro"
+                value = vm.dataRegistro.valor.value,
+                onValueChange = { vm.dataRegistro.definir(it) },
+                label = "Data do registro",
+                obrigatorio = true,
+                isError = vm.dataRegistro.temErro.value,
+                errorMessage = if (vm.dataRegistro.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.horaRegistro.value,
-                onValueChange = { vm.horaRegistro.value = MaskUtils.aplicarMascaraHora(it) },
+                value = vm.horaRegistro.valor.value,
+                onValueChange = { vm.horaRegistro.definir(MaskUtils.aplicarMascaraHora(it)) },
                 label = "Horário do registro",
-                placeholder = "HH:mm"
+                placeholder = "HH:mm",
+                isError = vm.horaRegistro.temErro.value,
+                errorMessage = if (vm.horaRegistro.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.descricao.value,
-                onValueChange = { vm.descricao.value = it },
-                label = "Descrição da evolução clínica"
+                value = vm.descricao.valor.value,
+                onValueChange = { vm.descricao.definir(it) },
+                label = "Descrição da evolução clínica",
+                obrigatorio = true,
+                isError = vm.descricao.temErro.value,
+                errorMessage = if (vm.descricao.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -150,9 +178,10 @@ fun EvolucaoClinicaFormulario(
                 valorSelecionado = statusExibicao,
                 opcoes = statusOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    val valorBoolean = (selecao == "Ativo").toString()
-                    vm.ativo.value = valorBoolean
-                }
+                    vm.ativo.definir((selecao == "Ativo").toString())
+                },
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

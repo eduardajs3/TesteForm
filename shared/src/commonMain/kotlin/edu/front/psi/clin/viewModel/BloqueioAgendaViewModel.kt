@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,10 +15,12 @@ import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
+import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 class BloqueioAgendaViewModel(
     private val mandarMensagem: (String) -> Unit,
@@ -53,6 +55,7 @@ class BloqueioAgendaViewModel(
 
                 _bloqueios.value = bloqueiosAtualizados
                 _psicologos.value = psicologosAtualizados
+
                 val psicologoSelecionadoId = psicologo.valor.value.toLongOrNull()
                 if (
                     id.value.isEmpty() &&
@@ -123,36 +126,31 @@ class BloqueioAgendaViewModel(
         }
 
         val psicologoId = psicologo.valor.value.toLongOrNull()
-        val inicio = formatarDataHora(dataInicio.valor.value, horaInicio.valor.value)
-        val fim = formatarDataHora(dataFim.valor.value, horaFim.valor.value)
-        val bloqueioId = if (id.value.isEmpty()) 0L else id.value.toLongOrNull()
+        val inicioDateTime = montarDataHoraIso(dataInicio.valor.value, horaInicio.valor.value)
+        val fimDateTime = montarDataHoraIso(dataFim.valor.value, horaFim.valor.value)
 
-        if (psicologoId == null || inicio == null || fim == null || bloqueioId == null) {
+        if (psicologoId == null || inicioDateTime == null || fimDateTime == null) {
             mandarMensagem("Informe psicólogo, datas e horários válidos.")
-            return
-        }
-
-        if (fim <= inicio) {
-            mandarMensagem("O fim do bloqueio deve ser posterior ao início.")
             return
         }
 
         viewModelScope.launch {
             salvando = true
             try {
+                val idAtual = id.value.toLongOrNull()
                 val bloqueio = BloqueioAgenda(
-                    id = if (id.value.isEmpty()) null else bloqueioId,
+                    id = idAtual,
                     psicologoId = psicologoId,
-                    dataHoraInicio = inicio,
-                    dataHoraFim = fim,
-                    motivo = motivo.valor.value,
+                    dataHoraInicio = inicioDateTime.toString(),
+                    dataHoraFim = fimDateTime.toString(),
+                    motivo = motivo.valor.value.trim(),
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 
                 if (id.value.isEmpty()) {
                     bloqueioApi.salvar(bloqueio)
                 } else {
-                    bloqueioApi.atualizar(bloqueioId, bloqueio)
+                    bloqueioApi.atualizar(idAtual!!, bloqueio)
                 }
 
                 _bloqueios.value = bloqueioApi.carregar()
@@ -200,12 +198,10 @@ class BloqueioAgendaViewModel(
         backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = bloqueio.id?.toString() ?: ""
         psicologo.definir(bloqueio.psicologoId.toString())
-        val (dataInicioValor, horaInicioValor) = separarDataHora(bloqueio.dataHoraInicio)
-        val (dataFimValor, horaFimValor) = separarDataHora(bloqueio.dataHoraFim)
-        dataInicio.definir(dataInicioValor)
-        horaInicio.definir(horaInicioValor)
-        dataFim.definir(dataFimValor)
-        horaFim.definir(horaFimValor)
+        dataInicio.definir(formatarDataIsoParaBrasileira(bloqueio.dataHoraInicio))
+        horaInicio.definir(bloqueio.dataHoraInicio.substringAfter('T', "").take(5))
+        dataFim.definir(formatarDataIsoParaBrasileira(bloqueio.dataHoraFim))
+        horaFim.definir(bloqueio.dataHoraFim.substringAfter('T', "").take(5))
         motivo.definir(bloqueio.motivo)
         ativo.definir(bloqueio.ativo.toString())
     }
@@ -224,28 +220,16 @@ class BloqueioAgendaViewModel(
         psicologos.firstOrNull { it.id == psicologoId }?.nome
             ?: "Psicólogo #$psicologoId"
 
-    private fun formatarDataHora(data: String, hora: String): String? {
-        val partesData = data.split('/')
-        if (partesData.size != 3) return null
-        val date = runCatching {
-            LocalDate(partesData[2].toInt(), partesData[1].toInt(), partesData[0].toInt())
-        }.getOrNull() ?: return null
-
-        val partesHora = hora.split(':')
+    private fun montarDataHoraIso(data: String, hora: String): LocalDateTime? {
+        val dataIso = formatarDataBrasileiraParaIso(data.trim())
+        val partesHora = hora.trim().split(':')
         if (partesHora.size != 2) return null
+
         val horaInt = partesHora[0].toIntOrNull() ?: return null
         val minutoInt = partesHora[1].toIntOrNull() ?: return null
         if (horaInt !in 0..23 || minutoInt !in 0..59) return null
 
-        return "$date" +
-            "T${horaInt.toString().padStart(2, '0')}:${minutoInt.toString().padStart(2, '0')}:00"
-    }
-
-    private fun separarDataHora(valor: String): Pair<String, String> {
-        val partes = valor.split('T', limit = 2)
-        if (partes.size != 2) return "" to ""
-        val data = partes[0].split('-')
-        if (data.size != 3) return "" to ""
-        return "${data[2]}/${data[1]}/${data[0]}" to partes[1].take(5)
+        val horaFormatada = "${horaInt.toString().padStart(2, '0')}:${minutoInt.toString().padStart(2, '0')}:00"
+        return runCatching { LocalDateTime.parse("${dataIso}T$horaFormatada") }.getOrNull()
     }
 }

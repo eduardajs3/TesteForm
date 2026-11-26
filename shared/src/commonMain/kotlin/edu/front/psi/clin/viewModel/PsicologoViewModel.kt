@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +23,7 @@ class PsicologoViewModel(
     private val httpClient = httpClientManager()
     private val psicologoApi = PsicologoAPI(httpClient)
 
-    private val _psicologos = MutableStateFlow<List<Psicologo>>(listOf())
+    private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
@@ -35,7 +35,6 @@ class PsicologoViewModel(
         viewModelScope.launch {
             try {
                 _psicologos.value = psicologoApi.carregar()
-                println("Psicólogos carregados no init: ${_psicologos.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar psicólogos do servidor"))
             }
@@ -52,8 +51,8 @@ class PsicologoViewModel(
         } else {
             psicologos.filter {
                 it.nome.contains(filtro, ignoreCase = true) ||
-                it.crp.contains(filtro, ignoreCase = true) ||
-                it.especialidade.contains(filtro, ignoreCase = true)
+                    it.crp.contains(filtro, ignoreCase = true) ||
+                    it.especialidade.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -61,6 +60,7 @@ class PsicologoViewModel(
     val backStack = NavBackStack<PsicologoRotas>(
         PsicologoRotas.Listagem
     )
+
     val id = mutableStateOf("")
     val nome = CampoValidado()
     val cpf = CampoValidado(formatador = { MaskUtils.aplicarMascaraCpf(it) })
@@ -94,8 +94,11 @@ class PsicologoViewModel(
         viewModelScope.launch {
             salvando = true
             try {
+                val idAtual = id.value.toLongOrNull()
+                val registroAtual = _psicologos.value.firstOrNull { it.id == idAtual }
+
                 val psicologo = Psicologo(
-                    id = id.value.toLongOrNull(),
+                    id = idAtual,
                     nome = nome.valor.value,
                     cpf = cpf.valor.value,
                     email = email.valor.value,
@@ -104,9 +107,7 @@ class PsicologoViewModel(
                     crp = crp.valor.value,
                     especialidade = especialidade.valor.value,
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true,
-                    dataCadastro = _psicologos.value
-                        .firstOrNull { it.id == id.value.toLongOrNull() }
-                        ?.dataCadastro
+                    dataCadastro = registroAtual?.dataCadastro
                 )
 
                 if (id.value.isEmpty()) {
@@ -117,20 +118,18 @@ class PsicologoViewModel(
                 }
 
                 _psicologos.value = psicologoApi.carregar()
-                println("Psicólogos após salvar: ${_psicologos.value}")
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Psicólogo salvo com sucesso!"
                 } else {
                     "Psicólogo atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
                 backStack.clear()
                 backStack.add(PsicologoRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -144,7 +143,6 @@ class PsicologoViewModel(
             try {
                 psicologoApi.apagar(psicologo)
                 _psicologos.value = psicologoApi.carregar()
-                println("Psicólogos após apagar: ${_psicologos.value}")
                 mandarMensagem("Psicólogo apagado com sucesso!")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao apagar"))
@@ -162,7 +160,7 @@ class PsicologoViewModel(
     fun editar(psicologo: Psicologo) {
         backStack.clear()
         backStack.add(PsicologoRotas.Formulario)
-        id.value = psicologo.id.toString()
+        id.value = psicologo.id?.toString() ?: ""
         nome.definir(psicologo.nome)
         cpf.definir(psicologo.cpf)
         email.definir(psicologo.email)

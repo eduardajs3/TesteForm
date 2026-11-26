@@ -23,15 +23,11 @@ fun ProntuarioFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
     val pacientes = vm.pacientes.collectAsState().value
-    val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
-    val pacientesFiltrados = pacientes.filter {
-        pacienteIdFiltro == null || it.id == pacienteIdFiltro
-    }
-    val pacienteOpcoes = pacientesFiltrados.map { it.nome }.distinct()
+    val pacienteOpcoes = pacientes.map { it.nome }.distinct()
 
     val statusRegistroOpcoes = listOf("Ativo", "Inativo")
-    val statusExibicao = ProntuarioStatus.deValorApi(vm.status.value).rotulo
-    val ativoExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
+    val statusExibicao = ProntuarioStatus.deValorApi(vm.status.valor.value).rotulo
+    val ativoExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
@@ -43,24 +39,37 @@ fun ProntuarioFormulario(
             }
         ) {
             CampoDropdownPadrao(
-                label = "Paciente",
-                valorSelecionado = vm.paciente.value,
+                label = "Paciente *",
+                valorSelecionado = vm.paciente.valor.value,
                 opcoes = pacienteOpcoes,
                 onOpcaoSelecionada = { selecao ->
-                    vm.paciente.value = selecao
-                }
+                    val pacienteEncontrado = pacientes.firstOrNull { it.nome == selecao }
+                    if (pacienteEncontrado != null) {
+                        vm.selecionarPaciente(pacienteEncontrado)
+                    } else {
+                        vm.atualizarPacienteTexto(selecao)
+                    }
+                },
+                isError = vm.paciente.temErro.value,
+                errorMessage = if (vm.paciente.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(
-                value = vm.dataAbertura.value,
-                onValueChange = { vm.dataAbertura.value = it },
-                label = "Data de abertura"
+                value = vm.dataAbertura.valor.value,
+                onValueChange = { vm.dataAbertura.definir(it) },
+                label = "Data de abertura",
+                obrigatorio = true,
+                isError = vm.dataAbertura.temErro.value,
+                errorMessage = if (vm.dataAbertura.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
-                value = vm.queixaPrincipal.value,
-                onValueChange = { vm.queixaPrincipal.value = it },
-                label = "Queixa principal"
+                value = vm.queixaPrincipal.valor.value,
+                onValueChange = { vm.queixaPrincipal.definir(it) },
+                label = "Queixa principal",
+                obrigatorio = true,
+                isError = vm.queixaPrincipal.temErro.value,
+                errorMessage = if (vm.queixaPrincipal.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -69,8 +78,10 @@ fun ProntuarioFormulario(
                 opcoes = ProntuarioStatus.entries.map { it.rotulo },
                 onOpcaoSelecionada = { selecao ->
                     val selecionado = ProntuarioStatus.entries.firstOrNull { it.rotulo == selecao }
-                    vm.status.value = selecionado?.name ?: ProntuarioStatus.ATIVO.name
-                }
+                    vm.status.definir(selecionado?.name ?: ProntuarioStatus.ATIVO.name)
+                },
+                isError = vm.status.temErro.value,
+                errorMessage = if (vm.status.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -79,8 +90,10 @@ fun ProntuarioFormulario(
                 opcoes = statusRegistroOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     val valorBoolean = (selecao == "Ativo").toString()
-                    vm.ativo.value = valorBoolean
-                }
+                    vm.ativo.definir(valorBoolean)
+                },
+                isError = vm.ativo.temErro.value,
+                errorMessage = if (vm.ativo.temErro.value) "Campo obrigatório" else null
             )
 
             BotoesAcaoFormulario(

@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,11 +25,11 @@ class PacienteViewModel(
     private val httpClient = httpClientManager()
     private val pacienteApi = PacienteAPI(httpClient)
 
-    private val _pacientes = MutableStateFlow<List<Paciente>>(listOf())
+    private val _pacientes = MutableStateFlow<List<Paciente>>(emptyList())
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -37,7 +37,6 @@ class PacienteViewModel(
         viewModelScope.launch {
             try {
                 _pacientes.value = pacienteApi.carregar()
-                println("Pacientes carregados no init: ${_pacientes.value}")
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar pacientes do servidor"))
             }
@@ -90,7 +89,7 @@ class PacienteViewModel(
             return
         }
         val dataFormatada = formatarDataBrasileiraParaIso(dataNascimento.valor.value)
-        
+
         viewModelScope.launch {
             salvando = true
             try {
@@ -120,13 +119,12 @@ class PacienteViewModel(
                 } else {
                     "Paciente atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
 
                 backStack.clear()
                 backStack.add(PacienteRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -157,7 +155,7 @@ class PacienteViewModel(
     fun editar(paciente: Paciente) {
         backStack.clear()
         backStack.add(PacienteRotas.Formulario)
-        id.value = paciente.id.toString()
+        id.value = paciente.id?.toString() ?: ""
         nome.definir(paciente.nome)
         cpf.definir(paciente.cpf)
         dataNascimento.definir(formatarDataIsoParaBrasileira(paciente.dataNascimento))

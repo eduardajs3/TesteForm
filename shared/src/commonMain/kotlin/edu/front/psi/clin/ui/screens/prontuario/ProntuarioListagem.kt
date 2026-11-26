@@ -22,8 +22,16 @@ fun ProntuarioListagem(
     innerPadding: PaddingValues,
     vm: ProntuarioViewModel,
     onVoltar: () -> Unit,
-    nomePaciente: String = vm.paciente.value.ifEmpty { vm.filtro.collectAsState().value.ifEmpty { "Todos os Pacientes" } }
+    nomePaciente: String = ""
 ) {
+    val filtroState by vm.filtro.collectAsState()
+    val pacienteCampo = vm.paciente.valor.value
+    val nomePacienteExibido = when {
+        pacienteCampo.isNotEmpty() -> pacienteCampo
+        nomePaciente.isNotEmpty() -> nomePaciente
+        filtroState.isNotEmpty() -> filtroState
+        else -> "Todos os Pacientes"
+    }
     val listaProntuarios by vm.prontuariosFiltrados.collectAsState()
     val listaOrdenada = remember(listaProntuarios) { listaProntuarios.sortedByDescending { it.id } }
 
@@ -45,14 +53,14 @@ fun ProntuarioListagem(
                 textoBotao = "Novo Prontuário",
                 iconeBotao = painterResource(Res.drawable.add),
                 onVoltar = onVoltar,
-                onClickBotao = { vm.novoProntuario(nomePaciente) }
+                onClickBotao = { vm.novoProntuario(nomePacienteExibido) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             CardCabecalhoInfo(
                 rotulo = "Paciente",
-                valor = nomePaciente
+                valor = nomePacienteExibido
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -61,7 +69,7 @@ fun ProntuarioListagem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(listaOrdenada) { item ->
+                items(listaOrdenada, key = { it.id ?: it.hashCode() }) { item ->
                     val isExpansivel = itemExpandidoId == item.id
                     val dataAbertura = formatarDataIsoParaBrasileira(item.dataAbertura)
 

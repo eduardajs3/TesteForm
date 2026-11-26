@@ -34,19 +34,23 @@ fun PagamentoFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
 
+    val agendaIdSelecionado = vm.agendaId.valor.value.toLongOrNull()
+    val pacienteIdSelecionado = vm.pacienteId.valor.value.toLongOrNull()
+    val convenioIdSelecionado = vm.convenioId.valor.value.toLongOrNull()
+
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
 
     val pacientesDisponiveis = pacientesLista.filter {
-        it.ativo || (isEdicao && it.id == vm.pacienteId.value)
+        it.ativo || (isEdicao && it.id == pacienteIdSelecionado)
     }
     val conveniosDisponiveis = conveniosLista.filter {
-        it.ativo || (isEdicao && it.id == vm.convenioId.value)
+        it.ativo || (isEdicao && it.id == convenioIdSelecionado)
     }
 
     val agendasLista = vm.agendas.collectAsState().value
     val agendasSemPagamento = vm.agendasSemPagamento.collectAsState().value
-    val agendaAtual = agendasLista.firstOrNull { it.id == vm.agendaId.value }
+    val agendaAtual = agendasLista.firstOrNull { it.id == agendaIdSelecionado }
     val agendasParaSelecionar = if (isEdicao && agendaAtual != null) {
         (agendasSemPagamento + agendaAtual).distinctBy { it.id }
     } else {
@@ -55,9 +59,9 @@ fun PagamentoFormulario(
 
     val formaPagamentoOpcoes = listOf("PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO")
 
-    val pacienteAtualNome = pacientesLista.firstOrNull { it.id == vm.pacienteId.value }?.nome ?: ""
-    val convenioAtualNome = conveniosLista.firstOrNull { it.id == vm.convenioId.value }?.nome ?: ""
-    val agendaAtualDescricao = agendasLista.firstOrNull { it.id == vm.agendaId.value }
+    val pacienteAtualNome = pacientesLista.firstOrNull { it.id == pacienteIdSelecionado }?.nome ?: ""
+    val convenioAtualNome = conveniosLista.firstOrNull { it.id == convenioIdSelecionado }?.nome ?: ""
+    val agendaAtualDescricao = agendasLista.firstOrNull { it.id == agendaIdSelecionado }
         ?.let { "Agenda #${it.id} - ${formatarDataHoraIsoParaBrasileira(it.dataHoraInicio)}" }
         ?: ""
 
@@ -79,10 +83,12 @@ fun PagamentoFormulario(
                 onOpcaoSelecionada = { selecao ->
                     val idStr = selecao.substringAfter("#").substringBefore(" -")
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
-                    vm.agendaId.value = agendaEscolhida?.id
-                    vm.pacienteId.value = agendaEscolhida?.pacienteId
-                    vm.convenioId.value = agendaEscolhida?.convenioId
-                }
+                    vm.agendaId.definir(agendaEscolhida?.id?.toString().orEmpty())
+                    vm.pacienteId.definir(agendaEscolhida?.pacienteId?.toString().orEmpty())
+                    vm.convenioId.definir(agendaEscolhida?.convenioId?.toString().orEmpty())
+                },
+                isError = vm.agendaId.temErro.value,
+                errorMessage = if (vm.agendaId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -91,8 +97,10 @@ fun PagamentoFormulario(
                 opcoes = pacientesDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
                     val pacienteEscolhido = pacientesDisponiveis.firstOrNull { it.nome == nome }
-                    vm.pacienteId.value = pacienteEscolhido?.id
-                }
+                    vm.pacienteId.definir(pacienteEscolhido?.id?.toString().orEmpty())
+                },
+                isError = vm.pacienteId.temErro.value,
+                errorMessage = if (vm.pacienteId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -101,8 +109,10 @@ fun PagamentoFormulario(
                 opcoes = conveniosDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
                     val convenioEscolhido = conveniosDisponiveis.firstOrNull { it.nome == nome }
-                    vm.convenioId.value = convenioEscolhido?.id
-                }
+                    vm.convenioId.definir(convenioEscolhido?.id?.toString().orEmpty())
+                },
+                isError = vm.convenioId.temErro.value,
+                errorMessage = if (vm.convenioId.temErro.value) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(
