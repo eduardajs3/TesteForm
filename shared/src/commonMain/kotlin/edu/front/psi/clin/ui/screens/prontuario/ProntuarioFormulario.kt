@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.model.enums.ProntuarioStatus
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
@@ -28,26 +29,8 @@ fun ProntuarioFormulario(
     }
     val pacienteOpcoes = pacientesFiltrados.map { it.nome }.distinct()
 
-    val statusProntuarioOpcoes = listOf(
-        "Ativo",
-        "Arquivado",
-        "Encerrado"
-    )
-
     val statusRegistroOpcoes = listOf("Ativo", "Inativo")
-
-    val pacienteAtual = vm.paciente.value
-    val pacienteExibicao = pacienteAtual
-
-    val statusAtual = vm.status.value
-    val statusExibicao = when {
-        statusProntuarioOpcoes.contains(statusAtual) -> statusAtual
-        statusAtual.equals("ATIVO", ignoreCase = true) || statusAtual.lowercase() == "true" -> "Ativo"
-        statusAtual.equals("ARQUIVADO", ignoreCase = true) -> "Arquivado"
-        statusAtual.equals("ENCERRADO", ignoreCase = true) || statusAtual.lowercase() == "false" -> "Encerrado"
-        else -> "Ativo"
-    }
-
+    val statusExibicao = ProntuarioStatus.deValorApi(vm.status.value).rotulo
     val ativoExibicao = if (vm.ativo.value == "true" || vm.ativo.value.isEmpty()) "Ativo" else "Inativo"
 
     Box(modifier = Modifier.padding(innerPadding)) {
@@ -61,7 +44,7 @@ fun ProntuarioFormulario(
         ) {
             CampoDropdownPadrao(
                 label = "Paciente",
-                valorSelecionado = pacienteExibicao,
+                valorSelecionado = vm.paciente.value,
                 opcoes = pacienteOpcoes,
                 onOpcaoSelecionada = { selecao ->
                     vm.paciente.value = selecao
@@ -83,9 +66,10 @@ fun ProntuarioFormulario(
             CampoDropdownPadrao(
                 label = "Status do prontuário",
                 valorSelecionado = statusExibicao,
-                opcoes = statusProntuarioOpcoes,
+                opcoes = ProntuarioStatus.entries.map { it.rotulo },
                 onOpcaoSelecionada = { selecao ->
-                    vm.status.value = selecao
+                    val selecionado = ProntuarioStatus.entries.firstOrNull { it.rotulo == selecao }
+                    vm.status.value = selecionado?.name ?: ProntuarioStatus.ATIVO.name
                 }
             )
 

@@ -8,14 +8,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Pagamento
+import edu.front.psi.clin.model.enums.PagamentoStatus
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.BadgeStatus
-import edu.front.psi.clin.ui.componentes.ItemDetalhe
-import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.componentes.CelulaTabelaTexto
+import edu.front.psi.clin.ui.componentes.ItemDetalhe
 import edu.front.psi.clin.ui.componentes.LayoutListagemBase
+import edu.front.psi.clin.ui.componentes.ModalDetalhesBase
 import edu.front.psi.clin.ui.viewmodel.PagamentoViewModel
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 
@@ -54,17 +55,16 @@ fun PagamentoListagem(
             itens = lista.value,
             onVisualizar = { pagamento -> pagamentoSelecionado.value = pagamento },
             onEditar = vm::editar,
-            onApagar = { pagamento ->
-                pagamentoParaExcluir.value = pagamento
-            },
+            onApagar = { pagamento -> pagamentoParaExcluir.value = pagamento },
             textoCompacto = { pagamento ->
                 pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome
                     ?: "Paciente #${pagamento.pacienteId}"
             },
             placeholderPesquisa = "Buscar por forma de pagamento ou status..."
         ) { pagamento ->
-            val pacienteNome = pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome ?: "Paciente #${pagamento.pacienteId}"
-            val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
+            val pacienteNome = pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome
+                ?: "Paciente #${pagamento.pacienteId}"
+            val isPago = pagamento.status == PagamentoStatus.PAGO
 
             CelulaTabelaTexto(
                 text = pacienteNome,
@@ -78,12 +78,11 @@ fun PagamentoListagem(
             CelulaTabelaTexto(
                 text = pagamento.formaPagamento,
                 weight = 1.1f
-            )   
-            
+            )
 
             Box(modifier = Modifier.weight(0.9f)) {
                 BadgeStatus(
-                    texto = if (isPago) "PAGO" else pagamento.status,
+                    texto = pagamento.status.rotulo,
                     isAtivo = isPago
                 )
             }
@@ -92,7 +91,7 @@ fun PagamentoListagem(
         pagamentoSelecionado.value?.let { pagamento ->
             val pacienteNome = pacientesLista.firstOrNull { it.id == pagamento.pacienteId }?.nome ?: "-"
             val convenioNome = conveniosLista.firstOrNull { it.id == pagamento.convenioId }?.nome ?: "-"
-            val isPago = pagamento.status.equals("PAGO", ignoreCase = true) || pagamento.status.equals("true", ignoreCase = true)
+            val isPago = pagamento.status == PagamentoStatus.PAGO
 
             ModalDetalhesBase(
                 titulo = "Detalhes do Pagamento",
@@ -110,7 +109,7 @@ fun PagamentoListagem(
                     )
                     ItemDetalhe(
                         rotulo = "Status",
-                        valor = if (isPago) "Pago" else pagamento.status,
+                        valor = pagamento.status.rotulo
                     )
                 }
             )

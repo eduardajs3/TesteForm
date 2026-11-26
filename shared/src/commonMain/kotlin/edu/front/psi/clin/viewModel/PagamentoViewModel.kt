@@ -1,13 +1,14 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.*
 import edu.front.psi.clin.model.*
+import edu.front.psi.clin.model.enums.PagamentoStatus
 import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
@@ -120,7 +121,8 @@ class PagamentoViewModel(
         } else {
             pagamentos.filter {
                 it.formaPagamento.contains(filtro, ignoreCase = true) ||
-                it.status.contains(filtro, ignoreCase = true)
+                    it.status.rotulo.contains(filtro, ignoreCase = true) ||
+                    it.status.name.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -137,7 +139,7 @@ class PagamentoViewModel(
     val valorPaciente = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
     val formaPagamento = CampoValidado()
     val dataPagamento = CampoValidado()
-    val status = CampoValidado("PENDENTE")
+    val status = CampoValidado(PagamentoStatus.PENDENTE.name)
 
     fun salvar() {
         if (salvando) return
@@ -175,7 +177,7 @@ class PagamentoViewModel(
                 valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
                 formaPagamento = formaPagamento.valor.value,
                 dataPagamento = dataPagamento.valor.value,
-                status = status.valor.value.ifEmpty { "PENDENTE" }
+                status = PagamentoStatus.deValorApi(status.valor.value)
             )
 
             viewModelScope.launch {
@@ -187,13 +189,13 @@ class PagamentoViewModel(
                         pagamentoApi.atualizar(id.value.toLong(), pagamento)
                     }
                     _pagamentos.value = pagamentoApi.carregar()
-                    
+
                     val mensagemSucesso = if (id.value.isEmpty()) {
                         "Pagamento salvo com sucesso!"
                     } else {
                         "Pagamento atualizado com sucesso!"
                     }
-                    
+
                     mandarMensagem(mensagemSucesso)
                     limparCampos()
 
@@ -244,7 +246,7 @@ class PagamentoViewModel(
 
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
 
-        status.definir(pagamento.status)
+        status.definir(pagamento.status.name)
     }
 
     private fun valorParaCentavos(valor: Double): String =
@@ -259,6 +261,6 @@ class PagamentoViewModel(
         valorPaciente.limpar()
         formaPagamento.limpar()
         dataPagamento.limpar()
-        status.definir("PENDENTE")
+        status.definir(PagamentoStatus.PENDENTE.name)
     }
 }

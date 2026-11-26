@@ -14,6 +14,7 @@ import edu.front.psi.clin.model.Paciente
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.model.SalaAtendimento
 import edu.front.psi.clin.model.TipoAtendimento
+import edu.front.psi.clin.model.enums.AgendaStatus
 import frontpsiclinic.shared.generated.resources.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -108,11 +109,11 @@ class DashboardViewModel(
 
     fun confirmarConsulta(consultaId: Long) {
         val agendamento = _agendamentos.value.firstOrNull { it.id == consultaId } ?: return
-        if (!agendamento.status.equals("AGENDADO", ignoreCase = true)) return
+        if (agendamento.status != AgendaStatus.AGENDADO) return
 
         viewModelScope.launch {
             try {
-                val atualizado = agendamento.copy(status = "CONFIRMADO")
+                val atualizado = agendamento.copy(status = AgendaStatus.CONFIRMADO)
                 agendaApi.atualizar(consultaId, atualizado)
                 _agendamentos.update { lista ->
                     lista.map { if (it.id == consultaId) atualizado else it }
@@ -132,12 +133,12 @@ class DashboardViewModel(
         val consultasHoje = _agendamentos.value.filter {
             it.ativo &&
                 it.dataHoraInicio.substringBefore('T') == hoje &&
-                !it.status.estaCancelado()
+                it.status != AgendaStatus.CANCELADO
         }
         val consultasVisiveis = consultasHoje
             .filter {
-                it.status.equals("AGENDADO", ignoreCase = true) ||
-                    it.status.equals("CONFIRMADO", ignoreCase = true)
+                it.status == AgendaStatus.AGENDADO ||
+                    it.status == AgendaStatus.CONFIRMADO
             }
             .mapNotNull { agenda ->
                 val id = agenda.id ?: return@mapNotNull null
@@ -153,7 +154,7 @@ class DashboardViewModel(
                     sala = agenda.salaNome(),
                     horario = "$inicio - $fim",
                     tipo = agenda.tipoAtendimentoNome(),
-                    status = agenda.status.tituloStatus()
+                    status = agenda.status.rotulo
                 )
             }
             .sortedBy { it.horario.substringBefore(" - ") }
@@ -165,8 +166,8 @@ class DashboardViewModel(
         val salasEmUso = consultasHoje
             .asSequence()
             .filter { agenda ->
-                !agenda.status.estaFinalizado() &&
-                    !agenda.status.equals("FALTOU", ignoreCase = true) &&
+                agenda.status != AgendaStatus.REALIZADO &&
+                    agenda.status != AgendaStatus.FALTOU &&
                     agenda.dataHoraInicio.substringBefore('T') == hoje &&
                     agenda.dataHoraInicio.substringAfter('T', "").take(5).toMinutos()
                         ?.let { it <= minutoAtual } == true &&
@@ -177,10 +178,10 @@ class DashboardViewModel(
             .toSet()
             .size
         val consultasAgendadasOuConfirmadas = consultasHoje.count {
-            it.status.equals("AGENDADO", ignoreCase = true) ||
-                it.status.equals("CONFIRMADO", ignoreCase = true)
+            it.status == AgendaStatus.AGENDADO ||
+                it.status == AgendaStatus.CONFIRMADO
         }
-        val consultasFinalizadas = consultasHoje.count { it.status.estaFinalizado() }
+        val consultasFinalizadas = consultasHoje.count { it.status == AgendaStatus.REALIZADO }
 
         _metricas.value = listOf(
             MetricaCardItem(
@@ -230,17 +231,5 @@ class DashboardViewModel(
         val minuto = partes[1].take(2).toIntOrNull() ?: return null
         if (hora !in 0..23 || minuto !in 0..59) return null
         return hora * 60 + minuto
-    }
-
-    private fun String.estaCancelado(): Boolean =
-        uppercase() in setOf("CANCELADO", "CANCELED", "CANCELLED")
-
-    private fun String.estaFinalizado(): Boolean =
-        uppercase() in setOf("REALIZADO", "REALIZADA", "FINALIZADO", "FINALIZADA", "CONCLUIDO", "CONCLUIDA")
-
-    private fun String.tituloStatus(): String = when (uppercase()) {
-        "AGENDADO" -> "Agendado"
-        "CONFIRMADO" -> "Confirmado"
-        else -> replaceFirstChar { it.uppercase() }
     }
 }

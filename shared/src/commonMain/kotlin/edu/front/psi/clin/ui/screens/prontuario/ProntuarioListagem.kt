@@ -10,11 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Prontuario
-import edu.front.psi.clin.ui.componentes.AppDeleteModal
 import edu.front.psi.clin.ui.componentes.*
 import edu.front.psi.clin.ui.theme.TextoPrincipal
-import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import edu.front.psi.clin.ui.viewmodel.ProntuarioViewModel
+import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import frontpsiclinic.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 
@@ -76,7 +75,7 @@ fun ProntuarioListagem(
                         onEditarClick = { vm.editar(item) },
                         onExcluirClick = { itemParaExcluir = item }
                     ) {
-                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status)
+                        LinhaDetalheCard(rotulo = "Status: ", valor = item.status.rotulo)
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),

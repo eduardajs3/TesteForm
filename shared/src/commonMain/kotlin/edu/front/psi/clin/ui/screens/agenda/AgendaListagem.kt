@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.Agenda
+import edu.front.psi.clin.model.enums.AgendaStatus
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
@@ -56,6 +57,7 @@ fun AgendaListagem(
     )
 
     val psicologoFiltroAtual by vm.psicologoFiltro.collectAsState()
+    val statusFiltroAtual by vm.statusFiltro.collectAsState()
     val horariosDisponiveisState = vm.horariosDisponiveis.collectAsState().value
 
     var agendamentoSelecionado by remember { mutableStateOf<Agenda?>(null) }
@@ -145,6 +147,17 @@ fun AgendaListagem(
         ).distinct().sorted()
     }
 
+    val opcoesFiltroStatus = remember {
+        listOf("Todos") + AgendaStatus.entries.map { it.rotulo }
+    }
+    val valorFiltroStatusExibicao = remember(statusFiltroAtual) {
+        if (statusFiltroAtual == "Todos") {
+            "Todos"
+        } else {
+            AgendaStatus.deValorApi(statusFiltroAtual).rotulo
+        }
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -196,9 +209,16 @@ fun AgendaListagem(
                         Spacer(modifier = Modifier.height(8.dp))
                         CampoDropdownPadrao(
                             label = "Status",
-                            valorSelecionado = vm.statusFiltro.collectAsState().value,
-                            opcoes = listOf("Todos", "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU"),
-                            onOpcaoSelecionada = { status -> vm.filtrarPorStatus(status) }
+                            valorSelecionado = valorFiltroStatusExibicao,
+                            opcoes = opcoesFiltroStatus,
+                            onOpcaoSelecionada = { rotulo ->
+                                if (rotulo == "Todos") {
+                                    vm.filtrarPorStatus("Todos")
+                                } else {
+                                    val enumStatus = AgendaStatus.entries.firstOrNull { it.rotulo == rotulo }
+                                    vm.filtrarPorStatus(enumStatus?.name ?: rotulo)
+                                }
+                            }
                         )
                     }
                 } else {
@@ -217,9 +237,16 @@ fun AgendaListagem(
                         Box(modifier = Modifier.weight(1f)) {
                             CampoDropdownPadrao(
                                 label = "Status",
-                                valorSelecionado = vm.statusFiltro.collectAsState().value,
-                                opcoes = listOf("Todos", "AGENDADO", "CONFIRMADO", "REALIZADO", "CANCELADO", "FALTOU"),
-                                onOpcaoSelecionada = { status -> vm.filtrarPorStatus(status) }
+                                valorSelecionado = valorFiltroStatusExibicao,
+                                opcoes = opcoesFiltroStatus,
+                                onOpcaoSelecionada = { rotulo ->
+                                    if (rotulo == "Todos") {
+                                        vm.filtrarPorStatus("Todos")
+                                    } else {
+                                        val enumStatus = AgendaStatus.entries.firstOrNull { it.rotulo == rotulo }
+                                        vm.filtrarPorStatus(enumStatus?.name ?: rotulo)
+                                    }
+                                }
                             )
                         }
                     }
@@ -279,7 +306,7 @@ fun AgendaListagem(
                             agendamento.dataHoraFim.substringAfter("T").take(5)
                         }"
                     )
-                    ItemDetalhe(rotulo = "Status", valor = agendamento.status)
+                    ItemDetalhe(rotulo = "Status", valor = agendamento.status.rotulo)
                     ItemDetalhe(rotulo = "Observações", valor = agendamento.observacoes?.ifEmpty { null })
                 },
                 acoesTopo = if (podeGerenciarAgenda) {

@@ -45,12 +45,9 @@ class ProntuarioAPI(private val httpClient: HttpClient) {
     }
 
     private fun Prontuario.normalizado() = copy(
-        pacienteId = pacienteId,
         dataAbertura = formatarDataBrasileiraOuIsoParaDataHoraIso(
             dataAbertura,
             "Data de abertura do prontuário inválida."
-        ),
-        queixaPrincipal = queixaPrincipal,
-        status = status.uppercase()
+        )
     )
 }

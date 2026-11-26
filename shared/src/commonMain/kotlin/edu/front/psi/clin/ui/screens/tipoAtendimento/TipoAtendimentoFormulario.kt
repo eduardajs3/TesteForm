@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import edu.front.psi.clin.model.ModalidadeAtendimento
+import edu.front.psi.clin.model.enums.ModalidadeAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
-import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
+import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
 import edu.front.psi.clin.ui.viewmodel.TipoAtendimentoViewModel
 

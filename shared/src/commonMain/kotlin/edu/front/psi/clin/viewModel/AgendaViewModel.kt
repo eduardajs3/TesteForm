@@ -1,13 +1,14 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.*
 import edu.front.psi.clin.model.*
+import edu.front.psi.clin.model.enums.AgendaStatus
 import edu.front.psi.clin.navigation.AgendaRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
@@ -143,18 +144,20 @@ class AgendaViewModel(
         agendamentos.filter { item ->
             val filtroTexto =
                 filtro.isBlank() ||
-                item.observacoes?.contains(filtro, true) == true ||
-                item.status.contains(filtro, true)
+                    item.observacoes?.contains(filtro, true) == true ||
+                    item.status.rotulo.contains(filtro, true) ||
+                    item.status.name.contains(filtro, true)
 
             val filtroPsicologo =
                 psicologoFiltro == "Todos" ||
-                _psicologos.value.firstOrNull {
-                    it.nome == psicologoFiltro
-                }?.id == item.psicologoId
+                    _psicologos.value.firstOrNull {
+                        it.nome == psicologoFiltro
+                    }?.id == item.psicologoId
 
             val filtroStatus =
                 statusFiltro == "Todos" ||
-                item.status.equals(statusFiltro, true)
+                    item.status.name.equals(statusFiltro, true) ||
+                    item.status.rotulo.equals(statusFiltro, true)
 
             filtroTexto && filtroPsicologo && filtroStatus
         }
@@ -185,7 +188,7 @@ class AgendaViewModel(
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
 
-    val status = CampoValidado("AGENDADO")
+    val status = CampoValidado(AgendaStatus.AGENDADO.name)
     val observacoes = CampoValidado()
     val ativo = CampoValidado("true")
 
@@ -482,7 +485,8 @@ class AgendaViewModel(
             mandarMensagem("O horário deve respeitar a duração do tipo de atendimento.")
             return
         }
-        if (id.value.isEmpty() && status.valor.value !in setOf("AGENDADO", "CONFIRMADO")) {
+        val statusSelecionado = AgendaStatus.deValorApi(status.valor.value)
+        if (id.value.isEmpty() && statusSelecionado !in AgendaStatus.opcoesNovoAgendamento) {
             mandarMensagem("Para novos agendamentos, selecione Agendado ou Confirmado.")
             return
         }
@@ -532,7 +536,7 @@ class AgendaViewModel(
                     convenioId = convenioId.value!!,
                     dataHoraInicio = inicioFormatado,
                     dataHoraFim = fimFormatado,
-                    status = status.valor.value,
+                    status = statusSelecionado,
                     observacoes = observacoes.valor.value.ifEmpty { null },
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
@@ -556,7 +560,6 @@ class AgendaViewModel(
 
                 backStack.clear()
                 backStack.add(AgendaRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {
@@ -567,13 +570,11 @@ class AgendaViewModel(
 
     fun alterarStatus(
         agenda: Agenda,
-        novoStatus: String
+        novoStatus: AgendaStatus
     ) {
         viewModelScope.launch {
             try {
-                val atualizado = agenda.copy(
-                    status = novoStatus.uppercase()
-                )
+                val atualizado = agenda.copy(status = novoStatus)
                 agendaApi.atualizar(
                     agenda.id!!,
                     atualizado
@@ -593,8 +594,7 @@ class AgendaViewModel(
         psicologoId: Long? = null,
         salaId: Long? = null
     ): Boolean = agendamentos.any { agendamento ->
-        val statusAtual = agendamento.status.uppercase()
-        val ocupaHorario = agendamento.ativo && statusAtual !in setOf("CANCELADO", "CANCELED")
+        val ocupaHorario = agendamento.ativo && agendamento.status != AgendaStatus.CANCELADO
         val mesmoRecurso = when {
             psicologoId != null -> agendamento.psicologoId == psicologoId
             salaId != null -> agendamento.salaId == salaId
@@ -662,7 +662,7 @@ class AgendaViewModel(
         horaInicio.limpar()
         horaFim.limpar()
         if (id.value.isEmpty()) {
-            status.definir("AGENDADO")
+            status.definir(AgendaStatus.AGENDADO.name)
         }
         observacoes.limpar()
         ativo.definir("true")
@@ -718,7 +718,7 @@ class AgendaViewModel(
             horaFim.definir(partesFim[1].take(5))
         }
 
-        status.definir(agenda.status)
+        status.definir(agenda.status.name)
         observacoes.definir(agenda.observacoes ?: "")
         ativo.definir(agenda.ativo.toString())
     }

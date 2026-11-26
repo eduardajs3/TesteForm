@@ -1,12 +1,15 @@
 package edu.front.psi.clin.ui.screens.pagamento
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import edu.front.psi.clin.model.enums.PagamentoStatus
 import edu.front.psi.clin.navigation.PagamentoRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
@@ -33,14 +36,14 @@ fun PagamentoFormulario(
 
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
-    
+
     val pacientesDisponiveis = pacientesLista.filter {
         it.ativo || (isEdicao && it.id == vm.pacienteId.value)
     }
     val conveniosDisponiveis = conveniosLista.filter {
         it.ativo || (isEdicao && it.id == vm.convenioId.value)
     }
-    
+
     val agendasLista = vm.agendas.collectAsState().value
     val agendasSemPagamento = vm.agendasSemPagamento.collectAsState().value
     val agendaAtual = agendasLista.firstOrNull { it.id == vm.agendaId.value }
@@ -51,7 +54,6 @@ fun PagamentoFormulario(
     }
 
     val formaPagamentoOpcoes = listOf("PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "BOLETO")
-    val statusOpcoes = listOf("PENDENTE", "PAGO", "CANCELADO")
 
     val pacienteAtualNome = pacientesLista.firstOrNull { it.id == vm.pacienteId.value }?.nome ?: ""
     val convenioAtualNome = conveniosLista.firstOrNull { it.id == vm.convenioId.value }?.nome ?: ""
@@ -153,9 +155,12 @@ fun PagamentoFormulario(
 
             CampoDropdownPadrao(
                 label = "Status do pagamento",
-                valorSelecionado = vm.status.valor.value,
-                opcoes = statusOpcoes,
-                onOpcaoSelecionada = { vm.status.definir(it) },
+                valorSelecionado = PagamentoStatus.deValorApi(vm.status.valor.value).rotulo,
+                opcoes = PagamentoStatus.entries.map { it.rotulo },
+                onOpcaoSelecionada = { selecao ->
+                    val selecionado = PagamentoStatus.entries.firstOrNull { it.rotulo == selecao }
+                    vm.status.definir(selecionado?.name.orEmpty())
+                },
                 isError = vm.status.temErro.value,
                 errorMessage = if (vm.status.temErro.value) "Campo obrigatório" else null
             )

@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,8 +9,8 @@ import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.TipoAtendimentoAPI
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
-import edu.front.psi.clin.model.ModalidadeAtendimento
 import edu.front.psi.clin.model.TipoAtendimento
+import edu.front.psi.clin.model.enums.ModalidadeAtendimento
 import edu.front.psi.clin.navigation.TipoAtendimentoRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
@@ -25,10 +25,10 @@ class TipoAtendimentoViewModel(
     private val tipoApi = TipoAtendimentoAPI(httpClient)
 
     private val _tiposAtendimento = MutableStateFlow<List<TipoAtendimento>>(listOf())
-    
+
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    
+
     var salvando by mutableStateOf(false)
         private set
 
@@ -72,7 +72,7 @@ class TipoAtendimentoViewModel(
 
     fun salvar() {
         if (salvando) return
-        
+
         val v1 = nome.validar()
         val v2 = descricao.validar()
         val v3 = duracao.validar()
@@ -111,13 +111,12 @@ class TipoAtendimentoViewModel(
                 } else {
                     "Tipo de atendimento atualizado com sucesso!"
                 }
-                
+
                 mandarMensagem(mensagemSucesso)
                 limparCampos()
-                
+
                 backStack.clear()
                 backStack.add(TipoAtendimentoRotas.Listagem)
-
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao salvar"))
             } finally {

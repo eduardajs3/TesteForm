@@ -60,7 +60,6 @@ class ConvenioViewModel(
         )
 
     val id = mutableStateOf("")
-    
     val nome = CampoValidado()
     val cnpj = CampoValidado(formatador = { MaskUtils.aplicarMascaraCnpj(it) })
     val telefone = CampoValidado(formatador = { MaskUtils.aplicarMascaraTelefone(it) })

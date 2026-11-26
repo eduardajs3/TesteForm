@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.model.Agenda
+import edu.front.psi.clin.model.enums.AgendaStatus
 import edu.front.psi.clin.ui.theme.*
 
 @Composable
@@ -24,29 +25,30 @@ fun CardAgendamentoGrade(
     onClick: (() -> Unit)? = null
 ) {
     val isOcupado = agendamento != null
-    val status = agendamento?.status?.uppercase() ?: ""
+    val status = agendamento?.status
 
     val corFundo = when (status) {
-        "CONFIRMADO" -> FundoStatusConfirmado  
-        "REALIZADO" -> FundoStatusRealizado   
-        "AGENDADO" -> FundoStatusAgendado    
-        "CANCELADO", "FALTOU" -> FundoStatusNegativo 
-        else -> Branco 
+        AgendaStatus.CONFIRMADO -> FundoStatusConfirmado
+        AgendaStatus.REALIZADO -> FundoStatusRealizado
+        AgendaStatus.AGENDADO -> FundoStatusAgendado
+        AgendaStatus.CANCELADO, AgendaStatus.FALTOU -> FundoStatusNegativo
+        null -> Branco
     }
 
     val corTexto = when (status) {
-        "CONFIRMADO" -> TextoStatusConfirmado
-        "REALIZADO" -> TextoStatusRealizado
-        "AGENDADO" -> TextoStatusAgendado
-        "CANCELADO", "FALTOU" -> TextoStatusNegativo
-        else -> TextoSecundario.copy(alpha = 0.45f)
+        AgendaStatus.CONFIRMADO -> TextoStatusConfirmado
+        AgendaStatus.REALIZADO -> TextoStatusRealizado
+        AgendaStatus.AGENDADO -> TextoStatusAgendado
+        AgendaStatus.CANCELADO, AgendaStatus.FALTOU -> TextoStatusNegativo
+        null -> TextoSecundario.copy(alpha = 0.45f)
     }
+
     val corBorda = when (status) {
-        "CONFIRMADO" -> BordaStatusConfirmado
-        "REALIZADO" -> BordaStatusRealizado
-        "AGENDADO" -> BordaStatusAgendado
-        "CANCELADO", "FALTOU" -> TextoStatusNegativo.copy(alpha = 0.5f)
-        else -> CardBordaCinza.copy(alpha = 0.5f)
+        AgendaStatus.CONFIRMADO -> BordaStatusConfirmado
+        AgendaStatus.REALIZADO -> BordaStatusRealizado
+        AgendaStatus.AGENDADO -> BordaStatusAgendado
+        AgendaStatus.CANCELADO, AgendaStatus.FALTOU -> TextoStatusNegativo.copy(alpha = 0.5f)
+        null -> CardBordaCinza.copy(alpha = 0.5f)
     }
 
     Card(
@@ -88,7 +90,7 @@ fun CardAgendamentoGrade(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "$nomeTipo • ${agendamento.status}",
+                    text = "$nomeTipo • ${agendamento.status.rotulo}",
                     style = MaterialTheme.typography.labelSmall,
                     color = corTexto.copy(alpha = 0.7f),
                     maxLines = 1,

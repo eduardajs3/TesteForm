@@ -1,5 +1,6 @@
 package edu.front.psi.clin.model
 
+import edu.front.psi.clin.model.enums.AgendaStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,7 +13,7 @@ data class Agenda(
     val convenioId: Long,
     val dataHoraInicio: String,
     val dataHoraFim: String,
-    val status: String,
+    val status: AgendaStatus,
     val observacoes: String? = null,
     val ativo: Boolean
 )

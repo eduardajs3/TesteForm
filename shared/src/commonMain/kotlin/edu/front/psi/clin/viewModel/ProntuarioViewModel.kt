@@ -1,7 +1,7 @@
 package edu.front.psi.clin.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,8 +11,9 @@ import edu.front.psi.clin.api.ProntuarioAPI
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
-import edu.front.psi.clin.model.Prontuario
 import edu.front.psi.clin.model.Paciente
+import edu.front.psi.clin.model.Prontuario
+import edu.front.psi.clin.model.enums.ProntuarioStatus
 import edu.front.psi.clin.navigation.ProntuarioRotas
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
@@ -84,7 +85,8 @@ class ProntuarioViewModel(
             prontuarios.filter {
                 pacientes.firstOrNull { paciente -> paciente.id == it.pacienteId }
                     ?.nome?.contains(filtro, ignoreCase = true) == true ||
-                    it.queixaPrincipal.contains(filtro, ignoreCase = true)
+                    it.queixaPrincipal.contains(filtro, ignoreCase = true) ||
+                    it.status.rotulo.contains(filtro, ignoreCase = true)
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -97,7 +99,7 @@ class ProntuarioViewModel(
     val paciente = mutableStateOf("")
     val dataAbertura = mutableStateOf("")
     val queixaPrincipal = mutableStateOf("")
-    val status = mutableStateOf("")
+    val status = mutableStateOf(ProntuarioStatus.ATIVO.name)
     val ativo = mutableStateOf("true")
 
     fun salvar() {
@@ -121,17 +123,12 @@ class ProntuarioViewModel(
         }
 
         val ehNovo = idAtual == null
-        val statusApi = when (status.value.trim().lowercase()) {
-            "arquivado" -> "ARQUIVADO"
-            "encerrado", "false", "0", "inativo", "não", "nao" -> "ENCERRADO"
-            else -> "ATIVO"
-        }
         val prontuario = Prontuario(
             id = idAtual,
             pacienteId = pacienteId,
             dataAbertura = dataAberturaFormatada,
             queixaPrincipal = queixaPrincipal.value.trim(),
-            status = statusApi,
+            status = ProntuarioStatus.deValorApi(status.value),
             ativo = ativo.value.toBooleanStrictOrNull() ?: true
         )
 
@@ -191,11 +188,7 @@ class ProntuarioViewModel(
         paciente.value = _pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome.orEmpty()
         dataAbertura.value = formatarDataIsoParaBrasileira(prontuario.dataAbertura)
         queixaPrincipal.value = prontuario.queixaPrincipal
-        status.value = when (prontuario.status.uppercase()) {
-            "ARQUIVADO" -> "Arquivado"
-            "ENCERRADO" -> "Encerrado"
-            else -> "Ativo"
-        }
+        status.value = prontuario.status.name
         ativo.value = prontuario.ativo.toString()
     }
 
@@ -204,7 +197,7 @@ class ProntuarioViewModel(
         paciente.value = ""
         dataAbertura.value = ""
         queixaPrincipal.value = ""
-        status.value = ""
+        status.value = ProntuarioStatus.ATIVO.name
         ativo.value = "true"
     }
 }

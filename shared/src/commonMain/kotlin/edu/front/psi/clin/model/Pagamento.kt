@@ -1,5 +1,6 @@
 package edu.front.psi.clin.model
 
+import edu.front.psi.clin.model.enums.PagamentoStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,5 +14,5 @@ data class Pagamento(
     val valorPaciente: Double,
     val formaPagamento: String,
     val dataPagamento: String,
-    val status: String
+    val status: PagamentoStatus
 )
