@@ -84,18 +84,14 @@ class ConvenioViewModel(
         viewModelScope.launch {
             salvando = true
             try {
-                val percentualDouble = percentualCobertura.valor.value
-                    .replace("%", "")
-                    .replace(",", ".")
-                    .trim()
-                    .toDoubleOrNull() ?: 0.0
-
                 val convenio = Convenio(
                     id = id.value.toLongOrNull(),
-                    nome = nome.valor.value,
-                    cnpj = cnpj.valor.value,
-                    telefone = telefone.valor.value,
-                    percentualCobertura = percentualDouble,
+                    nome = nome.valor.value.trim(),
+                    cnpj = cnpj.valor.value.trim(),
+                    telefone = telefone.valor.value.trim(),
+                    percentualCobertura = MaskUtils.converterPercentualParaDouble(
+                        percentualCobertura.valor.value
+                    ),
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
 

@@ -1,5 +1,7 @@
 package edu.front.psi.clin.utils
 
+import kotlin.math.roundToLong
+
 object MaskUtils {
 
     fun aplicarMascaraCpf(valor: String): String {
@@ -37,6 +39,7 @@ object MaskUtils {
         }
         return sb.toString()
     }
+
     fun aplicarMascaraMoeda(valor: String): String {
         val apenasDigitos = valor.filter { it.isDigit() }
         val valorLong = apenasDigitos.toLongOrNull() ?: 0L
@@ -53,6 +56,7 @@ object MaskUtils {
 
         return "R$ $reaisFormatados,$centavos"
     }
+
     fun validarEmail(email: String): Boolean {
         if (email.isBlank()) return false
         val regex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
@@ -87,4 +91,21 @@ object MaskUtils {
         val percentual = apenasDigitos.toIntOrNull()?.coerceAtMost(100) ?: return ""
         return "$percentual%"
     }
+
+    fun converterPercentualParaDouble(valorFormatado: String): Double {
+        val limpo = valorFormatado
+            .replace("%", "")
+            .replace(",", ".")
+            .trim()
+        return limpo.toDoubleOrNull() ?: 0.0
+    }
+
+    fun converterMoedaParaDouble(valorFormatado: String): Double {
+        val apenasDigitos = valorFormatado.filter { it.isDigit() }
+        if (apenasDigitos.isEmpty()) return 0.0
+        return apenasDigitos.toDouble() / 100.0
+    }
+
+    fun moedaDoubleParaCentavos(valor: Double): String =
+        (valor * 100.0).roundToLong().toString()
 }

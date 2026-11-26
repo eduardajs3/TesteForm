@@ -56,7 +56,7 @@ class BloqueioAgendaViewModel(
                 _bloqueios.value = bloqueiosAtualizados
                 _psicologos.value = psicologosAtualizados
 
-                val psicologoSelecionadoId = psicologo.valor.value.toLongOrNull()
+                val psicologoSelecionadoId = psicologoId
                 if (
                     id.value.isEmpty() &&
                     psicologoSelecionadoId != null &&
@@ -64,7 +64,7 @@ class BloqueioAgendaViewModel(
                         it.id == psicologoSelecionadoId && it.ativo
                     }
                 ) {
-                    psicologo.limpar()
+                    psicologoId = null
                 }
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar bloqueios de agenda"))
@@ -94,17 +94,22 @@ class BloqueioAgendaViewModel(
     )
 
     val id = mutableStateOf("")
+    var psicologoId by mutableStateOf<Long?>(null)
+        private set
+    var erroPsicologo by mutableStateOf(false)
+        private set
 
-    val psicologo = CampoValidado()
     val dataInicio = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val dataFim = CampoValidado()
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    val motivo = CampoValidado(
-        validadorExtra = { it.length <= 500 },
-        mensagemErroPersonalizada = "O motivo deve ter no máximo 500 caracteres"
-    )
+    val motivo = CampoValidado()
     val ativo = CampoValidado("true")
+
+    fun selecionarPsicologo(idSelecionado: Long?) {
+        psicologoId = idSelecionado
+        erroPsicologo = idSelecionado == null
+    }
 
     fun nomePsicologo(psicologoId: Long): String =
         nomePsicologo(psicologoId, _psicologos.value)
@@ -112,25 +117,32 @@ class BloqueioAgendaViewModel(
     fun salvar() {
         if (salvando) return
 
-        val v1 = psicologo.validar()
-        val v2 = dataInicio.validar()
-        val v3 = horaInicio.validar()
-        val v4 = dataFim.validar()
-        val v5 = horaFim.validar()
-        val v6 = motivo.validar()
-        val v7 = ativo.validar()
+        val psicologoSelecionado = psicologoId
+        erroPsicologo = psicologoSelecionado == null
 
-        if (!(v1 && v2 && v3 && v4 && v5 && v6 && v7)) {
-            mandarMensagem("Preencha todos os campos obrigatórios.")
+        val v1 = dataInicio.validar()
+        val v2 = horaInicio.validar()
+        val v3 = dataFim.validar()
+        val v4 = horaFim.validar()
+        val v5 = motivo.validar()
+        val v6 = ativo.validar()
+
+        if (erroPsicologo || !(v1 && v2 && v3 && v4 && v5 && v6)) {
+            mandarMensagem(
+                if (erroPsicologo && v1 && v2 && v3 && v4 && v5 && v6) {
+                    "Selecione um psicólogo."
+                } else {
+                    "Preencha todos os campos obrigatórios."
+                }
+            )
             return
         }
 
-        val psicologoId = psicologo.valor.value.toLongOrNull()
         val inicioDateTime = montarDataHoraIso(dataInicio.valor.value, horaInicio.valor.value)
         val fimDateTime = montarDataHoraIso(dataFim.valor.value, horaFim.valor.value)
 
-        if (psicologoId == null || inicioDateTime == null || fimDateTime == null) {
-            mandarMensagem("Informe psicólogo, datas e horários válidos.")
+        if (inicioDateTime == null || fimDateTime == null) {
+            mandarMensagem("Informe datas e horários válidos.")
             return
         }
 
@@ -140,7 +152,7 @@ class BloqueioAgendaViewModel(
                 val idAtual = id.value.toLongOrNull()
                 val bloqueio = BloqueioAgenda(
                     id = idAtual,
-                    psicologoId = psicologoId,
+                    psicologoId = psicologoSelecionado!!,
                     dataHoraInicio = inicioDateTime.toString(),
                     dataHoraFim = fimDateTime.toString(),
                     motivo = motivo.valor.value.trim(),
@@ -197,7 +209,8 @@ class BloqueioAgendaViewModel(
         backStack.clear()
         backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = bloqueio.id?.toString() ?: ""
-        psicologo.definir(bloqueio.psicologoId.toString())
+        psicologoId = bloqueio.psicologoId
+        erroPsicologo = false
         dataInicio.definir(formatarDataIsoParaBrasileira(bloqueio.dataHoraInicio))
         horaInicio.definir(bloqueio.dataHoraInicio.substringAfter('T', "").take(5))
         dataFim.definir(formatarDataIsoParaBrasileira(bloqueio.dataHoraFim))
@@ -207,7 +220,8 @@ class BloqueioAgendaViewModel(
     }
 
     fun limparCampos() {
-        psicologo.limpar()
+        psicologoId = null
+        erroPsicologo = false
         dataInicio.limpar()
         horaInicio.limpar()
         dataFim.limpar()

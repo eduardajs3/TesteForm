@@ -1,7 +1,5 @@
 package edu.front.psi.clin.ui.screens.horarioDisponivel
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -9,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import edu.front.psi.clin.model.enums.DiaSemana
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -32,24 +33,21 @@ fun HorarioDisponivelFormulario(
     val salvando = vm.salvando
     val psicologosLista = vm.psicologos.collectAsState().value
     val psicologosFiltrados = psicologosLista.filter {
-        it.ativo || (isEdicao && it.id == vm.psicologoId.value)
+        it.ativo || (isEdicao && it.id == vm.psicologoId)
     }
     val psicologoOpcoes = psicologosFiltrados.map { it.nome }
 
-    val diasOpcoes = listOf("SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO")
-
     val statusOpcoes = listOf("Ativo", "Inativo")
 
-    val psicologoAtualObj = psicologosFiltrados.firstOrNull { it.id == vm.psicologoId.value }
-    val psicologoAtualNome = psicologoAtualObj?.nome ?: (psicologoOpcoes.firstOrNull() ?: "")
+    val psicologoAtualObj = psicologosFiltrados.firstOrNull { it.id == vm.psicologoId }
+    val psicologoAtualNome = psicologoAtualObj?.nome.orEmpty()
 
-    LaunchedEffect(psicologosFiltrados, vm.psicologoId.value) {
-        if (vm.psicologoId.value == null && psicologosFiltrados.isNotEmpty()) {
-            vm.psicologoId.value = psicologosFiltrados.first().id
-        }
+    val diaSelecionado = if (vm.diaSemana.valor.value.isBlank()) {
+        null
+    } else {
+        DiaSemana.deValorApi(vm.diaSemana.valor.value)
     }
-
-    val diaAtualRotulo = vm.diaSemana.valor.value.ifBlank { diasOpcoes.first() }
+    val diaAtualRotulo = diaSelecionado?.rotulo.orEmpty()
 
     val statusExibicao = if (vm.ativo.valor.value == "true" || vm.ativo.valor.value.isEmpty()) "Ativo" else "Inativo"
 
@@ -67,19 +65,20 @@ fun HorarioDisponivelFormulario(
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nomeSelecionado ->
                     val psicologoEscolhido = psicologosFiltrados.firstOrNull { it.nome == nomeSelecionado }
-                    if (psicologoEscolhido?.id != null) {
-                        vm.psicologoId.value = psicologoEscolhido.id
-                    }
+                    vm.selecionarPsicologo(psicologoEscolhido?.id)
                 },
-                isError = false,
-                errorMessage = null
+                isError = vm.erroPsicologo,
+                errorMessage = if (vm.erroPsicologo) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
                 label = "Dia da semana *",
                 valorSelecionado = diaAtualRotulo,
-                opcoes = diasOpcoes,
-                onOpcaoSelecionada = { vm.diaSemana.definir(it) },
+                opcoes = DiaSemana.entries.map { it.rotulo },
+                onOpcaoSelecionada = { rotuloSelecionado ->
+                    val diaEscolhido = DiaSemana.entries.firstOrNull { it.rotulo == rotuloSelecionado }
+                    vm.diaSemana.definir(diaEscolhido?.name.orEmpty())
+                },
                 isError = vm.diaSemana.temErro.value,
                 errorMessage = if (vm.diaSemana.temErro.value) "Campo obrigatório" else null
             )

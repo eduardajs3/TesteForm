@@ -12,6 +12,7 @@ import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.HorarioDisponivel
 import edu.front.psi.clin.model.Psicologo
+import edu.front.psi.clin.model.enums.DiaSemana
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
@@ -53,7 +54,7 @@ class HorarioDisponivelViewModel(
                 _horarios.value = horariosAtualizados
                 _psicologos.value = psicologosAtualizados
 
-                val psicologoSelecionadoId = psicologoId.value
+                val psicologoSelecionadoId = psicologoId
                 if (
                     id.value.isEmpty() &&
                     psicologoSelecionadoId != null &&
@@ -61,7 +62,7 @@ class HorarioDisponivelViewModel(
                         it.id == psicologoSelecionadoId && it.ativo
                     }
                 ) {
-                    psicologoId.value = null
+                    psicologoId = null
                 }
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
@@ -83,7 +84,9 @@ class HorarioDisponivelViewModel(
                 val nomePsicologo = psicologos
                     .firstOrNull { it.id == horario.psicologoId }
                     ?.nome
+                val rotuloDia = DiaSemana.deValorApi(horario.diaSemana).rotulo
                 (nomePsicologo?.contains(filtro, ignoreCase = true) == true) ||
+                    rotuloDia.contains(filtro, ignoreCase = true) ||
                     horario.diaSemana.contains(filtro, ignoreCase = true) ||
                     horario.horaInicio.contains(filtro, ignoreCase = true) ||
                     horario.horaFim.contains(filtro, ignoreCase = true)
@@ -97,39 +100,52 @@ class HorarioDisponivelViewModel(
 
     val id = mutableStateOf("")
 
-    val psicologoId = mutableStateOf<Long?>(null)
+    var psicologoId by mutableStateOf<Long?>(null)
+        private set
+    var erroPsicologo by mutableStateOf(false)
+        private set
+
     val diaSemana = CampoValidado()
     val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
     val descricao = CampoValidado()
     val ativo = CampoValidado("true")
 
+    fun selecionarPsicologo(idSelecionado: Long?) {
+        psicologoId = idSelecionado
+        erroPsicologo = idSelecionado == null
+    }
+
     fun salvar() {
         if (salvando) return
 
-        val psicologoSelecionado = psicologoId.value
-        if (psicologoSelecionado == null) {
-            mandarMensagem("Selecione um psicólogo.")
-            return
-        }
+        val psicologoSelecionado = psicologoId
+        erroPsicologo = psicologoSelecionado == null
 
         val v2 = diaSemana.validar()
         val v3 = horaInicio.validar()
         val v4 = horaFim.validar()
         val v6 = ativo.validar()
 
-        if (!(v2 && v3 && v4 && v6)) {
-            mandarMensagem("Preencha todos os campos obrigatórios.")
+        if (erroPsicologo || !(v2 && v3 && v4 && v6)) {
+            mandarMensagem(
+                if (erroPsicologo && v2 && v3 && v4 && v6) {
+                    "Selecione um psicólogo."
+                } else {
+                    "Preencha todos os campos obrigatórios."
+                }
+            )
             return
         }
 
         viewModelScope.launch {
             salvando = true
             try {
+                val diaEnum = DiaSemana.deValorApi(diaSemana.valor.value)
                 val horario = HorarioDisponivel(
                     id = id.value.toLongOrNull(),
-                    psicologoId = psicologoSelecionado,
-                    diaSemana = diaSemana.valor.value,
+                    psicologoId = psicologoSelecionado!!,
+                    diaSemana = diaEnum.name,
                     horaInicio = if (horaInicio.valor.value.length == 5) "${horaInicio.valor.value}:00" else horaInicio.valor.value,
                     horaFim = if (horaFim.valor.value.length == 5) "${horaFim.valor.value}:00" else horaFim.valor.value,
                     descricao = descricao.valor.value.ifEmpty { null },
@@ -139,12 +155,8 @@ class HorarioDisponivelViewModel(
                 if (id.value.isEmpty()) {
                     horarioApi.salvar(horario)
                 } else {
-                    val idAtual = id.value.toLongOrNull()
-                    if (idAtual == null) {
-                        mandarMensagem("ID de horário inválido.")
-                        return@launch
-                    }
-                    horarioApi.atualizar(idAtual, horario)
+                    val idNumber = id.value.toLong()
+                    horarioApi.atualizar(idNumber, horario)
                 }
 
                 _horarios.value = horarioApi.carregar()
@@ -191,8 +203,9 @@ class HorarioDisponivelViewModel(
         backStack.clear()
         backStack.add(HorarioDisponivelRotas.Formulario)
         id.value = horario.id?.toString() ?: ""
-        psicologoId.value = horario.psicologoId
-        diaSemana.definir(horario.diaSemana)
+        psicologoId = horario.psicologoId
+        erroPsicologo = false
+        diaSemana.definir(DiaSemana.deValorApi(horario.diaSemana).name)
         horaInicio.definir(horario.horaInicio.take(5))
         horaFim.definir(horario.horaFim.take(5))
         descricao.definir(horario.descricao ?: "")
@@ -200,7 +213,8 @@ class HorarioDisponivelViewModel(
     }
 
     fun limparCampos() {
-        psicologoId.value = null
+        psicologoId = null
+        erroPsicologo = false
         diaSemana.limpar()
         horaInicio.limpar()
         horaFim.limpar()

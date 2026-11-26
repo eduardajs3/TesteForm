@@ -33,10 +33,10 @@ fun BloqueioAgendaFormulario(
     val salvando = vm.salvando
     val psicologos = vm.psicologos.collectAsState().value
     val psicologoOpcoes = psicologos.filter {
-        it.ativo || isEdicao && it.id?.toString() == vm.psicologo.valor.value
+        it.ativo || (isEdicao && it.id == vm.psicologoId)
     }.map { it.nome }
     val psicologoSelecionado = psicologos.firstOrNull {
-        it.id?.toString() == vm.psicologo.valor.value
+        it.id == vm.psicologoId
     }
 
     val statusOpcoes = listOf("Ativo", "Inativo")
@@ -57,10 +57,10 @@ fun BloqueioAgendaFormulario(
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nome ->
                     val psicologo = psicologos.firstOrNull { it.nome == nome }
-                    vm.psicologo.definir(psicologo?.id?.toString().orEmpty())
+                    vm.selecionarPsicologo(psicologo?.id)
                 },
-                isError = vm.psicologo.temErro.value,
-                errorMessage = if (vm.psicologo.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroPsicologo,
+                errorMessage = if (vm.erroPsicologo) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(

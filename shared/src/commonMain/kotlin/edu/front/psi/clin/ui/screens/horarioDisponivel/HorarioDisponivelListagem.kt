@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.HorarioDisponivel
+import edu.front.psi.clin.model.enums.DiaSemana
 import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.security.RecursoSistema
 import edu.front.psi.clin.ui.componentes.AppDeleteModal
@@ -62,6 +63,7 @@ fun HorarioDisponivelListagem(
         ) { horario ->
             val isAtivo = horario.ativo
             val nomePsicologo = nomeDoPsicologo(horario.psicologoId)
+            val diaRotulo = DiaSemana.deValorApi(horario.diaSemana).rotulo
 
             CelulaTabelaTexto(
                 text = nomePsicologo,
@@ -69,7 +71,7 @@ fun HorarioDisponivelListagem(
                 isBold = true
             )
             CelulaTabelaTexto(
-                text = horario.diaSemana,
+                text = diaRotulo,
                 weight = 1.1f
             )
             CelulaTabelaTexto(
@@ -91,12 +93,13 @@ fun HorarioDisponivelListagem(
 
         horarioSelecionado.value?.let { horario ->
             val isAtivo = horario.ativo
+            val diaRotulo = DiaSemana.deValorApi(horario.diaSemana).rotulo
             ModalDetalhesBase(
                 titulo = "Detalhes do Horário",
                 onDismiss = { horarioSelecionado.value = null },
                 conteudo = {
                     ItemDetalhe(rotulo = "Psicólogo(a)", valor = nomeDoPsicologo(horario.psicologoId))
-                    ItemDetalhe(rotulo = "Dia da semana", valor = horario.diaSemana)
+                    ItemDetalhe(rotulo = "Dia da semana", valor = diaRotulo)
                     ItemDetalhe(rotulo = "Horário de início", valor = horario.horaInicio)
                     ItemDetalhe(rotulo = "Horário de fim", valor = horario.horaFim)
                     ItemDetalhe(rotulo = "Descrição", valor = horario.descricao ?: "Nenhuma")

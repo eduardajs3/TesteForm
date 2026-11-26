@@ -34,9 +34,9 @@ fun PagamentoFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
 
-    val agendaIdSelecionado = vm.agendaId.valor.value.toLongOrNull()
-    val pacienteIdSelecionado = vm.pacienteId.valor.value.toLongOrNull()
-    val convenioIdSelecionado = vm.convenioId.valor.value.toLongOrNull()
+    val agendaIdSelecionado = vm.agendaId
+    val pacienteIdSelecionado = vm.pacienteId
+    val convenioIdSelecionado = vm.convenioId
 
     val pacientesLista = vm.pacientes.collectAsState().value
     val conveniosLista = vm.convenios.collectAsState().value
@@ -83,12 +83,10 @@ fun PagamentoFormulario(
                 onOpcaoSelecionada = { selecao ->
                     val idStr = selecao.substringAfter("#").substringBefore(" -")
                     val agendaEscolhida = agendasLista.firstOrNull { it.id.toString() == idStr }
-                    vm.agendaId.definir(agendaEscolhida?.id?.toString().orEmpty())
-                    vm.pacienteId.definir(agendaEscolhida?.pacienteId?.toString().orEmpty())
-                    vm.convenioId.definir(agendaEscolhida?.convenioId?.toString().orEmpty())
+                    vm.selecionarAgenda(agendaEscolhida)
                 },
-                isError = vm.agendaId.temErro.value,
-                errorMessage = if (vm.agendaId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroAgenda,
+                errorMessage = if (vm.erroAgenda) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -97,10 +95,10 @@ fun PagamentoFormulario(
                 opcoes = pacientesDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
                     val pacienteEscolhido = pacientesDisponiveis.firstOrNull { it.nome == nome }
-                    vm.pacienteId.definir(pacienteEscolhido?.id?.toString().orEmpty())
+                    vm.selecionarPaciente(pacienteEscolhido?.id)
                 },
-                isError = vm.pacienteId.temErro.value,
-                errorMessage = if (vm.pacienteId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroPaciente,
+                errorMessage = if (vm.erroPaciente) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -109,10 +107,10 @@ fun PagamentoFormulario(
                 opcoes = conveniosDisponiveis.map { it.nome },
                 onOpcaoSelecionada = { nome ->
                     val convenioEscolhido = conveniosDisponiveis.firstOrNull { it.nome == nome }
-                    vm.convenioId.definir(convenioEscolhido?.id?.toString().orEmpty())
+                    vm.selecionarConvenio(convenioEscolhido?.id)
                 },
-                isError = vm.convenioId.temErro.value,
-                errorMessage = if (vm.convenioId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroConvenio,
+                errorMessage = if (vm.erroConvenio) "Campo obrigatório" else null
             )
 
             CampoTextoPadrao(

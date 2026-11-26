@@ -19,7 +19,6 @@ import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlin.math.roundToLong
 
 class PagamentoViewModel(
     private val mandarMensagem: (String) -> Unit
@@ -74,27 +73,23 @@ class PagamentoViewModel(
                 _agendas.value = agendasAtualizadas
 
                 if (id.value.isEmpty()) {
-                    val pacienteIdAtual = pacienteId.valor.value.toLongOrNull()
                     if (
-                        pacienteIdAtual != null &&
+                        pacienteId != null &&
                         pacientesAtualizados.none {
-                            it.id == pacienteIdAtual && it.ativo
+                            it.id == pacienteId && it.ativo
                         }
                     ) {
-                        pacienteId.limpar()
+                        pacienteId = null
                     }
-
-                    val convenioIdAtual = convenioId.valor.value.toLongOrNull()
                     if (
-                        convenioIdAtual != null &&
+                        convenioId != null &&
                         conveniosAtualizados.none {
-                            it.id == convenioIdAtual && it.ativo
+                            it.id == convenioId && it.ativo
                         }
                     ) {
-                        convenioId.limpar()
+                        convenioId = null
                     }
-
-                    val agendaSelecionadaId = agendaId.valor.value.toLongOrNull()
+                    val agendaSelecionadaId = agendaId
                     if (
                         agendaSelecionadaId != null &&
                         (
@@ -104,7 +99,7 @@ class PagamentoViewModel(
                                 pagamentosAtualizados.any { it.agendaId == agendaSelecionadaId }
                             )
                     ) {
-                        agendaId.limpar()
+                        agendaId = null
                     }
                 }
             } catch (e: Exception) {
@@ -134,9 +129,19 @@ class PagamentoViewModel(
     val backStack = NavBackStack<PagamentoRotas>(PagamentoRotas.Listagem)
 
     val id = mutableStateOf("")
-    val agendaId = CampoValidado()
-    val pacienteId = CampoValidado()
-    val convenioId = CampoValidado()
+    var agendaId by mutableStateOf<Long?>(null)
+        private set
+    var pacienteId by mutableStateOf<Long?>(null)
+        private set
+    var convenioId by mutableStateOf<Long?>(null)
+        private set
+
+    var erroAgenda by mutableStateOf(false)
+        private set
+    var erroPaciente by mutableStateOf(false)
+        private set
+    var erroConvenio by mutableStateOf(false)
+        private set
 
     val valorTotal = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
     val valorConvenio = CampoValidado(formatador = { MaskUtils.aplicarMascaraMoeda(it) })
@@ -145,12 +150,36 @@ class PagamentoViewModel(
     val dataPagamento = CampoValidado()
     val status = CampoValidado(PagamentoStatus.PENDENTE.name)
 
+    fun selecionarAgenda(agenda: Agenda?) {
+        agendaId = agenda?.id
+        pacienteId = agenda?.pacienteId
+        convenioId = agenda?.convenioId
+        erroAgenda = agendaId == null
+        erroPaciente = pacienteId == null
+        erroConvenio = convenioId == null
+    }
+
+    fun selecionarPaciente(idSelecionado: Long?) {
+        pacienteId = idSelecionado
+        erroPaciente = idSelecionado == null
+    }
+
+    fun selecionarConvenio(idSelecionado: Long?) {
+        convenioId = idSelecionado
+        erroConvenio = idSelecionado == null
+    }
+
     fun salvar() {
         if (salvando) return
 
-        val vAgenda = agendaId.validar()
-        val vPaciente = pacienteId.validar()
-        val vConvenio = convenioId.validar()
+        val agendaSelecionada = agendaId
+        val pacienteSelecionado = pacienteId
+        val convenioSelecionado = convenioId
+
+        erroAgenda = agendaSelecionada == null
+        erroPaciente = pacienteSelecionado == null
+        erroConvenio = convenioSelecionado == null
+
         val v1 = valorTotal.validar()
         val v2 = valorConvenio.validar()
         val v3 = valorPaciente.validar()
@@ -158,32 +187,34 @@ class PagamentoViewModel(
         val v5 = dataPagamento.validar()
         val v6 = status.validar()
 
-        val agendaSelecionada = agendaId.valor.value.toLongOrNull()
-        val pacienteSelecionado = pacienteId.valor.value.toLongOrNull()
-        val convenioSelecionado = convenioId.valor.value.toLongOrNull()
-
-        if (!(vAgenda && vPaciente && vConvenio && v1 && v2 && v3 && v4 && v5 && v6)) {
-            mandarMensagem("Preencha todos os campos obrigatórios.")
-            return
-        }
-
-        if (agendaSelecionada == null || pacienteSelecionado == null || convenioSelecionado == null) {
-            mandarMensagem("Selecione Agenda, Paciente e Convênio válidos.")
+        val camposTextoValidos = v1 && v2 && v3 && v4 && v5 && v6
+        if (erroAgenda || erroPaciente || erroConvenio || !camposTextoValidos) {
+            val faltantes = buildList {
+                if (erroAgenda) add("Agenda")
+                if (erroPaciente) add("Paciente")
+                if (erroConvenio) add("Convênio")
+            }
+            mandarMensagem(
+                if (faltantes.isNotEmpty() && camposTextoValidos) {
+                    "Selecione ${faltantes.joinToString(", ")}."
+                } else {
+                    "Preencha todos os campos obrigatórios."
+                }
+            )
             return
         }
 
         viewModelScope.launch {
             salvando = true
             try {
-                val idAtual = id.value.toLongOrNull()
                 val pagamento = Pagamento(
-                    id = idAtual,
-                    agendaId = agendaSelecionada,
-                    pacienteId = pacienteSelecionado,
-                    convenioId = convenioSelecionado,
-                    valorTotal = converterMoedaParaDouble(valorTotal.valor.value),
-                    valorConvenio = converterMoedaParaDouble(valorConvenio.valor.value),
-                    valorPaciente = converterMoedaParaDouble(valorPaciente.valor.value),
+                    id = id.value.toLongOrNull(),
+                    agendaId = agendaSelecionada!!,
+                    pacienteId = pacienteSelecionado!!,
+                    convenioId = convenioSelecionado!!,
+                    valorTotal = MaskUtils.converterMoedaParaDouble(valorTotal.valor.value),
+                    valorConvenio = MaskUtils.converterMoedaParaDouble(valorConvenio.valor.value),
+                    valorPaciente = MaskUtils.converterMoedaParaDouble(valorPaciente.valor.value),
                     formaPagamento = formaPagamento.valor.value.trim(),
                     dataPagamento = formatarDataBrasileiraParaIso(dataPagamento.valor.value.trim()),
                     status = PagamentoStatus.deValorApi(status.valor.value)
@@ -192,7 +223,8 @@ class PagamentoViewModel(
                 if (id.value.isEmpty()) {
                     pagamentoApi.salvar(pagamento)
                 } else {
-                    pagamentoApi.atualizar(idAtual!!, pagamento)
+                    val idNumber = id.value.toLong()
+                    pagamentoApi.atualizar(idNumber, pagamento)
                 }
 
                 _pagamentos.value = pagamentoApi.carregar()
@@ -239,31 +271,27 @@ class PagamentoViewModel(
         backStack.clear()
         backStack.add(PagamentoRotas.Formulario)
         id.value = pagamento.id?.toString() ?: ""
-        agendaId.definir(pagamento.agendaId.toString())
-        pacienteId.definir(pagamento.pacienteId.toString())
-        convenioId.definir(pagamento.convenioId.toString())
-
-        valorTotal.definir(valorParaCentavos(pagamento.valorTotal))
-        valorConvenio.definir(valorParaCentavos(pagamento.valorConvenio))
-        valorPaciente.definir(valorParaCentavos(pagamento.valorPaciente))
+        agendaId = pagamento.agendaId
+        pacienteId = pagamento.pacienteId
+        convenioId = pagamento.convenioId
+        erroAgenda = false
+        erroPaciente = false
+        erroConvenio = false
+        valorTotal.definir(MaskUtils.moedaDoubleParaCentavos(pagamento.valorTotal))
+        valorConvenio.definir(MaskUtils.moedaDoubleParaCentavos(pagamento.valorConvenio))
+        valorPaciente.definir(MaskUtils.moedaDoubleParaCentavos(pagamento.valorPaciente))
         formaPagamento.definir(pagamento.formaPagamento)
         dataPagamento.definir(formatarDataIsoParaBrasileira(pagamento.dataPagamento))
         status.definir(pagamento.status.name)
     }
 
-    private fun valorParaCentavos(valor: Double): String =
-        (valor * 100.0).roundToLong().toString()
-
-    private fun converterMoedaParaDouble(valorStr: String): Double {
-        val apenasDigitos = valorStr.filter { it.isDigit() }
-        if (apenasDigitos.isEmpty()) return 0.0
-        return apenasDigitos.toDouble() / 100.0
-    }
-
     fun limparCampos() {
-        agendaId.limpar()
-        pacienteId.limpar()
-        convenioId.limpar()
+        agendaId = null
+        pacienteId = null
+        convenioId = null
+        erroAgenda = false
+        erroPaciente = false
+        erroConvenio = false
         valorTotal.limpar()
         valorConvenio.limpar()
         valorPaciente.limpar()
