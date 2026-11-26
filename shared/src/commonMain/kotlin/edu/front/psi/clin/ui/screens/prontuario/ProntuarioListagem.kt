@@ -25,9 +25,10 @@ fun ProntuarioListagem(
     nomePaciente: String = ""
 ) {
     val filtroState by vm.filtro.collectAsState()
-    val pacienteCampo = vm.paciente.valor.value
+    val pacientes by vm.pacientes.collectAsState()
+    val nomePacienteSelecionado = pacientes.firstOrNull { it.id == vm.pacienteId }?.nome.orEmpty()
     val nomePacienteExibido = when {
-        pacienteCampo.isNotEmpty() -> pacienteCampo
+        nomePacienteSelecionado.isNotEmpty() -> nomePacienteSelecionado
         nomePaciente.isNotEmpty() -> nomePaciente
         filtroState.isNotEmpty() -> filtroState
         else -> "Todos os Pacientes"

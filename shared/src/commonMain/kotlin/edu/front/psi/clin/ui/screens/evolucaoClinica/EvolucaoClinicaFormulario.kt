@@ -24,9 +24,9 @@ fun EvolucaoClinicaFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
 
-    val prontuarioIdSelecionado = vm.prontuarioId.valor.value.toLongOrNull()
-    val agendaIdSelecionado = vm.agendaId.valor.value.toLongOrNull()
-    val psicologoIdSelecionado = vm.psicologoId.valor.value.toLongOrNull()
+    val prontuarioIdSelecionado = vm.prontuarioId
+    val agendaIdSelecionado = vm.agendaId
+    val psicologoIdSelecionado = vm.psicologoId
 
     val pacientes = vm.pacientes.collectAsState().value
     val prontuarios = vm.prontuarios.collectAsState().value
@@ -114,8 +114,8 @@ fun EvolucaoClinicaFormulario(
                     }?.first
                     prontuarios.firstOrNull { it.id == prontuarioId }?.let(vm::selecionarProntuario)
                 },
-                isError = vm.prontuarioId.temErro.value,
-                errorMessage = if (vm.prontuarioId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroProntuario,
+                errorMessage = if (vm.erroProntuario) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -128,8 +128,8 @@ fun EvolucaoClinicaFormulario(
                     }?.first
                     agendas.firstOrNull { it.id == agendaId }?.let(vm::selecionarAgenda)
                 },
-                isError = vm.agendaId.temErro.value,
-                errorMessage = if (vm.agendaId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroAgenda,
+                errorMessage = if (vm.erroAgenda) "Campo obrigatório" else null
             )
 
             CampoDropdownPadrao(
@@ -140,10 +140,10 @@ fun EvolucaoClinicaFormulario(
                     val idSelecionado = psicologoOpcoes.firstOrNull {
                         it.second == selecao
                     }?.first
-                    vm.psicologoId.definir(idSelecionado?.toString().orEmpty())
+                    vm.selecionarPsicologo(idSelecionado)
                 },
-                isError = vm.psicologoId.temErro.value,
-                errorMessage = if (vm.psicologoId.temErro.value) "Campo obrigatório" else null
+                isError = vm.erroPsicologo,
+                errorMessage = if (vm.erroPsicologo) "Campo obrigatório" else null
             )
 
             CampoDataPadrao(

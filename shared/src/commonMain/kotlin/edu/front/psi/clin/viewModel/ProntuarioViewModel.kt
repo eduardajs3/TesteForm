@@ -79,16 +79,9 @@ class ProntuarioViewModel(
     }
 
     fun selecionarPaciente(pacienteSelecionado: Paciente) {
-        paciente.definir(pacienteSelecionado.nome)
-        pacienteIdSelecionado = pacienteSelecionado.id
-    }
-
-    fun atualizarPacienteTexto(texto: String) {
-        paciente.definir(texto)
-        val encontrado = _pacientes.value.firstOrNull {
-            it.nome.equals(texto.trim(), ignoreCase = true)
-        }
-        pacienteIdSelecionado = encontrado?.id
+        _pacienteIdFiltro.value = pacienteSelecionado.id
+        _filtro.value = pacienteSelecionado.nome
+        pacienteId = pacienteSelecionado.id
     }
 
     val prontuariosFiltrados = combine(
@@ -116,10 +109,10 @@ class ProntuarioViewModel(
     )
 
     val id = mutableStateOf("")
-    var pacienteIdSelecionado by mutableStateOf<Long?>(null)
+
+    var pacienteId by mutableStateOf<Long?>(null)
         private set
 
-    val paciente = CampoValidado()
     val dataAbertura = CampoValidado()
     val queixaPrincipal = CampoValidado()
     val status = CampoValidado(ProntuarioStatus.ATIVO.name)
@@ -128,27 +121,19 @@ class ProntuarioViewModel(
     fun salvar() {
         if (salvando) return
 
-        val v1 = paciente.validar()
+        val pacienteSelecionadoId = pacienteId ?: _pacienteIdFiltro.value
         val v2 = dataAbertura.validar()
         val v3 = queixaPrincipal.validar()
         val v4 = status.validar()
         val v5 = ativo.validar()
 
-        if (!(v1 && v2 && v3 && v4 && v5)) {
-            mandarMensagem("Por favor, corrija os erros no formulário.")
+        if (pacienteSelecionadoId == null) {
+            mandarMensagem("Nenhum paciente selecionado para o prontuário.")
             return
         }
 
-        val pacienteId = pacienteIdSelecionado
-            ?: _pacientes.value.firstOrNull { it.nome == paciente.valor.value.trim() }?.id
-        if (pacienteId == null) {
-            mandarMensagem("Selecione um paciente cadastrado.")
-            return
-        }
-
-        val idAtual = id.value.toLongOrNull()
-        if (id.value.isNotEmpty() && idAtual == null) {
-            mandarMensagem("Identificador do prontuário inválido.")
+        if (!(v2 && v3 && v4 && v5)) {
+            mandarMensagem("Preencha todos os campos obrigatórios.")
             return
         }
 
@@ -158,8 +143,8 @@ class ProntuarioViewModel(
             salvando = true
             try {
                 val prontuario = Prontuario(
-                    id = idAtual,
-                    pacienteId = pacienteId,
+                    id = id.value.toLongOrNull(),
+                    pacienteId = pacienteSelecionadoId,
                     dataAbertura = dataFormatada,
                     queixaPrincipal = queixaPrincipal.valor.value.trim(),
                     status = ProntuarioStatus.deValorApi(status.valor.value),
@@ -169,7 +154,8 @@ class ProntuarioViewModel(
                 if (id.value.isEmpty()) {
                     prontuarioApi.salvar(prontuario)
                 } else {
-                    prontuarioApi.atualizar(idAtual!!, prontuario)
+                    val idNumber = id.value.toLong()
+                    prontuarioApi.atualizar(idNumber, prontuario)
                 }
 
                 _prontuarios.value = prontuarioApi.carregar()
@@ -210,9 +196,11 @@ class ProntuarioViewModel(
         backStack.add(ProntuarioRotas.Formulario)
         id.value = ""
         limparCampos()
-        if (nomePaciente.isNotEmpty()) {
-            paciente.definir(nomePaciente)
-            pacienteIdSelecionado = _pacientes.value.firstOrNull { it.nome == nomePaciente }?.id
+
+        if (pacienteId == null && nomePaciente.isNotEmpty() && nomePaciente != "Todos os Pacientes") {
+            pacienteId = _pacientes.value.firstOrNull {
+                it.nome.equals(nomePaciente.trim(), ignoreCase = true)
+            }?.id
         }
     }
 
@@ -220,8 +208,7 @@ class ProntuarioViewModel(
         backStack.clear()
         backStack.add(ProntuarioRotas.Formulario)
         id.value = prontuario.id?.toString() ?: ""
-        pacienteIdSelecionado = prontuario.pacienteId
-        paciente.definir(_pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome.orEmpty())
+        pacienteId = prontuario.pacienteId
         dataAbertura.definir(formatarDataIsoParaBrasileira(prontuario.dataAbertura))
         queixaPrincipal.definir(prontuario.queixaPrincipal)
         status.definir(prontuario.status.name)
@@ -229,8 +216,7 @@ class ProntuarioViewModel(
     }
 
     fun limparCampos() {
-        pacienteIdSelecionado = null
-        paciente.limpar()
+        pacienteId = _pacienteIdFiltro.value
         dataAbertura.limpar()
         queixaPrincipal.limpar()
         status.definir(ProntuarioStatus.ATIVO.name)

@@ -23,7 +23,7 @@ fun ProntuarioFormulario(
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
     val pacientes = vm.pacientes.collectAsState().value
-    val pacienteOpcoes = pacientes.map { it.nome }.distinct()
+    val nomePaciente = pacientes.firstOrNull { it.id == vm.pacienteId }?.nome.orEmpty()
 
     val statusRegistroOpcoes = listOf("Ativo", "Inativo")
     val statusExibicao = ProntuarioStatus.deValorApi(vm.status.valor.value).rotulo
@@ -32,28 +32,12 @@ fun ProntuarioFormulario(
     Box(modifier = Modifier.padding(innerPadding)) {
         LayoutFormularioBase(
             titulo = if (isEdicao) "Editar Prontuário" else "Cadastro de Prontuário",
-            subtitulo = if (isEdicao) "Altere os dados do prontuário selecionado." else "Preencha os dados do prontuário.",
+            subtitulo = if (nomePaciente.isNotEmpty()) "Paciente: $nomePaciente" else "Preencha os dados do prontuário.",
             onVoltar = {
                 vm.backStack.clear()
                 vm.backStack.add(ProntuarioRotas.Listagem)
             }
         ) {
-            CampoDropdownPadrao(
-                label = "Paciente *",
-                valorSelecionado = vm.paciente.valor.value,
-                opcoes = pacienteOpcoes,
-                onOpcaoSelecionada = { selecao ->
-                    val pacienteEncontrado = pacientes.firstOrNull { it.nome == selecao }
-                    if (pacienteEncontrado != null) {
-                        vm.selecionarPaciente(pacienteEncontrado)
-                    } else {
-                        vm.atualizarPacienteTexto(selecao)
-                    }
-                },
-                isError = vm.paciente.temErro.value,
-                errorMessage = if (vm.paciente.temErro.value) "Campo obrigatório" else null
-            )
-
             CampoDataPadrao(
                 value = vm.dataAbertura.valor.value,
                 onValueChange = { vm.dataAbertura.definir(it) },
