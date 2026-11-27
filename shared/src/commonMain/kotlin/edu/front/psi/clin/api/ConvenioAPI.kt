@@ -37,7 +37,7 @@ class ConvenioAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(convenio: Convenio) {
         val id = requireNotNull(convenio.id) { "Convênio sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

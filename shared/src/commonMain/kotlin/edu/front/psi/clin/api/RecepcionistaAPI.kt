@@ -37,7 +37,7 @@ class RecepcionistaAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(recepcionista: Recepcionista) {
         val id = requireNotNull(recepcionista.id) { "Recepcionista sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

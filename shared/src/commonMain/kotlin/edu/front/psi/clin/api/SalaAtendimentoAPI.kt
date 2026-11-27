@@ -37,7 +37,7 @@ class SalaAtendimentoAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(sala: SalaAtendimento) {
         val id = requireNotNull(sala.id) { "Sala de atendimento sem identificador não pode ser excluída." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

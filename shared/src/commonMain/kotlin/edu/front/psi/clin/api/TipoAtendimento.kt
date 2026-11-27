@@ -37,7 +37,7 @@ class TipoAtendimentoAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(tipo: TipoAtendimento) {
         val id = requireNotNull(tipo.id) { "Tipo de atendimento sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

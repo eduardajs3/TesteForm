@@ -37,7 +37,7 @@ class PsicologoAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(psicologo: Psicologo) {
         val id = requireNotNull(psicologo.id) { "Psicólogo sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

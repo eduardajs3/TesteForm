@@ -37,7 +37,7 @@ class FuncionarioAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(funcionario: Funcionario) {
         val id = requireNotNull(funcionario.id) { "Funcionário sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

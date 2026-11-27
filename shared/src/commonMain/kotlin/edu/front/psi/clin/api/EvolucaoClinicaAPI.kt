@@ -38,7 +38,7 @@ class EvolucaoClinicaAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(evolucao: EvolucaoClinica) {
         val id = requireNotNull(evolucao.id) { "Evolução clínica sem identificador não pode ser excluída." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()

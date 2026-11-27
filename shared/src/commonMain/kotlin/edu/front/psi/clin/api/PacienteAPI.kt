@@ -37,7 +37,7 @@ class PacienteAPI(private val httpClient: HttpClient) {
 
     suspend fun apagar(paciente: Paciente) {
         val id = requireNotNull(paciente.id) { "Paciente sem identificador não pode ser excluído." }
-        val response = httpClient.delete("$endPoint/$id") {
+        val response = httpClient.delete("$endPoint/$id/inativar") {
             bearerAuth(token)
         }
         response.lancarErroSeNecessario()
