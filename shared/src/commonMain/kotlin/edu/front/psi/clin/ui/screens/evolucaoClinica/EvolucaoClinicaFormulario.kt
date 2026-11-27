@@ -3,15 +3,20 @@ package edu.front.psi.clin.ui.screens.evolucaoClinica
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import edu.front.psi.clin.navigation.EvolucaoClinicaRotas
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
 import edu.front.psi.clin.ui.componentes.LayoutFormularioBase
+import edu.front.psi.clin.ui.theme.TextoErro
 import edu.front.psi.clin.ui.viewmodel.EvolucaoClinicaViewModel
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
@@ -21,6 +26,12 @@ fun EvolucaoClinicaFormulario(
     innerPadding: PaddingValues,
     vm: EvolucaoClinicaViewModel
 ) {
+    LaunchedEffect(vm) {
+        if (vm.prontuarios.value.isEmpty()) {
+            vm.carregar(forcarAtualizacao = true)
+        }
+    }
+
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
 
@@ -35,20 +46,35 @@ fun EvolucaoClinicaFormulario(
     val pacienteIdFiltro = vm.pacienteIdFiltro.collectAsState().value
 
     val prontuarioAtual = prontuarios.firstOrNull { it.id == prontuarioIdSelecionado }
-    val agendasDoPaciente = prontuarioAtual?.let { prontuario ->
-        agendas.filter { it.pacienteId == prontuario.pacienteId }
+    val pacienteIdAtivo = pacienteIdFiltro ?: prontuarioAtual?.pacienteId
+
+    val agendasDoPaciente = pacienteIdAtivo?.let { idPac ->
+        agendas.filter { it.pacienteId == idPac }
     }.orEmpty()
     val agendaAtual = agendas.firstOrNull { it.id == agendaIdSelecionado }
     val agendasParaOpcoes = (agendasDoPaciente + listOfNotNull(agendaAtual))
         .distinctBy { it.id }
 
-    val prontuarioOpcoes = prontuarios.filter {
-        pacienteIdFiltro == null || it.pacienteId == pacienteIdFiltro
-    }.mapNotNull { prontuario ->
+    val prontuariosDoPaciente = if (pacienteIdAtivo != null) {
+        prontuarios.filter { it.pacienteId == pacienteIdAtivo }
+    } else {
+        emptyList()
+    }
+
+    val avisoSemProntuario = when {
+        pacienteIdAtivo == null -> "Nenhum paciente selecionado."
+        prontuariosDoPaciente.isEmpty() -> {
+            val nomePaciente = pacientes.firstOrNull { it.id == pacienteIdAtivo }?.nome ?: "Este paciente"
+            "$nomePaciente não possui prontuários cadastrados."
+        }
+        else -> null
+    }
+
+    val prontuarioOpcoes = prontuariosDoPaciente.mapNotNull { prontuario ->
         prontuario.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == prontuario.pacienteId }?.nome
-                ?: "Paciente #${prontuario.pacienteId}"
-            id to "$paciente - ${prontuario.queixaPrincipal} (#$id)"
+                ?: "Paciente"
+            id to "$paciente - ${prontuario.queixaPrincipal}"
         }
     }
 
@@ -56,21 +82,17 @@ fun EvolucaoClinicaFormulario(
     val psicologoAssociado = psicologos.firstOrNull { it.id == psicologoAssociadoId }
     val psicologoOpcoes = listOfNotNull(
         psicologoAssociadoId?.let { id ->
-            id to "${psicologoAssociado?.nome ?: "Psicólogo #$id"} (#$id)"
+            id to (psicologoAssociado?.nome ?: "Psicólogo")
         }
     )
 
     val agendaOpcoes = agendasParaOpcoes.mapNotNull { agenda ->
         agenda.id?.let { id ->
             val paciente = pacientes.firstOrNull { it.id == agenda.pacienteId }?.nome
-                ?: "Paciente #${agenda.pacienteId}"
-            id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)} (#$id)"
+                ?: "Paciente"
+            id to "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
         }
-    } + listOfNotNull(
-        agendaIdSelecionado
-            ?.takeIf { id -> agendasParaOpcoes.none { it.id == id } }
-            ?.let { it to "Agenda #$it" }
-    )
+    }
 
     val statusOpcoes = listOf("Ativo", "Inativo")
 
@@ -116,8 +138,21 @@ fun EvolucaoClinicaFormulario(
                     prontuarios.firstOrNull { it.id == prontuarioId }?.let(vm::selecionarProntuario)
                 },
                 isError = vm.erroProntuario,
-                errorMessage = if (vm.erroProntuario) "Campo obrigatório" else null
+                errorMessage = if (vm.erroProntuario) {
+                    avisoSemProntuario ?: "Campo obrigatório"
+                } else {
+                    null
+                }
             )
+
+            if (avisoSemProntuario != null) {
+                Text(
+                    text = avisoSemProntuario,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoErro,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+            }
 
             CampoDropdownPadrao(
                 label = "Agenda *",

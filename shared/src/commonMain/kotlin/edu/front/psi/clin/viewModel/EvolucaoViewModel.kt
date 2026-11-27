@@ -15,6 +15,7 @@ import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
 import edu.front.psi.clin.utils.formatarDataHoraIsoParaBrasileira
 import edu.front.psi.clin.utils.formatarDataIsoParaBrasileira
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -58,9 +59,9 @@ class EvolucaoClinicaViewModel(
         carregar()
     }
 
-    fun carregar() {
+    fun carregar(forcarAtualizacao: Boolean = false) {
         if (!PermissoesAcesso.podeAcessar(SessionManager.role, RecursoSistema.EVOLUCOES_CLINICAS)) return
-        if (carregamentoDados?.isActive == true) return
+        if (carregamentoDados?.isActive == true && !forcarAtualizacao) return
 
         carregamentoDados = viewModelScope.launch {
             try {
@@ -69,6 +70,8 @@ class EvolucaoClinicaViewModel(
                 _prontuarios.value = prontuarioApi.carregar()
                 _psicologos.value = psicologoApi.carregar()
                 _agendas.value = agendaApi.carregar()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 mandarMensagem(e.mensagemParaUsuario("Erro ao carregar dados da evolução clínica"))
             } finally {
@@ -178,11 +181,11 @@ class EvolucaoClinicaViewModel(
     fun selecionarPaciente(paciente: Paciente) {
         _pacienteIdFiltro.value = paciente.id
         _filtro.value = paciente.nome
-        val prontuario = _prontuarios.value.firstOrNull {
+        val prontuariosDoPaciente = _prontuarios.value.filter {
             it.pacienteId == paciente.id
         }
-        if (prontuario != null) {
-            selecionarProntuario(prontuario)
+        if (prontuariosDoPaciente.size == 1) {
+            selecionarProntuario(prontuariosDoPaciente.first())
         } else {
             prontuarioId = null
             agendaId = null
@@ -214,9 +217,9 @@ class EvolucaoClinicaViewModel(
         prontuarioId = prontuario.id
         erroProntuario = false
 
-        val agendaAtual = _agendas.value.firstOrNull {
-            it.id == agendaId && it.pacienteId == prontuario.pacienteId
-        }
+        val agendasDoPaciente = _agendas.value.filter { it.pacienteId == prontuario.pacienteId }
+        val agendaAtual = agendasDoPaciente.firstOrNull { it.id == agendaId }
+            ?: agendasDoPaciente.singleOrNull()
         agendaId = agendaAtual?.id
         erroAgenda = false
 
@@ -264,7 +267,7 @@ class EvolucaoClinicaViewModel(
         viewModelScope.launch {
             salvando = true
             try {
-                val horaFormatada = horaRegistro.valor.value.trim().ifEmpty { "00:00" }
+                val hora = horaRegistro.valor.value.trim().ifEmpty { "00:00" }
                 val dataIso = formatarDataBrasileiraParaIso(dataRegistro.valor.value.trim())
 
                 val evolucao = EvolucaoClinica(
@@ -272,7 +275,7 @@ class EvolucaoClinicaViewModel(
                     prontuarioId = prontuarioSelecionado!!,
                     psicologoId = psicologoSelecionado!!,
                     agendaId = agendaSelecionada!!,
-                    dataRegistro = "${dataIso}T${horaFormatada}:00",
+                    dataRegistro = "${dataIso}T${hora}:00",
                     descricao = descricao.valor.value.trim(),
                     ativo = ativo.valor.value.toBooleanStrictOrNull() ?: true
                 )
@@ -322,6 +325,7 @@ class EvolucaoClinicaViewModel(
         backStack.add(EvolucaoClinicaRotas.Formulario)
         id.value = ""
         limparCampos()
+        carregar(forcarAtualizacao = true)
         if (nomePaciente.isNotEmpty()) {
             selecionarPaciente(nomePaciente)
         }
@@ -337,8 +341,7 @@ class EvolucaoClinicaViewModel(
         erroProntuario = false
         erroAgenda = false
         erroPsicologo = false
-        _pacienteIdFiltro.value = null
-        _filtro.value = ""
+        carregar(forcarAtualizacao = true)
 
         val partesDataHora = evolucao.dataRegistro.split('T', limit = 2)
         dataRegistro.definir(formatarDataIsoParaBrasileira(partesDataHora[0]))
@@ -361,19 +364,19 @@ class EvolucaoClinicaViewModel(
     }
 
     fun nomeProntuario(id: Long): String {
-        val prontuario = _prontuarios.value.firstOrNull { it.id == id } ?: return "Prontuário #$id"
+        val prontuario = _prontuarios.value.firstOrNull { it.id == id } ?: return "Prontuário"
         val nomePaciente = _pacientes.value.firstOrNull { it.id == prontuario.pacienteId }?.nome
             ?: "Paciente"
-        return "$nomePaciente - ${prontuario.queixaPrincipal} (#$id)"
+        return "$nomePaciente - ${prontuario.queixaPrincipal}"
     }
 
     fun nomePsicologo(id: Long): String =
-        _psicologos.value.firstOrNull { it.id == id }?.nome ?: "Psicólogo #$id"
+        _psicologos.value.firstOrNull { it.id == id }?.nome ?: "Psicólogo"
 
     fun nomeAgenda(id: Long): String {
-        val agenda = _agendas.value.firstOrNull { it.id == id } ?: return "Agenda #$id"
+        val agenda = _agendas.value.firstOrNull { it.id == id } ?: return "Agenda"
         val paciente = _pacientes.value.firstOrNull { it.id == agenda.pacienteId }?.nome
-            ?: "Paciente #${agenda.pacienteId}"
+            ?: "Paciente"
         return "$paciente - ${formatarDataHoraIsoParaBrasileira(agenda.dataHoraInicio)}"
     }
 }

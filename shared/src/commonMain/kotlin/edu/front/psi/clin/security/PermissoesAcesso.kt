@@ -28,6 +28,9 @@ object PermissoesAcesso {
         "PSICOLOGO"
     )
 
+    fun ehPsicologo(role: String?): Boolean =
+        role?.let(::normalizarRole) == "PSICOLOGO"
+
     fun podeAcessar(role: String?, recurso: RecursoSistema): Boolean {
         val perfil = role?.let(::normalizarRole) ?: return false
         return when (recurso) {

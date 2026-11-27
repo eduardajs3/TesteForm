@@ -8,11 +8,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.BloqueioAgendaAPI
 import edu.front.psi.clin.api.PsicologoAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.BloqueioAgenda
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
+import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import edu.front.psi.clin.utils.formatarDataBrasileiraParaIso
@@ -34,26 +36,75 @@ class BloqueioAgendaViewModel(
     private val _psicologos = MutableStateFlow<List<Psicologo>>(emptyList())
     val psicologos = _psicologos.asStateFlow()
 
+    private val _filtro = MutableStateFlow("")
+    val filtro = _filtro.asStateFlow()
+
+    val backStack = NavBackStack<BloqueioAgendaRotas>(
+        BloqueioAgendaRotas.Listagem
+    )
+
+    val id = mutableStateOf("")
+    var psicologoId by mutableStateOf<Long?>(null)
+        private set
+    var erroPsicologo by mutableStateOf(false)
+        private set
+
+    val dataInicio = CampoValidado()
+    val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
+    val dataFim = CampoValidado()
+    val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
+    val motivo = CampoValidado()
+    val ativo = CampoValidado("true")
+
     var salvando by mutableStateOf(false)
         private set
 
-    private val _filtro = MutableStateFlow("")
-    val filtro = _filtro.asStateFlow()
     private var carregamentoDadosFormulario: Job? = null
+    private var ultimaSessao: String? = null
 
     init {
-        carregarDadosFormulario()
+        SessionManager.aoAlterar {
+            prepararParaSessaoAtual(recarregarDados = true)
+        }
+        prepararParaSessaoAtual(recarregarDados = true)
     }
 
-    fun carregarDadosFormulario() {
-        if (carregamentoDadosFormulario?.isActive == true) return
+    private fun chaveSessao(): String =
+        "${SessionManager.role.orEmpty()}|${SessionManager.email.orEmpty()}|${SessionManager.token}"
 
+    fun prepararParaSessaoAtual(recarregarDados: Boolean = false) {
+        val atual = chaveSessao()
+        if (ultimaSessao != atual) {
+            ultimaSessao = atual
+            carregamentoDadosFormulario?.cancel()
+            carregamentoDadosFormulario = null
+            _bloqueios.value = emptyList()
+            _psicologos.value = emptyList()
+            _filtro.value = ""
+            if (id.value.isEmpty()) {
+                psicologoId = null
+                erroPsicologo = false
+            }
+            if (recarregarDados) {
+                carregarDadosFormulario(forcarAtualizacao = true)
+            }
+        }
+    }
+
+    fun carregarDadosFormulario(forcarAtualizacao: Boolean = false) {
+        prepararParaSessaoAtual(recarregarDados = false)
+        if (!forcarAtualizacao && carregamentoDadosFormulario?.isActive == true) return
+
+        carregamentoDadosFormulario?.cancel()
         carregamentoDadosFormulario = viewModelScope.launch {
             try {
-                val bloqueiosAtualizados = bloqueioApi.carregar()
-                val psicologosAtualizados = psicologoApi.carregar()
+                _bloqueios.value = bloqueioApi.carregar()
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar bloqueios de agenda"))
+            }
 
-                _bloqueios.value = bloqueiosAtualizados
+            try {
+                val psicologosAtualizados = psicologoApi.carregar()
                 _psicologos.value = psicologosAtualizados
 
                 val psicologoSelecionadoId = psicologoId
@@ -66,8 +117,12 @@ class BloqueioAgendaViewModel(
                 ) {
                     psicologoId = null
                 }
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar bloqueios de agenda"))
+
+                if (id.value.isEmpty() && psicologoId == null) {
+                    preencherPsicologoSeNecessario()
+                }
+            } catch (_: Exception) {
+                // Evita bloquear a listagem de bloqueios caso o perfil nao carregue todos os psicologos
             } finally {
                 carregamentoDadosFormulario = null
             }
@@ -89,24 +144,11 @@ class BloqueioAgendaViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val backStack = NavBackStack<BloqueioAgendaRotas>(
-        BloqueioAgendaRotas.Listagem
-    )
-
-    val id = mutableStateOf("")
-    var psicologoId by mutableStateOf<Long?>(null)
-        private set
-    var erroPsicologo by mutableStateOf(false)
-        private set
-
-    val dataInicio = CampoValidado()
-    val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    val dataFim = CampoValidado()
-    val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    val motivo = CampoValidado()
-    val ativo = CampoValidado("true")
-
     fun selecionarPsicologo(idSelecionado: Long?) {
+        if (PermissoesAcesso.ehPsicologo(SessionManager.role) && id.value.isEmpty()) {
+            preencherPsicologoSeNecessario()
+            return
+        }
         psicologoId = idSelecionado
         erroPsicologo = idSelecionado == null
     }
@@ -166,7 +208,7 @@ class BloqueioAgendaViewModel(
                 }
 
                 _bloqueios.value = bloqueioApi.carregar()
-                _psicologos.value = psicologoApi.carregar()
+                runCatching { _psicologos.value = psicologoApi.carregar() }
 
                 val mensagemSucesso = if (id.value.isEmpty()) {
                     "Bloqueio de agenda salvo com sucesso!"
@@ -203,6 +245,7 @@ class BloqueioAgendaViewModel(
         backStack.add(BloqueioAgendaRotas.Formulario)
         id.value = ""
         limparCampos()
+        preencherPsicologoSeNecessario()
     }
 
     fun editar(bloqueio: BloqueioAgenda) {
@@ -228,6 +271,22 @@ class BloqueioAgendaViewModel(
         horaFim.limpar()
         motivo.limpar()
         ativo.definir("true")
+        if (id.value.isEmpty()) {
+            preencherPsicologoSeNecessario()
+        }
+    }
+
+    private fun preencherPsicologoSeNecessario() {
+        if (!PermissoesAcesso.ehPsicologo(SessionManager.role)) return
+        val emailSessao = SessionManager.email?.trim().orEmpty()
+        if (emailSessao.isEmpty()) return
+        val idEncontrado = _psicologos.value
+            .firstOrNull { it.email.trim().equals(emailSessao, ignoreCase = true) }
+            ?.id
+        if (idEncontrado != null) {
+            psicologoId = idEncontrado
+            erroPsicologo = false
+        }
     }
 
     private fun nomePsicologo(psicologoId: Long, psicologos: List<Psicologo>): String =

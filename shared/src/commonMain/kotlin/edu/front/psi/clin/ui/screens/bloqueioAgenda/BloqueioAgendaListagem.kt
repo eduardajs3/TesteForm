@@ -2,6 +2,7 @@ package edu.front.psi.clin.ui.screens.bloqueioAgenda
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,10 @@ fun BloqueioAgendaListagem(
     innerPadding: PaddingValues,
     vm: BloqueioAgendaViewModel
 ) {
+    LaunchedEffect(Unit) {
+        vm.carregarDadosFormulario(forcarAtualizacao = true)
+    }
+
     val lista = vm.bloqueiosFiltrados.collectAsState()
     val filtro = vm.filtro.collectAsState()
 

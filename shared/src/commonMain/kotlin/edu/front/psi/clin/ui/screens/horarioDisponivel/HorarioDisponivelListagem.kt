@@ -43,6 +43,10 @@ fun HorarioDisponivelListagem(
     innerPadding: PaddingValues,
     vm: HorarioDisponivelViewModel
 ) {
+    LaunchedEffect(Unit) {
+        vm.carregarDadosFormulario(forcarAtualizacao = true)
+    }
+
     val lista = vm.horariosFiltrados.collectAsState().value
     val filtro = vm.filtro.collectAsState().value
     val psicologos = vm.psicologos.collectAsState().value

@@ -9,8 +9,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.model.enums.DiaSemana
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
+import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
 import edu.front.psi.clin.ui.componentes.CampoTextoPadrao
@@ -31,16 +33,22 @@ fun HorarioDisponivelFormulario(
 
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
+    val isPsicologoLogado = PermissoesAcesso.ehPsicologo(SessionManager.role)
     val psicologosLista = vm.psicologos.collectAsState().value
     val psicologosFiltrados = psicologosLista.filter {
         it.ativo || (isEdicao && it.id == vm.psicologoId)
     }
-    val psicologoOpcoes = psicologosFiltrados.map { it.nome }
-
-    val statusOpcoes = listOf("Ativo", "Inativo")
 
     val psicologoAtualObj = psicologosFiltrados.firstOrNull { it.id == vm.psicologoId }
     val psicologoAtualNome = psicologoAtualObj?.nome.orEmpty()
+
+    val psicologoOpcoes = if (isPsicologoLogado && !isEdicao && psicologoAtualObj != null) {
+        listOf(psicologoAtualObj.nome)
+    } else {
+        psicologosFiltrados.map { it.nome }
+    }
+
+    val statusOpcoes = listOf("Ativo", "Inativo")
 
     val diaSelecionado = if (vm.diaSemana.valor.value.isBlank()) {
         null
@@ -64,8 +72,10 @@ fun HorarioDisponivelFormulario(
                 valorSelecionado = psicologoAtualNome,
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nomeSelecionado ->
-                    val psicologoEscolhido = psicologosFiltrados.firstOrNull { it.nome == nomeSelecionado }
-                    vm.selecionarPsicologo(psicologoEscolhido?.id)
+                    if (!isPsicologoLogado || isEdicao) {
+                        val psicologoEscolhido = psicologosFiltrados.firstOrNull { it.nome == nomeSelecionado }
+                        vm.selecionarPsicologo(psicologoEscolhido?.id)
+                    }
                 },
                 isError = vm.erroPsicologo,
                 errorMessage = if (vm.erroPsicologo) "Campo obrigatório" else null

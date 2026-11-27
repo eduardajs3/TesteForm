@@ -9,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.navigation.BloqueioAgendaRotas
+import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.componentes.BotoesAcaoFormulario
 import edu.front.psi.clin.ui.componentes.CampoDataPadrao
 import edu.front.psi.clin.ui.componentes.CampoDropdownPadrao
@@ -31,12 +33,17 @@ fun BloqueioAgendaFormulario(
 
     val isEdicao = vm.id.value.isNotEmpty()
     val salvando = vm.salvando
+    val isPsicologoLogado = PermissoesAcesso.ehPsicologo(SessionManager.role)
     val psicologos = vm.psicologos.collectAsState().value
-    val psicologoOpcoes = psicologos.filter {
-        it.ativo || (isEdicao && it.id == vm.psicologoId)
-    }.map { it.nome }
     val psicologoSelecionado = psicologos.firstOrNull {
         it.id == vm.psicologoId
+    }
+    val psicologoOpcoes = if (isPsicologoLogado && !isEdicao && psicologoSelecionado != null) {
+        listOf(psicologoSelecionado.nome)
+    } else {
+        psicologos.filter {
+            it.ativo || (isEdicao && it.id == vm.psicologoId)
+        }.map { it.nome }
     }
 
     val statusOpcoes = listOf("Ativo", "Inativo")
@@ -56,8 +63,10 @@ fun BloqueioAgendaFormulario(
                 valorSelecionado = psicologoSelecionado?.nome.orEmpty(),
                 opcoes = psicologoOpcoes,
                 onOpcaoSelecionada = { nome ->
-                    val psicologo = psicologos.firstOrNull { it.nome == nome }
-                    vm.selecionarPsicologo(psicologo?.id)
+                    if (!isPsicologoLogado || isEdicao) {
+                        val psicologo = psicologos.firstOrNull { it.nome == nome }
+                        vm.selecionarPsicologo(psicologo?.id)
+                    }
                 },
                 isError = vm.erroPsicologo,
                 errorMessage = if (vm.erroPsicologo) "Campo obrigatório" else null

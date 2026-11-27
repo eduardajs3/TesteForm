@@ -8,12 +8,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavBackStack
 import edu.front.psi.clin.api.HorarioDisponivelAPI
 import edu.front.psi.clin.api.PsicologoAPI
+import edu.front.psi.clin.api.SessionManager
 import edu.front.psi.clin.api.httpClientManager
 import edu.front.psi.clin.api.mensagemParaUsuario
 import edu.front.psi.clin.model.HorarioDisponivel
 import edu.front.psi.clin.model.Psicologo
 import edu.front.psi.clin.model.enums.DiaSemana
 import edu.front.psi.clin.navigation.HorarioDisponivelRotas
+import edu.front.psi.clin.security.PermissoesAcesso
 import edu.front.psi.clin.ui.componentes.CampoValidado
 import edu.front.psi.clin.utils.MaskUtils
 import kotlinx.coroutines.Job
@@ -34,24 +36,72 @@ class HorarioDisponivelViewModel(
 
     private val _filtro = MutableStateFlow("")
     val filtro = _filtro.asStateFlow()
-    private var carregamentoDadosFormulario: Job? = null
+
+    val backStack = NavBackStack<HorarioDisponivelRotas>(
+        HorarioDisponivelRotas.Listagem
+    )
+
+    val id = mutableStateOf("")
+
+    var psicologoId by mutableStateOf<Long?>(null)
+        private set
+    var erroPsicologo by mutableStateOf(false)
+        private set
+
+    val diaSemana = CampoValidado()
+    val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
+    val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
+    val descricao = CampoValidado()
+    val ativo = CampoValidado("true")
 
     var salvando by mutableStateOf(false)
         private set
 
+    private var carregamentoDadosFormulario: Job? = null
+    private var ultimaSessao: String? = null
+
     init {
-        carregarDadosFormulario()
+        SessionManager.aoAlterar {
+            prepararParaSessaoAtual()
+        }
+        prepararParaSessaoAtual()
+        carregarDadosFormulario(forcarAtualizacao = true)
     }
 
-    fun carregarDadosFormulario() {
-        if (carregamentoDadosFormulario?.isActive == true) return
+    private fun chaveSessao(): String =
+        "${SessionManager.role.orEmpty()}|${SessionManager.email.orEmpty()}|${SessionManager.token}"
 
+    fun prepararParaSessaoAtual() {
+        val atual = chaveSessao()
+        if (ultimaSessao != atual) {
+            ultimaSessao = atual
+            carregamentoDadosFormulario?.cancel()
+            carregamentoDadosFormulario = null
+            _horarios.value = emptyList()
+            _psicologos.value = emptyList()
+            _filtro.value = ""
+            if (id.value.isEmpty()) {
+                psicologoId = null
+                erroPsicologo = false
+            }
+        }
+    }
+
+    fun carregarDadosFormulario(forcarAtualizacao: Boolean = false) {
+        prepararParaSessaoAtual()
+        if (!forcarAtualizacao && carregamentoDadosFormulario?.isActive == true) return
+
+        carregamentoDadosFormulario?.cancel()
         carregamentoDadosFormulario = viewModelScope.launch {
             try {
                 val horariosAtualizados = horarioApi.carregar()
-                val psicologosAtualizados = psicologoApi.carregar()
-
                 _horarios.value = horariosAtualizados
+            } catch (e: Exception) {
+                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
+            }
+
+            try {
+                val psicologosAtualizados = psicologoApi.carregar()
                 _psicologos.value = psicologosAtualizados
 
                 val psicologoSelecionadoId = psicologoId
@@ -64,8 +114,11 @@ class HorarioDisponivelViewModel(
                 ) {
                     psicologoId = null
                 }
-            } catch (e: Exception) {
-                mandarMensagem(e.mensagemParaUsuario("Erro ao carregar horários disponíveis do servidor"))
+
+                if (id.value.isEmpty() && psicologoId == null) {
+                    preencherPsicologoSeNecessario()
+                }
+            } catch (_: Exception) {
             } finally {
                 carregamentoDadosFormulario = null
             }
@@ -94,24 +147,11 @@ class HorarioDisponivelViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val backStack = NavBackStack<HorarioDisponivelRotas>(
-        HorarioDisponivelRotas.Listagem
-    )
-
-    val id = mutableStateOf("")
-
-    var psicologoId by mutableStateOf<Long?>(null)
-        private set
-    var erroPsicologo by mutableStateOf(false)
-        private set
-
-    val diaSemana = CampoValidado()
-    val horaInicio = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    val horaFim = CampoValidado(formatador = { MaskUtils.aplicarMascaraHora(it) })
-    val descricao = CampoValidado()
-    val ativo = CampoValidado("true")
-
     fun selecionarPsicologo(idSelecionado: Long?) {
+        if (PermissoesAcesso.ehPsicologo(SessionManager.role) && id.value.isEmpty()) {
+            preencherPsicologoSeNecessario()
+            return
+        }
         psicologoId = idSelecionado
         erroPsicologo = idSelecionado == null
     }
@@ -197,6 +237,7 @@ class HorarioDisponivelViewModel(
         backStack.add(HorarioDisponivelRotas.Formulario)
         id.value = ""
         limparCampos()
+        preencherPsicologoSeNecessario()
     }
 
     fun editar(horario: HorarioDisponivel) {
@@ -210,6 +251,19 @@ class HorarioDisponivelViewModel(
         horaFim.definir(horario.horaFim.take(5))
         descricao.definir(horario.descricao ?: "")
         ativo.definir(horario.ativo.toString())
+    }
+
+    private fun preencherPsicologoSeNecessario() {
+        if (!PermissoesAcesso.ehPsicologo(SessionManager.role)) return
+        val emailSessao = SessionManager.email?.trim().orEmpty()
+        if (emailSessao.isEmpty()) return
+        val idEncontrado = _psicologos.value
+            .firstOrNull { it.email.trim().equals(emailSessao, ignoreCase = true) }
+            ?.id
+        if (idEncontrado != null) {
+            psicologoId = idEncontrado
+            erroPsicologo = false
+        }
     }
 
     fun limparCampos() {
