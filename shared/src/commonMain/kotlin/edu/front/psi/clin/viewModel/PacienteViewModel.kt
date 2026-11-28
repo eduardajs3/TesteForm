@@ -146,15 +146,17 @@ class PacienteViewModel(
     }
 
     fun novoPaciente() {
-        backStack.clear()
-        backStack.add(PacienteRotas.Formulario)
+        if (backStack.lastOrNull() != PacienteRotas.Formulario) {
+            backStack.add(PacienteRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(paciente: Paciente) {
-        backStack.clear()
-        backStack.add(PacienteRotas.Formulario)
+        if (backStack.lastOrNull() != PacienteRotas.Formulario) {
+            backStack.add(PacienteRotas.Formulario)
+        }
         id.value = paciente.id?.toString() ?: ""
         nome.definir(paciente.nome)
         cpf.definir(paciente.cpf)

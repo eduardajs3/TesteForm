@@ -681,15 +681,17 @@ class AgendaViewModel(
     }
 
     fun novoAgendamento() {
-        backStack.clear()
-        backStack.add(AgendaRotas.Formulario)
+        if (backStack.lastOrNull() != AgendaRotas.Formulario) {
+            backStack.add(AgendaRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(agenda: Agenda) {
-        backStack.clear()
-        backStack.add(AgendaRotas.Formulario)
+        if (backStack.lastOrNull() != AgendaRotas.Formulario) {
+            backStack.add(AgendaRotas.Formulario)
+        }
         id.value = agenda.id?.toString() ?: ""
 
         pacienteId.value = agenda.pacienteId

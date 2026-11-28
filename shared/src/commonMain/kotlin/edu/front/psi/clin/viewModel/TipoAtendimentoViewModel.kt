@@ -136,15 +136,17 @@ class TipoAtendimentoViewModel(
     }
 
     fun novoTipo() {
-        backStack.clear()
-        backStack.add(TipoAtendimentoRotas.Formulario)
+        if (backStack.lastOrNull() != TipoAtendimentoRotas.Formulario) {
+            backStack.add(TipoAtendimentoRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(tipo: TipoAtendimento) {
-        backStack.clear()
-        backStack.add(TipoAtendimentoRotas.Formulario)
+        if (backStack.lastOrNull() != TipoAtendimentoRotas.Formulario) {
+            backStack.add(TipoAtendimentoRotas.Formulario)
+        }
         id.value = tipo.id?.toString() ?: ""
         nome.definir(tipo.nome)
         descricao.definir(tipo.descricao)

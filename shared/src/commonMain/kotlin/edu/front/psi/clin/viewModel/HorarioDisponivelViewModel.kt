@@ -233,16 +233,19 @@ class HorarioDisponivelViewModel(
     }
 
     fun novoHorario() {
-        backStack.clear()
-        backStack.add(HorarioDisponivelRotas.Formulario)
+        if (backStack.lastOrNull() != HorarioDisponivelRotas.Formulario) {
+            backStack.add(HorarioDisponivelRotas.Formulario)
+        }
+
         id.value = ""
         limparCampos()
         preencherPsicologoSeNecessario()
     }
 
     fun editar(horario: HorarioDisponivel) {
-        backStack.clear()
-        backStack.add(HorarioDisponivelRotas.Formulario)
+        if (backStack.lastOrNull() != HorarioDisponivelRotas.Formulario) {
+            backStack.add(HorarioDisponivelRotas.Formulario)
+        }
         id.value = horario.id?.toString() ?: ""
         psicologoId = horario.psicologoId
         erroPsicologo = false

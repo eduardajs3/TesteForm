@@ -139,15 +139,17 @@ class SalaAtendimentoViewModel(
     }
 
     fun novaSala() {
-        backStack.clear()
-        backStack.add(SalaAtendimentoRotas.Formulario)
+        if (backStack.lastOrNull() != SalaAtendimentoRotas.Formulario) {
+            backStack.add(SalaAtendimentoRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(sala: SalaAtendimento) {
-        backStack.clear()
-        backStack.add(SalaAtendimentoRotas.Formulario)
+        if (backStack.lastOrNull() != SalaAtendimentoRotas.Formulario) {
+            backStack.add(SalaAtendimentoRotas.Formulario)
+        }
         id.value = sala.id?.toString() ?: ""
         nome.definir(sala.nome)
         descricao.definir(sala.descricao)

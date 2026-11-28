@@ -261,15 +261,17 @@ class PagamentoViewModel(
     }
 
     fun novoPagamento() {
-        backStack.clear()
-        backStack.add(PagamentoRotas.Formulario)
+        if (backStack.lastOrNull() != PagamentoRotas.Formulario) {
+            backStack.add(PagamentoRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(pagamento: Pagamento) {
-        backStack.clear()
-        backStack.add(PagamentoRotas.Formulario)
+        if (backStack.lastOrNull() != PagamentoRotas.Formulario) {
+            backStack.add(PagamentoRotas.Formulario)
+        }
         id.value = pagamento.id?.toString() ?: ""
         agendaId = pagamento.agendaId
         pacienteId = pagamento.pacienteId

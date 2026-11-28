@@ -137,8 +137,9 @@ class ConvenioViewModel(
     fun novoConvenio() {
         id.value = ""
         limparCampos()
-        backStack.clear()
-        backStack.add(ConvenioRotas.Formulario)
+        if (backStack.lastOrNull() != ConvenioRotas.Formulario) {
+            backStack.add(ConvenioRotas.Formulario)
+        }
     }
 
     fun editar(convenio: Convenio) {
@@ -148,8 +149,9 @@ class ConvenioViewModel(
         telefone.definir(convenio.telefone)
         percentualCobertura.definir(convenio.percentualCobertura.toInt().toString())
         ativo.definir(convenio.ativo.toString())
-        backStack.clear()
-        backStack.add(ConvenioRotas.Formulario)
+        if (backStack.lastOrNull() != ConvenioRotas.Formulario) {
+            backStack.add(ConvenioRotas.Formulario)
+        }
     }
 
     fun limparCampos() {

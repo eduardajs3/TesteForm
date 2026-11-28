@@ -241,16 +241,18 @@ class BloqueioAgendaViewModel(
     }
 
     fun novoBloqueio() {
-        backStack.clear()
-        backStack.add(BloqueioAgendaRotas.Formulario)
+        if (backStack.lastOrNull() != BloqueioAgendaRotas.Formulario) {
+            backStack.add(BloqueioAgendaRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
         preencherPsicologoSeNecessario()
     }
 
     fun editar(bloqueio: BloqueioAgenda) {
-        backStack.clear()
-        backStack.add(BloqueioAgendaRotas.Formulario)
+        if (backStack.lastOrNull() != BloqueioAgendaRotas.Formulario) {
+            backStack.add(BloqueioAgendaRotas.Formulario)
+        }
         id.value = bloqueio.id?.toString() ?: ""
         psicologoId = bloqueio.psicologoId
         erroPsicologo = false

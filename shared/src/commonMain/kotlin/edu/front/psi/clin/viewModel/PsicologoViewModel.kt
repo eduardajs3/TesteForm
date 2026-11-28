@@ -151,15 +151,17 @@ class PsicologoViewModel(
     }
 
     fun novoPsicologo() {
-        backStack.clear()
-        backStack.add(PsicologoRotas.Formulario)
+        if (backStack.lastOrNull() != PsicologoRotas.Formulario) {
+            backStack.add(PsicologoRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
     }
 
     fun editar(psicologo: Psicologo) {
-        backStack.clear()
-        backStack.add(PsicologoRotas.Formulario)
+        if (backStack.lastOrNull() != PsicologoRotas.Formulario) {
+            backStack.add(PsicologoRotas.Formulario)
+        }
         id.value = psicologo.id?.toString() ?: ""
         limparCampos()
         nome.definir(psicologo.nome)

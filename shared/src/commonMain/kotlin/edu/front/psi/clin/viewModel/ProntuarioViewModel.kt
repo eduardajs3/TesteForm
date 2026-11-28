@@ -192,8 +192,9 @@ class ProntuarioViewModel(
     }
 
     fun novoProntuario(nomePaciente: String = "") {
-        backStack.clear()
-        backStack.add(ProntuarioRotas.Formulario)
+        if (backStack.lastOrNull() != ProntuarioRotas.Formulario) {
+            backStack.add(ProntuarioRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
 
@@ -205,8 +206,9 @@ class ProntuarioViewModel(
     }
 
     fun editar(prontuario: Prontuario) {
-        backStack.clear()
-        backStack.add(ProntuarioRotas.Formulario)
+        if (backStack.lastOrNull() != ProntuarioRotas.Formulario) {
+            backStack.add(ProntuarioRotas.Formulario)
+        }
         id.value = prontuario.id?.toString() ?: ""
         pacienteId = prontuario.pacienteId
         dataAbertura.definir(formatarDataIsoParaBrasileira(prontuario.dataAbertura))

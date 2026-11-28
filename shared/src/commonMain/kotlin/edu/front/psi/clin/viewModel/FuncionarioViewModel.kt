@@ -155,20 +155,18 @@ class FuncionarioViewModel(
     }
 
     fun novoFuncionario() {
-        backStack.clear()
-        backStack.add(
-            FuncionarioRotas.Formulario
-        )
+        if (backStack.lastOrNull() != FuncionarioRotas.Formulario) {
+            backStack.add(FuncionarioRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
         roleOriginal.value = "ADMIN"
     }
 
     fun editar(funcionario: Funcionario) {
-        backStack.clear()
-        backStack.add(
-            FuncionarioRotas.Formulario
-        )
+        if (backStack.lastOrNull() != FuncionarioRotas.Formulario) {
+            backStack.add(FuncionarioRotas.Formulario)
+        }
         id.value = funcionario.id?.toString() ?: ""
         nome.definir(funcionario.nome.orEmpty())
         cpf.definir(funcionario.cpf.orEmpty())

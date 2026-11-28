@@ -321,8 +321,9 @@ class EvolucaoClinicaViewModel(
     }
 
     fun novaEvolucao(nomePaciente: String = "") {
-        backStack.clear()
-        backStack.add(EvolucaoClinicaRotas.Formulario)
+        if (backStack.lastOrNull() != EvolucaoClinicaRotas.Formulario) {
+            backStack.add(EvolucaoClinicaRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
         carregar(forcarAtualizacao = true)
@@ -332,8 +333,9 @@ class EvolucaoClinicaViewModel(
     }
 
     fun editar(evolucao: EvolucaoClinica) {
-        backStack.clear()
-        backStack.add(EvolucaoClinicaRotas.Formulario)
+        if (backStack.lastOrNull() != EvolucaoClinicaRotas.Formulario) {
+            backStack.add(EvolucaoClinicaRotas.Formulario)
+        }
         id.value = evolucao.id?.toString() ?: ""
         prontuarioId = evolucao.prontuarioId
         agendaId = evolucao.agendaId

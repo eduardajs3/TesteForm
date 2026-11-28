@@ -160,16 +160,18 @@ class RecepcionistaViewModel(
     }
 
     fun novaRecepcionista() {
-        backStack.clear()
-        backStack.add(RecepcionistaRotas.Formulario)
+        if (backStack.lastOrNull() != RecepcionistaRotas.Formulario) {
+            backStack.add(RecepcionistaRotas.Formulario)
+        }
         id.value = ""
         limparCampos()
         mensagem.value = ""
     }
 
     fun editar(recepcionista: Recepcionista) {
-        backStack.clear()
-        backStack.add(RecepcionistaRotas.Formulario)
+        if (backStack.lastOrNull() != RecepcionistaRotas.Formulario) {
+            backStack.add(RecepcionistaRotas.Formulario)
+        }
         id.value = recepcionista.id.toString()
         nome.definir(recepcionista.nome)
         cpf.definir(recepcionista.cpf)
